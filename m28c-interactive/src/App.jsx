@@ -3,10 +3,13 @@ import {
   Search, Moon, Sun, Bookmark, BookOpen, Calculator, Award, 
   Trash2, ChevronRight, ChevronDown, ExternalLink, ShieldCheck, 
   Scale, FileText, CheckCircle, HelpCircle, Info, BookMarked, Users, Settings, RefreshCw, AlertTriangle,
-  TrendingUp, DollarSign, Compass, Briefcase, FlaskConical, Play
+  TrendingUp, DollarSign, Compass, Briefcase, FlaskConical, Play, GraduationCap, Eye, EyeOff
 } from 'lucide-react';
 import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS, GLOSSARY_TERMS, VRE_OFFICES, VA_DISABILITY_COMP_TABLE_2026, VA_PENSION_MAPR_2026, SMC_RATES_2026 } from './data';
 import { SCHOOLS_DATABASE, CAREERS_DATABASE } from './school_data';
+import { INDUSTRIES_LOOKUP } from './industry_data';
+import CustomCursor from './CustomCursor';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DEFAULT_RATES = {
   version: "2026.1",
@@ -345,6 +348,24 @@ function App() {
   const [extNeedMoreTime, setExtNeedMoreTime] = useState(false);
   const [showTpdChecklist, setShowTpdChecklist] = useState(false);
 
+  // Global Reduce Motion state
+  const [reduceMotion, setReduceMotion] = useState(() => {
+    const saved = localStorage.getItem('m28c_reduce_motion');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Self-Employment Track states
+  const [selfBizName, setSelfBizName] = useState('Valiant Tech Solutions');
+  const [selfBizType, setSelfBizType] = useState('LLC');
+  const [selfBizIndustry, setSelfBizIndustry] = useState('IT Consulting & Cyber Security');
+  const [selfBizConcept, setSelfBizConcept] = useState('Provide specialized cybersecurity audits and network setup services for local small businesses and government sub-contractors.');
+  const [selfFundingCategory, setSelfFundingCategory] = useState('Category I');
+  const [selfGeneratedLetter, setSelfGeneratedLetter] = useState('');
+  const [selfChecklist1, setSelfChecklist1] = useState(false);
+  const [selfChecklist2, setSelfChecklist2] = useState(false);
+  const [selfChecklist3, setSelfChecklist3] = useState(false);
+  const [selfChecklist4, setSelfChecklist4] = useState(false);
+
   // Toggle Theme effect
   useEffect(() => {
     const body = document.body;
@@ -359,6 +380,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
+
+  // Sync Reduce Motion to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('m28c_reduce_motion', JSON.stringify(reduceMotion));
+  }, [reduceMotion]);
 
   // Fetch rates.json on load for automatic VA calculator synchronization
   useEffect(() => {
@@ -1307,10 +1333,69 @@ ___________________________________
     setJustGeneratedLetter(letter);
   };
 
+  const generateSelfEmploymentLetter = () => {
+    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const checklistStatus = [
+      selfChecklist1 ? "[X] Completed business feasibility review with a certified advisor" : "[ ] Pending business feasibility review",
+      selfChecklist2 ? "[X] Completed and drafted formal Business Plan" : "[ ] Pending formal Business Plan draft",
+      selfChecklist3 ? "[X] Submitted Business Plan for VRC / Regional Office panel review" : "[ ] Pending submission to VRC for Regional Office panel review",
+      selfChecklist4 ? "[X] Coordinated with SBA/SCORE mentors for ongoing operational support" : "[ ] Pending coordination with SBA/SCORE mentors"
+    ].join('\n');
+
+    const letter = `Date: ${dateStr}
+To: Vocational Rehabilitation Counselor (VRC)
+VA Regional Office - VR&E Division
+
+From: Veteran Applicant / Participant
+Subject: Formal Request for Self-Employment Track Services (38 CFR § 21.258 & § 21.257)
+
+Dear Counselor,
+
+I am writing to formally request approval to pursue the Self-Employment Track of services under 38 U.S.C. Chapter 31. This request is made pursuant to 38 CFR § 21.257 and § 21.258, which authorize the provision of self-employment assistance for veterans with service-connected disabilities.
+
+Proposed Venture Specifications:
+- Proposed Business Name: ${selfBizName}
+- Business Entity Type: ${selfBizType}
+- Target Industry: ${selfBizIndustry}
+- Business Concept: ${selfBizConcept}
+- Requested Assistance Category: ${selfFundingCategory}
+
+Pursuant to VA regulations, my serious employment handicap and service-connected limitations make self-employment the most feasible method to achieve long-term vocational rehabilitation. 
+
+Readiness Checklist Progress:
+${checklistStatus}
+
+Under 38 CFR § 21.258, I am requesting authorization for necessary startup services, licenses, tools, and supplies required for this category of self-employment. 
+
+I request that we review my Individualized Written Rehabilitation Plan (IWRP) to document this self-employment track and outline the next steps for panel approval.
+
+Sincerely,
+
+___________________________________
+[Veteran Signature]
+`;
+    setSelfGeneratedLetter(letter);
+  };
+
+  useEffect(() => {
+    generateSelfEmploymentLetter();
+  }, [
+    selfBizName,
+    selfBizType,
+    selfBizIndustry,
+    selfBizConcept,
+    selfFundingCategory,
+    selfChecklist1,
+    selfChecklist2,
+    selfChecklist3,
+    selfChecklist4
+  ]);
+
   const activeSchools = schoolsDatabase.length > 0 ? schoolsDatabase : SCHOOLS_DATABASE;
 
   return (
     <div className="app-container">
+      <CustomCursor reduceMotion={reduceMotion} />
       {/* SIDEBAR NAVIGATION */}
       <aside className="sidebar">
         <div className="branding">
@@ -1368,6 +1453,20 @@ ___________________________________
             >
               <Compass size={18} />
               <span>Career Plan and Strategy</span>
+            </div>
+            <div 
+              className={`nav-item ${activeView === 'self_employment' ? 'active' : ''}`}
+              onClick={() => { setActiveView('self_employment'); setSelfGeneratedLetter(''); }}
+            >
+              <Briefcase size={18} />
+              <span>Self-Employment Track</span>
+            </div>
+            <div 
+              className={`nav-item ${activeView === 'special_programs' ? 'active' : ''}`}
+              onClick={() => setActiveView('special_programs')}
+            >
+              <GraduationCap size={18} />
+              <span>Special Retraining Programs</span>
             </div>
             <div 
               className={`nav-item ${activeView === 'directory' ? 'active' : ''}`}
@@ -1603,6 +1702,19 @@ ___________________________________
             >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+
+            {/* Reduce Motion toggle */}
+            <button 
+              className="action-btn"
+              onClick={() => setReduceMotion(!reduceMotion)}
+              title={reduceMotion ? "Enable Motion Animations" : "Reduce Motion Animations"}
+              style={{
+                borderColor: reduceMotion ? 'var(--accent-color)' : 'var(--card-border)',
+                color: reduceMotion ? 'var(--accent-color)' : 'var(--text-secondary)'
+              }}
+            >
+              {reduceMotion ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
         </header>
 
@@ -1658,9 +1770,25 @@ ___________________________________
               </div>
             )}
 
+            {activeView === 'reference' && !activeContent && (
+              <div className="doc-card text-center p-8 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl hover:border-slate-700 transition-all duration-300">
+                <BookOpen size={48} className="text-slate-500 mx-auto mb-3" />
+                <h2 className="text-lg font-bold text-slate-200">Select a Reference Section</h2>
+                <p className="text-xs text-slate-400 max-w-md mx-auto mt-1 leading-relaxed">
+                  Browse the VR&E policy library using the Reference Tree in the sidebar. You can explore statutory law under 38 U.S.C., federal regulations under 38 CFR Part 21, or operational procedures in the M28C Manual.
+                </p>
+              </div>
+            )}
+
             {/* ENTITLEMENT WIZARD VIEW */}
             {activeView === 'wizard' && (
-              <div className="doc-card">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+                className="doc-card"
+              >
                 <span className="doc-tag">Interactive Tools</span>
                 <h1 className="doc-title">Entitlement & Eligibility Wizard</h1>
                 <p className="doc-subtitle">Evaluate vocational rehabilitation and serious employment handicap criteria side-by-side.</p>
@@ -1818,7 +1946,97 @@ ___________________________________
                     )}
                   </div>
                 </div>
-              </div>
+
+                {/* Entitlement Extensions Section */}
+                <div className="mt-8 pt-8 border-t border-slate-800">
+                  <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+                    <div className="absolute -inset-px bg-gradient-to-r from-amber-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                          <Settings className="text-amber-500 animate-pulse" size={20} />
+                          VR&E Entitlement Extensions Pre-Screener
+                        </h3>
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20">
+                          38 CFR § 21.44 & § 21.78
+                        </span>
+                      </div>
+                      
+                      <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                        Find out how having a Serious Employment Handicap (SEH) allows you to extend services past 48 months or bypass the 12-year basic eligibility window.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Extension Pre-Screening Criteria</h4>
+                          <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                            <input 
+                              type="checkbox" 
+                              className="mt-1 accent-amber-500 cursor-pointer"
+                              checked={extHasSeh} 
+                              onChange={(e) => setExtHasSeh(e.target.checked)} 
+                            />
+                            <div className="text-xs">
+                              <span className="font-semibold text-slate-200 block">Serious Employment Handicap (SEH)</span>
+                              <span className="text-slate-400 text-[11px] block mt-0.5">Do you have an assessed serious employment handicap (usually rating of 10% or barriers)?</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                            <input 
+                              type="checkbox" 
+                              className="mt-1 accent-amber-500 cursor-pointer"
+                              checked={extApproachingLimit} 
+                              onChange={(e) => setExtApproachingLimit(e.target.checked)} 
+                            />
+                            <div className="text-xs">
+                              <span className="font-semibold text-slate-200 block">Approaching Limits</span>
+                              <span className="text-slate-400 text-[11px] block mt-0.5">Have you reached or are you near the 48-month limit or basic 12-year expiration?</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                            <input 
+                              type="checkbox" 
+                              className="mt-1 accent-amber-500 cursor-pointer"
+                              checked={extNeedMoreTime} 
+                              onChange={(e) => setExtNeedMoreTime(e.target.checked)} 
+                            />
+                            <div className="text-xs">
+                              <span className="font-semibold text-slate-200 block">Additional Retraining Needed</span>
+                              <span className="text-slate-400 text-[11px] block mt-0.5">Do you require additional vocational retraining to achieve suitable employment?</span>
+                            </div>
+                          </label>
+                        </div>
+
+                        <div className="flex flex-col justify-center">
+                          {extHasSeh && extApproachingLimit && extNeedMoreTime ? (
+                            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 text-emerald-400 relative overflow-hidden animate-fade-in">
+                              <div className="flex items-start gap-3">
+                                <CheckCircle size={22} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <strong className="text-sm font-semibold text-emerald-300 block mb-1">Pre-screen Recommendation Approved</strong>
+                                  <p className="text-xs text-emerald-400/90 leading-relaxed">
+                                    Under statutory rules 38 CFR § 21.44 (bypassing 12-year basic period) and 38 CFR § 21.78 (extending past 48 months), you meet the criteria for a VRC extension grant. Inform your counselor to classify your case as an SEH to unlock these extensions.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                              <Info size={28} className="text-slate-600 mb-2" />
+                              <p className="text-[11px] max-w-xs leading-relaxed">
+                                Toggle all three criteria checkboxes on the left to verify if you qualify for a statutory program extension.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             )}
 
             {/* SUBSISTENCE ALLOWANCE CALCULATOR VIEW */}
@@ -4665,21 +4883,30 @@ ___________________________________
 
             {/* CAREER PLAN AND STRATEGY VIEW */}
             {activeView === 'planning' && (
-              <div className="doc-card">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+                className="doc-card"
+              >
                 <span className="doc-tag">VA Career Plan and Strategy</span>
                 <h1 className="doc-title">Career Plan, Strategy and Justification Wizard</h1>
-                <p className="doc-subtitle">Generate legally structured VRC justification letters, track VET TEC technological training, and check adaptive sports allowances.</p>
+                <p className="doc-subtitle">Generate legally structured VRC justification letters, assess physical compatibility, and find industry classification codes.</p>
                 <div className="doc-divider"></div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px' }}>
-                  {/* Left Column: Inputs Form */}
-                  <div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Left Column: Bento Grid for Input Cards */}
+                  <div className="lg:col-span-7 space-y-6">
                     {/* Labor Market & Disability Compatibility Strategist */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', marginBottom: '12px', borderBottom: '1px dashed var(--card-border)', paddingBottom: '6px' }}>Labor Market & Disability Compatibility Strategist</h4>
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300">
+                      <h4 className="text-sm font-bold text-amber-500 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <Scale size={16} />
+                        Labor Market & Disability Compatibility Strategist
+                      </h4>
                       
                       <div className="form-group">
-                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Target Occupational Goal (OOH/O*NET Classification Database)</label>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Target Occupational Goal (OOH/O*NET Classification Database)</label>
                         <select
                           className="form-control"
                           value={selectedCareerIndex}
@@ -4692,45 +4919,30 @@ ___________________________________
                       </div>
 
                       {/* Disability / Physical Constraints Checkboxes */}
-                      <div style={{ margin: '14px 0', padding: '12px', backgroundColor: 'var(--hover-bg)', borderRadius: '6px', border: '1px solid var(--card-border)' }}>
-                        <h5 style={{ fontSize: '0.78rem', margin: '0 0 8px 0', color: 'var(--text-primary)', fontWeight: '600' }}>Indicated Disability & Functional Limitations</h5>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 12px' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitStanding} onChange={(e) => setLimitStanding(e.target.checked)} />
-                            <span>Standing Limit</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitLifting} onChange={(e) => setLimitLifting(e.target.checked)} />
-                            <span>Lifting Limit (&gt;15 lbs)</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitBending} onChange={(e) => setLimitBending(e.target.checked)} />
-                            <span>Bending/Kneeling</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitEnvironment} onChange={(e) => setLimitEnvironment(e.target.checked)} />
-                            <span>Climate/Altitude</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitSitting} onChange={(e) => setLimitSitting(e.target.checked)} />
-                            <span>Prolonged Sitting</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitRepetitive} onChange={(e) => setLimitRepetitive(e.target.checked)} />
-                            <span>Repetitive Motion</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitSensory} onChange={(e) => setLimitSensory(e.target.checked)} />
-                            <span>Sensory (Vision/Hearing)</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitStress} onChange={(e) => setLimitStress(e.target.checked)} />
-                            <span>High Stress/Confinement</span>
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
-                            <input type="checkbox" checked={limitRespiratory} onChange={(e) => setLimitRespiratory(e.target.checked)} />
-                            <span>Respiratory/Dust Limit</span>
-                          </label>
+                      <div className="my-4 p-4 bg-slate-950/40 rounded-xl border border-slate-800/80">
+                        <h5 className="text-[11px] uppercase tracking-wider font-bold text-slate-300 mb-3">Indicated Disability & Functional Limitations</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {[
+                            { label: "Standing Limit", checked: limitStanding, set: setLimitStanding },
+                            { label: "Lifting Limit (>15 lbs)", checked: limitLifting, set: setLimitLifting },
+                            { label: "Bending/Kneeling", checked: limitBending, set: setLimitBending },
+                            { label: "Climate/Altitude", checked: limitEnvironment, set: setLimitEnvironment },
+                            { label: "Prolonged Sitting", checked: limitSitting, set: setLimitSitting },
+                            { label: "Repetitive Motion", checked: limitRepetitive, set: setLimitRepetitive },
+                            { label: "Sensory (Vision/Hearing)", checked: limitSensory, set: setLimitSensory },
+                            { label: "High Stress/Confinement", checked: limitStress, set: setLimitStress },
+                            { label: "Respiratory/Dust Limit", checked: limitRespiratory, set: setLimitRespiratory }
+                          ].map((item, index) => (
+                            <label key={index} className="flex items-center gap-2 cursor-pointer text-xs text-slate-200 hover:text-white select-none">
+                              <input 
+                                type="checkbox" 
+                                className="accent-amber-500" 
+                                checked={item.checked} 
+                                onChange={(e) => item.set(e.target.checked)} 
+                              />
+                              <span>{item.label}</span>
+                            </label>
+                          ))}
                         </div>
                       </div>
 
@@ -4739,32 +4951,22 @@ ___________________________________
                         const currentCareer = CAREERS_DATABASE[selectedCareerIndex] || CAREERS_DATABASE[0];
                         const { compatible, reasons } = getCareerCompatibility(currentCareer);
                         return (
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'flex-start', 
-                            gap: '10px', 
-                            padding: '10px 12px', 
-                            borderRadius: '6px', 
-                            border: '1px solid', 
-                            borderColor: compatible ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)', 
-                            backgroundColor: compatible ? 'rgba(16, 185, 129, 0.06)' : 'rgba(245, 158, 11, 0.06)', 
-                            marginBottom: '16px' 
-                          }}>
-                            <div style={{ flexShrink: 0, marginTop: '2px' }}>
-                              {compatible ? (
-                                <CheckCircle size={16} style={{ color: 'var(--success-color)' }} />
-                              ) : (
-                                <AlertTriangle size={16} style={{ color: 'var(--warning-color)' }} />
-                              )}
+                          <div className={`flex items-start gap-3 p-4 rounded-xl border ${
+                            compatible 
+                              ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400' 
+                              : 'border-amber-500/30 bg-amber-500/5 text-amber-400'
+                          } mb-4`}>
+                            <div className="flex-shrink-0 mt-0.5">
+                              {compatible ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', lineHeight: '1.4' }}>
-                              <strong>Status: {compatible ? "Medically Compatible" : "Potential Physical Conflict"}</strong>
+                            <div className="text-xs leading-relaxed">
+                              <strong className="block text-slate-200 mb-0.5">Status: {compatible ? "Medically Compatible" : "Potential Physical Conflict"}</strong>
                               {reasons.length > 0 ? (
-                                <ul style={{ margin: '4px 0 0 0', paddingLeft: '14px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                                <ul className="list-disc pl-4 space-y-0.5 text-slate-400 mt-1">
                                   {reasons.map((r, idx) => <li key={idx}>{r}</li>)}
                                 </ul>
                               ) : (
-                                <span style={{ display: 'block', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                                <span className="text-slate-400 block">
                                   The demands of this role are fully compatible with your physical capacities.
                                 </span>
                               )}
@@ -4774,19 +4976,18 @@ ___________________________________
                       })()}
 
                       {/* LMI & Compatibility Test Lab */}
-                      <div style={{ padding: '12px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <h5 style={{ fontSize: '0.76rem', margin: 0, color: 'var(--text-primary)', fontWeight: '700' }}>Compatibility Test Lab & Auditor</h5>
-                          <span style={{ fontSize: '0.62rem', padding: '1px 5px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)', borderRadius: '4px', fontWeight: 'bold' }}>Active</span>
+                      <div className="p-4 bg-slate-950/20 border border-slate-800/80 rounded-xl mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <h5 className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">Compatibility Test Lab & Auditor</h5>
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">Active</span>
                         </div>
-                        <p style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', lineHeight: '1.3' }}>
+                        <p className="text-[10px] text-slate-400 mb-3 leading-relaxed">
                           Load a pre-configured veteran profile to instantly populate disability limitations and audit compatibility calculations.
                         </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <button
                             type="button"
-                            className="btn"
-                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            className="text-left p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-all duration-200 cursor-pointer"
                             onClick={() => {
                               setLimitStanding(true);
                               setLimitLifting(true);
@@ -4800,13 +5001,13 @@ ___________________________________
                               setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Software Developer'));
                             }}
                           >
-                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile A: Orthopedic Limits</strong>
-                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Standing & lifting limits. Software Dev target (Compatible).</span>
+                            <strong className="text-[11px] text-slate-200 block">Profile A: Orthopedic Limits</strong>
+                            <span className="block text-[10px] text-slate-400 mt-0.5">Standing & lifting limits. Software Dev target (Compatible).</span>
                           </button>
+                          
                           <button
                             type="button"
-                            className="btn"
-                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            className="text-left p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-all duration-200 cursor-pointer"
                             onClick={() => {
                               setLimitStanding(true);
                               setLimitLifting(false);
@@ -4820,13 +5021,13 @@ ___________________________________
                               setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Solar Photovoltaic Installer'));
                             }}
                           >
-                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile B: Outdoors & Dust</strong>
-                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Climate & respiratory limits. Solar Installer (Conflict).</span>
+                            <strong className="text-[11px] text-slate-200 block">Profile B: Outdoors & Dust</strong>
+                            <span className="block text-[10px] text-slate-400 mt-0.5">Climate & respiratory limits. Solar Installer (Conflict).</span>
                           </button>
+
                           <button
                             type="button"
-                            className="btn"
-                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            className="text-left p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-all duration-200 cursor-pointer"
                             onClick={() => {
                               setLimitStanding(false);
                               setLimitLifting(false);
@@ -4840,13 +5041,13 @@ ___________________________________
                               setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Accountant'));
                             }}
                           >
-                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile C: Hand Repetition</strong>
-                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sitting & keyboard limits. Accountant (Conflict).</span>
+                            <strong className="text-[11px] text-slate-200 block">Profile C: Hand Repetition</strong>
+                            <span className="block text-[10px] text-slate-400 mt-0.5">Sitting & keyboard limits. Accountant (Conflict).</span>
                           </button>
+
                           <button
                             type="button"
-                            className="btn"
-                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            className="text-left p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-all duration-200 cursor-pointer"
                             onClick={() => {
                               setLimitStanding(false);
                               setLimitLifting(false);
@@ -4860,8 +5061,8 @@ ___________________________________
                               setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Commercial Pilot'));
                             }}
                           >
-                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile D: Sensory & Flight</strong>
-                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sensory, stress & climate limits. Pilot (Conflict).</span>
+                            <strong className="text-[11px] text-slate-200 block">Profile D: Sensory & Flight</strong>
+                            <span className="block text-[10px] text-slate-400 mt-0.5">Sensory, stress & climate limits. Pilot (Conflict).</span>
                           </button>
                         </div>
                       </div>
@@ -4870,34 +5071,34 @@ ___________________________________
                       {(() => {
                         const currentCareer = CAREERS_DATABASE[selectedCareerIndex] || CAREERS_DATABASE[0];
                         return (
-                          <div style={{ fontSize: '0.75rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', padding: '12px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '6px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                              <div>
-                                <strong>O*NET-SOC Code:</strong> <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', float: 'right' }}>{currentCareer.soc}</span>
+                          <div className="text-xs">
+                            <div className="grid grid-cols-2 gap-3 p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl text-slate-300 mb-3">
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>O*NET-SOC Code:</strong> <span className="text-slate-100 font-mono">{currentCareer.soc}</span>
                               </div>
-                              <div>
-                                <strong>DOT Code:</strong> <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', float: 'right' }}>{currentCareer.dot}</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>DOT Code:</strong> <span className="text-slate-100 font-mono">{currentCareer.dot}</span>
                               </div>
-                              <div>
-                                <strong>SVP Preparation Level:</strong> <span style={{ color: 'var(--text-primary)', float: 'right' }}>{currentCareer.svp} ({currentCareer.svp >= 8 ? "4-10 yrs" : currentCareer.svp >= 7 ? "2-4 yrs" : "Under 2 yrs"})</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>SVP Preparation:</strong> <span className="text-slate-100">{currentCareer.svp} ({currentCareer.svp >= 8 ? "4-10 yrs" : currentCareer.svp >= 7 ? "2-4 yrs" : "Under 2 yrs"})</span>
                               </div>
-                              <div>
-                                <strong>DOT Physical Demand:</strong> <span style={{ color: 'var(--text-primary)', fontWeight: 'bold', float: 'right' }}>{currentCareer.physicalDemand}</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>DOT Physical Demand:</strong> <span className="text-slate-100 font-semibold">{currentCareer.physicalDemand}</span>
                               </div>
-                              <div>
-                                <strong>Industry SIC Code:</strong> <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', float: 'right' }}>{currentCareer.sic}</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>Industry SIC Code:</strong> <span className="text-slate-100 font-mono">{currentCareer.sic}</span>
                               </div>
-                              <div>
-                                <strong>NAICS Sector:</strong> <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', float: 'right' }}>{currentCareer.naics}</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>NAICS Sector:</strong> <span className="text-slate-100 font-mono">{currentCareer.naics}</span>
                               </div>
-                              <div>
-                                <strong>BLS Median Pay:</strong> <span style={{ color: 'var(--accent-color)', fontWeight: '600', float: 'right' }}>${currentCareer.medianPay.toLocaleString()}/yr</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>BLS Median Pay:</strong> <span className="text-amber-500 font-semibold">${currentCareer.medianPay.toLocaleString()}/yr</span>
                               </div>
-                              <div>
-                                <strong>BLS Job Growth Rate:</strong> <span style={{ color: 'var(--text-primary)', float: 'right' }}>{currentCareer.outlook}</span>
+                              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                                <strong>BLS Growth Rate:</strong> <span className="text-slate-100">{currentCareer.outlook}</span>
                               </div>
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>
+                            <div className="text-[11px] text-slate-400 leading-relaxed p-2">
                               <strong>Essential Duties:</strong> {currentCareer.duties}
                             </div>
                           </div>
@@ -4906,112 +5107,71 @@ ___________________________________
                     </div>
 
                     {/* O*NET Interest Profiler (Holland Codes) */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>O*NET Interest Profiler (Holland Codes)</h4>
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-sm font-bold text-amber-500 flex items-center gap-2">
+                          <Compass size={16} />
+                          O*NET Interest Profiler (Holland Codes)
+                        </h4>
                         <button
                           type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
+                          className="px-2.5 py-1 text-[10px] font-bold uppercase bg-slate-800 hover:bg-slate-700 text-amber-500 rounded border border-slate-700 cursor-pointer transition-colors duration-150"
                           onClick={() => setShowProfiler(!showProfiler)}
                         >
                           {showProfiler ? "Hide Profiler" : "Open Profiler"}
                         </button>
                       </div>
 
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
+                      <p className="text-xs text-slate-400 leading-relaxed mb-4">
                         Assess your vocational interests using Holland's RIASEC model and get matched with suitable goals from the career database.
                       </p>
 
                       {showProfiler && (
-                        <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--card-border)', paddingTop: '10px' }}>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rate your interest in each vocational category (1 = Dislike, 5 = Strongly Enjoy):</span>
+                        <div className="border-t border-dashed border-slate-800 pt-4 space-y-4">
+                          <span className="text-[11px] text-slate-400 block mb-2">Rate your interest in each vocational category (1 = Dislike, 5 = Strongly Enjoy):</span>
                           
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-                            {/* R */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Realistic (R):</strong> Hands-on/Build</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecR} 
-                                onChange={(e) => setRiasecR(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecR}</span>
-                            </div>
-                            {/* I */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Investigative (I):</strong> Analytical/Tech</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecI} 
-                                onChange={(e) => setRiasecI(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecI}</span>
-                            </div>
-                            {/* A */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Artistic (A):</strong> Design/Creative</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecA} 
-                                onChange={(e) => setRiasecA(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecA}</span>
-                            </div>
-                            {/* S */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Social (S):</strong> Helping/Mentoring</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecS} 
-                                onChange={(e) => setRiasecS(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecS}</span>
-                            </div>
-                            {/* E */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Enterprising (E):</strong> Leadership/Biz</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecE} 
-                                onChange={(e) => setRiasecE(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecE}</span>
-                            </div>
-                            {/* C */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                              <span style={{ width: '130px' }}><strong>Conventional (C):</strong> Audit/Details</span>
-                              <input 
-                                type="range" min="1" max="5" value={riasecC} 
-                                onChange={(e) => setRiasecC(parseInt(e.target.value))} 
-                                style={{ flex: 1, margin: '0 12px' }} 
-                              />
-                              <span style={{ width: '16px', fontWeight: 'bold' }}>{riasecC}</span>
-                            </div>
+                          <div className="space-y-3">
+                            {[
+                              { label: "Realistic (R): Hands-on/Build", val: riasecR, set: setRiasecR },
+                              { label: "Investigative (I): Analytical/Tech", val: riasecI, set: setRiasecI },
+                              { label: "Artistic (A): Design/Creative", val: riasecA, set: setRiasecA },
+                              { label: "Social (S): Helping/Mentoring", val: riasecS, set: setRiasecS },
+                              { label: "Enterprising (E): Leadership/Biz", val: riasecE, set: setRiasecE },
+                              { label: "Conventional (C): Audit/Details", val: riasecC, set: setRiasecC }
+                            ].map((item, index) => (
+                              <div key={index} className="flex items-center justify-between text-xs">
+                                <span className="w-48 text-slate-300">{item.label}</span>
+                                <input 
+                                  type="range" min="1" max="5" value={item.val} 
+                                  onChange={(e) => item.set(parseInt(e.target.value))} 
+                                  className="flex-1 mx-4 accent-amber-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <span className="w-4 font-bold text-slate-100 text-right">{item.val}</span>
+                              </div>
+                            ))}
                           </div>
 
                           {/* Profiler Recommendation Result */}
                           {(() => {
                             const { topScore, matches } = getRiasecRecommendations();
                             return (
-                              <div style={{ marginTop: '6px', padding: '10px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '6px' }}>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '6px' }}>
-                                  Primary Interest: <strong style={{ color: 'var(--accent-color)' }}>{topScore.name}</strong>
-                                  <p style={{ margin: '2px 0 0 0', fontSize: '0.68rem', color: 'var(--text-muted)' }}>{topScore.description}</p>
+                              <div className="mt-4 p-4 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                <div className="text-xs text-slate-200 mb-3 pb-3 border-b border-slate-900">
+                                  Primary Interest Match: <strong className="text-amber-500 font-semibold">{topScore.name}</strong>
+                                  <p className="margin-0 text-[10px] text-slate-400 mt-1 leading-normal">{topScore.description}</p>
                                 </div>
                                 {matches.length > 0 ? (
-                                  <div>
-                                    <span style={{ fontSize: '0.7rem', display: 'block', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: '600' }}>Matched Careers:</span>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                  <div className="space-y-2">
+                                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Matched Careers:</span>
+                                    <div className="space-y-2">
                                       {matches.map((c, idx) => {
                                         const originalIndex = CAREERS_DATABASE.findIndex(dbC => dbC.title === c.title);
                                         return (
-                                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--glass-bg)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--card-border)' }}>
-                                            <span style={{ fontSize: '0.72rem', color: 'var(--text-primary)', fontWeight: '500' }}>{c.title} <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>({c.soc})</span></span>
+                                          <div key={idx} className="flex justify-between items-center bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                            <span className="text-xs text-slate-200 font-medium">{c.title} <span className="text-[10px] text-slate-400 font-mono">({c.soc})</span></span>
                                             <button
                                               type="button"
-                                              className="btn"
-                                              style={{ height: '20px', fontSize: '0.65rem', padding: '0 6px', backgroundColor: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
+                                              className="px-2 py-0.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 rounded cursor-pointer transition-colors duration-150"
                                               onClick={() => setSelectedCareerIndex(originalIndex)}
                                             >
                                               Set as Goal
@@ -5022,7 +5182,7 @@ ___________________________________
                                     </div>
                                   </div>
                                 ) : (
-                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>No exact database matches. Try raising Realistic, Investigative, Enterprising, or Conventional categories.</span>
+                                  <span className="text-[10px] text-slate-400 italic">No exact database matches. Try raising Realistic, Investigative, Enterprising, or Conventional categories.</span>
                                 )}
                               </div>
                             );
@@ -5032,12 +5192,15 @@ ___________________________________
                     </div>
 
                     {/* VRC Program Change Justification Generator */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', marginBottom: '12px', borderBottom: '1px dashed var(--card-border)', paddingBottom: '6px' }}>VRC Program Change Justification Generator</h4>
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300">
+                      <h4 className="text-sm font-bold text-amber-500 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <FileText size={16} />
+                        VRC Program Change Justification Generator
+                      </h4>
                       
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.75rem' }}>Current Vocational Goal (IWRP)</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div className="form-group mb-0">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Current Vocational Goal (IWRP)</label>
                           <input
                             type="text"
                             className="form-control"
@@ -5046,8 +5209,8 @@ ___________________________________
                           />
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.75rem' }}>Proposed Vocational Goal</label>
+                        <div className="form-group mb-0">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Proposed Vocational Goal</label>
                           <input
                             type="text"
                             className="form-control"
@@ -5057,8 +5220,8 @@ ___________________________________
                         </div>
                       </div>
 
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.75rem' }}>Reason for Change of Program</label>
+                      <div className="form-group mb-4">
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Reason for Change of Program</label>
                         <select
                           className="form-control"
                           value={justReason}
@@ -5070,32 +5233,31 @@ ___________________________________
                         </select>
                       </div>
 
-                      <div className="form-group">
-                        <label style={{ fontSize: '0.75rem' }}>Explain the physical impact of the current goal</label>
+                      <div className="form-group mb-4">
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Explain physical impact of the current goal</label>
                         <textarea
-                          className="form-control"
-                          style={{ height: '80px', padding: '8px', fontSize: '0.8rem', resize: 'vertical' }}
+                          className="form-control h-20 p-3 text-xs resize-y"
                           value={justPhysicalImpact}
                           onChange={(e) => setJustPhysicalImpact(e.target.value)}
                         />
                       </div>
 
-                      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 0 }}>
+                      <div className="flex items-center gap-2 mb-4 cursor-pointer select-none">
                         <input
                           type="checkbox"
                           id="justMedical"
+                          className="accent-amber-500"
                           checked={justMedicalEvidence}
                           onChange={(e) => setJustMedicalEvidence(e.target.checked)}
                         />
-                        <label htmlFor="justMedical" style={{ margin: 0, fontSize: '0.78rem', cursor: 'pointer' }}>
+                        <label htmlFor="justMedical" className="text-xs text-slate-300 cursor-pointer">
                           Medical evidence is available to support this change
                         </label>
                       </div>
 
                       <button
                         type="button"
-                        className="btn btn-primary"
-                        style={{ marginTop: '16px', width: '100%' }}
+                        className="btn btn-primary w-full"
                         onClick={generateJustificationLetter}
                       >
                         Generate Formal Justification Letter
@@ -5103,31 +5265,32 @@ ___________________________________
                     </div>
 
                     {/* SEC SIC & NAICS Industry Finder */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>SEC SIC & NAICS Industry Code Finder</h4>
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-sm font-bold text-amber-500 flex items-center gap-2">
+                          <Search size={16} />
+                          SEC SIC & NAICS Industry Code Finder
+                        </h4>
                         <button
                           type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
+                          className="px-2.5 py-1 text-[10px] font-bold uppercase bg-slate-800 hover:bg-slate-700 text-amber-500 rounded border border-slate-700 cursor-pointer transition-colors duration-150"
                           onClick={() => setShowIndustryFinder(!showIndustryFinder)}
                         >
                           {showIndustryFinder ? "Hide Finder" : "Open Finder"}
                         </button>
                       </div>
 
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
+                      <p className="text-xs text-slate-400 leading-relaxed mb-4">
                         Search classifications from the SEC SIC Standard Industrial Classification list and BLS Industry Groups.
                       </p>
 
                       {showIndustryFinder && (
-                        <div style={{ marginTop: '12px', borderTop: '1px dashed var(--card-border)', paddingTop: '10px' }}>
-                          <div className="form-group" style={{ marginBottom: '12px' }}>
+                        <div className="border-t border-dashed border-slate-800 pt-4 space-y-4">
+                          <div className="form-group mb-3">
                             <input
                               type="text"
-                              className="form-control"
+                              className="form-control text-xs"
                               placeholder="Search by keyword (e.g. software, logistics, pilot, CNC)..."
-                              style={{ fontSize: '0.78rem' }}
                               value={industrySearchQuery}
                               onChange={(e) => setIndustrySearchQuery(e.target.value)}
                             />
@@ -5135,350 +5298,490 @@ ___________________________________
 
                           {/* Industry Search Results */}
                           {(() => {
-                            const INDUSTRIES_LOOKUP = [
-                              { keyword: 'software programming systems design software engineer coding', sic: '7371 / 7372', naics: '541511', title: 'Computer Programming & Prepackaged Software', desc: 'Custom software design, systems integration, and packaged software publishing.' },
-                              { keyword: 'cybersecurity networks network security consulting tech support services', sic: '7379', naics: '541519', title: 'Other Computer Related Services', desc: 'Information security consulting, disaster recovery, and computer system installation services.' },
-                              { keyword: 'logistics shipping warehouse transportation cargo distribution consult', sic: '4731 / 8742', naics: '541614', title: 'Freight Arrangement & Logistics Consulting', desc: 'Arrangement of transportation of freight, and distribution/logistics supply chain consulting.' },
-                              { keyword: 'machinery metal plastic manufacturing industrial shop milling turning cnc', sic: '3599 / 3327', naics: '332710', title: 'Machine Shops & Precision Tooling', desc: 'Precision machining, metal/plastic cutting, custom part fabrication, and tool operation.' },
-                              { keyword: 'solar construction electricity installation contracting trade panel green energy', sic: '1799 / 1731', naics: '238210 / 238990', title: 'Special Trade & Electrical Installation', desc: 'Assembly and installation of solar photovoltaic systems, wiring, and structural framing.' },
-                              { keyword: 'pilot aircraft flight aviation airline passengers shipping cargo commercial', sic: '4512 / 4522', naics: '481211', title: 'Air Transportation & Chartered Flights', desc: 'Commercial piloting, passenger flights, air freight transportation, and scheduled aviation services.' },
-                              { keyword: 'management project administrative operations consulting advisory corporate guidance', sic: '8742', naics: '541611', title: 'Administrative Management Consulting', desc: 'General management consulting, scheduling, procurement, budgeting, and operations planning.' },
-                              { keyword: 'accounting audit bookkeeping finance ledger CPA certified tax public services', sic: '8721', naics: '541211', title: 'Accounting, Auditing, and Bookkeeping', desc: 'Financial record auditing, general bookkeeping, tax return preparation, and financial reporting.' }
-                            ];
+                            const q = industrySearchQuery.trim().toLowerCase();
+                            const isSearchActive = q.length >= 2;
 
                             const filtered = INDUSTRIES_LOOKUP.filter(ind => {
-                              const q = industrySearchQuery.toLowerCase();
-                              return ind.title.toLowerCase().includes(q) || ind.desc.toLowerCase().includes(q) || ind.keyword.toLowerCase().includes(q) || ind.sic.includes(q) || ind.naics.includes(q);
+                              if (!isSearchActive) {
+                                return INDUSTRIES_LOOKUP.indexOf(ind) < 8;
+                              }
+                              return (
+                                ind.title.toLowerCase().includes(q) ||
+                                ind.desc.toLowerCase().includes(q) ||
+                                ind.keyword.toLowerCase().includes(q) ||
+                                ind.sic.includes(q) ||
+                                ind.naics.includes(q)
+                              );
                             });
 
                             if (filtered.length === 0) {
-                              return <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>No matching industries found. Try "software", "machinery", "logistics", etc.</p>;
+                              return <p className="text-xs text-slate-400 italic">No matching industries found. Try searching by keywords like "software", "aviation", "electrical", or codes.</p>;
                             }
 
+                            const maxResults = 100;
+                            const displayed = filtered.slice(0, maxResults);
+                            const hasMore = filtered.length > maxResults;
+
                             return (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
-                                {filtered.map((ind, idx) => (
-                                  <div key={idx} style={{ padding: '8px 10px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '0.72rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                      <strong style={{ color: 'var(--text-primary)' }}>{ind.title}</strong>
+                              <div className="space-y-3">
+                                {!isSearchActive && (
+                                  <p className="text-[10px] text-slate-400 italic leading-normal">
+                                    Showing common industry groups. Type 2+ characters to search the full SEC database of 2,100+ classifications.
+                                  </p>
+                                )}
+                                {isSearchActive && hasMore && (
+                                  <p className="text-[10px] text-amber-500 font-medium">
+                                    Showing top {maxResults} of {filtered.length} matches. Please refine search query for more specific results.
+                                  </p>
+                                )}
+                                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                  {displayed.map((ind, idx) => (
+                                    <div key={idx} className="p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl space-y-1.5">
+                                      <div className="flex justify-between items-center">
+                                        <strong className="text-xs text-slate-200">{ind.title}</strong>
+                                      </div>
+                                      <p className="text-[10px] text-slate-400 leading-relaxed">{ind.desc}</p>
+                                      <div className="flex gap-4 text-[10px] text-slate-400">
+                                        <span>SIC: <strong className="text-slate-300 font-mono">{ind.sic}</strong></span>
+                                        <span>NAICS: <strong className="text-slate-300 font-mono">{ind.naics}</strong></span>
+                                      </div>
                                     </div>
-                                    <p style={{ margin: '0 0 6px 0', fontSize: '0.68rem', color: 'var(--text-secondary)', lineHeight: '1.2' }}>{ind.desc}</p>
-                                    <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)', fontSize: '0.68rem' }}>
-                                      <span>SIC: <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{ind.sic}</strong></span>
-                                      <span>NAICS: <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{ind.naics}</strong></span>
-                                    </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
                             );
                           })()}
                         </div>
                       )}
                     </div>
-
-                    {/* VET TEC Tracker */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>VET TEC Technology Training Tracker</h4>
-                        <button
-                          type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
-                          onClick={() => setShowVetTecInfo(!showVetTecInfo)}
-                        >
-                          {showVetTecInfo ? "Hide Details" : "Show Details"}
-                        </button>
-                      </div>
-
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={vetTecOnline}
-                          onChange={(e) => setVetTecOnline(e.target.checked)}
-                        />
-                        Online VET TEC training provider
-                      </label>
-
-                      {showVetTecInfo && (
-                        <div style={{ marginTop: '12px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                          <p style={{ marginBottom: '6px' }}><strong>VET TEC Key Information:</strong></p>
-                          <ul style={{ paddingLeft: '16px', margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <li>Must have at least 1 day of unexpired GI Bill entitlement.</li>
-                            <li>Does NOT count against your 48 months of GI Bill entitlement.</li>
-                            <li>Tuition is paid directly to the provider (100% covered).</li>
-                            <li>MHA is paid at E-5 with dependents BAH. Online programs pay 50% of the national average.</li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sports4Vets Section */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>Sports4Vets (Paralympic Training Allowance)</h4>
-                        <button
-                          type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
-                          onClick={() => setShowSportsInfo(!showSportsInfo)}
-                        >
-                          {showSportsInfo ? "Hide Details" : "Show Details"}
-                        </button>
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem' }}>Training Intensity Load</label>
-                        <select
-                          className="form-control"
-                          value={sportsLoad}
-                          onChange={(e) => setSportsLoad(e.target.value)}
-                        >
-                          <option value="full">Full-Time training allowance</option>
-                          <option value="three-quarters">3/4-Time training allowance</option>
-                          <option value="half">1/2-Time training allowance</option>
-                        </select>
-                      </div>
-
-                      {showSportsInfo && (
-                        <div style={{ marginTop: '12px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                          <p style={{ marginBottom: '6px' }}><strong>Sports4Vets Information (38 U.S.C. § 322):</strong></p>
-                          <p style={{ margin: 0 }}>
-                            Allows disabled veterans training in Paralympic sports to receive monthly subsistence equal to the Chapter 31 institutional rate (No Dependents level).
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Graduate School Strategy Panel */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginTop: '24px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>Graduate School Strategy Advisor</h4>
-                        <button
-                          type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
-                          onClick={() => setShowGraduateStrategy(!showGraduateStrategy)}
-                        >
-                          {showGraduateStrategy ? "Hide Strategy" : "Show Strategy"}
-                        </button>
-                      </div>
-
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
-                        Learn how to maximize your Chapter 31 VR&E and Chapter 33 GI Bill benefits to fully fund graduate programs (Master's, Ph.D., JD, MD).
-                      </p>
-
-                      {showGraduateStrategy && (
-                        <div style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--card-border)', paddingTop: '10px' }}>
-                          <div>
-                            <strong style={{ color: 'var(--text-primary)' }}>1. The Retroactive Induction Strategy (38 CFR § 21.282)</strong>
-                            <p style={{ margin: '2px 0 6px 0', fontSize: '0.72rem' }}>
-                              If you previously paid for undergraduate degrees using Chapter 33 GI Bill while eligible for Chapter 31, you can request a "Retroactive Induction". This transfers past undergraduate months to Chapter 31, fully restoring your Chapter 33 GI Bill entitlement to use for graduate school.
-                            </p>
-                          </div>
-                          <div>
-                            <strong style={{ color: 'var(--text-primary)' }}>2. Preserving Your GI Bill Months</strong>
-                            <p style={{ margin: '2px 0 6px 0', fontSize: '0.72rem' }}>
-                              Use VR&E first for your undergraduate or initial programs. Unlike the GI Bill (strictly capped at 36 months), Chapter 31 VR&E can cover up to 48 months (or more with an SEH) without touching your GI Bill.
-                            </p>
-                          </div>
-                          <div>
-                            <strong style={{ color: 'var(--text-primary)' }}>3. Justifying Graduate Education</strong>
-                            <p style={{ margin: '2px 0 0 0', fontSize: '0.72rem' }}>
-                              To get graduate school approved under Chapter 31, you must show that your service-connected disabilities prevent you from securing entry-level employment in your field, or that the industry requires a graduate degree for stable employment.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Self-Employment / Business Startup Panel */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>Business Startup & Self-Employment</h4>
-                        <button
-                          type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
-                          onClick={() => setShowStartupStrategy(!showStartupStrategy)}
-                        >
-                          {showStartupStrategy ? "Hide Details" : "Show Details"}
-                        </button>
-                      </div>
-
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
-                        The Chapter 31 Self-Employment Track (38 CFR § 21.258) assists disabled veterans in starting and establishing their own businesses.
-                      </p>
-
-                      {showStartupStrategy && (
-                        <div style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--card-border)', paddingTop: '10px' }}>
-                          <div>
-                            <strong style={{ color: 'var(--text-primary)' }}>VA Funding Categories:</strong>
-                            <ul style={{ paddingLeft: '16px', margin: '4px 0 8px 0', fontSize: '0.72rem', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              <li><strong>Category I (Severe Barriers):</strong> Full funding for startup equipment, initial inventory, licenses, marketing, and professional services.</li>
-                              <li><strong>Category II (Standard barriers):</strong> Limited funding for basic tools and vocational licenses.</li>
-                              <li><strong>Category III:</strong> Job search assistance only.</li>
-                            </ul>
-                          </div>
-                          <div style={{ fontSize: '0.72rem' }}>
-                            <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '4px' }}>Startup Checklist:</strong>
-                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginBottom: '4px' }}>
-                              <input type="checkbox" style={{ marginTop: '2px' }} />
-                              <span>Complete business feasibility review with a certified advisor.</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginBottom: '4px' }}>
-                              <input type="checkbox" style={{ marginTop: '2px' }} />
-                              <span>Draft formal Business Plan (required for Category I/II funding approval).</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginBottom: '4px' }}>
-                              <input type="checkbox" style={{ marginTop: '2px' }} />
-                              <span>Submit Business Plan to VRC for Regional Office panel review.</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
-                              <input type="checkbox" style={{ marginTop: '2px' }} />
-                              <span>Coordinate with SBA/SCORE mentors for ongoing operational support.</span>
-                            </label>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Entitlement Extensions Strategy Panel */}
-                    <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>VR&E Entitlement Extensions</h4>
-                        <button
-                          type="button"
-                          className="btn"
-                          style={{ height: '24px', fontSize: '0.7rem', padding: '0 8px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', color: 'var(--accent-color)' }}
-                          onClick={() => setShowExtensionsStrategy(!showExtensionsStrategy)}
-                        >
-                          {showExtensionsStrategy ? "Hide Checker" : "Open Checker"}
-                        </button>
-                      </div>
-
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
-                        Find out how having a Serious Employment Handicap (SEH) allows you to extend services past 48 months or bypass the 12-year basic eligibility window.
-                      </p>
-
-                      {showExtensionsStrategy && (
-                        <div style={{ marginTop: '12px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--card-border)', paddingTop: '10px' }}>
-                          <div style={{ fontSize: '0.72rem' }}>
-                            <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>Extension Pre-Screening Questions:</strong>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', cursor: 'pointer' }}>
-                              <input type="checkbox" checked={extHasSeh} onChange={(e) => setExtHasSeh(e.target.checked)} />
-                              <span>Do you have a Serious Employment Handicap (SEH)?</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', cursor: 'pointer' }}>
-                              <input type="checkbox" checked={extApproachingLimit} onChange={(e) => setExtApproachingLimit(e.target.checked)} />
-                              <span>Have you reached (or are you near) the 48-month limit or basic 12-year expiration?</span>
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                              <input type="checkbox" checked={extNeedMoreTime} onChange={(e) => setExtNeedMoreTime(e.target.checked)} />
-                              <span>Do you require additional retraining to achieve suitable employment?</span>
-                            </label>
-                          </div>
-
-                          {extHasSeh && extApproachingLimit && extNeedMoreTime ? (
-                            <div style={{ padding: '8px 10px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--success-color)', borderRadius: '6px', fontSize: '0.7rem', color: 'var(--success-color)', marginTop: '4px' }}>
-                              <strong>Extension Pre-screen Approved:</strong> Under 38 CFR § 21.44 and § 21.78, you meet the statutory criteria for your VRC to grant an extension. Make sure your VRC designates your case as an SEH to unlock these extensions.
-                            </div>
-                          ) : (
-                            <div style={{ padding: '8px 10px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                              *Fill out all three checkboxes above to see if you are pre-screened for a program extension.
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
                   </div>
 
                   {/* Right Column: Outcomes Panel */}
-                  <div>
-                    <div className="result-box" style={{ borderLeft: '4px solid var(--accent-color)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="lg:col-span-5">
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-cyan-500/5 pointer-events-none rounded-xl" />
                       
-                      {/* VET TEC Estimates */}
-                      <div>
-                        <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '4px' }}>VET TEC Monthly Housing (MHA)</h4>
-                        <span style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--accent-color)' }}>
-                          {vetTecOnline 
-                            ? `$${(rates.p911_online_rate).toFixed(2)}/mo`
-                            : `$${(calcBahRate).toFixed(2)}/mo`
-                          }
-                        </span>
-                        <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                          {vetTecOnline 
-                            ? "Using the national online-only MHA rate."
-                            : `Using BAH rate of school zip code ($${calcBahRate.toFixed(2)}/mo).`
-                          }
-                        </p>
+                      <div className="relative z-10 space-y-6">
+                        {/* Request Letter Display */}
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+                            <FileText size={16} className="text-amber-500" />
+                            Justification Letter Output
+                          </h4>
+                          {justGeneratedLetter ? (
+                            <div className="space-y-3">
+                              <textarea
+                                readOnly
+                                value={justGeneratedLetter}
+                                className="w-full h-80 p-3 bg-slate-950 border border-slate-800 rounded-xl text-[11px] text-slate-300 font-mono resize-none leading-relaxed"
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-primary w-full text-xs font-semibold py-2.5"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(justGeneratedLetter);
+                                  alert("Justification letter copied to clipboard!");
+                                }}
+                              >
+                                Copy Letter to Clipboard
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-8 bg-slate-950/50 border border-slate-850 rounded-xl text-center">
+                              <Info size={24} className="text-slate-600 mb-2 mx-auto" />
+                              <p className="text-xs text-slate-400 leading-relaxed">
+                                Fill out the parameters on the left and click "Generate" to construct your program change justification letter.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-
-                      <div className="doc-divider" style={{ margin: 0 }}></div>
-
-                      {/* Sports4Vets Estimates */}
-                      <div>
-                        <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '4px' }}>Sports4Vets Allowance</h4>
-                        <span style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--accent-color)' }}>
-                          {(() => {
-                            const map = {
-                              full: rates.ch31_institutional_full[0],
-                              'three-quarters': rates.ch31_institutional_threeQuarters[0],
-                              half: rates.ch31_institutional_half[0]
-                            };
-                            const amt = map[sportsLoad] || 0;
-                            return `$${amt.toFixed(2)}/mo`;
-                          })()}
-                        </span>
-                        <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                          Linked to the Chapter 31 institutional rate with no dependents.
-                        </p>
-                      </div>
-
-                      <div className="doc-divider" style={{ margin: 0 }}></div>
-
-                      {/* Request Letter Display */}
-                      <div>
-                        <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '8px' }}>Justification Letter Output</h4>
-                        {justGeneratedLetter ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <textarea
-                              readOnly
-                              value={justGeneratedLetter}
-                              style={{
-                                width: '100%',
-                                height: '220px',
-                                padding: '10px',
-                                backgroundColor: 'var(--hover-bg)',
-                                border: '1px solid var(--card-border)',
-                                borderRadius: '6px',
-                                fontSize: '0.75rem',
-                                color: 'var(--text-primary)',
-                                fontFamily: 'monospace',
-                                resize: 'none'
-                              }}
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-primary"
-                              style={{ width: '100%', height: '32px', fontSize: '0.75rem' }}
-                              onClick={() => {
-                                navigator.clipboard.writeText(justGeneratedLetter);
-                                alert("Justification letter copied to clipboard!");
-                              }}
-                            >
-                              Copy Letter to Clipboard
-                            </button>
-                          </div>
-                        ) : (
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Fill out the wizard on the left and click "Generate" to construct your request letter.</p>
-                        )}
-                      </div>
-
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
+
+            {/* SELF-EMPLOYMENT TRACK VIEW */}
+            {activeView === 'self_employment' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+                className="doc-card"
+              >
+                <span className="doc-tag font-bold text-cyan-400 uppercase tracking-wider">Self-Employment Track (38 CFR § 21.258)</span>
+                <h1 className="doc-title mt-1.5 mb-1.5 text-2xl font-black text-slate-100">Self-Employment Venture & Startup Strategist</h1>
+                <p className="doc-subtitle text-xs text-slate-400">Configure your business plan, evaluate regulatory startup categories, and generate a formal request letter.</p>
+                <div className="doc-divider mb-6 mt-4"></div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Left Column: Input Form & SBDC Milestones */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {/* Venture Profile */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2 relative z-10">
+                        <Briefcase size={16} />
+                        Startup Venture Profile Builder
+                      </h4>
+                      
+                      <div className="space-y-4 relative z-10">
+                        <div className="form-group">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Proposed Business Name</label>
+                          <input
+                            type="text"
+                            className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-cyan-500 transition-all"
+                            value={selfBizName}
+                            onChange={(e) => setSelfBizName(e.target.value)}
+                            placeholder="e.g. Valiant Tech Solutions"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="form-group">
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Legal Entity Structure</label>
+                            <select
+                              className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-cyan-500 transition-all"
+                              value={selfBizType}
+                              onChange={(e) => setSelfBizType(e.target.value)}
+                            >
+                              <option value="LLC">Limited Liability Company (LLC)</option>
+                              <option value="Sole Proprietorship">Sole Proprietorship</option>
+                              <option value="S-Corporation">S-Corporation</option>
+                              <option value="C-Corporation">C-Corporation</option>
+                              <option value="Partnership">Partnership</option>
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Requested Assistance Category</label>
+                            <select
+                              className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-cyan-500 transition-all"
+                              value={selfFundingCategory}
+                              onChange={(e) => setSelfFundingCategory(e.target.value)}
+                            >
+                              <option value="Category I">Category I (Serious Employment Handicap)</option>
+                              <option value="Category II">Category II (Employment Handicap)</option>
+                              <option value="Category III">Category III (Reemployment)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Target Industry Sector</label>
+                          <input
+                            type="text"
+                            className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-cyan-500 transition-all"
+                            value={selfBizIndustry}
+                            onChange={(e) => setSelfBizIndustry(e.target.value)}
+                            placeholder="e.g. Cybersecurity & IT Consulting"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Business Concept Statement</label>
+                          <textarea
+                            className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-cyan-500 transition-all h-24 resize-none"
+                            value={selfBizConcept}
+                            onChange={(e) => setSelfBizConcept(e.target.value)}
+                            placeholder="Describe what services/products your venture provides..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SBDC Readiness Checklist */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2 relative z-10">
+                        <ShieldCheck size={16} />
+                        SBDC / SCORE Feasibility Checklist
+                      </h4>
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed relative z-10">
+                        The VA requires documented proof of venture feasibility before authorizing funds under 38 CFR § 21.258. Complete these milestones with a certified advisor:
+                      </p>
+                      
+                      <div className="space-y-3 relative z-10">
+                        {[
+                          { label: "Completed business feasibility review with certified SBDC/SCORE advisor", checked: selfChecklist1, set: setSelfChecklist1 },
+                          { label: "Completed and drafted formal Business Plan document", checked: selfChecklist2, set: setSelfChecklist2 },
+                          { label: "Submitted Business Plan to VRC for Regional Office panel review", checked: selfChecklist3, set: setSelfChecklist3 },
+                          { label: "SCORE/SBA mentor assigned for ongoing post-launch support", checked: selfChecklist4, set: setSelfChecklist4 }
+                        ].map((item, index) => (
+                          <label key={index} className="flex items-start gap-3 p-3 bg-slate-950/40 border border-slate-800 rounded-xl cursor-pointer select-none hover:border-slate-700 transition-all">
+                            <input
+                              type="checkbox"
+                              className="accent-cyan-500 mt-0.5"
+                              checked={item.checked}
+                              onChange={(e) => item.set(e.target.checked)}
+                            />
+                            <span className="text-xs text-slate-200 leading-relaxed">{item.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Output Letter & Regulatory Rules */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* Letter Output */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 relative z-10">
+                        <FileText size={16} className="text-cyan-500" />
+                        Request Letter under 38 CFR § 21.258
+                      </h4>
+                      <div className="space-y-3 relative z-10">
+                        <textarea
+                          readOnly
+                          value={selfGeneratedLetter}
+                          className="w-full h-80 p-3 bg-slate-950 border border-slate-800 rounded-xl text-[11px] text-slate-300 font-mono resize-none leading-relaxed"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-primary w-full text-xs font-semibold py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-none"
+                          onClick={() => {
+                            navigator.clipboard.writeText(selfGeneratedLetter);
+                            alert("Formal self-employment request letter copied to clipboard!");
+                          }}
+                        >
+                          Copy Letter to Clipboard
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Regulatory Rules Card */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 relative z-10">
+                        <Info size={16} className="text-cyan-500" />
+                        Funding & Supply Categories
+                      </h4>
+                      <div className="space-y-3 text-[11px] text-slate-400 leading-relaxed relative z-10">
+                        <div className="p-2.5 bg-slate-950/50 border border-slate-800 rounded-xl">
+                          <strong className="text-slate-200 block mb-1">Category I (SEH)</strong>
+                          Full scope of services including business license fees, specialized workspace setup, tools, equipment, and up to a 60-day inventory of startup supplies.
+                        </div>
+                        <div className="p-2.5 bg-slate-950/50 border border-slate-800 rounded-xl">
+                          <strong className="text-slate-200 block mb-1">Category II (Employment Handicap)</strong>
+                          Limited to basic startup supplies and standard licensing required to begin working. Does not fund heavy capital equipment or extensive supply inventory.
+                        </div>
+                        <div className="p-2.5 bg-slate-950/50 border border-slate-800 rounded-xl">
+                          <strong className="text-slate-200 block mb-1">Category III (Reemployment)</strong>
+                          Only specialized ergonomic equipment, vehicle adjustments, or adaptive workplace accommodations to help the veteran maintain pre-existing self-employment.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* SPECIAL RETRAINING PROGRAMS VIEW */}
+            {activeView === 'special_programs' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+                className="doc-card"
+              >
+                <span className="doc-tag font-bold text-amber-500 uppercase tracking-wider">Special VA Programs</span>
+                <h1 className="doc-title mt-1.5 mb-1.5 text-2xl font-black text-slate-100">Special Retraining & Veteran Programs</h1>
+                <p className="doc-subtitle text-xs text-slate-400">Track VET TEC housing allowances, calculate Sports4Vets Paralympic training support, and review graduate induction strategies.</p>
+                <div className="doc-divider mb-6 mt-4"></div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Left Column: VET TEC, Sports4Vets and Graduate School */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {/* VET TEC Technology Training Tracker */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-amber-500 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2 relative z-10">
+                        <GraduationCap size={16} />
+                        VET TEC Technology Training Tracker
+                      </h4>
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed relative z-10">
+                        The VET TEC program funds high-tech industry training. If authorized, you receive Monthly Housing Allowance (MHA) during your course.
+                      </p>
+                      <div className="space-y-4 relative z-10">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-200 hover:text-white select-none">
+                          <input 
+                            type="checkbox" 
+                            className="accent-amber-500" 
+                            checked={vetTecOnline} 
+                            onChange={(e) => setVetTecOnline(e.target.checked)} 
+                          />
+                          <span>Online-Only Training Course (VET TEC online rate applies)</span>
+                        </label>
+                        
+                        <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl text-xs space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Housing Rate Mode:</span>
+                            <span className="font-semibold text-slate-200">{vetTecOnline ? 'Online MHA Rate' : 'Local Bah/MHA Rate'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">VET TEC MHA Monthly Estimate:</span>
+                            <span className="font-bold text-amber-500 font-mono">
+                              ${vetTecOnline 
+                                ? rates.p911_online_rate.toLocaleString('en-US', { minimumFractionDigits: 2 }) 
+                                : rates.ch31_institutional_full[0].toLocaleString('en-US', { minimumFractionDigits: 2 })
+                              }/mo
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sports4Vets Paralympic Allowance Calculator */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-amber-500 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2 relative z-10">
+                        <Award size={16} />
+                        Sports4Vets Paralympic Allowance Calculator
+                      </h4>
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed relative z-10">
+                        Veterans with service-connected disabilities training for the Paralympic or Olympic teams may qualify for a monthly allowance under 38 U.S.C. § 322.
+                      </p>
+                      
+                      <div className="space-y-4 relative z-10">
+                        <div className="form-group">
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Athlete Training Load</label>
+                          <select
+                            className="form-control w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 text-xs focus:border-amber-500 transition-all"
+                            value={sportsLoad}
+                            onChange={(e) => setSportsLoad(e.target.value)}
+                          >
+                            <option value="full">Full-Time Training</option>
+                            <option value="threeQuarters">3/4-Time Training</option>
+                            <option value="half">1/2-Time Training</option>
+                          </select>
+                        </div>
+
+                        <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl text-xs space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Monthly Training Support:</span>
+                            <span className="font-bold text-amber-500 font-mono">
+                              {(() => {
+                                let val = 0;
+                                if (sportsLoad === 'full') val = rates.ch31_institutional_full[0];
+                                else if (sportsLoad === 'threeQuarters') val = rates.ch31_institutional_threeQuarters[0];
+                                else if (sportsLoad === 'half') val = rates.ch31_institutional_half[0];
+                                return `$${val.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo`;
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Graduate School Strategy Advisor */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-amber-500 mb-4 border-b border-slate-800 pb-2 flex items-center gap-2 relative z-10">
+                        <BookOpen size={16} />
+                        Graduate School Induction Strategy Advisor
+                      </h4>
+                      <div className="space-y-3 text-xs text-slate-300 leading-relaxed relative z-10">
+                        <p>
+                          Securing Chapter 31 funding for postgraduate programs (Master's, J.D., M.D., Ph.D.) requires establishing that the postgraduate degree is the <strong>minimum entry requirement</strong> to overcome the veteran's vocational handicap.
+                        </p>
+                        <ul className="list-disc pl-5 space-y-2 text-slate-400">
+                          <li><strong>Entry-Level Justification:</strong> Obtain formal letters from employers or industry regulations showing that the master's or doctorate is mandatory for employment in your chosen sector (e.g. licensed psychologist, occupational therapist).</li>
+                          <li><strong>Labor Market Data:</strong> Present data showing employment options with an undergraduate degree are not compatible with your disability, whereas post-grad roles are compatible.</li>
+                          <li><strong>Track Alignment:</strong> Always align postgraduate requests under the Long-Term Services track and compile this evidence before requesting your IWRP review.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Calculations & Ratios Display */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* Funding Ratios Card */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 relative z-10">
+                        <TrendingUp size={16} className="text-amber-500" />
+                        VET TEC Funding Ratios
+                      </h4>
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed relative z-10">
+                        To incentivize high employment outcomes, VET TEC pays training providers based on the student's progress:
+                      </p>
+                      
+                      <div className="space-y-4 relative z-10">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold text-slate-300">
+                            <span>1. Enrollment Milestone</span>
+                            <span>50% Funding</span>
+                          </div>
+                          <div className="h-2.5 bg-slate-950 border border-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: '50%' }} />
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-normal">
+                            Paid to the provider when you formally enroll and start the technology program.
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold text-slate-300">
+                            <span>2. Graduation Milestone</span>
+                            <span>25% Funding</span>
+                          </div>
+                          <div className="h-2.5 bg-slate-950 border border-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: '25%' }} />
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-normal">
+                            Paid to the provider when you successfully complete the course and graduate.
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold text-slate-300">
+                            <span>3. Employment Milestone</span>
+                            <span>25% Funding</span>
+                          </div>
+                          <div className="h-2.5 bg-slate-950 border border-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: '25%' }} />
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-normal">
+                            Paid to the provider only when you find meaningful employment in the field of study within 180 days of graduation.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Rates Card */}
+                    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute -inset-px bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none rounded-xl" />
+                      <h4 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 relative z-10">
+                        <DollarSign size={16} className="text-amber-500" />
+                        Active Monthly Rates Summary
+                      </h4>
+                      
+                      <div className="space-y-2 text-xs relative z-10">
+                        <div className="flex justify-between border-b border-slate-850 pb-2">
+                          <span className="text-slate-400">VET TEC Online MHA:</span>
+                          <span className="font-semibold text-slate-200 font-mono">${rates.p911_online_rate.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-850 pb-2">
+                          <span className="text-slate-400">Sports4Vets Full load:</span>
+                          <span className="font-semibold text-slate-200 font-mono">${rates.ch31_institutional_full[0].toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-850 pb-2">
+                          <span className="text-slate-400">Sports4Vets 3/4 load:</span>
+                          <span className="font-semibold text-slate-200 font-mono">${rates.ch31_institutional_threeQuarters[0].toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Sports4Vets 1/2 load:</span>
+                          <span className="font-semibold text-slate-200 font-mono">${rates.ch31_institutional_half[0].toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             )}
 
           </div>
