@@ -149,16 +149,104 @@ function App() {
   const [loanUndergrad, setLoanUndergrad] = useState(true);
 
   // Budget
-  const [budgetIncomeJob, setBudgetIncomeJob] = useState(0);
-  const [budgetIncomeSpouse, setBudgetIncomeSpouse] = useState(0);
-  const [budgetHousing, setBudgetHousing] = useState(0);
-  const [budgetUtilities, setBudgetUtilities] = useState(0);
-  const [budgetFood, setBudgetFood] = useState(0);
-  const [budgetTransportation, setBudgetTransportation] = useState(0);
-  const [budgetInsurance, setBudgetInsurance] = useState(0);
-  const [budgetHealth, setBudgetHealth] = useState(0);
-  const [budgetGiving, setBudgetGiving] = useState(0);
-  const [budgetSavingDebt, setBudgetSavingDebt] = useState(0);
+  const [budgetIncomes, setBudgetIncomes] = useState([]);
+  const [budgetExpenses, setBudgetExpenses] = useState([]);
+
+  const addIncomeTemplate = (type) => {
+    const typeCounts = {};
+    budgetIncomes.forEach(i => {
+      typeCounts[i.type] = (typeCounts[i.type] || 0) + 1;
+    });
+    const count = typeCounts[type] || 0;
+    let name = '';
+    let amount = 0;
+
+    switch (type) {
+      case 'va_disability':
+        name = `VA Disability Pay`;
+        amount = calculatedDisabilityPay;
+        break;
+      case 'va_bah':
+        name = `VA BAH / MHA`;
+        amount = budgetMhaAmount;
+        break;
+      case 'va_pension':
+        name = `VA Pension`;
+        break;
+      case 'ssi':
+        name = `SSI (Supplemental Security)`;
+        break;
+      case 'ssdi':
+        name = `SSDI (Social Security Disability)`;
+        break;
+      case 'job':
+        name = `W2/1099 Job Income${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'spouse':
+        name = `Spouse Income${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'child_support':
+        name = `Child Support${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      default:
+        name = `Other Income${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+    }
+
+    setBudgetIncomes([...budgetIncomes, { id: Date.now() + Math.random(), type, name, amount }]);
+  };
+
+  const addExpenseTemplate = (category) => {
+    const catCounts = {};
+    budgetExpenses.forEach(e => {
+      catCounts[e.category] = (catCounts[e.category] || 0) + 1;
+    });
+    const count = catCounts[category] || 0;
+    let name = '';
+
+    switch (category) {
+      case 'housing':
+        name = `Housing (Rent/Mortgage)${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'utilities':
+        name = `Utilities${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'food':
+        name = `Food & Groceries${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'transportation':
+        name = `Transportation${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'insurance':
+        name = `Insurance${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'health':
+        name = `Health & Medical${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'giving':
+        name = `Giving & Tithing${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'saving_debt':
+        name = `Savings & Debt${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      default:
+        name = `Other Expense${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+    }
+
+    setBudgetExpenses([...budgetExpenses, { id: Date.now() + Math.random(), category, name, amount: 0 }]);
+  };
+
+  const autofillCalculatedIncome = () => {
+    let current = [...budgetIncomes];
+    if (calculatedDisabilityPay > 0 && !current.some(i => i.type === 'va_disability')) {
+      current.push({ id: Date.now() + Math.random(), type: 'va_disability', name: 'VA Disability Pay', amount: calculatedDisabilityPay });
+    }
+    if (budgetMhaAmount > 0 && !current.some(i => i.type === 'va_bah')) {
+      current.push({ id: Date.now() + Math.random(), type: 'va_bah', name: 'VA BAH / MHA Allowance', amount: budgetMhaAmount });
+    }
+    setBudgetIncomes(current);
+  };
 
   // Debt Snowball
   const [debtsList, setDebtsList] = useState([]);
@@ -969,7 +1057,7 @@ function App() {
         : Number(calculatorResults.regularRate))
     : 0;
 
-  const budgetTotalIncome = budgetIncomeJob + budgetIncomeSpouse + calculatedDisabilityPay + budgetMhaAmount;
+  const budgetTotalIncome = budgetIncomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
 
   const recommendedBudget = {
     housing: budgetTotalIncome * 0.25,
@@ -982,8 +1070,17 @@ function App() {
     savingDebt: budgetTotalIncome * 0.15
   };
 
-  const budgetAllocated = budgetHousing + budgetUtilities + budgetFood + budgetTransportation + budgetInsurance + budgetHealth + budgetGiving + budgetSavingDebt;
+  const budgetAllocated = budgetExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
   const budgetRemaining = budgetTotalIncome - budgetAllocated;
+
+  const budgetHousing = budgetExpenses.filter(e => e.category === 'housing').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetUtilities = budgetExpenses.filter(e => e.category === 'utilities').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetFood = budgetExpenses.filter(e => e.category === 'food').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetTransportation = budgetExpenses.filter(e => e.category === 'transportation').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetInsurance = budgetExpenses.filter(e => e.category === 'insurance').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetHealth = budgetExpenses.filter(e => e.category === 'health').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetGiving = budgetExpenses.filter(e => e.category === 'giving').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const budgetSavingDebt = budgetExpenses.filter(e => e.category === 'saving_debt').reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
   // Debt Snowball projection
   const getSnowballProjection = () => {
@@ -3767,16 +3864,20 @@ ___________________________________
                           }}
                           onClick={() => {
                             setActiveTestScenario('ramsey');
-                            setBudgetIncomeJob(3500);
-                            setBudgetIncomeSpouse(2000);
-                            setBudgetHousing(1200);
-                            setBudgetUtilities(300);
-                            setBudgetFood(600);
-                            setBudgetTransportation(400);
-                            setBudgetInsurance(350);
-                            setBudgetHealth(200);
-                            setBudgetGiving(250);
-                            setBudgetSavingDebt(500);
+                            setBudgetIncomes([
+                              { id: 1, type: 'job', name: 'W2/1099 Job Income', amount: 3500 },
+                              { id: 2, type: 'spouse', name: 'Spouse Income', amount: 2000 }
+                            ]);
+                            setBudgetExpenses([
+                              { id: 11, category: 'housing', name: 'Housing (Rent/Mortgage)', amount: 1200 },
+                              { id: 12, category: 'utilities', name: 'Utilities', amount: 300 },
+                              { id: 13, category: 'food', name: 'Food & Groceries', amount: 600 },
+                              { id: 14, category: 'transportation', name: 'Transportation', amount: 400 },
+                              { id: 15, category: 'insurance', name: 'Insurance', amount: 350 },
+                              { id: 16, category: 'health', name: 'Health & Medical', amount: 200 },
+                              { id: 17, category: 'giving', name: 'Giving & Tithing', amount: 250 },
+                              { id: 18, category: 'saving_debt', name: 'Savings & Debt', amount: 500 }
+                            ]);
                           }}
                         >
                           <span style={{ fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -4028,63 +4129,205 @@ ___________________________________
                     <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px' }}>
                       <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', marginBottom: '12px', borderBottom: '1px dashed var(--card-border)', paddingBottom: '6px' }}>Dave Ramsey Zero-Based Budget Planner</h4>
                       
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.75rem' }}>Veteran W2/1099 Job Income ($/mo)</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={budgetIncomeJob}
-                            onChange={(e) => setBudgetIncomeJob(Number(e.target.value))}
-                            min={0}
-                          />
+                      {/* Income Section */}
+                      <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-primary)' }}>1. Monthly Income Sources</span>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              style={{ height: '24px', fontSize: '0.62rem', padding: '0 6px', border: '1px solid var(--success-color)', color: 'var(--success-color)', background: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              onClick={autofillCalculatedIncome}
+                            >
+                              Autofill from Calculator
+                            </button>
+                            <select
+                              className="form-control"
+                              style={{ height: '24px', fontSize: '0.65rem', padding: '0 4px', width: '130px', cursor: 'pointer', backgroundColor: 'var(--glass-bg)', color: 'var(--text-primary)', border: '1px solid var(--card-border)', borderRadius: '4px' }}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) return;
+                                addIncomeTemplate(val);
+                                e.target.value = '';
+                              }}
+                            >
+                              <option value="">+ Add Income Type...</option>
+                              <option value="job">W2/1099 Job Income</option>
+                              <option value="spouse">Spouse Income</option>
+                              <option value="va_disability">VA Disability Pay</option>
+                              <option value="va_bah">VA BAH / MHA</option>
+                              <option value="va_pension">VA Pension</option>
+                              <option value="ssi">SSI (Supplemental)</option>
+                              <option value="ssdi">SSDI (Social Security Disability)</option>
+                              <option value="child_support">Child Support</option>
+                              <option value="other">Other Income</option>
+                            </select>
+                          </div>
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.75rem' }}>Spouse W2/1099 Income ($/mo)</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={budgetIncomeSpouse}
-                            onChange={(e) => setBudgetIncomeSpouse(Number(e.target.value))}
-                            min={0}
-                          />
-                        </div>
+                        {budgetIncomes.length === 0 ? (
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 12px 0', fontStyle: 'italic' }}>
+                            No income sources added yet. Click templates or Autofill to start.
+                          </p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                            {budgetIncomes.map((inc, index) => (
+                              <div key={inc.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px', backgroundColor: 'var(--hover-bg)', borderRadius: '6px' }}>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  style={{ flex: 1.5, height: '28px', padding: '4px', fontSize: '0.75rem' }}
+                                  value={inc.name}
+                                  onChange={(e) => {
+                                    const list = [...budgetIncomes];
+                                    list[index].name = e.target.value;
+                                    setBudgetIncomes(list);
+                                  }}
+                                />
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>$</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    style={{ height: '28px', padding: '4px', fontSize: '0.75rem' }}
+                                    value={inc.amount || ''}
+                                    onChange={(e) => {
+                                      const list = [...budgetIncomes];
+                                      list[index].amount = Number(e.target.value);
+                                      setBudgetIncomes(list);
+                                    }}
+                                    placeholder="Amount/mo"
+                                    min={0}
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  style={{ color: 'var(--danger-color)', cursor: 'pointer', padding: '4px', background: 'none', border: 'none' }}
+                                  onClick={() => setBudgetIncomes(budgetIncomes.filter(item => item.id !== inc.id))}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 12px', borderTop: '1px dashed var(--card-border)', paddingTop: '12px' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Housing ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetHousing} onChange={(e) => setBudgetHousing(Number(e.target.value))} min={0} />
+                      {/* Expenses Section */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderTop: '1px dashed var(--card-border)', paddingTop: '12px' }}>
+                          <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-primary)' }}>2. Allocated Expenses</span>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              style={{ height: '24px', fontSize: '0.62rem', padding: '0 6px', border: '1px solid var(--accent-color)', color: 'var(--accent-color)', background: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              onClick={() => {
+                                const totalMins = debtsList.reduce((sum, d) => sum + Number(d.minPayment || 0), 0);
+                                if (totalMins > 0) {
+                                  const current = [...budgetExpenses];
+                                  if (!current.some(e => e.name.includes("Snowball Min Payments"))) {
+                                    setBudgetExpenses([...budgetExpenses, { id: Date.now(), category: 'saving_debt', name: 'Debt Snowball Min Payments', amount: totalMins }]);
+                                  }
+                                }
+                              }}
+                            >
+                              Import Debt Minimums
+                            </button>
+                            <select
+                              className="form-control"
+                              style={{ height: '24px', fontSize: '0.65rem', padding: '0 4px', width: '130px', cursor: 'pointer', backgroundColor: 'var(--glass-bg)', color: 'var(--text-primary)', border: '1px solid var(--card-border)', borderRadius: '4px' }}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) return;
+                                addExpenseTemplate(val);
+                                e.target.value = '';
+                              }}
+                            >
+                              <option value="">+ Add Expense Type...</option>
+                              <option value="housing">Housing (Rent/Mortgage)</option>
+                              <option value="utilities">Utilities</option>
+                              <option value="food">Food & Groceries</option>
+                              <option value="transportation">Transportation</option>
+                              <option value="insurance">Insurance</option>
+                              <option value="health">Health & Medical</option>
+                              <option value="giving">Giving & Tithing</option>
+                              <option value="saving_debt">Savings & Debt</option>
+                              <option value="other">Other Expense</option>
+                            </select>
+                          </div>
                         </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Utilities ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetUtilities} onChange={(e) => setBudgetUtilities(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Food ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetFood} onChange={(e) => setBudgetFood(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Transportation ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetTransportation} onChange={(e) => setBudgetTransportation(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Insurance ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetInsurance} onChange={(e) => setBudgetInsurance(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Health ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetHealth} onChange={(e) => setBudgetHealth(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Giving ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetGiving} onChange={(e) => setBudgetGiving(Number(e.target.value))} min={0} />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
-                          <label style={{ fontSize: '0.68rem' }}>Savings/Debt ($)</label>
-                          <input type="number" className="form-control" style={{ padding: '4px' }} value={budgetSavingDebt} onChange={(e) => setBudgetSavingDebt(Number(e.target.value))} min={0} />
-                        </div>
+
+                        {budgetExpenses.length === 0 ? (
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontStyle: 'italic' }}>
+                            No expenses added yet. Select templates to build your zero-based budget.
+                          </p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {budgetExpenses.map((exp, index) => (
+                              <div key={exp.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px', backgroundColor: 'var(--hover-bg)', borderRadius: '6px' }}>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  style={{ flex: 1.2, height: '28px', padding: '4px', fontSize: '0.75rem' }}
+                                  value={exp.name}
+                                  onChange={(e) => {
+                                    const list = [...budgetExpenses];
+                                    list[index].name = e.target.value;
+                                    setBudgetExpenses(list);
+                                  }}
+                                />
+                                
+                                <select
+                                  className="form-control"
+                                  style={{ flex: 1, height: '28px', padding: '0 4px', fontSize: '0.7rem' }}
+                                  value={exp.category}
+                                  onChange={(e) => {
+                                    const list = [...budgetExpenses];
+                                    list[index].category = e.target.value;
+                                    setBudgetExpenses(list);
+                                  }}
+                                >
+                                  <option value="housing">Housing</option>
+                                  <option value="utilities">Utilities</option>
+                                  <option value="food">Food</option>
+                                  <option value="transportation">Transportation</option>
+                                  <option value="insurance">Insurance</option>
+                                  <option value="health">Health</option>
+                                  <option value="giving">Giving</option>
+                                  <option value="saving_debt">Saving & Debt</option>
+                                  <option value="other">Other/Personal</option>
+                                </select>
+
+                                <div style={{ flex: 0.8, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>$</span>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    style={{ height: '28px', padding: '4px', fontSize: '0.75rem' }}
+                                    value={exp.amount || ''}
+                                    onChange={(e) => {
+                                      const list = [...budgetExpenses];
+                                      list[index].amount = Number(e.target.value);
+                                      setBudgetExpenses(list);
+                                    }}
+                                    placeholder="Amount/mo"
+                                    min={0}
+                                  />
+                                </div>
+                                
+                                <button
+                                  type="button"
+                                  style={{ color: 'var(--danger-color)', cursor: 'pointer', padding: '4px', background: 'none', border: 'none' }}
+                                  onClick={() => setBudgetExpenses(budgetExpenses.filter(item => item.id !== exp.id))}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
