@@ -427,13 +427,84 @@ export const M28C_PARTS = [
     chapters: [
       {
         id: "m28c-part-1-ch-1",
-        title: "Chapter 1: Overview of Veteran Readiness and Employment Program",
+        title: "Chapter 1: Overview of VR&E Services",
         content: `
-          <p><strong>M28C.I.A.1.01 Introduction and Authority</strong></p>
-          <p>Under the provisions of 38 U.S.C. Chapter 31, the Department of Veterans Affairs (VA) administers the Veteran Readiness and Employment (VR&E) program. The primary mission of VR&E is to assist veterans and service members with service-connected disabilities to prepare for, obtain, and maintain suitable employment. For veterans whose disabilities are too severe to pursue immediate employment, the program provides comprehensive independent living services to enhance their ability to live as independently as possible within their families and communities.</p>
+          <h4 class="text-lg font-bold text-cyan-400 mb-2">1.01 Introduction and Authority</h4>
+          <p class="mb-4"><strong>M28C.I.A.1.01.a.</strong> Under the provisions of 38 U.S.C. Chapter 31, the Department of Veterans Affairs (VA) administers the Veteran Readiness and Employment (VR&E) program. The primary mission of VR&E is to assist veterans and service members with service-connected disabilities to prepare for, obtain, and maintain suitable employment. For veterans whose disabilities are too severe to pursue immediate employment, the program provides comprehensive independent living services to enhance their ability to live as independently as possible within their families and communities.</p>
+          <p class="mb-4"><strong>M28C.I.A.1.01.b.</strong> Authority for this program is derived from Title 38 of the United States Code (U.S.C.) and Title 38 of the Code of Federal Regulations (CFR), specifically Part 21. While the M28C manual provides operational policy and guidelines to ensure consistent decision-making, it does not supersede statutory or regulatory mandates. All determinations must ultimately align with 38 U.S.C. Chapter 31 and 38 CFR Part 21.</p>
           
-          <p><strong>M28C.I.A.1.02 Core Service Delivery</strong></p>
-          <p>VR&E operations are structured to deliver rapid, effective, and veteran-centric support. Vocational Rehabilitation Counselors (VRCs) lead case evaluation, planning, and service delivery, working collaboratively with the veteran. VRCs are supported by Employment Coordinators (ECs), who assist in direct job search, resume development, and placement services.</p>
+          <div class="callout-panel mb-6">
+            <h4>IMPORTANT NOTE</h4>
+            <p>The M28C manual serves as the primary guidance for Vocational Rehabilitation Counselors (VRCs). While it interprets laws and regulations, it does not carry the weight of law. In cases of conflict, the U.S. Code and Code of Federal Regulations take precedence.</p>
+          </div>
+
+          <h4 class="text-lg font-bold text-cyan-400 mb-2">1.02 Eligibility and Entitlement</h4>
+          <p class="mb-4"><strong>M28C.I.A.1.02.a. Eligibility Requirements:</strong> A veteran must have received, or will receive, a discharge that is other than dishonorable and must have a service-connected disability rating of at least 10 percent from the VA. Service members are eligible to apply if they have a memorandum rating of 20 percent or more, or if they are participating in the Integrated Disability Evaluation System (IDES) process.</p>
+          <p class="mb-4"><strong>M28C.I.A.1.02.b. Entitlement Period:</strong> Active duty service members or veterans who apply for VR&E services must undergo an initial evaluation to determine if they have an employment handicap. An employment handicap is defined as an impairment of the veteran's ability to prepare for, obtain, or retain employment consistent with his or her abilities, aptitudes, and interests, resulting from a service-connected disability.</p>
+          <p class="mb-4"><strong>M28C.I.A.1.02.c. Entitlement Determination:</strong> If a veteran is found to have an employment handicap, the VRC will determine if he or she has a serious employment handicap (SEH). A serious employment handicap is a significant impairment of a veteran's ability to prepare for, obtain, or retain employment, requiring comprehensive rehabilitation services. The distinction between an employment handicap and a serious employment handicap impacts the period of entitlement and the duration of services provided.</p>
+
+          <div class="diagram-container mb-4">
+            <div class="diagram-step">
+              <h5>1. Application</h5>
+              <p>Submit VA Form 28-1900</p>
+            </div>
+            <div class="diagram-arrow"></div>
+            <div class="diagram-step">
+              <h5>2. Evaluation</h5>
+              <p>Counselor Assessment</p>
+            </div>
+            <div class="diagram-arrow"></div>
+            <div class="diagram-step">
+              <h5>3. Entitlement</h5>
+              <p>Vocational Decision</p>
+            </div>
+          </div>
+          <p class="diagram-caption mb-6 text-center text-slate-400 text-xs italic">Figure 1.1: VR&E Phase 1 Evaluation and Entitlement Flow.</p>
+
+          <h4 class="text-lg font-bold text-cyan-400 mb-2">1.03 Five Tracks to Employment</h4>
+          <p class="mb-4"><strong>M28C.I.A.1.03.a.</strong> The VR&E program is structured around five specialized rehabilitation tracks designed to address the unique needs of each participant. The VRC collaborates with the veteran to determine the most appropriate track to achieve rehabilitation. The five tracks are:</p>
+          <div class="track-list-container mb-6">
+            <div class="track-item-card">
+              <div class="track-accent-bar"></div>
+              <div class="track-content">
+                <h4>1. Reemployment</h4>
+                <p>For veterans returning to their pre-service employers. Services include job accommodations, adaptive equipment, and reemployment rights guidance.</p>
+              </div>
+            </div>
+            <div class="track-item-card">
+              <div class="track-accent-bar"></div>
+              <div class="track-content">
+                <h4>2. Rapid Access to Employment</h4>
+                <p>For veterans with the skills to enter the workforce immediately. Services focus on job placement, resume development, and interview prep.</p>
+              </div>
+            </div>
+            <div class="track-item-card">
+              <div class="track-accent-bar"></div>
+              <div class="track-content">
+                <h4>3. Self-Employment</h4>
+                <p>For veterans interested in starting a business. Services include business plan assistance, financial training, and start-up supply support.</p>
+              </div>
+            </div>
+            <div class="track-item-card">
+              <div class="track-accent-bar"></div>
+              <div class="track-content">
+                <h4>4. Employment Through Long-Term Services</h4>
+                <p>For veterans requiring training or education to obtain employment. Covers tuition, books, fees, and a monthly subsistence allowance.</p>
+              </div>
+            </div>
+            <div class="track-item-card">
+              <div class="track-accent-bar"></div>
+              <div class="track-content">
+                <h4>5. Independent Living</h4>
+                <p>For veterans where employment is not currently feasible. Services focus on increasing daily living independence (e.g., home modifications).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout-panel mb-4">
+            <h4>TRACK ASSIGNMENT CONSIDERATION</h4>
+            <p>The selection of a rehabilitation track is a collaborative process. The VRC and the veteran work together to assess feasibility, vocational interests, and disability limitations to select the path most likely to lead to successful rehabilitation.</p>
+          </div>
         `
       },
       {
