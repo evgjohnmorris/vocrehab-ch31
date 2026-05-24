@@ -96,8 +96,8 @@ function App() {
     const parsed = saved ? JSON.parse(saved) : DEFAULT_RATES;
     return parsed.ch31_computer_package_value || 2000.00;
   });
-  const [calcOjtTrainingWage, setCalcOjtTrainingWage] = useState(20);
-  const [calcOjtJourneymanWage, setCalcOjtJourneymanWage] = useState(35);
+  const [calcOjtTrainingWage, setCalcOjtTrainingWage] = useState(0);
+  const [calcOjtJourneymanWage, setCalcOjtJourneymanWage] = useState(0);
   const [calcCalculatorTab, setCalcCalculatorTab] = useState('monthly'); // 'monthly' | 'tuition' | 'ojt'
   const [calcSchoolSearchQuery, setCalcSchoolSearchQuery] = useState('');
   const [calcSelectedSchool, setCalcSelectedSchool] = useState(null);
@@ -110,10 +110,7 @@ function App() {
   const [dirQuery, setDirQuery] = useState('');
 
   // --- DISABILITY & SMC HUB STATES ---
-  const [disabilityRatings, setDisabilityRatings] = useState([
-    { id: 1, value: 50, bilateral: false },
-    { id: 2, value: 30, bilateral: false }
-  ]);
+  const [disabilityRatings, setDisabilityRatings] = useState([]);
   const [depSpouse, setDepSpouse] = useState(false);
   const [depSpouseAa, setDepSpouseAa] = useState(false);
   const [depChildrenUnder18, setDepChildrenUnder18] = useState(0);
@@ -125,51 +122,47 @@ function App() {
 
   // Pension Sub-states
   const [showPensionCalc, setShowPensionCalc] = useState(false);
-  const [pensionIncome, setPensionIncome] = useState(12000);
-  const [pensionExpenses, setPensionExpenses] = useState(3000);
-  const [pensionNetWorth, setPensionNetWorth] = useState(45000);
+  const [pensionIncome, setPensionIncome] = useState(0);
+  const [pensionExpenses, setPensionExpenses] = useState(0);
+  const [pensionNetWorth, setPensionNetWorth] = useState(0);
   const [pensionCategory, setPensionCategory] = useState('basic');
 
   // Chapter 61 Retirement sub-states
   const [showRetirementCalc, setShowRetirementCalc] = useState(false);
-  const [retBasePay, setRetBasePay] = useState(5500);
-  const [retYearsService, setRetYearsService] = useState(8);
-  const [retDodRating, setRetDodRating] = useState(40);
+  const [retBasePay, setRetBasePay] = useState(0);
+  const [retYearsService, setRetYearsService] = useState(0);
+  const [retDodRating, setRetDodRating] = useState(0);
   const [retSystem, setRetSystem] = useState('high3');
   const [retMedical, setRetMedical] = useState(true);
   const [retCombat, setRetCombat] = useState(false);
-  const [retCombatRating, setRetCombatRating] = useState(30);
+  const [retCombatRating, setRetCombatRating] = useState(0);
 
   // --- FINANCIAL PLANNER STATES ---
   const [pellDependency, setPellDependency] = useState('independent');
   const [pellFamilySize, setPellFamilySize] = useState(1);
-  const [pellAgi, setPellAgi] = useState(25000);
+  const [pellAgi, setPellAgi] = useState(0);
 
-  const [loanDebt, setLoanDebt] = useState(35000);
-  const [loanInterest, setLoanInterest] = useState(6.5);
-  const [loanAgi, setLoanAgi] = useState(50000);
+  const [loanDebt, setLoanDebt] = useState(0);
+  const [loanInterest, setLoanInterest] = useState(0);
+  const [loanAgi, setLoanAgi] = useState(0);
   const [loanFamilySize, setLoanFamilySize] = useState(1);
   const [loanUndergrad, setLoanUndergrad] = useState(true);
 
   // Budget
-  const [budgetIncomeJob, setBudgetIncomeJob] = useState(3500);
-  const [budgetIncomeSpouse, setBudgetIncomeSpouse] = useState(2000);
-  const [budgetHousing, setBudgetHousing] = useState(1200);
-  const [budgetUtilities, setBudgetUtilities] = useState(300);
-  const [budgetFood, setBudgetFood] = useState(600);
-  const [budgetTransportation, setBudgetTransportation] = useState(400);
-  const [budgetInsurance, setBudgetInsurance] = useState(350);
-  const [budgetHealth, setBudgetHealth] = useState(200);
-  const [budgetGiving, setBudgetGiving] = useState(250);
-  const [budgetSavingDebt, setBudgetSavingDebt] = useState(500);
+  const [budgetIncomeJob, setBudgetIncomeJob] = useState(0);
+  const [budgetIncomeSpouse, setBudgetIncomeSpouse] = useState(0);
+  const [budgetHousing, setBudgetHousing] = useState(0);
+  const [budgetUtilities, setBudgetUtilities] = useState(0);
+  const [budgetFood, setBudgetFood] = useState(0);
+  const [budgetTransportation, setBudgetTransportation] = useState(0);
+  const [budgetInsurance, setBudgetInsurance] = useState(0);
+  const [budgetHealth, setBudgetHealth] = useState(0);
+  const [budgetGiving, setBudgetGiving] = useState(0);
+  const [budgetSavingDebt, setBudgetSavingDebt] = useState(0);
 
   // Debt Snowball
-  const [debtsList, setDebtsList] = useState([
-    { id: 1, name: 'Credit Card A', balance: 3500, minPayment: 110 },
-    { id: 2, name: 'Auto Loan', balance: 14000, minPayment: 320 },
-    { id: 3, name: 'Medical Debt', balance: 1200, minPayment: 50 }
-  ]);
-  const [snowballExtra, setSnowballExtra] = useState(200);
+  const [debtsList, setDebtsList] = useState([]);
+  const [snowballExtra, setSnowballExtra] = useState(0);
   const [showFinancialTestLab, setShowFinancialTestLab] = useState(false);
   const [activeTestScenario, setActiveTestScenario] = useState(null);
 
