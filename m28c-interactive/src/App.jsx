@@ -1336,7 +1336,7 @@ ___________________________________
               onClick={() => setActiveView('planning')}
             >
               <Compass size={18} />
-              <span>Career Strategy</span>
+              <span>Career Plan & Strategy</span>
             </div>
             <div 
               className={`nav-item ${activeView === 'directory' ? 'active' : ''}`}
@@ -4632,11 +4632,11 @@ ___________________________________
               </div>
             )}
 
-            {/* CAREER STRATEGY VIEW */}
+            {/* CAREER PLAN & STRATEGY VIEW */}
             {activeView === 'planning' && (
               <div className="doc-card">
-                <span className="doc-tag">VA Career Strategy</span>
-                <h1 className="doc-title">Career Strategy & Justification Wizard</h1>
+                <span className="doc-tag">VA Career Plan & Strategy</span>
+                <h1 className="doc-title">Career Plan, Strategy & Justification Wizard</h1>
                 <p className="doc-subtitle">Generate legally structured VRC justification letters, track VET TEC technological training, and check adaptive sports allowances.</p>
                 <div className="doc-divider"></div>
 
