@@ -1,0 +1,13 @@
+{
+  "version": "2026.1",
+  "lastUpdated": "2026-05-23",
+  "ch31_institutional_full": [861.10, 1067.81, 1258.13, 91.85],
+  "ch31_institutional_threeQuarters": [646.71, 801.49, 943.40, 68.77],
+  "ch31_institutional_half": [432.31, 534.86, 629.57, 45.92],
+  "ch31_ojt": [710.67, 859.43, 990.47, 64.41],
+  "p911_online_rate": 1169.00,
+  "p911_foreign_rate": 2338.00,
+  "p911_private_tuition_cap": 29920.95,
+  "p911_books_cap": 1000.00,
+  "ch31_computer_package_value": 2000.00
+}
