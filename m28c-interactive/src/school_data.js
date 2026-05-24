@@ -1208,7 +1208,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Sedentary",
     sic: "7371",
     naics: "541511",
-    duties: "Develop, create, and modify general computer applications software or utility programs. Analyze user needs and develop software solutions. Design software or customize software for client use with the aim of optimizing operational efficiency."
+    duties: "Develop, create, and modify general computer applications software or utility programs. Analyze user needs and develop software solutions. Design software or customize software for client use with the aim of optimizing operational efficiency.",
+    requiresSitting: true,
+    requiresRepetitiveMotion: true,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: false
   },
   {
     title: "Information Security Analyst",
@@ -1222,7 +1227,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Sedentary",
     sic: "7379",
     naics: "541519",
-    duties: "Plan, implement, upgrade, or monitor security measures for the protection of computer networks and information. Assess system vulnerabilities for security risks and propose and implement risk mitigation strategies."
+    duties: "Plan, implement, upgrade, or monitor security measures for the protection of computer networks and information. Assess system vulnerabilities for security risks and propose and implement risk mitigation strategies.",
+    requiresSitting: true,
+    requiresRepetitiveMotion: true,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: false
   },
   {
     title: "Logistics Manager",
@@ -1236,7 +1246,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Light",
     sic: "4731",
     naics: "541614",
-    duties: "Plan, direct, or coordinate purchasing, warehousing, distribution, forecasting, customer service, or planning services. Manage logistics personnel and systems; direct daily operations."
+    duties: "Plan, direct, or coordinate purchasing, warehousing, distribution, forecasting, customer service, or planning services. Manage logistics personnel and systems; direct daily operations.",
+    requiresSitting: false,
+    requiresRepetitiveMotion: false,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: false
   },
   {
     title: "CNC Machinist",
@@ -1250,7 +1265,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Medium",
     sic: "3599",
     naics: "332710",
-    duties: "Set up and operate computer-controlled machines or robots to perform one or more machine functions on metal or plastic workpieces. Inspect finished parts to ensure specifications are met."
+    duties: "Set up and operate computer-controlled machines or robots to perform one or more machine functions on metal or plastic workpieces. Inspect finished parts to ensure specifications are met.",
+    requiresSitting: false,
+    requiresRepetitiveMotion: false,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: true
   },
   {
     title: "Solar Photovoltaic Installer",
@@ -1264,7 +1284,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Heavy",
     sic: "1799",
     naics: "238210",
-    duties: "Assemble, install, or maintain solar photovoltaic (PV) systems on roofs or other structures in compliance with site assessment and schematics. May include measuring, cutting, assembling, and bolting structural framing and solar modules."
+    duties: "Assemble, install, or maintain solar photovoltaic (PV) systems on roofs or other structures in compliance with site assessment and schematics. May include measuring, cutting, assembling, and bolting structural framing and solar modules.",
+    requiresSitting: false,
+    requiresRepetitiveMotion: false,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: true
   },
   {
     title: "Commercial Pilot",
@@ -1278,7 +1303,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Medium",
     sic: "4512",
     naics: "481211",
-    duties: "Pilot and navigate the flight of fixed-wing aircraft on nonscheduled air carrier routes, or nonscheduled flights. May transport passengers and cargo, or perform crop dusting, aerial photography, or charter flights."
+    duties: "Pilot and navigate the flight of fixed-wing aircraft on nonscheduled air carrier routes, or nonscheduled flights. May transport passengers and cargo, or perform crop dusting, aerial photography, or charter flights.",
+    requiresSitting: true,
+    requiresRepetitiveMotion: false,
+    requiresVisionHearing: true,
+    requiresHighStressConfinement: true,
+    requiresRespiratorFumes: false
   },
   {
     title: "Business Operations Specialist",
@@ -1292,7 +1322,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Sedentary",
     sic: "8742",
     naics: "541611",
-    duties: "Analyze and coordinate the schedule, timeline, procurement, staffing, and budget of a product or service on a project basis. Lead cross-functional teams to deliver projects on time and within budget."
+    duties: "Analyze and coordinate the schedule, timeline, procurement, staffing, and budget of a product or service on a project basis. Lead cross-functional teams to deliver projects on time and within budget.",
+    requiresSitting: true,
+    requiresRepetitiveMotion: false,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: false
   },
   {
     title: "Accountant",
@@ -1306,7 +1341,12 @@ export const CAREERS_DATABASE = [
     physicalDemand: "Sedentary",
     sic: "8721",
     naics: "541211",
-    duties: "Examine, analyze, and interpret accounting records to prepare financial statements, give advice, or audit and evaluate statements prepared by others. Ensure compliance with financial laws and regulations."
+    duties: "Examine, analyze, and interpret accounting records to prepare financial statements, give advice, or audit and evaluate statements prepared by others. Ensure compliance with financial laws and regulations.",
+    requiresSitting: true,
+    requiresRepetitiveMotion: true,
+    requiresVisionHearing: false,
+    requiresHighStressConfinement: false,
+    requiresRespiratorFumes: false
   }
 ];
 

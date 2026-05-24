@@ -315,6 +315,11 @@ function App() {
   const [limitLifting, setLimitLifting] = useState(false);
   const [limitBending, setLimitBending] = useState(false);
   const [limitEnvironment, setLimitEnvironment] = useState(false);
+  const [limitSitting, setLimitSitting] = useState(false);
+  const [limitRepetitive, setLimitRepetitive] = useState(false);
+  const [limitSensory, setLimitSensory] = useState(false);
+  const [limitStress, setLimitStress] = useState(false);
+  const [limitRespiratory, setLimitRespiratory] = useState(false);
   const [riasecR, setRiasecR] = useState(3);
   const [riasecI, setRiasecI] = useState(3);
   const [riasecA, setRiasecA] = useState(3);
@@ -1190,6 +1195,31 @@ function App() {
         compatible = false;
         reasons.push(`Career involves outdoor exposure, non-climate-controlled environments, or specific pressure/altitude factors.`);
       }
+    }
+
+    if (limitSitting && career.requiresSitting) {
+      compatible = false;
+      reasons.push(`Career requires prolonged sitting ("Sedentary" or flight-deck posture), which conflicts with sitting tolerance limits.`);
+    }
+
+    if (limitRepetitive && career.requiresRepetitiveMotion) {
+      compatible = false;
+      reasons.push(`Role involves extensive keyboarding or repetitive wrist-finger motions, which conflicts with upper extremity limitations.`);
+    }
+
+    if (limitSensory && career.requiresVisionHearing) {
+      compatible = false;
+      reasons.push(`Career has strict FAA/DOT sensory, vision (20/20 corrected), or hearing thresholds that conflict with sensory limitations.`);
+    }
+
+    if (limitStress && career.requiresHighStressConfinement) {
+      compatible = false;
+      reasons.push(`High-stress operations, cockpit confinement, or rapid decision-making requirements conflict with stress tolerance thresholds.`);
+    }
+
+    if (limitRespiratory && career.requiresRespiratorFumes) {
+      compatible = false;
+      reasons.push(`Role requires exposure to machine coolant mist, dust, or potential pulmonary irritants, which conflicts with respiratory limits.`);
     }
 
     return { compatible, reasons };
@@ -4664,22 +4694,42 @@ ___________________________________
                       {/* Disability / Physical Constraints Checkboxes */}
                       <div style={{ margin: '14px 0', padding: '12px', backgroundColor: 'var(--hover-bg)', borderRadius: '6px', border: '1px solid var(--card-border)' }}>
                         <h5 style={{ fontSize: '0.78rem', margin: '0 0 8px 0', color: 'var(--text-primary)', fontWeight: '600' }}>Indicated Disability & Functional Limitations</h5>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)', margin: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 12px' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
                             <input type="checkbox" checked={limitStanding} onChange={(e) => setLimitStanding(e.target.checked)} />
-                            <span>Standing constraint</span>
+                            <span>Standing Limit</span>
                           </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)', margin: 0 }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
                             <input type="checkbox" checked={limitLifting} onChange={(e) => setLimitLifting(e.target.checked)} />
-                            <span>Lifting constraint (&gt;15 lbs)</span>
+                            <span>Lifting Limit (&gt;15 lbs)</span>
                           </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)', margin: 0 }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
                             <input type="checkbox" checked={limitBending} onChange={(e) => setLimitBending(e.target.checked)} />
-                            <span>Bending/Kneeling constraint</span>
+                            <span>Bending/Kneeling</span>
                           </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)', margin: 0 }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
                             <input type="checkbox" checked={limitEnvironment} onChange={(e) => setLimitEnvironment(e.target.checked)} />
-                            <span>Extreme climate/Altitude</span>
+                            <span>Climate/Altitude</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
+                            <input type="checkbox" checked={limitSitting} onChange={(e) => setLimitSitting(e.target.checked)} />
+                            <span>Prolonged Sitting</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
+                            <input type="checkbox" checked={limitRepetitive} onChange={(e) => setLimitRepetitive(e.target.checked)} />
+                            <span>Repetitive Motion</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
+                            <input type="checkbox" checked={limitSensory} onChange={(e) => setLimitSensory(e.target.checked)} />
+                            <span>Sensory (Vision/Hearing)</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
+                            <input type="checkbox" checked={limitStress} onChange={(e) => setLimitStress(e.target.checked)} />
+                            <span>High Stress/Confinement</span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.72rem', color: 'var(--text-primary)', margin: 0 }}>
+                            <input type="checkbox" checked={limitRespiratory} onChange={(e) => setLimitRespiratory(e.target.checked)} />
+                            <span>Respiratory/Dust Limit</span>
                           </label>
                         </div>
                       </div>
@@ -4722,6 +4772,99 @@ ___________________________________
                           </div>
                         );
                       })()}
+
+                      {/* LMI & Compatibility Test Lab */}
+                      <div style={{ padding: '12px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <h5 style={{ fontSize: '0.76rem', margin: 0, color: 'var(--text-primary)', fontWeight: '700' }}>Compatibility Test Lab & Auditor</h5>
+                          <span style={{ fontSize: '0.62rem', padding: '1px 5px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)', borderRadius: '4px', fontWeight: 'bold' }}>Active</span>
+                        </div>
+                        <p style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', lineHeight: '1.3' }}>
+                          Load a pre-configured veteran profile to instantly populate disability limitations and audit compatibility calculations.
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            onClick={() => {
+                              setLimitStanding(true);
+                              setLimitLifting(true);
+                              setLimitBending(true);
+                              setLimitEnvironment(false);
+                              setLimitSitting(false);
+                              setLimitRepetitive(false);
+                              setLimitSensory(false);
+                              setLimitStress(false);
+                              setLimitRespiratory(false);
+                              setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Software Developer'));
+                            }}
+                          >
+                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile A: Orthopedic Limits</strong>
+                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Standing & lifting limits. Software Dev target (Compatible).</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            onClick={() => {
+                              setLimitStanding(true);
+                              setLimitLifting(false);
+                              setLimitBending(true);
+                              setLimitEnvironment(true);
+                              setLimitSitting(false);
+                              setLimitRepetitive(false);
+                              setLimitSensory(false);
+                              setLimitStress(false);
+                              setLimitRespiratory(true);
+                              setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Solar Photovoltaic Installer'));
+                            }}
+                          >
+                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile B: Outdoors & Dust</strong>
+                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Climate & respiratory limits. Solar Installer (Conflict).</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            onClick={() => {
+                              setLimitStanding(false);
+                              setLimitLifting(false);
+                              setLimitBending(false);
+                              setLimitEnvironment(false);
+                              setLimitSitting(true);
+                              setLimitRepetitive(true);
+                              setLimitSensory(false);
+                              setLimitStress(false);
+                              setLimitRespiratory(false);
+                              setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Accountant'));
+                            }}
+                          >
+                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile C: Hand Repetition</strong>
+                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sitting & keyboard limits. Accountant (Conflict).</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{ padding: '6px', textAlign: 'left', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', color: 'var(--text-primary)', cursor: 'pointer', borderRadius: '4px' }}
+                            onClick={() => {
+                              setLimitStanding(false);
+                              setLimitLifting(false);
+                              setLimitBending(false);
+                              setLimitEnvironment(true);
+                              setLimitSitting(true);
+                              setLimitRepetitive(false);
+                              setLimitSensory(true);
+                              setLimitStress(true);
+                              setLimitRespiratory(false);
+                              setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Commercial Pilot'));
+                            }}
+                          >
+                            <strong style={{ fontSize: '0.68rem', display: 'block' }}>Profile D: Sensory & Flight</strong>
+                            <span style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sensory, stress & climate limits. Pilot (Conflict).</span>
+                          </button>
+                        </div>
+                      </div>
 
                       {/* Official Classification Info Grid */}
                       {(() => {
