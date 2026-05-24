@@ -166,6 +166,54 @@ function App() {
   const [showFinancialTestLab, setShowFinancialTestLab] = useState(false);
   const [activeTestScenario, setActiveTestScenario] = useState(null);
 
+  const addDebtTemplate = (type) => {
+    const typeCounts = {};
+    debtsList.forEach(d => {
+      const baseType = d.type || 'custom';
+      typeCounts[baseType] = (typeCounts[baseType] || 0) + 1;
+    });
+
+    const count = typeCounts[type] || 0;
+    let name = '';
+
+    switch (type) {
+      case 'credit_card':
+        const cardLabels = ['A', 'B', 'C', 'D', 'E'];
+        name = `Credit Card ${cardLabels[count] || (count + 1)}`;
+        break;
+      case 'personal_loan':
+        const loanLabels = ['1', '2', '3', '4', '5'];
+        name = `Personal Loan ${loanLabels[count] || (count + 1)}`;
+        break;
+      case 'line_of_credit':
+        name = `Line of Credit${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'heloc':
+        name = `HELOC${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'mortgage':
+        name = `Mortgage${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'auto_loan':
+        name = `Auto Loan${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'business_loan':
+        name = `Business Loan${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'family_loan':
+        name = `Family Loan${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      case 'private_student_loan':
+        name = `Private Student Loan${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+      default:
+        name = `Custom Debt${count > 0 ? ' ' + (count + 1) : ''}`;
+        break;
+    }
+
+    setDebtsList([...debtsList, { id: Date.now() + Math.random(), type, name, balance: 0, minPayment: 0 }]);
+  };
+
   // --- CAREER STRATEGY STATES ---
   const [justCurrentGoal, setJustCurrentGoal] = useState('Operations Specialist');
   const [justProposedGoal, setJustProposedGoal] = useState('Software Developer');
@@ -4044,14 +4092,28 @@ ___________________________________
                     <div style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <h4 style={{ fontSize: '0.88rem', color: 'var(--accent-color)', margin: 0 }}>Debt Snowball Planner</h4>
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          style={{ height: '26px', fontSize: '0.7rem', padding: '0 8px' }}
-                          onClick={() => setDebtsList([...debtsList, { id: Date.now(), name: 'New Debt', balance: 1000, minPayment: 50 }])}
+                        <select
+                          className="form-control"
+                          style={{ height: '26px', fontSize: '0.7rem', padding: '0 4px', width: '160px', cursor: 'pointer', backgroundColor: 'var(--glass-bg)', color: 'var(--text-primary)', border: '1px solid var(--card-border)', borderRadius: '4px' }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            addDebtTemplate(val);
+                            e.target.value = ''; // Reset selection
+                          }}
                         >
-                          + Add Debt
-                        </button>
+                          <option value="">+ Add Debt Type...</option>
+                          <option value="credit_card">Credit Card</option>
+                          <option value="personal_loan">Personal Loan</option>
+                          <option value="line_of_credit">Line of Credit</option>
+                          <option value="heloc">HELOC</option>
+                          <option value="mortgage">Mortgage</option>
+                          <option value="auto_loan">Auto Loan</option>
+                          <option value="business_loan">Business Loan</option>
+                          <option value="family_loan">Family Loan</option>
+                          <option value="private_student_loan">Private Student Loan</option>
+                          <option value="custom">Custom Debt</option>
+                        </select>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
