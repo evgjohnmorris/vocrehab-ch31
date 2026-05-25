@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 export default function CustomCursor({ reduceMotion = false }) {
@@ -24,7 +24,6 @@ export default function CustomCursor({ reduceMotion = false }) {
     // Check if device is mobile/touch-screen
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice || reduceMotion) {
-      setVisible(false);
       return;
     }
 
@@ -49,7 +48,7 @@ export default function CustomCursor({ reduceMotion = false }) {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [visible, cursorState.type, reduceMotion]);
+  }, [visible, cursorState.type, reduceMotion, mouseX, mouseY]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -120,7 +119,7 @@ export default function CustomCursor({ reduceMotion = false }) {
       document.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseout', handleMouseOut);
     };
-  }, [reduceMotion]);
+  }, [reduceMotion, mouseX, mouseY]);
 
   if (!visible || reduceMotion) return null;
 

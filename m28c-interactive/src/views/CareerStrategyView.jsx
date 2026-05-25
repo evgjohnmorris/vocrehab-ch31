@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Scale, Compass, FileText, Search, CheckCircle, AlertTriangle, Info 
 } from 'lucide-react';
@@ -40,13 +40,15 @@ function CareerStrategyView({ reduceMotion }) {
   const [industrySearchQuery, setIndustrySearchQuery] = useState('');
   const [showIndustryFinder, setShowIndustryFinder] = useState(false);
 
-  // Sync selected career to justProposedGoal
-  useEffect(() => {
+  // Sync selected career to justProposedGoal during render
+  const [prevCareerIndex, setPrevCareerIndex] = useState(selectedCareerIndex);
+  if (selectedCareerIndex !== prevCareerIndex) {
+    setPrevCareerIndex(selectedCareerIndex);
     const career = CAREERS_DATABASE[selectedCareerIndex];
     if (career) {
       setJustProposedGoal(career.title);
     }
-  }, [selectedCareerIndex]);
+  }
 
   const getCareerCompatibility = (career) => {
     if (!career) return { compatible: true, reasons: [] };

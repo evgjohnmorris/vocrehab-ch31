@@ -5,9 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run legal:check && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "authority:ingest:usc": "node scripts/authority/ingest-usc-ch31.mjs",
+    "authority:ingest:cfr": "node scripts/authority/ingest-cfr-part21-subpart-a.mjs",
+    "authority:ingest:m28c": "node scripts/authority/ingest-m28c-knowva.mjs",
+    "authority:ingest:manifest": "node scripts/authority/generate-manifest.mjs",
+    "authority:ingest:all": "npm run authority:ingest:usc && npm run authority:ingest:cfr && npm run authority:ingest:m28c && npm run authority:ingest:manifest",
+    "legal:check": "npm run legal:schema && npm run legal:coverage && npm run legal:citations && npm run legal:modals",
+    "legal:schema": "node scripts/legal/validate-authority-schema.mjs",
+    "legal:coverage": "node scripts/legal/check-topic-coverage.mjs",
+    "legal:citations": "node scripts/legal/audit-citations.mjs",
+    "legal:modals": "node scripts/legal/audit-modal-verbs.mjs",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:deps": "npm outdated",
+    "test:accessibility": "playwright test tests/accessibility.spec.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
@@ -18,10 +31,13 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwindcss": "^4.3.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.60.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -29,6 +45,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "playwright": "^1.60.0",
     "vite": "^8.0.12"
   }
 }

@@ -1,0 +1,29 @@
+{
+  "id": "m28c-i-a-2",
+  "canonicalCitation": "M28C.I.A.2",
+  "title": "Partnerships and Memoranda of Agreement or Understanding",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150222/M28CIA2-Partnerships-and-Memoranda-of-Agreement-or-Understanding",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2025-01-30",
+  "status": "current",
+  "fullText": "### 2.01 Partnerships and Agreements Overview\nThis chapter provides guidelines for establishing and managing partnerships, Memoranda of Understanding (MOUs), and Memoranda of Agreement (MOAs) between the VR&E service and other federal, state, and private entities to enhance claimant services.\n\n### 2.02 Signatory Authority and Legal Review\nAll formal agreements must be signed by authorized individuals who possess the delegation of authority to commit the Department of Veterans Affairs. Proposed agreements must be reviewed by the Office of General Counsel (OGC) and local leadership to ensure compatibility with VA regulations and policy.\n\n### 2.03 Anti-Deficiency Act Restrictions\nThe manual warns that employees cannot enter into agreements containing indemnification clauses without specific statutory authorization. Doing so can violate the Anti-Deficiency Act, rendering the agreement legally void and exposing officials to administrative penalties.\n\n### 2.04 Key Partnership Examples\n* **Veterans Health Administration (VHA)**: Collaborations to ensure priority medical treatment, physical therapy, and mental health services.\n* **Department of Labor (DOL)**: Cooperation on veterans' employment training services and transition assistance.",
+  "plainEnglish": "Guidelines explaining how the VA forms partnerships and signed agreements with other agencies (like DOL or VHA) to help you get services.",
+  "veteranUse": "Understand that local counselor agreements with outside schools or agencies must be validated and cannot conflict with federal statutes or cause Anti-Deficiency violations.",
+  "topics": [
+    "partnerships",
+    "agreements",
+    "mou",
+    "moa"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3115",
+    "38-cfr-21-390"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "fea2820cb1b09f04837e673b94a36969733a90a969cebcb158c8cace7aed5679"
+}

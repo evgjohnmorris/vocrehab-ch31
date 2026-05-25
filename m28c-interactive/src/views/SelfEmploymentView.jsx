@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Briefcase, ShieldCheck, FileText, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { generateSelfEmploymentLetter } from '../utils/letterGenerators';
@@ -12,39 +12,25 @@ function SelfEmploymentView({ reduceMotion }) {
     'Provide specialized cybersecurity audits and network setup services for local small businesses and government sub-contractors.'
   );
   const [selfFundingCategory, setSelfFundingCategory] = useState('Category I');
-  const [selfGeneratedLetter, setSelfGeneratedLetter] = useState('');
   
   const [selfChecklist1, setSelfChecklist1] = useState(false);
   const [selfChecklist2, setSelfChecklist2] = useState(false);
   const [selfChecklist3, setSelfChecklist3] = useState(false);
   const [selfChecklist4, setSelfChecklist4] = useState(false);
 
-  useEffect(() => {
-    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const letter = generateSelfEmploymentLetter({
-      dateStr,
-      selfChecklist1,
-      selfChecklist2,
-      selfChecklist3,
-      selfChecklist4,
-      selfBizName,
-      selfBizType,
-      selfBizIndustry,
-      selfBizConcept,
-      selfFundingCategory
-    });
-    setSelfGeneratedLetter(letter);
-  }, [
+  const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const selfGeneratedLetter = generateSelfEmploymentLetter({
+    dateStr,
+    selfChecklist1,
+    selfChecklist2,
+    selfChecklist3,
+    selfChecklist4,
     selfBizName,
     selfBizType,
     selfBizIndustry,
     selfBizConcept,
-    selfFundingCategory,
-    selfChecklist1,
-    selfChecklist2,
-    selfChecklist3,
-    selfChecklist4
-  ]);
+    selfFundingCategory
+  });
 
   return (
     <motion.div 

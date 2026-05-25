@@ -1,0 +1,34 @@
+{
+  "id": "m28c-iv-c-1",
+  "canonicalCitation": "M28C.IV.C.1",
+  "title": "Courses of Education or Training and Facilities",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150227/M28CIVC1-Courses-of-Education-or-Training-and-Facilities",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2024-08-14",
+  "status": "current",
+  "fullText": "### 1.01 Course and Facility Selection Guidelines\nUnder 38 C.F.R. 21.120 through 21.128, a veteran's rehabilitation plan may utilize various educational institutions, training facilities, on-the-job training (OJT) sites, or independent living service providers. The VRC and the veteran must collaborate to select facilities that are accredited, approved by the State Approving Agency (SAA), and capable of providing the necessary accommodations for the veteran's disabilities.\n\n### 1.02 Collaborative Facility Selection\nWhile the VRC has final approval authority on facility selection under VA regulations, they must work collaboratively with the veteran. Cost alone cannot be the sole basis for denying a specific training facility.\n* **Justification for Higher-Cost Schools**: A higher-cost facility or private school may be approved if it provides superior support services, required disability accommodations, has higher job placement rates, or fits the veteran's timeline better than a lower-cost option.\n\n### 1.03 Independent Living Facilities\nFor veterans in the Independent Living track, service facilities include rehabilitation centers, specialized medical facilities, or home-based training setups. Under 38 U.S.C. 3120, facilities must be certified to deliver assistive technologies and daily-living adaptations.",
+  "plainEnglish": "Rules governing how you and your counselor select schools, training sites, or independent living facilities, including rules for approving higher-cost or private schools.",
+  "veteranUse": "If your VRC rejects a specific university solely because it is a private school or costs more than a state school, remind them that cost is not the sole factor. Provide evidence of better job placement rates or disability support at your preferred school.",
+  "topics": [
+    "facilities",
+    "school-selection",
+    "tuition-cap",
+    "independent-living"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3115",
+    "38-cfr-21-120",
+    "38-cfr-21-258"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "4dfdb004b40e4f4e5e68f2e83db7c34bba5c2608c3c2aea14ade2ef6f5c97ca3",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "4dfdb004b40e4f4e5e68f2e83db7c34bba5c2608c3c2aea14ade2ef6f5c97ca3",
+  "changedSinceLastSnapshot": false
+}

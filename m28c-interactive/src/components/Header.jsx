@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Search, BookMarked, Settings, Sun, Moon, Eye, EyeOff, Menu, X } from 'lucide-react';
-import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from '../data/data';
+import { useState, useEffect } from 'react';
+import { Search, BookMarked, Settings, Sun, Moon, Eye, EyeOff, Menu, X, Shield, Trash2, HelpCircle } from 'lucide-react';
+import authorityManifest from '../data/authority/manifest.json';
 
 function Header({
-  activeView,
   setActiveView,
   setSelectedSection,
   bookmarks,
@@ -20,79 +19,128 @@ function Header({
   isSettingsOpen,
   setIsSettingsOpen,
   isSidebarOpen,
-  setIsSidebarOpen
+  setIsSidebarOpen,
+  privacyMode,
+  setPrivacyMode,
+  onClearAllData,
+  userMode,
+  setUserMode,
+  customCursorEnabled,
+  setCustomCursorEnabled,
+  largeTextMode,
+  setLargeTextMode,
+  highContrastMode,
+  setHighContrastMode,
+  dyslexiaSpacing,
+  setDyslexiaSpacing,
+  plainLanguageMode,
+  setPlainLanguageMode
 }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   
   // Bind settingsForm to the active rates year subset
   const [settingsForm, setSettingsForm] = useState(rates[selectedRateYear] || rates.ay2025_2026);
+  const [prevSelectedRateYear, setPrevSelectedRateYear] = useState(selectedRateYear);
+  const [prevRates, setPrevRates] = useState(rates);
 
   // Sync settings form with rates when rates or selected rate year change
-  useEffect(() => {
+  if (selectedRateYear !== prevSelectedRateYear || rates !== prevRates) {
+    setPrevSelectedRateYear(selectedRateYear);
+    setPrevRates(rates);
     setSettingsForm(rates[selectedRateYear] || rates.ay2025_2026);
-  }, [rates, selectedRateYear]);
+  }
 
-  // Real-time Search Logic
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
+    const handleOpenAccess = () => setIsAccessibilityOpen(true);
+    window.addEventListener('open-accessibility-settings', handleOpenAccess);
+    return () => window.removeEventListener('open-accessibility-settings', handleOpenAccess);
+  }, []);
 
-    const query = searchQuery.toLowerCase();
+  // Real-time Search Logic calculated synchronously on render
+  const searchResults = (() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    // Synonym mapping dictionary to resolve informal queries to formal legal references
+    const synonyms = {
+      'laptop': ['supplies', 'technology', 'equipment', 'computer', '21.212', 'm28c.v.a.3', 'v-a-3', '21.210'],
+      'laptops': ['supplies', 'technology', 'equipment', 'computer', '21.212', 'm28c.v.a.3', 'v-a-3', '21.210'],
+      'computer': ['supplies', 'technology', 'equipment', 'computer', '21.212', 'm28c.v.a.3', 'v-a-3', '21.210'],
+      'computers': ['supplies', 'technology', 'equipment', 'computer', '21.212', 'm28c.v.a.3', 'v-a-3', '21.210'],
+      'case closed': ['discontinued', 'interrupted', 'closure', 'closed', '21.197', '21.198', 'm28c.v.a.1', 'v-a-1'],
+      'case closure': ['discontinued', 'interrupted', 'closure', 'closed', '21.197', '21.198', 'm28c.v.a.1', 'v-a-1'],
+      'discontinued': ['discontinued', 'interrupted', 'closure', 'closed', '21.197', '21.198', 'm28c.v.a.1', 'v-a-1'],
+      'interrupted': ['discontinued', 'interrupted', 'closure', 'closed', '21.197', '21.198', 'm28c.v.a.1', 'v-a-1'],
+      'bah': ['mha', 'housing', 'subsistence', 'post-9/11', 'rate', '21.260', 'm28c.v.b.7', 'v-b-7'],
+      'mha': ['mha', 'housing', 'subsistence', 'post-9/11', 'rate', '21.260', 'm28c.v.b.7', 'v-b-7'],
+      'housing allowance': ['mha', 'housing', 'subsistence', 'post-9/11', 'rate', '21.260', 'm28c.v.b.7', 'v-b-7'],
+      'ghosted': ['nonresponse', 'delay', 'counselor', 'respond', 'communication', 'm28c.ii.a.1', 'ii-a-1'],
+      'counselor delay': ['nonresponse', 'delay', 'counselor', 'respond', 'communication', 'm28c.ii.a.1', 'ii-a-1'],
+      'no response': ['nonresponse', 'delay', 'counselor', 'respond', 'communication', 'm28c.ii.a.1', 'ii-a-1'],
+      'graduate school': ['feasibility', "master's", 'degree', 'advanced training', 'post-baccalaureate', '21.72', 'm28c.iv.c.4', 'iv-c-4'],
+      'masters': ['feasibility', "master's", 'degree', 'advanced training', 'post-baccalaureate', '21.72', 'm28c.iv.c.4', 'iv-c-4'],
+      'phd': ['feasibility', "master's", 'degree', 'advanced training', 'post-baccalaureate', '21.72', 'm28c.iv.c.4', 'iv-c-4'],
+      'advanced training': ['feasibility', "master's", 'degree', 'advanced training', 'post-baccalaureate', '21.72', 'm28c.iv.c.4', 'iv-c-4']
+    };
+
+    const searchPhrases = [query];
+    Object.keys(synonyms).forEach(key => {
+      if (query.includes(key)) {
+        searchPhrases.push(...synonyms[key]);
+      }
+    });
+
     const results = [];
 
+    const isMatch = (text, citation) => {
+      const lowerText = (text || '').toLowerCase();
+      const lowerCitation = (citation || '').toLowerCase();
+      return searchPhrases.some(phrase => lowerText.includes(phrase) || lowerCitation.includes(phrase));
+    };
+
     // Search U.S. Code
-    US_CODE_SECTIONS.forEach(sec => {
-      const titleMatch = sec.title.toLowerCase().includes(query);
-      const textMatch = sec.content.toLowerCase().includes(query);
-      if (titleMatch || textMatch) {
+    authorityManifest.statutes.forEach(sec => {
+      if (isMatch(sec.title, sec.citation)) {
         results.push({
           type: 'usc',
           id: sec.id,
-          title: sec.title,
-          snippet: sec.subtitle,
+          title: sec.citation,
+          snippet: sec.title,
           category: 'U.S. Code'
         });
       }
     });
 
     // Search CFR
-    CFR_REGULATIONS.forEach(reg => {
-      const titleMatch = reg.title.toLowerCase().includes(query);
-      const textMatch = reg.content.toLowerCase().includes(query);
-      if (titleMatch || textMatch) {
+    authorityManifest.regulations.forEach(reg => {
+      if (isMatch(reg.title, reg.citation)) {
         results.push({
           type: 'cfr',
           id: reg.id,
-          title: reg.title,
-          snippet: reg.subtitle,
+          title: reg.citation,
+          snippet: reg.title,
           category: '38 CFR Part 21'
         });
       }
     });
 
-    // Search M28C Parts
-    M28C_PARTS.forEach(part => {
-      part.chapters.forEach(ch => {
-        const titleMatch = ch.title.toLowerCase().includes(query);
-        const textMatch = ch.content.toLowerCase().includes(query);
-        if (titleMatch || textMatch) {
-          results.push({
-            type: 'm28c',
-            id: ch.id,
-            title: ch.title,
-            snippet: part.title,
-            category: part.title
-          });
-        }
-      });
+    // Search M28C
+    authorityManifest.m28c.forEach(ch => {
+      if (isMatch(ch.title, ch.citation)) {
+        results.push({
+          type: 'm28c',
+          id: ch.id,
+          title: ch.citation,
+          snippet: ch.title,
+          category: 'KnowVA M28C Manual'
+        });
+      }
     });
 
-    setSearchResults(results.slice(0, 10)); // Limit to top 10
-  }, [searchQuery]);
+    return results.slice(0, 10); // Limit to top 10
+  })();
 
   return (
     <>
@@ -202,6 +250,23 @@ function Header({
             )}
           </button>
 
+          {/* User Mode Selector */}
+          <div className="flex items-center gap-1.5 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 h-9">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">Mode</span>
+            <select 
+              value={userMode} 
+              onChange={(e) => setUserMode(e.target.value)} 
+              className="bg-transparent text-xs text-slate-200 border-none outline-none font-semibold cursor-pointer pr-1"
+              style={{ paddingRight: '12px' }}
+              aria-label="Select User Mode Mode"
+            >
+              <option value="veteran" style={{backgroundColor: '#0b0f19'}}>Veteran</option>
+              <option value="advocate" style={{backgroundColor: '#0b0f19'}}>Advocate/VSO</option>
+              <option value="school" style={{backgroundColor: '#0b0f19'}}>School/SCO</option>
+              <option value="legal" style={{backgroundColor: '#0b0f19'}}>Legal/Attorney</option>
+            </select>
+          </div>
+
           {/* Dark/Light mode toggle */}
           <button 
             className="action-btn"
@@ -211,17 +276,45 @@ function Header({
             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* Reduce Motion toggle */}
+          {/* Accessibility Settings toggle */}
           <button 
             className="action-btn"
-            onClick={() => setReduceMotion(!reduceMotion)}
-            title={reduceMotion ? "Enable Motion Animations" : "Reduce Motion Animations"}
+            onClick={() => setIsAccessibilityOpen(true)}
+            title="Accessibility Settings"
+            aria-label="Open Accessibility Settings Panel"
             style={{
-              borderColor: reduceMotion ? 'var(--accent-color)' : 'var(--card-border)',
-              color: reduceMotion ? 'var(--accent-color)' : 'var(--text-secondary)'
+              borderColor: (largeTextMode || highContrastMode || dyslexiaSpacing || reduceMotion) ? 'var(--accent-color)' : 'var(--card-border)',
+              color: (largeTextMode || highContrastMode || dyslexiaSpacing || reduceMotion) ? 'var(--accent-color)' : 'var(--text-secondary)'
             }}
           >
-            {reduceMotion ? <EyeOff size={18} /> : <Eye size={18} />}
+            <Eye size={18} />
+          </button>
+
+          {/* Privacy Mode Toggle */}
+          <button 
+            className="action-btn"
+            onClick={() => setPrivacyMode(!privacyMode)}
+            title={privacyMode ? "Privacy Mode: ACTIVE (Session-only, memory storage)" : "Privacy Mode: INACTIVE (Saved in browser)"}
+            style={{
+              borderColor: privacyMode ? '#10b981' : 'var(--card-border)',
+              color: privacyMode ? '#10b981' : 'var(--text-secondary)',
+              backgroundColor: privacyMode ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+            }}
+          >
+            <Shield size={18} />
+          </button>
+
+          {/* Clear all local data */}
+          <button 
+            className="action-btn"
+            onClick={onClearAllData}
+            title="Clear All Case & Rate Data"
+            style={{
+              borderColor: 'var(--card-border)',
+              color: '#ef4444'
+            }}
+          >
+            <Trash2 size={18} />
           </button>
         </div>
       </header>
@@ -422,6 +515,105 @@ function Header({
                   Save Settings
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAccessibilityOpen && (
+        <div className="modal-overlay" onClick={() => setIsAccessibilityOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Accessibility & Display Settings</h2>
+              <button className="close-btn" onClick={() => setIsAccessibilityOpen(false)} aria-label="Close accessibility options">×</button>
+            </div>
+            <div className="modal-body space-y-4">
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Tailor the portal display to accommodate visual, physical, and cognitive preferences.
+              </p>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-plain" className="text-xs font-semibold text-slate-200">Plain Language Mode (Translate Jargon)</label>
+                  <input
+                    id="accessibility-plain"
+                    type="checkbox"
+                    checked={plainLanguageMode}
+                    onChange={(e) => setPlainLanguageMode(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-large" className="text-xs font-semibold text-slate-200">Large Text Mode (115% Zoom)</label>
+                  <input
+                    id="accessibility-large"
+                    type="checkbox"
+                    checked={largeTextMode}
+                    onChange={(e) => setLargeTextMode(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-contrast" className="text-xs font-semibold text-slate-200">High Contrast Mode</label>
+                  <input
+                    id="accessibility-contrast"
+                    type="checkbox"
+                    checked={highContrastMode}
+                    onChange={(e) => setHighContrastMode(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-motion" className="text-xs font-semibold text-slate-200">Reduce Motion (Hide Animations)</label>
+                  <input
+                    id="accessibility-motion"
+                    type="checkbox"
+                    checked={reduceMotion}
+                    onChange={(e) => setReduceMotion(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-spacing" className="text-xs font-semibold text-slate-200">Dyslexia-Friendly Spacing</label>
+                  <input
+                    id="accessibility-spacing"
+                    type="checkbox"
+                    checked={dyslexiaSpacing}
+                    onChange={(e) => setDyslexiaSpacing(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-cursor" className="text-xs font-semibold text-slate-200">Enable Custom Cursor (Opt-In)</label>
+                  <input
+                    id="accessibility-cursor"
+                    type="checkbox"
+                    checked={customCursorEnabled}
+                    onChange={(e) => setCustomCursorEnabled(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-slate-950/40 p-4 border border-slate-850 rounded-xl mt-4 space-y-2">
+                <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <HelpCircle size={14} className="text-blue-400" />
+                  <span>Keyboard Navigation Shortcuts</span>
+                </h4>
+                <ul className="text-[10px] text-slate-450 space-y-1 list-disc pl-4 leading-relaxed">
+                  <li>Use <kbd className="bg-slate-900 px-1 border border-slate-850 rounded">Tab</kbd> to focus interactive elements and <kbd className="bg-slate-900 px-1 border border-slate-850 rounded">Enter</kbd> or <kbd className="bg-slate-900 px-1 border border-slate-850 rounded">Space</kbd> to select.</li>
+                  <li>Click <a href="#main-content" className="text-blue-400 underline">Skip to Main Content</a> at any time to bypass sidebar navigation.</li>
+                  <li>All modal dialogs can be closed by pressing the escape key or clicking the overlay.</li>
+                </ul>
+              </div>
+            </div>
+            <div className="modal-footer flex justify-end gap-2">
+              <button className="btn btn-primary" onClick={() => setIsAccessibilityOpen(false)}>Done</button>
             </div>
           </div>
         </div>

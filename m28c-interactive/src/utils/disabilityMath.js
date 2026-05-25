@@ -35,7 +35,7 @@ export const calculateCombinedRating = (ratings) => {
   
   let currentVal = 100;
   let combStepsStr = [];
-  allRatings.forEach((val, i) => {
+  allRatings.forEach((val) => {
     const prev = currentVal;
     currentVal = currentVal * (1 - val / 100);
     const combined = 100 - currentVal;

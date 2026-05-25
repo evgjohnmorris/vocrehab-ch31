@@ -1,0 +1,30 @@
+{
+  "id": "m28c-iv-b-1",
+  "canonicalCitation": "M28C.IV.B.1",
+  "title": "Evaluation Process",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150222/M28CIVB1-Evaluation-Process",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2024-11-20",
+  "status": "current",
+  "fullText": "### 1.01 Initial Evaluation Requirements\nUnder 38 U.S.C. 3106 and 38 C.F.R. 21.50, every claimant who applies for Chapter 31 benefits and meets basic eligibility criteria must participate in a comprehensive initial evaluation. The evaluation is conducted by a Vocational Rehabilitation Counselor (VRC) to determine if the veteran is entitled to services.\n\n### 1.02 Determination of Employment Handicap (EH)\nA VRC must determine if the veteran has an Employment Handicap. Under 38 C.F.R. 21.35, an EH exists if:\n1. The veteran has a service-connected disability rated 20% or higher.\n2. The veteran has vocational limitations (impairments in preparing for, obtaining, or retaining suitable employment).\n3. The veteran has not already overcome the effects of these limitations through suitable employment.\n\n### 1.03 Serious Employment Handicap (SEH) Determinations\nA Serious Employment Handicap (SEH) is a significant impairment of a veteran's ability to prepare for, obtain, or retain suitable employment.\n* **10% Disability Ratings**: A veteran with a 10% disability rating MUST be found to have an SEH to qualify for Chapter 31 services.\n* **Extended Duration and Window**: An SEH finding allows the VRC to extend services beyond the basic 48-month statutory cap, and to extend the 12-year basic eligibility window.",
+  "plainEnglish": "Rules explaining how counselors evaluate your disability limitations and decide if you are entitled to services under an Employment Handicap (EH) or Serious Employment Handicap (SEH).",
+  "veteranUse": "If you have a 10% rating, prepare evidence to show you have a Serious Employment Handicap (SEH) so you can qualify for services. VRCs must document this evaluation.",
+  "topics": [
+    "initial-evaluation",
+    "entitlement",
+    "seh",
+    "employment-handicap"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3106",
+    "38-cfr-21-35",
+    "38-cfr-21-50"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "864016d21124d309e239345bb6f346a0a512a29f9e44f4e9c21231d5faf9a36a"
+}

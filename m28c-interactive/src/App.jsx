@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from './data/data';
+import { useState, useEffect } from 'react';
 import CustomCursor from './CustomCursor';
 import { BookOpen, Award, Calculator, AlertTriangle, FileEdit } from 'lucide-react';
 
@@ -9,6 +8,8 @@ import Header from './components/Header';
 import BookmarkSidebar from './components/BookmarkSidebar';
 
 // Views
+import HomeDashboardView from './views/HomeDashboardView';
+import DisputeHubView from './views/DisputeHubView';
 import ReferenceLibraryView from './views/ReferenceLibraryView';
 import EntitlementWizardView from './views/EntitlementWizardView';
 import CalculatorView from './views/CalculatorView';
@@ -22,6 +23,10 @@ import ResourceCenterView from './views/ResourceCenterView';
 import GlossaryView from './views/GlossaryView';
 import VaErrorSpotterView from './views/VaErrorSpotterView';
 import DocumentGeneratorView from './views/DocumentGeneratorView';
+import AuthorityLibraryView from './views/AuthorityLibraryView';
+import ClaimArgumentBuilderView from './views/ClaimArgumentBuilderView';
+import CoverageReportView from './views/CoverageReportView';
+import SourceDiffView from './views/SourceDiffView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -62,7 +67,7 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Navigation State
-  const [activeView, setActiveView] = useState('reference'); // 'reference' | 'wizard' | 'calculator' ...
+  const [activeView, setActiveView] = useState('home'); // 'home' | 'reference' | 'wizard' | 'calculator' ...
   const [selectedSection, setSelectedSection] = useState({ type: 'usc', id: '3100' });
   
   // Accordion Expand/Collapse State
@@ -73,34 +78,43 @@ function App() {
     m28cParts: {} // Part ID to boolean
   });
 
+  // Privacy Mode State (Default to true, store in sessionStorage so it persists across page refreshes in the same tab)
+  const [privacyMode, setPrivacyMode] = useState(() => {
+    const saved = sessionStorage.getItem('m28c_privacy_mode');
+    return saved ? JSON.parse(saved) : true;
+  });
+
   // Bookmarks State
   const [bookmarks, setBookmarks] = useState(() => {
-    const saved = localStorage.getItem('m28c_bookmarks');
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const saved = isPrivacy ? sessionStorage.getItem('m28c_bookmarks') : localStorage.getItem('m28c_bookmarks');
     return saved ? JSON.parse(saved) : [{ type: 'usc', id: '3102' }];
   });
 
   // Rate Year Selection State ('ay2025_2026' | 'ay2026_2027')
   const [selectedRateYear, setSelectedRateYear] = useState(() => {
-    const saved = localStorage.getItem('m28c_selected_rate_year');
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const saved = isPrivacy ? sessionStorage.getItem('m28c_selected_rate_year') : localStorage.getItem('m28c_selected_rate_year');
     return (saved === 'ay2025' || saved === 'ay2026') ? 'ay2025_2026' : (saved || 'ay2025_2026');
   });
 
   // Calculator Rates
   const [rates, setRates] = useState(() => {
-    const saved = localStorage.getItem('m28c_calculator_rates');
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const saved = isPrivacy ? sessionStorage.getItem('m28c_calculator_rates') : localStorage.getItem('m28c_calculator_rates');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.ay2025_2026 && parsed.ay2026_2027) return parsed;
       } catch (e) {
-        console.error('Failed to parse saved rates, using defaults');
+        console.error('Failed to parse saved rates, using defaults', e);
       }
     }
     return DEFAULT_RATES;
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'success' | 'failed'
+  const [syncStatus, setSyncStatus] = useState('syncing'); // Starts as 'syncing' to avoid setSyncStatus('syncing') on mount
 
   // Shared outputs lifted to App
   const [calculatedDisabilityPay, setCalculatedDisabilityPay] = useState(0);
@@ -116,8 +130,63 @@ function App() {
   // Plain-Language Mode State for Legal Jargon
   const [plainLanguageMode, setPlainLanguageMode] = useState(false);
 
+  // User Persona Mode State
+  const [userMode, setUserMode] = useState(() => {
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const saved = isPrivacy ? sessionStorage.getItem('m28c_user_mode') : localStorage.getItem('m28c_user_mode');
+    return saved || 'veteran';
+  });
+
+  // Case Stage State
+  const [currentCaseStage, setCurrentCaseStage] = useState(() => {
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const saved = isPrivacy ? sessionStorage.getItem('m28c_case_stage') : localStorage.getItem('m28c_case_stage');
+    return saved || 'not_applied';
+  });
+
+  // Accessibility settings state
+  const [customCursorEnabled, setCustomCursorEnabled] = useState(() => {
+    const saved = localStorage.getItem('m28c_custom_cursor');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [largeTextMode, setLargeTextMode] = useState(() => {
+    const saved = localStorage.getItem('m28c_large_text');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [highContrastMode, setHighContrastMode] = useState(() => {
+    const saved = localStorage.getItem('m28c_high_contrast');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [dyslexiaSpacing, setDyslexiaSpacing] = useState(() => {
+    const saved = localStorage.getItem('m28c_dyslexia_spacing');
+    return saved ? JSON.parse(saved) : false;
+  });
+
   // Sidebar Collapsed/Drawer State for mobile viewports
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const clearAllData = () => {
+    if (window.confirm("Are you sure you want to clear all bookmarks, custom rates, accessibility settings, and session case details? This action cannot be undone.")) {
+      localStorage.clear();
+      sessionStorage.clear();
+      setBookmarks([]);
+      setRates(DEFAULT_RATES);
+      setSelectedRateYear('ay2025_2026');
+      setReduceMotion(false);
+      setCalculatedDisabilityPay(0);
+      setBudgetMhaAmount(0);
+      setCombinedRating(0);
+      setPrivacyMode(true);
+      setUserMode('veteran');
+      setCurrentCaseStage('not_applied');
+      setCustomCursorEnabled(false);
+      setLargeTextMode(false);
+      setHighContrastMode(false);
+      setDyslexiaSpacing(false);
+      setPlainLanguageMode(false);
+      sessionStorage.setItem('m28c_privacy_mode', 'true');
+    }
+  };
 
   // Toggle Theme effect
   useEffect(() => {
@@ -129,24 +198,118 @@ function App() {
     }
   }, [isDarkMode]);
 
-  // Sync Bookmarks to LocalStorage
+  // Sync Privacy Mode transitions
   useEffect(() => {
-    localStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
-  }, [bookmarks]);
+    sessionStorage.setItem('m28c_privacy_mode', JSON.stringify(privacyMode));
+    if (privacyMode) {
+      // Migrate from localStorage to sessionStorage, then clean localStorage
+      const bm = localStorage.getItem('m28c_bookmarks');
+      if (bm) sessionStorage.setItem('m28c_bookmarks', bm);
+      const rt = localStorage.getItem('m28c_calculator_rates');
+      if (rt) sessionStorage.setItem('m28c_calculator_rates', rt);
+      const ry = localStorage.getItem('m28c_selected_rate_year');
+      if (ry) sessionStorage.setItem('m28c_selected_rate_year', ry);
 
-  // Sync Selected Rate Year to LocalStorage
+      localStorage.removeItem('m28c_bookmarks');
+      localStorage.removeItem('m28c_calculator_rates');
+      localStorage.removeItem('m28c_selected_rate_year');
+    } else {
+      // Migrate from sessionStorage to localStorage, then clean sessionStorage
+      const bm = sessionStorage.getItem('m28c_bookmarks');
+      if (bm) localStorage.setItem('m28c_bookmarks', bm);
+      const rt = sessionStorage.getItem('m28c_calculator_rates');
+      if (rt) localStorage.setItem('m28c_calculator_rates', rt);
+      const ry = sessionStorage.getItem('m28c_selected_rate_year');
+      if (ry) localStorage.setItem('m28c_selected_rate_year', ry);
+
+      sessionStorage.removeItem('m28c_bookmarks');
+      sessionStorage.removeItem('m28c_calculator_rates');
+      sessionStorage.removeItem('m28c_selected_rate_year');
+    }
+  }, [privacyMode]);
+
+  // Sync Bookmarks
   useEffect(() => {
-    localStorage.setItem('m28c_selected_rate_year', selectedRateYear);
-  }, [selectedRateYear]);
+    if (privacyMode) {
+      sessionStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
+      localStorage.removeItem('m28c_bookmarks');
+    } else {
+      localStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
+      sessionStorage.removeItem('m28c_bookmarks');
+    }
+  }, [bookmarks, privacyMode]);
+
+  // Listen to custom navigation events from LegalStatements
+  useEffect(() => {
+    const handleNav = (e) => {
+      const { type, id } = e.detail;
+      setSelectedSection({ type, id });
+      setActiveView('reference');
+    };
+    window.addEventListener('navigate-to-authority', handleNav);
+    return () => window.removeEventListener('navigate-to-authority', handleNav);
+  }, []);
+
+  // Sync Selected Rate Year
+  useEffect(() => {
+    if (privacyMode) {
+      sessionStorage.setItem('m28c_selected_rate_year', selectedRateYear);
+      localStorage.removeItem('m28c_selected_rate_year');
+    } else {
+      localStorage.setItem('m28c_selected_rate_year', selectedRateYear);
+      sessionStorage.removeItem('m28c_selected_rate_year');
+    }
+  }, [selectedRateYear, privacyMode]);
+
+  // Sync Calculator Rates
+  useEffect(() => {
+    if (privacyMode) {
+      sessionStorage.setItem('m28c_calculator_rates', JSON.stringify(rates));
+      localStorage.removeItem('m28c_calculator_rates');
+    } else {
+      localStorage.setItem('m28c_calculator_rates', JSON.stringify(rates));
+      sessionStorage.removeItem('m28c_calculator_rates');
+    }
+  }, [rates, privacyMode]);
 
   // Sync Reduce Motion to LocalStorage
   useEffect(() => {
     localStorage.setItem('m28c_reduce_motion', JSON.stringify(reduceMotion));
   }, [reduceMotion]);
 
+  // Accessibility Effects
+  useEffect(() => {
+    document.body.classList.toggle('large-text', largeTextMode);
+    localStorage.setItem('m28c_large_text', JSON.stringify(largeTextMode));
+  }, [largeTextMode]);
+
+  useEffect(() => {
+    document.body.classList.toggle('high-contrast', highContrastMode);
+    localStorage.setItem('m28c_high_contrast', JSON.stringify(highContrastMode));
+  }, [highContrastMode]);
+
+  useEffect(() => {
+    document.body.classList.toggle('dyslexia-spacing', dyslexiaSpacing);
+    localStorage.setItem('m28c_dyslexia_spacing', JSON.stringify(dyslexiaSpacing));
+  }, [dyslexiaSpacing]);
+
+  useEffect(() => {
+    localStorage.setItem('m28c_custom_cursor', JSON.stringify(customCursorEnabled));
+  }, [customCursorEnabled]);
+
+  // Sync userMode and currentCaseStage
+  useEffect(() => {
+    const storage = privacyMode ? sessionStorage : localStorage;
+    storage.setItem('m28c_user_mode', userMode);
+  }, [userMode, privacyMode]);
+
+  useEffect(() => {
+    const storage = privacyMode ? sessionStorage : localStorage;
+    storage.setItem('m28c_case_stage', currentCaseStage);
+  }, [currentCaseStage, privacyMode]);
+
   // Fetch rates.json on load for automatic VA calculator synchronization
   useEffect(() => {
-    setSyncStatus('syncing');
     fetch(`${import.meta.env.BASE_URL}rates.json`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch remote rates');
@@ -179,29 +342,59 @@ function App() {
       });
   }, []);
 
-  // Find Selected Content Object for Reference Library
-  const getSelectedContent = () => {
-    if (selectedSection.type === 'usc') {
-      return US_CODE_SECTIONS.find(sec => sec.id === selectedSection.id);
-    } else if (selectedSection.type === 'cfr') {
-      return CFR_REGULATIONS.find(reg => reg.id === selectedSection.id);
-    } else {
-      for (const part of M28C_PARTS) {
-        const chapter = part.chapters.find(ch => ch.id === selectedSection.id);
-        if (chapter) {
-          return {
-            ...chapter,
-            subtitle: part.title,
-            category: 'M28C Manual',
-            tag: part.tag
-          };
-        }
-      }
-    }
-    return null;
-  };
+  const [activeContent, setActiveContent] = useState(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-  const activeContent = getSelectedContent();
+  useEffect(() => {
+    const loadContent = async () => {
+      if (!selectedSection || !selectedSection.type || !selectedSection.id) {
+        setActiveContent(null);
+        return;
+      }
+      setIsLoadingContent(true);
+      try {
+        let url = '';
+        if (selectedSection.type === 'usc') {
+          url = `${import.meta.env.BASE_URL}authority/usc/38-usc-${selectedSection.id}.json`;
+        } else if (selectedSection.type === 'cfr') {
+          const sec = selectedSection.id.replace('_', '-');
+          url = `${import.meta.env.BASE_URL}authority/cfr/38-cfr-${sec}.json`;
+        } else if (selectedSection.type === 'm28c') {
+          const ch = selectedSection.id.replace(/_/g, '-');
+          url = `${import.meta.env.BASE_URL}authority/m28c/${ch}.json`;
+        }
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error ${res.status} when loading ${url}`);
+        const data = await res.json();
+        
+        setActiveContent({
+          id: selectedSection.id,
+          title: data.title,
+          subtitle: data.canonicalCitation,
+          category: selectedSection.type === 'usc' ? '38 U.S.C. Chapter 31' : selectedSection.type === 'cfr' ? '38 CFR Part 21' : 'M28C Manual',
+          tag: data.authorityLevel,
+          content: `<div class="space-y-4">
+            <div class="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap select-text">${data.fullText || data.text}</div>
+            ${data.plainEnglish ? `<div class="bg-slate-900/60 p-4 border border-slate-800 rounded-lg mt-4">
+              <h4 class="text-xs font-bold text-emerald-400">Plain English Summary</h4>
+              <p class="text-xs text-slate-300 mt-1">${data.plainEnglish}</p>
+            </div>` : ''}
+            ${data.veteranUse ? `<div class="bg-emerald-950/20 p-4 border border-emerald-900/30 rounded-lg mt-3">
+              <h4 class="text-xs font-bold text-slate-200">How to use this in a VR&E Dispute</h4>
+              <p class="text-xs text-slate-300 mt-1">${data.veteranUse}</p>
+            </div>` : ''}
+          </div>`
+        });
+      } catch (err) {
+        console.error('Failed to load dynamic reference content:', err);
+        setActiveContent(null);
+      } finally {
+        setIsLoadingContent(false);
+      }
+    };
+    loadContent();
+  }, [selectedSection]);
 
   // Collapsible toggle helpers
   const toggleCategory = (cat) => {
@@ -231,6 +424,28 @@ function App() {
   // Render view dispatcher
   const renderView = () => {
     switch (activeView) {
+      case 'home':
+        return (
+          <HomeDashboardView
+            reduceMotion={reduceMotion}
+            setActiveView={setActiveView}
+            setSelectedSection={setSelectedSection}
+            privacyMode={privacyMode}
+            bookmarksCount={bookmarks.length}
+            userMode={userMode}
+            currentCaseStage={currentCaseStage}
+            setCurrentCaseStage={setCurrentCaseStage}
+          />
+        );
+      case 'dispute_hub':
+        return (
+          <DisputeHubView
+            reduceMotion={reduceMotion}
+            userMode={userMode}
+            currentCaseStage={currentCaseStage}
+            setCurrentCaseStage={setCurrentCaseStage}
+          />
+        );
       case 'reference':
         return (
           <ReferenceLibraryView
@@ -240,6 +455,7 @@ function App() {
             bookmarks={bookmarks}
             toggleBookmark={toggleBookmark}
             reduceMotion={reduceMotion}
+            isLoadingContent={isLoadingContent}
           />
         );
       case 'wizard':
@@ -302,6 +518,20 @@ function App() {
             plainLanguageMode={plainLanguageMode}
           />
         );
+      case 'authority_library':
+        return (
+          <AuthorityLibraryView 
+            reduceMotion={reduceMotion}
+            setSelectedSection={setSelectedSection}
+            setActiveView={setActiveView}
+          />
+        );
+      case 'coverage_report':
+        return <CoverageReportView reduceMotion={reduceMotion} />;
+      case 'source_diff':
+        return <SourceDiffView reduceMotion={reduceMotion} />;
+      case 'claim_builder':
+        return <ClaimArgumentBuilderView reduceMotion={reduceMotion} />;
       case 'directory':
         return <CounselorDirectoryView reduceMotion={reduceMotion} />;
       case 'resources':
@@ -321,7 +551,7 @@ function App() {
   return (
     <div className="app-container">
       <a href="#main-content" className="skip-link">Skip to Main Content</a>
-      <CustomCursor reduceMotion={reduceMotion} />
+      {customCursorEnabled && <CustomCursor reduceMotion={reduceMotion} />}
       
       {/* SIDEBAR NAVIGATION */}
       <Sidebar
@@ -358,6 +588,21 @@ function App() {
           setIsSettingsOpen={setIsSettingsOpen}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+          privacyMode={privacyMode}
+          setPrivacyMode={setPrivacyMode}
+          onClearAllData={clearAllData}
+          userMode={userMode}
+          setUserMode={setUserMode}
+          customCursorEnabled={customCursorEnabled}
+          setCustomCursorEnabled={setCustomCursorEnabled}
+          largeTextMode={largeTextMode}
+          setLargeTextMode={setLargeTextMode}
+          highContrastMode={highContrastMode}
+          setHighContrastMode={setHighContrastMode}
+          dyslexiaSpacing={dyslexiaSpacing}
+          setDyslexiaSpacing={setDyslexiaSpacing}
+          plainLanguageMode={plainLanguageMode}
+          setPlainLanguageMode={setPlainLanguageMode}
         />
 
         {/* MAIN BODY CONTENT */}

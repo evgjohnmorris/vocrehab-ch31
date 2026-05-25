@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Info } from 'lucide-react';
 import { VRE_OFFICES } from '../data/data';
 import { motion } from 'framer-motion';

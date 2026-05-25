@@ -1,0 +1,91 @@
+{
+  "supplies-not-annual-allowance": {
+    "statementId": "supplies-not-annual-allowance",
+    "text": "VR&E supplies are needs-based and not a flat annual allowance.",
+    "issueId": "supplies-computer-technology",
+    "authorityIds": [
+      "38-usc-3104",
+      "38-cfr-21-210",
+      "38-cfr-21-212",
+      "38-cfr-21-220"
+    ],
+    "strength": "binding",
+    "allowedModalVerbs": ["may", "should"],
+    "forbiddenModalVerbs": ["guaranteed", "automatic"]
+  },
+  "laptop-request-standard": {
+    "statementId": "laptop-request-standard",
+    "text": "VA should authorize necessary technology when the evidence satisfies the supply standard and the item is tied to the approved rehabilitation plan.",
+    "issueId": "supplies-computer-technology",
+    "authorityIds": [
+      "38-usc-3104",
+      "38-cfr-21-212",
+      "38-cfr-21-220"
+    ],
+    "strength": "policy",
+    "allowedModalVerbs": ["should", "may"],
+    "forbiddenModalVerbs": ["guaranteed", "must", "shall"]
+  },
+  "graduate-school-feasibility": {
+    "statementId": "graduate-school-feasibility",
+    "text": "VA may approve graduate training if required for employment in the rehabilitation goal or to overcome a serious employment handicap.",
+    "issueId": "graduate-school-request",
+    "authorityIds": [
+      "38-usc-3104",
+      "38-cfr-21-57",
+      "38-cfr-21-78"
+    ],
+    "strength": "policy",
+    "allowedModalVerbs": ["may", "should"],
+    "forbiddenModalVerbs": ["guaranteed", "must", "automatic"]
+  },
+  "extension-beyond-48": {
+    "statementId": "extension-beyond-48",
+    "text": "An extension of rehabilitation services beyond 48 months requires a determination of a serious employment handicap.",
+    "issueId": "serious-employment-handicap-determination",
+    "authorityIds": [
+      "38-usc-3105",
+      "38-cfr-21-78"
+    ],
+    "strength": "binding",
+    "allowedModalVerbs": ["must", "shall", "required"],
+    "forbiddenModalVerbs": ["guaranteed", "automatic"]
+  },
+  "retroactive-induction-eligibility": {
+    "statementId": "retroactive-induction-eligibility",
+    "text": "VA may approve retroactive induction if a veteran was eligible, entitled, and faced a serious employment handicap during the training period.",
+    "issueId": "retroactive-induction-request",
+    "authorityIds": [
+      "38-usc-3115",
+      "38-cfr-21-282"
+    ],
+    "strength": "policy",
+    "allowedModalVerbs": ["may", "should"],
+    "forbiddenModalVerbs": ["guaranteed", "automatic", "must"]
+  },
+  "counselor-duty-to-assist": {
+    "statementId": "counselor-duty-to-assist",
+    "text": "VA has a duty to assist the claimant by developing the evidence necessary to substantiate the claim for benefits.",
+    "issueId": "claim-development-assistance",
+    "authorityIds": [
+      "38-usc-3115",
+      "38-cfr-21-30"
+    ],
+    "strength": "binding",
+    "allowedModalVerbs": ["must", "shall", "required"],
+    "forbiddenModalVerbs": ["guaranteed", "automatic"]
+  },
+  "discontinuance-cooperation-notice": {
+    "statementId": "discontinuance-cooperation-notice",
+    "text": "VA must provide prior notice and a reasonable opportunity to comply before discontinuing a program for lack of cooperation.",
+    "issueId": "program-discontinuance-closure",
+    "authorityIds": [
+      "38-usc-3111",
+      "38-cfr-21-362",
+      "38-cfr-21-364"
+    ],
+    "strength": "binding",
+    "allowedModalVerbs": ["must", "shall"],
+    "forbiddenModalVerbs": ["guaranteed", "automatic"]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "m28c-v-a-3",
+  "canonicalCitation": "M28C.V.A.3",
+  "title": "Services, Supplies, and Equipment",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000146298/M28CVA3-Services-Supplies-and-Equipment",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2025-12-01",
+  "status": "current",
+  "fullText": "### 3.01 Provision of Supplies and Equipment\nUnder 38 C.F.R. 21.210 and 21.212, the VA is required to furnish all necessary books, supplies, tools, software, and equipment required for a veteran to participate in and complete their rehabilitation plan. Supplies are provided on a needs-based, individualized basis.\n\n### 3.02 Computer and Technology Packages\n* **Rule of Necessity**: A personal computer, printer, and required software must be authorized if required of all students in the program, OR if the veteran's disabilities necessitate specialized adaptive hardware or software, OR if the lack of a computer puts the veteran at a distinct disadvantage compared to non-disabled peers in the program (under 38 C.F.R. 21.220).\n* **Flat Cap Prohibitions**: Counselors cannot apply a blanket restriction or flat dollar cap (e.g. $500 or $1,000 limit) to deny a computer package. Any denial must be based on a written, individualized analysis showing the item is not required for the program.\n\n### 3.03 Procurement Procedures\nVRCs must utilize the appropriate procurement pathways (such as credit card purchases, contract agreements, or direct school bookstore authorizations) to ensure veterans receive their supplies before classes begin. Delayed supplies must be escalated to prevent academic barriers.",
+  "plainEnglish": "Detailed policies on how VR&E supplies and computer packages are authorized, emphasizing that denials based on arbitrary spending limits or blanket caps are prohibited.",
+  "veteranUse": "Cite M28C.V.A.3 and 38 C.F.R. 21.212 if your counselor says the VA doesn't buy laptops. Demand a written necessity analysis if they refuse to authorize your computer package.",
+  "topics": [
+    "computer-technology-supplies",
+    "procurement",
+    "costs"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3104",
+    "38-cfr-21-212",
+    "38-cfr-21-220"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151",
+  "changedSinceLastSnapshot": false
+}

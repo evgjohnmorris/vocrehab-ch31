@@ -1,0 +1,33 @@
+{
+  "id": "m28c-iv-c-6",
+  "canonicalCitation": "M28C.IV.C.6",
+  "title": "Independent Living Plan",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150226/M28CIVC6-Independent-Living-Plan",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2025-02-15",
+  "status": "current",
+  "fullText": "### 6.01 Independent Living (IL) Overview\nUnder 38 U.S.C. 3120, independent living services are designed for veterans whose service-connected disabilities are so severe that they cannot currently participate in a vocational program. The objective of an Individualized Independent Living Plan (IILP) is to enable the veteran to live and function more independently within their family and community with reduced dependency on the services of others.\n\n### 6.02 Entitlement and Feasibility Assessments\nTo be entitled to an IILP:\n1. The veteran must have a Serious Employment Handicap (SEH) resulting from service-connected conditions.\n2. The VRC must determine that achieving a vocational goal is not currently reasonably feasible.\n3. The VRC must identify significant limitations in the veteran's activities of daily living that can be mitigated by independent living services.\n4. There must be a reasonable likelihood that the services will improve the veteran's independence.\n\n### 6.03 Scope and Duration of Services\n* **Duration**: The basic period for independent living services is limited to 24 months. VREO approval is required to extend the program beyond 24 months, up to a maximum of 36 months, under special circumstances.\n* **Authorized Services**: Independent living services may include assistive technologies, home or bathroom modifications, specialized training in daily living activities, orthopedic appliances, and coordinate health services with VHA.\n* **Home Adaptions**: Bathroom adaptions (such as walk-in tubs or grab bars) must undergo a VA engineering evaluation.",
+  "plainEnglish": "Rules explaining how severely disabled veterans who cannot work can get independent living services, home modifications, and assistive devices.",
+  "veteranUse": "If you cannot work due to severe disabilities, request an Independent Living evaluation. VRCs must evaluate if services will make you more independent at home.",
+  "topics": [
+    "independent-living",
+    "iilp",
+    "feasibility"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3120",
+    "38-cfr-21-160",
+    "38-cfr-21-162"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "e45175682b8da344158fa2d0fc72aa30b2b1b734734bcb89487f0379fdad38fd",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "e45175682b8da344158fa2d0fc72aa30b2b1b734734bcb89487f0379fdad38fd",
+  "changedSinceLastSnapshot": false
+}

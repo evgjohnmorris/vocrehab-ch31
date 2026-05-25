@@ -1,0 +1,33 @@
+{
+  "id": "m28c-v-b-7",
+  "canonicalCitation": "M28C.V.B.7",
+  "title": "Subsistence Allowance Administration",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000146304/M28C.V.B.7-Subsistence-Allowance",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2026-02-06",
+  "status": "current",
+  "fullText": "### 7.01 Subsistence Allowance Eligibility\nA veteran participating in a program of vocational rehabilitation under Chapter 31 is entitled to a monthly subsistence allowance while pursuing training. Allowance payments are based on the rate of pursuit (full-time, 3/4-time, 1/2-time), the type of training program (institutional, cooperative, on-the-job training), and the number of dependents.\n\n### 7.02 Post-9/11 Subsistence Allowance (P911SA) Election\nUnder 38 U.S.C. 3108(b) and 38 C.F.R. 21.264, a veteran who is entitled to Chapter 31 services and has remaining, unexhausted entitlement under Chapter 33 (Post-9/11 GI Bill) may elect to receive the Post-9/11 subsistence allowance rate in lieu of the traditional Chapter 31 subsistence allowance.\n* **Election Requirement**: The election must be made in writing (using VAF 28-0987 or a signed statement) prior to the commencement of the training period. Elections cannot be applied retroactively unless part of an approved retroactive induction.\n* **Rate Determination**: The P911SA rate is equivalent to the Basic Allowance for Housing (BAH) paid to a military E-5 with dependents, based on the ZIP code of the training facility.\n\n### 7.03 Special Rate Rules\n* **Online/Distance Learning**: Veterans pursuing their program entirely online receive an online-only rate, which is set at 50% of the national average BAH.\n* **Foreign Schools**: Veterans attending foreign institutions receive a flat foreign rate.\n* **Concurrent Payments**: A veteran cannot receive subsistence allowance under Chapter 31 concurrently with educational assistance under any other VA program (e.g. Chapter 33, Chapter 35).",
+  "plainEnglish": "Rules governing monthly subsistence payouts, including traditional VR&E rates and electing the Post-9/11 BAH rate.",
+  "veteranUse": "Review election criteria to choose the highest-paying monthly allowance rate during your school enrollment.",
+  "topics": [
+    "subsistence",
+    "allowance",
+    "p911sa"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3108",
+    "38-cfr-21-260",
+    "38-cfr-21-264"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "13df6b6a2a36ca76d9084307eef07b83996b0c9e18859f95641fd9eed7cc0445",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "13df6b6a2a36ca76d9084307eef07b83996b0c9e18859f95641fd9eed7cc0445",
+  "changedSinceLastSnapshot": false
+}

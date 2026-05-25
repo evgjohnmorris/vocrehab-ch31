@@ -1,0 +1,29 @@
+{
+  "id": "m28c-ii-a-4",
+  "canonicalCitation": "M28C.II.A.4",
+  "title": "Advisory Committees",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000144225/M28CIIA4-Advisory-Committees",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2024-08-14",
+  "status": "current",
+  "fullText": "### 4.01 Field Advisory Committee (FAC)\nThe Field Advisory Committee serves as the primary mechanism for the Executive Director of VR&E Service to solicit input directly from local regional offices. The FAC focuses on identifying operational barriers and recommending policy changes to improve claimant experience.\n\n### 4.02 Vocational Rehabilitation Panel (VRP)\nThe Vocational Rehabilitation Panel acts as a consultative body under 38 C.F.R. § 21.60. VRCs refer complex cases to the panel for multidisciplinary reviews regarding employability feasibility, medical complications, and independent living options.\n\n### 4.03 Committee Membership\nCommittee memberships are structured to leverage interagency expertise, incorporating representatives from the Veterans Health Administration (VHA), the Department of Education (RSA), and the Department of Labor (DOL).",
+  "plainEnglish": "Explains advisory groups and panels (like the Vocational Rehabilitation Panel) that help resolve complex cases and guide VR&E policies.",
+  "veteranUse": "If your VRC claims a vocational goal is too complex or not feasible, you can request that they refer your case to the Vocational Rehabilitation Panel for a multidisciplinary assessment.",
+  "topics": [
+    "advisory-committees",
+    "vr-panel",
+    "feasibility"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3106",
+    "38-cfr-21-60",
+    "38-cfr-21-62"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "5e3f84bda5b436bebd9d74f272843749d0e244e5413bf1c2a3b35bfc16eb3a24"
+}

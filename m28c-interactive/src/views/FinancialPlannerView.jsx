@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Trash2, Play, FlaskConical, Info } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Play, FlaskConical } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
   getPellEstimate, 
@@ -81,7 +81,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
       typeCounts[i.type] = (typeCounts[i.type] || 0) + 1;
     });
     const count = typeCounts[type] || 0;
-    let name = '';
+    let name;
     let amount = 0;
 
     switch (type) {
@@ -125,7 +125,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
       catCounts[e.category] = (catCounts[e.category] || 0) + 1;
     });
     const count = catCounts[category] || 0;
-    let name = '';
+    let name;
 
     switch (category) {
       case 'housing':
@@ -168,17 +168,19 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
     });
 
     const count = typeCounts[type] || 0;
-    let name = '';
+    let name;
 
     switch (type) {
-      case 'credit_card':
+      case 'credit_card': {
         const cardLabels = ['A', 'B', 'C', 'D', 'E'];
         name = `Credit Card ${cardLabels[count] || (count + 1)}`;
         break;
-      case 'personal_loan':
+      }
+      case 'personal_loan': {
         const loanLabels = ['1', '2', '3', '4', '5'];
         name = `Personal Loan ${loanLabels[count] || (count + 1)}`;
         break;
+      }
       case 'line_of_credit':
         name = `Line of Credit${count > 0 ? ' ' + (count + 1) : ''}`;
         break;

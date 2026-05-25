@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   BookOpen, FileText, Info, Users, ShieldCheck, 
   BookMarked, Calculator, HelpCircle, CheckCircle, ExternalLink, Scale 

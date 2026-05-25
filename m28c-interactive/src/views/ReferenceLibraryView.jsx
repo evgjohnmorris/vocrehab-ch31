@@ -1,5 +1,4 @@
-import React from 'react';
-import { Bookmark, BookOpen, ExternalLink } from 'lucide-react';
+import { Bookmark, BookOpen, ExternalLink, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function ReferenceLibraryView({ 
@@ -8,8 +7,19 @@ function ReferenceLibraryView({
   setSelectedSection, 
   bookmarks, 
   toggleBookmark, 
-  reduceMotion 
+  reduceMotion,
+  isLoadingContent
 }) {
+  if (isLoadingContent) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl">
+        <div className="text-center text-slate-400 text-xs">
+          <Loader2 className="animate-spin text-emerald-500 mx-auto mb-2" size={24} />
+          <span>Loading reference document...</span>
+        </div>
+      </div>
+    );
+  }
   if (!activeContent) {
     return (
       <div className="doc-card text-center p-8 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl hover:border-slate-700 transition-all duration-300">

@@ -15,7 +15,7 @@
   --card-border: #1e293b;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-muted: #8fa0b8;
   --sidebar-bg: rgba(15, 23, 42, 0.75);
   --sidebar-border: rgba(30, 41, 59, 0.7);
   --hover-bg: #1e293b;
@@ -33,7 +33,7 @@
   --card-border: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #64748b;
+  --text-muted: #4e5d78;
   --sidebar-bg: rgba(241, 245, 249, 0.9);
   --sidebar-border: rgba(226, 232, 240, 0.8);
   --hover-bg: #f1f5f9;
@@ -1149,5 +1149,96 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.5 !important;
   }
 }
+
+/* ACCESSIBILITY UTILITY OVERRIDES */
+body.large-text {
+  font-size: 1.15rem !important;
+}
+body.large-text p, 
+body.large-text span, 
+body.large-text select, 
+body.large-text input, 
+body.large-text textarea, 
+body.large-text button, 
+body.large-text li, 
+body.large-text pre,
+body.large-text div:not(.branding-logo):not(.branding) {
+  font-size: 1.05rem !important;
+}
+body.large-text h1 {
+  font-size: 2.2rem !important;
+}
+body.large-text h2 {
+  font-size: 1.8rem !important;
+}
+body.large-text h3 {
+  font-size: 1.5rem !important;
+}
+body.large-text h4 {
+  font-size: 1.25rem !important;
+}
+body.large-text .nav-item {
+  font-size: 1.1rem !important;
+}
+
+body.high-contrast {
+  --bg-color: #000000 !important;
+  --card-bg: #111111 !important;
+  --card-border: #ffffff !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #eeeeee !important;
+  --text-muted: #dddddd !important;
+  --sidebar-bg: #000000 !important;
+  --sidebar-border: #ffffff !important;
+  --hover-bg: #222222 !important;
+  --active-bg: #333333 !important;
+  --accent-color: #ffff00 !important;
+  --primary-color: #0000ff !important;
+  color-scheme: dark !important;
+}
+body.high-contrast .btn-primary {
+  background-color: #0000ff !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+body.high-contrast .btn-secondary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+body.high-contrast select, 
+body.high-contrast input, 
+body.high-contrast textarea {
+  border-color: #ffffff !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+body.high-contrast select option {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+body.high-contrast a, 
+body.high-contrast .nav-item.active {
+  color: #ffff00 !important;
+}
+
+body.dyslexia-spacing {
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.2em !important;
+  line-height: 2.0 !important;
+}
+body.dyslexia-spacing p, 
+body.dyslexia-spacing span, 
+body.dyslexia-spacing li, 
+body.dyslexia-spacing div, 
+body.dyslexia-spacing input, 
+body.dyslexia-spacing select, 
+body.dyslexia-spacing textarea, 
+body.dyslexia-spacing pre {
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.2em !important;
+  line-height: 2.0 !important;
+}
+
 
 

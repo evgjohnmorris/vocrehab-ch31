@@ -15,7 +15,6 @@ export const calculateAllowance = ({
   calcYellowRibbon,
   calcYrSchoolContribution,
   calcKicker,
-  calcScholarships,
   calcIncludeComputer,
   calcComputerCost,
   calcOjtTrainingWage,
@@ -57,7 +56,7 @@ export const calculateAllowance = ({
   }
 
   // 2. Post-9/11 BAH Option Calculate
-  let p911Rate = 0;
+  let p911Rate;
   let baseMhaRate = 0;
   let rateOfPursuit = 1.0;
 

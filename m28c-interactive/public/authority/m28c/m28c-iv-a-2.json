@@ -1,0 +1,34 @@
+{
+  "id": "m28c-iv-a-2",
+  "canonicalCitation": "M28C.IV.A.2",
+  "title": "Eligibility and Entitlement",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150221/M28CIVA2-Eligibility-and-Entitlement",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-25",
+  "sourceUpdated": "2024-11-20",
+  "status": "current",
+  "fullText": "### 2.01 Eligibility and Entitlement Overview\nEligibility and entitlement are distinct legal decisions. Under 38 U.S.C. 3102, a veteran is eligible to apply for Chapter 31 services if they have a service-connected disability rating of 10% or higher and a discharge character that is other than dishonorable. Entitlement, however, is a subsequent finding by a Vocational Rehabilitation Counselor (VRC) determining whether the veteran requires services to prepare for, obtain, or retain suitable employment due to an employment handicap.\n\n### 2.02 Employment Handicap (EH) vs. Serious Employment Handicap (SEH)\n* **Employment Handicap (EH)**: Required for veterans with a 20% or higher disability rating. The VRC must find that the veteran has vocational limitations caused by their service-connected disabilities and has not overcome those limitations.\n* **Serious Employment Handicap (SEH)**: Required for veterans with a 10% rating, or for extending the 12-year basic period of eligibility, or for extending training beyond 48 months. An SEH is defined under 38 C.F.R. 21.35 as a significant impairment of the veteran's ability to prepare for, obtain, or retain employment consistent with their abilities, aptitudes, and interests.\n\n### 2.03 12-Year Basic Period of Eligibility\nThe basic period of eligibility is 12 years from the date of separation from active duty or the date the veteran was first notified of a compensable service-connected disability rating, whichever is later. This period can be extended if the VRC determines that the veteran has an SEH and that the extension is necessary to overcome the handicap.\n\n### 2.04 Vocational Rehabilitation Counselor (VRC) Decision Boundaries\nThe VRC is the sole primary authority for making entitlement and feasibility decisions. Counselors must resolve all reasonable doubt in favor of the veteran under 38 C.F.R. 21.57. Denials of entitlement must be accompanied by a detailed written rationale explaining the specific reasons why the veteran's disabilities do not create an employment barrier, or why suitable employment has already been achieved.",
+  "plainEnglish": "Guidelines explaining how VA VRCs determine if you are eligible to apply and if you are entitled to services based on employment handicap assessments.",
+  "veteranUse": "Use this chapter to demand an EH/SEH assessment if VRC tries to close your case or deny entitlement based solely on your disability rating percentage.",
+  "topics": [
+    "eligibility",
+    "entitlement",
+    "employment-handicap",
+    "seh"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3102",
+    "38-cfr-21-40",
+    "38-cfr-21-53"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "e0c0f7e11d7f504b7003e3f5ed03f4b5c80d2fbde0ed8a5ebccf512a00f203c9",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "e0c0f7e11d7f504b7003e3f5ed03f4b5c80d2fbde0ed8a5ebccf512a00f203c9",
+  "changedSinceLastSnapshot": false
+}

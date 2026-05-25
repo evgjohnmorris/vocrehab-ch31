@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bookmark, Info, Trash2 } from 'lucide-react';
 
 function BookmarkSidebar({ 

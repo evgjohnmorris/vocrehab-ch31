@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Trash2, ShieldCheck, Info, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
   VA_DISABILITY_COMP_TABLE_2026, 

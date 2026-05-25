@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { AlertTriangle, ChevronRight, FileEdit, BookOpen, ExternalLink, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, ChevronRight, FileEdit, BookOpen, HelpCircle } from 'lucide-react';
 
 const ERROR_ITEMS = [
   {
     id: 'seh_denial',
     title: 'Unreasonable Denial of Serious Employment Handicap (SEH)',
     plainTitle: 'Counselor Refuses to Grant "Serious Handicap" Status',
-    citation: '38 CFR § 21.52, 38 CFR § 21.44, M28C.IV.B.2',
+    citation: '38 CFR § 21.52, 38 CFR § 21.44, M28C.IV.A.2, M28C.IV.B.1',
     explanation: 'The counselor denies an SEH designation despite clear evidence of significant barriers to employment and a service-connected rating of 10% or more, or fails to apply the lower threshold required for veterans with an SEH.',
     plainExplanation: 'If you have a 10% or greater disability rating, your counselor might wrongly deny you "Serious Employment Handicap" (SEH) status. Getting SEH unlocks longer training terms, more funding, and specialized tracks.',
     advocacySteps: [
@@ -21,7 +21,7 @@ const ERROR_ITEMS = [
     id: 'feasibility_denial',
     title: 'Denial of Feasibility Without Exhaustive Assessment',
     plainTitle: 'Counselor Claims Your Disability Makes Training "Unfeasible"',
-    citation: '38 CFR § 21.53, M28C.IV.B.2',
+    citation: '38 CFR § 21.53, M28C.IV.B.3',
     explanation: 'The counselor asserts that achieving a vocational goal is not "reasonably feasible" due to the severity of your disability, but fails to conduct a comprehensive vocational evaluation or coordinate with medical professionals as required under 38 CFR § 21.53.',
     plainExplanation: 'Your counselor cannot simply declare you "too disabled to work" without doing a deep, professional evaluation of your skills and health, including consulting doctors. You have the right to fight this finding.',
     advocacySteps: [
@@ -81,7 +81,7 @@ const ERROR_ITEMS = [
     id: 'unilateral_iwrp_change',
     title: 'Unilateral Modification of IWRP/IPE Vocational Goal',
     plainTitle: 'Counselor Changes Your Career Goal Without Your Agreement',
-    citation: '38 CFR § 21.94, 38 CFR § 21.96, M28C.IV.B.6',
+    citation: '38 CFR § 21.94, 38 CFR § 21.96, M28C.IV.C.4',
     explanation: 'The counselor unilaterally changes your vocational goal, extends your plan, or terminates services without your consent or without following the formal dispute and amendment procedures under 38 CFR § 21.94.',
     plainExplanation: 'Your rehabilitation plan is a contract between you and the VA. The counselor cannot change your career goal, shorten your timeline, or stop your program without your agreement or a formal process.',
     advocacySteps: [
@@ -96,7 +96,7 @@ const ERROR_ITEMS = [
     id: 'il_blanket_denial',
     title: 'Blanket Denial or Arbitrary Caps on Independent Living (IL) Services',
     plainTitle: 'Counselor Rejects Independent Living Support Out of Hand',
-    citation: '38 U.S.C. § 3120, 38 CFR § 21.160, M28C.IV.C.1',
+    citation: '38 U.S.C. § 3120, 38 CFR § 21.160, M28C.IV.C.1, M28C.IV.C.6',
     explanation: 'The counselor denies access to the Independent Living (IL) track by claiming the program is "full", that there is a waiting list, or that IL is only for the "most severely disabled" who are bedridden. Under 38 U.S.C. § 3120, any veteran for whom a vocational goal is currently not feasible is entitled to an evaluation for IL services.',
     plainExplanation: 'Independent Living (IL) services help you live more independently at home. Counselors cannot reject you by saying "the program is full" or that it is only for bedridden veterans. If working is not possible for you right now, you have a right to an IL evaluation.',
     advocacySteps: [
@@ -111,7 +111,7 @@ const ERROR_ITEMS = [
     id: 'entitlement_extension_denial',
     title: 'Refusal to Extend Entitlement Beyond 48 Months',
     plainTitle: 'Counselor Rejects Training Because it Exceeds 48 Months',
-    citation: '38 U.S.C. § 3105, 38 CFR § 21.78, M28C.IV.B.2',
+    citation: '38 U.S.C. § 3105, 38 CFR § 21.78, M28C.IV.A.2',
     explanation: 'The counselor refuses to approve a training plan because it requires more than 48 months of entitlement. However, under 38 CFR § 21.78, veterans with a Serious Employment Handicap (SEH) are eligible for extensions beyond 48 months if additional services are necessary to achieve rehabilitation.',
     plainExplanation: 'If you have a Serious Employment Handicap (SEH), the VA can extend your training time past the standard 48-month limit. A counselor cannot refuse a program just because it takes longer than 48 months to complete.',
     advocacySteps: [
@@ -124,7 +124,7 @@ const ERROR_ITEMS = [
   }
 ];
 
-function VaErrorSpotterView({ reduceMotion, setActiveView, plainLanguageMode, setPlainLanguageMode }) {
+function VaErrorSpotterView({ setActiveView, plainLanguageMode, setPlainLanguageMode }) {
   const [checkedItems, setCheckedItems] = useState({});
   const [expandedId, setExpandedId] = useState(null);
 
@@ -180,7 +180,7 @@ function VaErrorSpotterView({ reduceMotion, setActiveView, plainLanguageMode, se
         </div>
 
         <div className="divide-y divide-slate-800">
-          {ERROR_ITEMS.map((item, index) => {
+          {ERROR_ITEMS.map((item) => {
             const isChecked = !!checkedItems[item.id];
             const isExpanded = expandedId === item.id;
             

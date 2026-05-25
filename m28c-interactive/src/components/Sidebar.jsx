@@ -1,10 +1,10 @@
-import React from 'react';
 import { 
   ShieldCheck, BookOpen, Award, Calculator, Scale, 
   DollarSign, Compass, Briefcase, GraduationCap, Users, 
-  FileText, ExternalLink, ChevronRight, AlertTriangle, FileEdit 
+  FileText, ExternalLink, ChevronRight, AlertTriangle, FileEdit,
+  Gavel, FileCheck, CheckCircle2, RefreshCw, Home, Shield, Settings
 } from 'lucide-react';
-import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from '../data/data';
+import authorityManifest from '../data/authority/manifest.json';
 
 function Sidebar({ 
   activeView, 
@@ -13,7 +13,6 @@ function Sidebar({
   setSelectedSection,
   expandedCategories, 
   toggleCategory, 
-  togglePart,
   setWizardResult,
   setSelfGeneratedLetter,
   setDirQuery,
@@ -46,80 +45,46 @@ function Sidebar({
       </div>
 
       <div className="nav-section">
-        {/* VR&E Core Modules */}
+        {/* Get Help Now */}
         <div className="nav-category">
-          <div className="nav-title">VR&E Core Modules</div>
-          
           <div 
-            className={`nav-item ${activeView === 'reference' ? 'active' : ''}`}
-            onClick={() => handleNavClick('reference')}
+            className={`nav-item ${activeView === 'home' ? 'active' : ''}`}
+            onClick={() => handleNavClick('home')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('reference'))}
-            aria-current={activeView === 'reference' ? 'page' : undefined}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('home'))}
+            aria-current={activeView === 'home' ? 'page' : undefined}
+            style={{ fontWeight: 'bold' }}
           >
-            <BookOpen size={18} />
-            <span>Manual Reference</span>
+            <Home size={18} />
+            <span>Get Help Now (Dashboard)</span>
           </div>
+        </div>
 
+        {/* My VR&E Situation */}
+        <div className="nav-category" style={{ marginTop: '12px' }}>
+          <div className="nav-title">My VR&E Situation</div>
+          
           <div 
             className={`nav-item ${activeView === 'wizard' ? 'active' : ''}`}
             onClick={() => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); }}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); })}
-            aria-current={activeView === 'wizard' ? 'page' : undefined}
           >
             <Award size={18} />
-            <span>Entitlement Wizard</span>
+            <span>Eligibility & Entitlement</span>
           </div>
 
           <div 
-            className={`nav-item ${activeView === 'calculator' ? 'active' : ''}`}
-            onClick={() => handleNavClick('calculator')}
+            className={`nav-item ${activeView === 'claim_builder' ? 'active' : ''}`}
+            onClick={() => handleNavClick('claim_builder')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('calculator'))}
-            aria-current={activeView === 'calculator' ? 'page' : undefined}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('claim_builder'))}
           >
-            <Calculator size={18} />
-            <span>Subsistence Calc</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'error_spotter' ? 'active' : ''}`}
-            onClick={() => handleNavClick('error_spotter')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('error_spotter'))}
-            aria-current={activeView === 'error_spotter' ? 'page' : undefined}
-          >
-            <AlertTriangle size={18} />
-            <span>VA Error Spotter</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'document_generator' ? 'active' : ''}`}
-            onClick={() => handleNavClick('document_generator')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('document_generator'))}
-            aria-current={activeView === 'document_generator' ? 'page' : undefined}
-          >
-            <FileEdit size={18} />
-            <span>Document Generator</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'self_employment' ? 'active' : ''}`}
-            onClick={() => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); })}
-            aria-current={activeView === 'self_employment' ? 'page' : undefined}
-          >
-            <Briefcase size={18} />
-            <span>Self-Employment Track</span>
+            <Compass size={18} />
+            <span>IPE / Plan Builder</span>
           </div>
 
           <div 
@@ -128,11 +93,175 @@ function Sidebar({
             role="button"
             tabIndex={0}
             onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('special_programs'))}
-            aria-current={activeView === 'special_programs' ? 'page' : undefined}
           >
             <GraduationCap size={18} />
-            <span>Special Retraining</span>
+            <span>School / Training Track</span>
           </div>
+
+          <div 
+            className={`nav-item ${activeView === 'dispute_hub' && sessionStorage.getItem('dispute_hub_prefill') === 'computer_denial' ? 'active' : ''}`}
+            onClick={() => {
+              sessionStorage.setItem('dispute_hub_prefill', 'computer_denial');
+              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'computer_denial' }));
+              handleNavClick('dispute_hub');
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => {
+              sessionStorage.setItem('dispute_hub_prefill', 'computer_denial');
+              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'computer_denial' }));
+              handleNavClick('dispute_hub');
+            })}
+          >
+            <Briefcase size={18} />
+            <span>Supplies & Tech Requests</span>
+          </div>
+
+          <div 
+            className={`nav-item`}
+            onClick={() => {
+              sessionStorage.setItem('dispute_hub_prefill', 'feasibility_denial');
+              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'feasibility_denial' }));
+              handleNavClick('dispute_hub');
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => {
+              sessionStorage.setItem('dispute_hub_prefill', 'feasibility_denial');
+              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'feasibility_denial' }));
+              handleNavClick('dispute_hub');
+            })}
+          >
+            <Shield size={18} />
+            <span>Independent Living Help</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'self_employment' ? 'active' : ''}`}
+            onClick={() => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); })}
+          >
+            <Briefcase size={18} />
+            <span>Self-Employment Track</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'dispute_hub' && !sessionStorage.getItem('dispute_hub_prefill') ? 'active' : ''}`}
+            onClick={() => {
+              sessionStorage.removeItem('dispute_hub_prefill');
+              handleNavClick('dispute_hub');
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => {
+              sessionStorage.removeItem('dispute_hub_prefill');
+              handleNavClick('dispute_hub');
+            })}
+          >
+            <Scale size={18} />
+            <span>Appeals & Disputes Hub</span>
+          </div>
+        </div>
+
+        {/* Primary Actions */}
+        <div className="nav-category" style={{ marginTop: '12px' }}>
+          <div className="nav-title">Primary Tools</div>
+
+          <div 
+            className={`nav-item ${activeView === 'calculator' ? 'active' : ''}`}
+            onClick={() => handleNavClick('calculator')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('calculator'))}
+          >
+            <Calculator size={18} />
+            <span>Calculate Payments</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'document_generator' ? 'active' : ''}`}
+            onClick={() => handleNavClick('document_generator')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('document_generator'))}
+          >
+            <FileEdit size={18} />
+            <span>Build a Letter / Document</span>
+          </div>
+
+          <div 
+            className={`nav-item`}
+            onClick={() => {
+              // Directs to evidence sufficiency checklist within dispute hub
+              window.dispatchEvent(new CustomEvent('change-dispute-tab', { detail: 'evidence' }));
+              handleNavClick('dispute_hub');
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => {
+              window.dispatchEvent(new CustomEvent('change-dispute-tab', { detail: 'evidence' }));
+              handleNavClick('dispute_hub');
+            })}
+          >
+            <FileCheck size={18} />
+            <span>Track Evidence Packages</span>
+          </div>
+        </div>
+
+        {/* Research Authority */}
+        <div className="nav-category" style={{ marginTop: '12px' }}>
+          <div className="nav-title">Research Authority</div>
+          
+          <div 
+            className={`nav-item ${activeView === 'authority_library' ? 'active' : ''}`}
+            onClick={() => handleNavClick('authority_library')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('authority_library'))}
+          >
+            <Gavel size={18} />
+            <span>Authority Library</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'coverage_report' ? 'active' : ''}`}
+            onClick={() => handleNavClick('coverage_report')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('coverage_report'))}
+          >
+            <CheckCircle2 size={18} className="text-emerald-400" />
+            <span>Coverage & Trust Report</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'source_diff' ? 'active' : ''}`}
+            onClick={() => handleNavClick('source_diff')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('source_diff'))}
+          >
+            <RefreshCw size={18} className="text-indigo-400" />
+            <span>Source Updates & Diffs</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'reference' ? 'active' : ''}`}
+            onClick={() => handleNavClick('reference')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('reference'))}
+          >
+            <BookOpen size={18} />
+            <span>Citation Search (eCFR/USC)</span>
+          </div>
+        </div>
+
+        {/* Support & Configuration */}
+        <div className="nav-category" style={{ marginTop: '12px' }}>
+          <div className="nav-title">Support & System</div>
 
           <div 
             className={`nav-item ${activeView === 'directory' ? 'active' : ''}`}
@@ -140,83 +269,25 @@ function Sidebar({
             role="button"
             tabIndex={0}
             onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('directory'); if (setDirQuery) setDirQuery(''); })}
-            aria-current={activeView === 'directory' ? 'page' : undefined}
           >
             <Users size={18} />
-            <span>Counselor Directory</span>
+            <span>Find Contacts (ROs)</span>
           </div>
 
           <div 
-            className={`nav-item ${activeView === 'glossary' ? 'active' : ''}`}
-            onClick={() => handleNavClick('glossary')}
+            className="nav-item"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-accessibility-settings'))}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('glossary'))}
-            aria-current={activeView === 'glossary' ? 'page' : undefined}
+            onKeyDown={(e) => handleKeyDown(e, () => window.dispatchEvent(new CustomEvent('open-accessibility-settings')))}
           >
-            <FileText size={18} />
-            <span>Glossary of Terms</span>
+            <Settings size={18} />
+            <span>Accessibility Settings</span>
           </div>
         </div>
-
-        {/* Related VA Benefits / Planning Tools */}
-        <div className="nav-category" style={{ marginTop: '16px' }}>
-          <div className="nav-title">Related Benefits / Planning</div>
-          
-          <div 
-            className={`nav-item ${activeView === 'disability_hub' ? 'active' : ''}`}
-            onClick={() => handleNavClick('disability_hub')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('disability_hub'))}
-            aria-current={activeView === 'disability_hub' ? 'page' : undefined}
-          >
-            <Scale size={18} />
-            <span>Disability & SMC</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'financial_planner' ? 'active' : ''}`}
-            onClick={() => handleNavClick('financial_planner')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('financial_planner'))}
-            aria-current={activeView === 'financial_planner' ? 'page' : undefined}
-          >
-            <DollarSign size={18} />
-            <span>Financial Planner</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'planning' ? 'active' : ''}`}
-            onClick={() => handleNavClick('planning')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('planning'))}
-            aria-current={activeView === 'planning' ? 'page' : undefined}
-          >
-            <Compass size={18} />
-            <span>Career Plan & Strategy</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'resources' ? 'active' : ''}`}
-            onClick={() => handleNavClick('resources')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('resources'))}
-            aria-current={activeView === 'resources' ? 'page' : undefined}
-          >
-            <ExternalLink size={18} />
-            <span>Resource Center</span>
-          </div>
-        </div>
-
-        {/* Reference Manual Tree */}
+        
         {activeView === 'reference' && (
-          <div className="nav-category">
-            <div className="nav-title">Reference Tree</div>
-            
+          <div style={{ marginTop: '16px', borderTop: '1px solid var(--sidebar-border)', paddingTop: '16px' }}>
             {/* U.S. Code Accordion */}
             <div>
               <div 
@@ -236,7 +307,7 @@ function Sidebar({
               
               {expandedCategories.usc && (
                 <div role="group">
-                  {US_CODE_SECTIONS.map(sec => (
+                  {authorityManifest.statutes.map(sec => (
                     <div 
                       key={sec.id}
                       className={`nav-item sub-item ${selectedSection.type === 'usc' && selectedSection.id === sec.id ? 'active' : ''}`}
@@ -245,7 +316,7 @@ function Sidebar({
                       tabIndex={0}
                       onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); })}
                     >
-                      {sec.id}: {sec.title.split('. ')[1]}
+                      § {sec.id}: {sec.title}
                     </div>
                   ))}
                 </div>
@@ -271,7 +342,7 @@ function Sidebar({
               
               {expandedCategories.cfr && (
                 <div role="group">
-                  {CFR_REGULATIONS.map(reg => (
+                  {authorityManifest.regulations.map(reg => (
                     <div 
                       key={reg.id}
                       className={`nav-item sub-item ${selectedSection.type === 'cfr' && selectedSection.id === reg.id ? 'active' : ''}`}
@@ -280,7 +351,7 @@ function Sidebar({
                       tabIndex={0}
                       onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'cfr', id: reg.id }); setIsSidebarOpen(false); })}
                     >
-                      {reg.id}: {reg.title.split('. ')[1]}
+                      § {reg.section}: {reg.title}
                     </div>
                   ))}
                 </div>
@@ -306,38 +377,16 @@ function Sidebar({
 
               {expandedCategories.m28c && (
                 <div role="group">
-                  {M28C_PARTS.map(part => (
-                    <div key={part.id}>
-                      <div 
-                        className="nav-item sub-item" 
-                        style={{ fontWeight: '600', color: 'var(--text-primary)' }}
-                        onClick={() => togglePart(part.id)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => handleKeyDown(e, () => togglePart(part.id))}
-                        aria-expanded={expandedCategories.m28cParts[part.id]}
-                      >
-                        <ChevronRight size={12} className={`collapsible-icon ${expandedCategories.m28cParts[part.id] ? 'expanded' : ''}`} />
-                        <span style={{ marginLeft: '4px' }}>{part.title.split('. ')[0]}</span>
-                      </div>
-                      
-                      {expandedCategories.m28cParts[part.id] && (
-                        <div role="group">
-                          {part.chapters.map(ch => (
-                            <div 
-                              key={ch.id}
-                              className={`nav-item sub-item ${selectedSection.type === 'm28c' && selectedSection.id === ch.id ? 'active' : ''}`}
-                              onClick={() => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); }}
-                              style={{ paddingLeft: '48px', fontSize: '0.8rem' }}
-                              role="button"
-                              tabIndex={0}
-                              onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); })}
-                            >
-                              {ch.title.split(': ')[0]}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  {authorityManifest.m28c.map(ch => (
+                    <div 
+                      key={ch.id}
+                      className={`nav-item sub-item ${selectedSection.type === 'm28c' && selectedSection.id === ch.id ? 'active' : ''}`}
+                      onClick={() => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); })}
+                    >
+                      {ch.citation}: {ch.title}
                     </div>
                   ))}
                 </div>

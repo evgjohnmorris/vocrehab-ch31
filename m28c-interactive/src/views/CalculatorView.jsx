@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Info, Settings, HelpCircle, ShieldCheck, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { 
+  Search, Info, Settings, HelpCircle, ShieldCheck, 
+  AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, 
+  Printer, Clipboard, FileText, CheckSquare, Save
+} from 'lucide-react';
 import { SCHOOLS_DATABASE } from '../data/school_data';
 import { calculateAllowance } from '../utils/ch31Calculations';
 
@@ -8,25 +12,23 @@ function CalculatorView({
   selectedRateYear, 
   setSelectedRateYear, 
   openSettings, 
-  onMhaChange, 
-  reduceMotion 
+  onMhaChange,
+  reduceMotion
 }) {
-  // Resolve active rates target year
   const activeRates = rates[selectedRateYear] || rates.ay2025_2026 || rates;
+
+  // Stepper State
+  const [currentStep, setCurrentStep] = useState(1);
+  const [calculatorMode, setCalculatorMode] = useState('advanced'); // 'simple' | 'advanced'
 
   // Localized Calculator States
   const [calcTrainingType, setCalcTrainingType] = useState('institutional');
   const [calcTime, setCalcTime] = useState('full');
   const [calcDependents, setCalcDependents] = useState(0);
   const [calcBahRate, setCalcBahRate] = useState(1950);
-  
   const [calcActiveDuty, setCalcActiveDuty] = useState(false);
   const [calcVenue, setCalcVenue] = useState('in-person'); // 'in-person' | 'online' | 'foreign'
-  const [calcTier, setCalcTier] = useState(1.0); // 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.0
-  const [showTierCalc, setShowTierCalc] = useState(false);
-  const [tierCalcMonths, setTierCalcMonths] = useState(36);
-  const [tierCalcPurpleHeart, setTierCalcPurpleHeart] = useState(false);
-  const [tierCalcDisabilityDischarge, setTierCalcDisabilityDischarge] = useState(false);
+  const [calcTier, setCalcTier] = useState(1.0); // 1.0, 0.9, 0.8...
   const [calcUseCredits, setCalcUseCredits] = useState(false);
   const [calcCredits, setCalcCredits] = useState(12);
   const [calcFullTimeThreshold, setCalcFullTimeThreshold] = useState(12);
@@ -41,13 +43,18 @@ function CalculatorView({
   const [calcComputerCost, setCalcComputerCost] = useState(activeRates.ch31_computer_package_value || 2000.00);
   const [calcOjtTrainingWage, setCalcOjtTrainingWage] = useState(0);
   const [calcOjtJourneymanWage, setCalcOjtJourneymanWage] = useState(0);
-  const [calcCalculatorTab, setCalcCalculatorTab] = useState('monthly'); // 'monthly' | 'tuition' | 'ojt'
   const [calcSchoolSearchQuery, setCalcSchoolSearchQuery] = useState('');
   const [calcSelectedSchool, setCalcSelectedSchool] = useState(null);
   const [calcShowSuggestions, setCalcShowSuggestions] = useState(false);
   const [schoolsDatabase, setSchoolsDatabase] = useState([]);
+  
+  // Custom Stepper States
+  const [selectedSubsistenceType, setSelectedSubsistenceType] = useState('p911'); // 'p911' | 'ch31'
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [estimateSaved, setEstimateSaved] = useState(false);
+  const [showChecklistModal, setShowChecklistModal] = useState(false);
 
-  // Fetch complete GI Bill colleges database on load locally
+  // Fetch complete colleges database
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}schools.json`)
       .then(res => {
@@ -56,7 +63,7 @@ function CalculatorView({
       })
       .then(data => {
         const mapped = data.map(arr => ({
-          id: arr[7], // facilityCode
+          id: arr[7],
           name: arr[0],
           city: arr[1],
           state: arr[2],
@@ -85,7 +92,6 @@ function CalculatorView({
           onlineOnly: arr[0].toLowerCase().includes('online') || arr[0].toLowerCase().includes('distance learning'),
           yellowRibbonDetails: arr[23] || null
         }));
-        // Blend in mock institutions to ensure tests/cautions demo works
         setSchoolsDatabase([...mapped, ...SCHOOLS_DATABASE.filter(s => s.id.includes('mock'))]);
       })
       .catch(err => {
@@ -96,7 +102,7 @@ function CalculatorView({
 
   const activeSchools = schoolsDatabase.length > 0 ? schoolsDatabase : SCHOOLS_DATABASE;
 
-  // Run allowance calculation on the fly
+  // Run calculation
   const calculatorResults = calculateAllowance({
     rates: activeRates,
     calcTrainingType,
@@ -121,7 +127,6 @@ function CalculatorView({
     calcOjtJourneymanWage
   });
 
-  // Calculate MHA and propagate to parent for budget autofill
   const budgetMhaAmount = calculatorResults 
     ? (Number(calculatorResults.p911Rate) > Number(calculatorResults.regularRate) 
         ? Number(calculatorResults.p911Rate) 
@@ -132,1142 +137,768 @@ function CalculatorView({
     onMhaChange(budgetMhaAmount);
   }, [budgetMhaAmount, onMhaChange]);
 
-  // Reset default computer package cost when rate year updates
-  useEffect(() => {
+  const [prevRateYear, setPrevRateYear] = useState(selectedRateYear);
+  if (selectedRateYear !== prevRateYear) {
+    setPrevRateYear(selectedRateYear);
     setCalcComputerCost(activeRates.ch31_computer_package_value || 2000.00);
-  }, [selectedRateYear, activeRates.ch31_computer_package_value]);
+  }
+
+  // Stepper helper
+  const nextStep = () => {
+    if (currentStep < 7) setCurrentStep(prev => prev + 1);
+  };
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(prev => prev - 1);
+  };
+
+  // Compile summary details
+  const getResultsSummaryText = () => {
+    if (!calculatorResults) return 'No results calculated.';
+    const bestRateName = calculatorResults.recommendation === 'Post-9/11 Subsistence Allowance (P911SA)' ? 'Post-9/11 Rate' : 'Standard Chapter 31 Rate';
+    return `CH. 31 VR&E SUBSISTENCE ESTIMATE SUMMARY
+Academic Year: ${activeRates.label}
+Selected Program Track: ${calcTrainingType.toUpperCase()}
+Housing Subsistence Election: ${selectedSubsistenceType === 'p911' ? 'Post-9/11 GI Bill rate' : 'Standard Chapter 31 rate'}
+Calculated Monthly Payout: $${(selectedSubsistenceType === 'p911' ? calculatorResults.p911Rate : calculatorResults.regularRate).toLocaleString()}
+Best Option Recommended: ${bestRateName} (Difference: $${Math.abs(Number(calculatorResults.p911Rate) - Number(calculatorResults.regularRate)).toFixed(2)}/mo)
+Tuition Payments Covered: $${calculatorResults.tuitionPayable.toLocaleString()} / year
+Books & Supplies Value Provided: $${calculatorResults.suppliesValue.toLocaleString()} / year
+Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost.toLocaleString()}` : '$0.00'}
+
+*** Confirmed via published rates as of May 25, 2026. Estimates are subject to VRC counselor audit. ***`;
+  };
+
+  const handleCopySummary = () => {
+    navigator.clipboard.writeText(getResultsSummaryText());
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  const handlePrintSummary = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>VR&E Subsistence Estimate Summary</title>
+          <style>
+            body { font-family: Courier, monospace; padding: 40px; white-space: pre-wrap; line-height: 1.5; color: #000; }
+            h1 { font-family: sans-serif; font-size: 1.2rem; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+          </style>
+        </head>
+        <body>
+          <h1>VR&E Payment Estimate</h1>
+          <div>${getResultsSummaryText()}</div>
+          <script>window.print();</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleSaveEstimate = () => {
+    const storage = sessionStorage; // Session only
+    storage.setItem('m28c_saved_calculator_estimate', JSON.stringify({
+      rateYear: selectedRateYear,
+      trainingType: calcTrainingType,
+      monthlyPayout: selectedSubsistenceType === 'p911' ? calculatorResults.p911Rate : calculatorResults.regularRate,
+      tuition: calculatorResults.tuitionPayable,
+      supplies: calculatorResults.suppliesValue
+    }));
+    setEstimateSaved(true);
+    setTimeout(() => setEstimateSaved(false), 2000);
+  };
 
   return (
-    <div className="doc-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span className="doc-tag">Interactive Tools</span>
-        <button 
-          className="btn"
-          style={{
-            height: '28px',
-            fontSize: '0.75rem',
-            padding: '0 10px',
-            backgroundColor: 'var(--hover-bg)',
-            border: '1px solid var(--card-border)',
-            color: 'var(--accent-color)'
-          }}
-          onClick={openSettings}
-        >
-          <Settings size={12} />
-          <span>Manage Base Rates</span>
-        </button>
-      </div>
-      <h1 className="doc-title">Subsistence Allowance & Housing Calculator</h1>
-      <p className="doc-subtitle">Compare regular Chapter 31 rates side-by-side with Post-9/11 housing options, including tuition offsets, books stipends, and OJT schedules.</p>
-      
-      {/* Rate Year Selector & Verification Indicator */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '12px 16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px', marginTop: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Academic Year Rates:</span>
-          <select
-            className="form-control"
-            style={{ width: 'auto', height: '32px', padding: '0 8px', fontSize: '0.8rem', minWidth: '150px' }}
-            value={selectedRateYear}
-            onChange={(e) => {
-              setSelectedRateYear(e.target.value);
-              const active = rates[e.target.value] || rates.ay2025_2026;
-              setCalcComputerCost(active.ch31_computer_package_value || 2000.00);
-            }}
+    <div className="doc-card text-slate-100 select-text">
+      {/* Top Banner and Mode Switcher */}
+      <div className="flex justify-between items-center flex-wrap gap-3 mb-6">
+        <div>
+          <span className="doc-tag bg-blue-500/10 text-blue-400 border border-blue-500/20">Guided Payment Stepper</span>
+          <h1 className="text-2xl font-bold text-slate-100 mt-1">Subsistence Allowance Calculator</h1>
+        </div>
+        <div className="flex gap-2">
+          {/* Simple / Advanced Mode Toggles */}
+          <div className="flex bg-slate-950/60 p-1 border border-slate-800 rounded-lg">
+            <button
+              onClick={() => setCalculatorMode('simple')}
+              className={`px-3 py-1 rounded text-xs font-semibold transition cursor-pointer ${
+                calculatorMode === 'simple' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Simple Mode
+            </button>
+            <button
+              onClick={() => setCalculatorMode('advanced')}
+              className={`px-3 py-1 rounded text-xs font-semibold transition cursor-pointer ${
+                calculatorMode === 'advanced' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Advanced Mode
+            </button>
+          </div>
+
+          <button 
+            className="btn btn-sm btn-secondary flex items-center gap-1.5 h-8 text-xs cursor-pointer"
+            onClick={openSettings}
           >
-            <option value="ay2025_2026">Post-9/11 AY 2025–2026 / Chapter 31 FY 2026</option>
-            <option value="ay2026_2027">Post-9/11 AY 2026–2027 / Chapter 31 FY 2026 (until FY27 is published)</option>
+            <Settings size={12} />
+            <span>Base Rates</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stepper Progress Bar */}
+      <div className="relative mb-6">
+        <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+          <span>Step {currentStep} of 7: {
+            currentStep === 1 ? 'Program Type' :
+            currentStep === 2 ? 'Subsistence Type' :
+            currentStep === 3 ? 'Training Location' :
+            currentStep === 4 ? 'Dependents & Attendance' :
+            currentStep === 5 ? 'Tuition & Supplies' :
+            currentStep === 6 ? 'Calculation Results' : 'Actions & Exports'
+          }</span>
+          <span>{Math.round((currentStep / 7) * 100)}% Complete</span>
+        </div>
+        <div className="w-full bg-slate-950 border border-slate-850 h-2.5 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-indigo-500 transition-all duration-300"
+            style={{ width: `${(currentStep / 7) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Academic Year select warning strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/40 p-3 border border-slate-800 rounded-xl mb-6 text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-slate-300">Rates Year:</span>
+          <select
+            value={selectedRateYear}
+            onChange={(e) => setSelectedRateYear(e.target.value)}
+            className="bg-slate-950 border border-slate-850 rounded px-2.5 py-1 text-xs text-slate-100 font-semibold cursor-pointer"
+            aria-label="Select active rates year"
+          >
+            <option value="ay2025_2026">AY 25–26 / FY 26</option>
+            <option value="ay2026_2027">AY 26–27 / FY 26</option>
           </select>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            <span>Rates Last Updated/Verified: <strong>{rates.lastUpdated || rates.lastVerified || "2026-05-25"}</strong></span>
-          </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-            Rates are estimates. Confirm against VA’s current published Chapter 31 and Post-9/11 rate tables.
-          </div>
+        <div className="text-[10px] italic">
+          Last verified: {rates.lastVerified || '2026-05-25'} • Rates are estimates.
         </div>
       </div>
 
-      <div className="doc-divider"></div>
+      <div className="doc-divider mb-6"></div>
 
-      {/* Sub-Tabs for Calculator Outputs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid var(--card-border)', paddingBottom: '10px' }}>
-        <button 
-          className={`tab-btn ${calcCalculatorTab === 'monthly' ? 'active' : ''}`}
-          onClick={() => setCalcCalculatorTab('monthly')}
-          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-        >
-          Monthly Housing Payouts
-        </button>
-        <button 
-          className={`tab-btn ${calcCalculatorTab === 'tuition' ? 'active' : ''}`}
-          onClick={() => setCalcCalculatorTab('tuition')}
-          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-        >
-          Tuition & Books Offset
-        </button>
-        {calcTrainingType === 'ojt' && (
-          <button 
-            className={`tab-btn ${calcCalculatorTab === 'ojt' ? 'active' : ''}`}
-            onClick={() => setCalcCalculatorTab('ojt')}
-            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-          >
-            OJT Step Progression
-          </button>
-        )}
-      </div>
+      {/* STEP CONTENT SWITCHER */}
+      <div className="min-h-[280px]">
+        {/* STEP 1: PROGRAM TYPE */}
+        {currentStep === 1 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 1: What type of program are you attending?</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Chapter 31 VR&E calculates subsistence payouts differently depending on whether you are enrolled in standard college coursework or an Apprenticeship/On-the-Job training track.
+            </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px' }}>
-        {/* Left Column: Input Form */}
-        <div>
-          {/* General Settings */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div className="form-group">
-              <label>Rehabilitation Program/Track</label>
-              <select 
-                className="form-control" 
-                value={calcTrainingType} 
-                onChange={(e) => {
-                  const newType = e.target.value;
-                  setCalcTrainingType(newType);
-                  if (newType === 'ojt') {
-                    setCalcTime('full'); // OJT is full-time only
-                  } else if (newType === 'institutional' && calcCalculatorTab === 'ojt') {
-                    setCalcCalculatorTab('monthly');
-                  }
-                }}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                onClick={() => setCalcTrainingType('institutional')}
+                className={`border rounded-xl p-5 cursor-pointer transition select-none flex flex-col justify-between h-32 ${
+                  calcTrainingType === 'institutional' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-750'
+                }`}
               >
-                <option value="institutional">Institutional (College, Technical, University)</option>
-                <option value="ojt">On-the-Job Training / Apprentice</option>
-              </select>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-200">Institutional Training</span>
+                  <p className="text-[10px] text-slate-450 leading-relaxed">Attending colleges, trade schools, business academies, or accredited universities.</p>
+                </div>
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mt-2">Select Institutional</span>
+              </div>
+
+              <div 
+                onClick={() => setCalcTrainingType('ojt')}
+                className={`border rounded-xl p-5 cursor-pointer transition select-none flex flex-col justify-between h-32 ${
+                  calcTrainingType === 'ojt' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-750'
+                }`}
+              >
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-200">Apprenticeship & On-the-Job Training</span>
+                  <p className="text-[10px] text-slate-450 leading-relaxed">Learning a trade directly on the job with structured wage progressions.</p>
+                </div>
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mt-2">Select OJT Track</span>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Active Duty Status</label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '38px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                <input 
+            <div className="bg-slate-950/40 p-4 border border-slate-850 rounded-xl mt-4">
+              <label className="flex items-center gap-3 cursor-pointer select-none text-xs text-slate-200">
+                <input
                   type="checkbox"
                   checked={calcActiveDuty}
                   onChange={(e) => setCalcActiveDuty(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
                 />
-                I am currently on Active Duty
+                <span>I am currently on Active Duty status</span>
               </label>
-            </div>
-          </div>
-
-          {/* Venue, Dependents, and Tier (Post-9/11 Specifics) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '8px' }}>
-            <div className="form-group">
-              <label>Number of Dependents</label>
-              <select 
-                className="form-control" 
-                value={calcDependents} 
-                onChange={(e) => setCalcDependents(Number(e.target.value))}
-              >
-                <option value={0}>No Dependents</option>
-                <option value={1}>1 Dependent</option>
-                <option value={2}>2 Dependents</option>
-                <option value={3}>3 Dependents</option>
-                <option value={4}>4 Dependents</option>
-                <option value={5}>5 or More Dependents</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label style={{ margin: 0 }}>GI Bill Eligibility Tier</label>
-                <button 
-                  type="button" 
-                  onClick={() => setShowTierCalc(!showTierCalc)}
-                  style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    color: 'var(--accent-color)', 
-                    fontSize: '0.72rem', 
-                    cursor: 'pointer', 
-                    padding: 0, 
-                    textDecoration: 'underline',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px'
-                  }}
-                >
-                  <HelpCircle size={12} />
-                  <span>{showTierCalc ? "Hide Helper" : "Calculate Tier"}</span>
-                </button>
-              </div>
-              <select 
-                className="form-control" 
-                value={calcTier} 
-                onChange={(e) => setCalcTier(Number(e.target.value))}
-              >
-                <option value={1.0}>100% (36+ Mos, Purple Heart, or Med Disch)</option>
-                <option value={0.9}>90% (30-35 Months)</option>
-                <option value={0.8}>80% (24-29 Months)</option>
-                <option value={0.7}>70% (18-23 Months)</option>
-                <option value={0.6}>60% (6-17 Months)</option>
-                <option value={0.5}>50% (90 Days - 5 Mos)</option>
-                <option value={0.0}>0% (Not eligible)</option>
-              </select>
-
-              {showTierCalc && (
-                <div style={{ 
-                  marginTop: '8px', 
-                  padding: '12px', 
-                  backgroundColor: 'var(--hover-bg)', 
-                  border: '1px solid var(--card-border)', 
-                  borderRadius: '8px', 
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px'
-                }}>
-                  <div style={{ fontWeight: '600', color: 'var(--accent-color)', fontSize: '0.82rem' }}>
-                    GI Bill Tier Estimator
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.72rem', display: 'block', marginBottom: '4px' }}>Cumulative Active Duty Service (Months)</label>
-                    <input 
-                      type="number" 
-                      className="form-control" 
-                      style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                      value={tierCalcMonths} 
-                      onChange={(e) => setTierCalcMonths(Number(e.target.value))}
-                      min={0}
-                      max={120}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input 
-                      type="checkbox" 
-                      id="purpleHeart"
-                      checked={tierCalcPurpleHeart} 
-                      onChange={(e) => setTierCalcPurpleHeart(e.target.checked)}
-                    />
-                    <label htmlFor="purpleHeart" style={{ fontSize: '0.72rem', cursor: 'pointer', margin: 0 }}>
-                      Purple Heart Recipient
-                    </label>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input 
-                      type="checkbox" 
-                      id="disabilityDischarge"
-                      checked={tierCalcDisabilityDischarge} 
-                      onChange={(e) => setTierCalcDisabilityDischarge(e.target.checked)}
-                    />
-                    <label htmlFor="disabilityDischarge" style={{ fontSize: '0.72rem', cursor: 'pointer', margin: 0 }}>
-                      Service-Connected Discharge (30+ Continuous Days)
-                    </label>
-                  </div>
-                  
-                  <div style={{ 
-                    marginTop: '4px',
-                    padding: '6px 8px', 
-                    backgroundColor: 'var(--card-bg)', 
-                    border: '1px dashed var(--card-border)', 
-                    borderRadius: '4px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span>Calculated Tier:</span>
-                    <strong style={{ color: 'var(--accent-color)', fontWeight: '700' }}>
-                      {(() => {
-                        if (tierCalcPurpleHeart || tierCalcDisabilityDischarge) return "100%";
-                        if (tierCalcMonths >= 36) return "100%";
-                        if (tierCalcMonths >= 30) return "90%";
-                        if (tierCalcMonths >= 24) return "80%";
-                        if (tierCalcMonths >= 18) return "70%";
-                        if (tierCalcMonths >= 6) return "60%";
-                        if (tierCalcMonths >= 3) return "50%";
-                        return "0%";
-                      })()}
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{ padding: '6px 10px', fontSize: '0.75rem', width: '100%', marginTop: '4px' }}
-                    onClick={() => {
-                      let finalTier = 0.0;
-                      if (tierCalcPurpleHeart || tierCalcDisabilityDischarge) finalTier = 1.0;
-                      else if (tierCalcMonths >= 36) finalTier = 1.0;
-                      else if (tierCalcMonths >= 30) finalTier = 0.9;
-                      else if (tierCalcMonths >= 24) finalTier = 0.8;
-                      else if (tierCalcMonths >= 18) finalTier = 0.7;
-                      else if (tierCalcMonths >= 6) finalTier = 0.6;
-                      else if (tierCalcMonths >= 3) finalTier = 0.5;
-                      setCalcTier(finalTier);
-                      setShowTierCalc(false);
-                    }}
-                  >
-                    Apply Calculated Tier
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Monthly Kicker Stipend ($)</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                value={calcKicker} 
-                onChange={(e) => setCalcKicker(Number(e.target.value))}
-                min={0}
-                placeholder="e.g. 200"
-              />
-            </div>
-          </div>
-
-          {calcTrainingType === 'institutional' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* School Search Box */}
-              <div className="form-group" style={{ position: 'relative', marginBottom: 0 }}>
-                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600' }}>Search School Name or Zip Code (GI Bill Database)</span>
-                  {calcSelectedSchool && (
-                    <span 
-                      style={{ fontSize: '0.75rem', color: 'var(--accent-color)', cursor: 'pointer', fontWeight: '600' }}
-                      onClick={() => {
-                        setCalcSelectedSchool(null);
-                        setCalcSchoolSearchQuery('');
-                      }}
-                    >
-                      Clear Search
-                    </span>
-                  )}
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    type="text"
-                    className="form-control"
-                    style={{ paddingRight: '36px' }}
-                    placeholder="Type school name (e.g. Arizona State) or zip code..."
-                    value={calcSchoolSearchQuery}
-                    onChange={(e) => {
-                      setCalcSchoolSearchQuery(e.target.value);
-                      setCalcShowSuggestions(true);
-                    }}
-                    onFocus={() => setCalcShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setCalcShowSuggestions(false), 200)}
-                  />
-                  <Search 
-                    size={16} 
-                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} 
-                  />
-                </div>
-
-                {/* Autocomplete Dropdown */}
-                {calcShowSuggestions && calcSchoolSearchQuery.trim().length > 1 && (
-                  <div 
-                    className="autocomplete-dropdown"
-                    style={{ 
-                      position: 'absolute', 
-                      top: '100%', 
-                      left: 0, 
-                      right: 0, 
-                      backgroundColor: 'var(--card-bg)', 
-                      border: '1px solid var(--card-border)', 
-                      borderRadius: '8px', 
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.3)', 
-                      zIndex: 1000, 
-                      maxHeight: '220px', 
-                      overflowY: 'auto',
-                      marginTop: '4px'
-                    }}
-                  >
-                    {activeSchools.filter(school => {
-                      const q = calcSchoolSearchQuery.toLowerCase();
-                      return school.name.toLowerCase().includes(q) || 
-                             school.id.toLowerCase().includes(q) || 
-                             school.zipCode.includes(q) || 
-                             school.city.toLowerCase().includes(q) || 
-                             school.state.toLowerCase().includes(q);
-                    }).slice(0, 8).map(school => (
-                      <div 
-                        key={school.id}
-                        className="autocomplete-item"
-                        style={{ 
-                          padding: '10px 14px', 
-                          cursor: 'pointer', 
-                          borderBottom: '1px solid var(--card-border)', 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          gap: '2px'
-                        }}
-                        onMouseDown={() => {
-                          setCalcSelectedSchool(school);
-                          setCalcSchoolSearchQuery(school.name);
-                          setCalcShowSuggestions(false);
-                          setCalcBahRate(school.bahRate);
-                          setCalcSchoolType(school.type);
-                          setCalcTuition(school.tuition);
-                          setCalcYellowRibbon(school.yellowRibbon || false);
-                          setCalcYrSchoolContribution(0);
-                          setCalcYrDivision("");
-                          setCalcScholarships(0);
-                          // Automatically set venue based on school details
-                          if (school.foreign) {
-                            setCalcVenue('foreign');
-                          } else if (school.onlineOnly) {
-                            setCalcVenue('online');
-                          } else {
-                            setCalcVenue('in-person');
-                          }
-                        }}
-                      >
-                        <div style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                          {school.name}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px' }}>
-                          <span>{school.city}, {school.state} {school.zipCode}</span>
-                          <span>•</span>
-                          <span style={{ textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--accent-color)', fontWeight: '700' }}>{school.type}</span>
-                        </div>
-                      </div>
-                    ))}
-                    {activeSchools.filter(school => {
-                      const q = calcSchoolSearchQuery.toLowerCase();
-                      return school.name.toLowerCase().includes(q) || 
-                             school.id.toLowerCase().includes(q) || 
-                             school.zipCode.includes(q) || 
-                             school.city.toLowerCase().includes(q) || 
-                             school.state.toLowerCase().includes(q);
-                    }).length === 0 && (
-                      <div style={{ padding: '12px', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        No matching schools or zip codes. Type custom values below.
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Selected School Card */}
-              {calcSelectedSchool && (
-                <div 
-                  style={{ 
-                    padding: '16px', 
-                    backgroundColor: 'var(--glass-bg)', 
-                    border: '1px solid var(--accent-color)', 
-                    borderRadius: '8px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '12px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                    marginTop: '8px'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <div style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        🏫 {calcSelectedSchool.name}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                        {calcSelectedSchool.city}, {calcSelectedSchool.state} {calcSelectedSchool.zipCode} • {calcSelectedSchool.institutionOwnership || calcSelectedSchool.type}
-                      </div>
-                    </div>
-                    <span 
-                      className={`badge ${calcSelectedSchool.type === 'public' ? 'badge-success' : 'badge-info'}`}
-                      style={{ fontSize: '0.65rem', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}
-                    >
-                      {calcSelectedSchool.type}
-                    </span>
-                  </div>
-
-                  {/* Alert Banner for Complaints and Caution Flags */}
-                  {(calcSelectedSchool.complaints > 0 || 
-                    calcSelectedSchool.benefitsSuspended || 
-                    calcSelectedSchool.accreditationProbation || 
-                    calcSelectedSchool.hcm || 
-                    calcSelectedSchool.oigInvestigation) && (
-                    <div style={{ 
-                      padding: '10px 14px', 
-                      backgroundColor: 'rgba(239, 68, 68, 0.08)', 
-                      border: '1px solid rgba(239, 68, 68, 0.2)', 
-                      borderRadius: '6px', 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: '6px' 
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <AlertTriangle size={14} style={{ color: 'var(--danger-color)', flexShrink: 0 }} />
-                        <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--danger-color)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                          Federal Education Caution Flags
-                        </span>
-                      </div>
-                      <ul style={{ 
-                        margin: 0, 
-                        paddingLeft: '16px', 
-                        fontSize: '0.7rem', 
-                        color: 'var(--danger-color)', 
-                        lineHeight: '1.4',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px'
-                      }}>
-                        {calcSelectedSchool.complaints > 0 && (
-                          <li>
-                            <strong>Student Complaints:</strong> {calcSelectedSchool.complaints} closed, Principles of Excellence-related complaints submitted to the VA.
-                          </li>
-                        )}
-                        {calcSelectedSchool.benefitsSuspended && (
-                          <li>
-                            <strong>Suspension of VA Benefits:</strong> Deceptive/misleading practices detected (38 U.S.C. § 3696). VA has suspended new enrollments.
-                          </li>
-                        )}
-                        {calcSelectedSchool.accreditationProbation && (
-                          <li>
-                            <strong>Accreditation Probation:</strong> Institutional accreditation is on probation or warning status from the Dept. of Education.
-                          </li>
-                        )}
-                        {calcSelectedSchool.oigInvestigation && (
-                          <li>
-                            <strong>OIG Investigation:</strong> Institution is under investigation by the VA Office of Inspector General (OIG).
-                          </li>
-                        )}
-                        {calcSelectedSchool.hcm === 'HCM1' && (
-                          <li>
-                            <strong>Heightened Cash Monitoring (HCM1):</strong> U.S. Dept. of Education has placed this school under increased financial oversight.
-                          </li>
-                        )}
-                        {calcSelectedSchool.hcm === 'HCM2' && (
-                          <li>
-                            <strong>Heightened Cash Monitoring (HCM2):</strong> U.S. Dept. of Education has restricted funding to a strict reimbursement-only payment method.
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Detail Fields Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--card-border)', paddingBottom: '10px' }}>
-                    <div><strong>Est. Tuition:</strong> ${calcSelectedSchool.tuition.toLocaleString()}/yr</div>
-                    <div><strong>Local BAH:</strong> ${calcSelectedSchool.bahRate}/mo</div>
-                    <div><strong>Facility Code:</strong> <code style={{ fontSize: '0.7rem' }}>{calcSelectedSchool.facilityCode}</code></div>
-                    <div><strong>OPE Code:</strong> <code style={{ fontSize: '0.7rem' }}>{calcSelectedSchool.opeCode || "N/A"}</code></div>
-                    <div><strong>GI Bill Students:</strong> {calcSelectedSchool.giBillStudents.toLocaleString()}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <CheckCircle size={10} style={{ color: 'var(--success-color)' }} />
-                      <span style={{ color: 'var(--success-color)', fontWeight: '600' }}>Autofilled from Database</span>
-                    </div>
-                  </div>
-
-                  {/* Badges Panel */}
-                  <div>
-                    <div style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '6px', letterSpacing: '0.02em' }}>
-                      Veteran Benefits & Accreditations
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: calcSelectedSchool.accredited ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: calcSelectedSchool.accredited ? 'var(--success-color)' : 'var(--danger-color)', border: `1px solid ${calcSelectedSchool.accredited ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}` }}>
-                        {calcSelectedSchool.accredited ? '✓ Accredited' : '✗ Unaccredited'}
-                      </span>
-                      <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: calcSelectedSchool.studentVeteranGroup ? 'rgba(16, 185, 129, 0.1)' : 'rgba(148, 163, 184, 0.1)', color: calcSelectedSchool.studentVeteranGroup ? 'var(--success-color)' : 'var(--text-muted)', border: '1px solid var(--card-border)' }}>
-                        {calcSelectedSchool.studentVeteranGroup ? '✓ SVA Chapter' : 'No SVA Chapter'}
-                      </span>
-                      {calcSelectedSchool.yellowRibbon && (
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: 'rgba(216, 161, 41, 0.1)', color: 'var(--accent-color)', border: '1px solid rgba(216, 161, 41, 0.2)' }}>
-                          ✓ Yellow Ribbon
-                        </span>
-                      )}
-                      {calcSelectedSchool.priorityEnrollment && (
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-color)', border: '1px solid var(--card-border)' }}>
-                          ✓ Priority Enrollment
-                        </span>
-                      )}
-                      {calcSelectedSchool.militaryTA && (
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-color)', border: '1px solid var(--card-border)' }}>
-                          ✓ Military TA Approved
-                        </span>
-                      )}
-                      {calcSelectedSchool.principlesOfExcellence && (
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-color)', border: '1px solid var(--card-border)' }}>
-                          ✓ Principles of Excellence
-                        </span>
-                      )}
-                      {calcSelectedSchool.eightKeys && (
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-color)', border: '1px solid var(--card-border)' }}>
-                          ✓ 8 Keys to Success
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Rate of Pursuit and Venue grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', padding: '16px', backgroundColor: 'var(--hover-bg)', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Rate of Pursuit Input</span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--accent-color)', cursor: 'pointer' }} onClick={() => setCalcUseCredits(!calcUseCredits)}>
-                      {calcUseCredits ? "Switch to Time Select" : "Switch to Credit Count"}
-                    </span>
-                  </label>
-                  
-                  {calcUseCredits ? (
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ width: '70px' }}
-                        value={calcCredits} 
-                        onChange={(e) => setCalcCredits(Math.max(1, Number(e.target.value)))}
-                        min={1}
-                      />
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>/</span>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ width: '70px' }}
-                        value={calcFullTimeThreshold} 
-                        onChange={(e) => setCalcFullTimeThreshold(Math.max(1, Number(e.target.value)))}
-                        min={1}
-                      />
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>credits (full-time)</span>
-                    </div>
-                  ) : (
-                    <select 
-                      className="form-control" 
-                      value={calcTime} 
-                      onChange={(e) => setCalcTime(e.target.value)}
-                    >
-                      <option value="full">Full-Time (100%)</option>
-                      <option value="three-quarters">3/4-Time (75%)</option>
-                      <option value="half">1/2-Time (50%)</option>
-                    </select>
-                  )}
-                </div>
-
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Training Venue & Location</label>
-                  <select 
-                    className="form-control" 
-                    value={calcVenue} 
-                    onChange={(e) => setCalcVenue(e.target.value)}
-                  >
-                    <option value="in-person">In-Person Classes (US Campus)</option>
-                    <option value="online">Online-Only / Distance Learning</option>
-                    {calcSchoolType === 'private' && (
-                      <option value="foreign">Foreign Institution Classes</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {calcTrainingType === 'institutional' && (
-            <div className="form-group" style={{ marginTop: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>School's Local BAH Rate (E-5 with Dependents) ($)</span>
-                  {calcSelectedSchool && (
-                    <span style={{ fontSize: '0.65rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.12)', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                      Auto-populated
-                    </span>
-                  )}
-                </label>
-              </div>
-              <input 
-                type="number" 
-                className="form-control" 
-                value={calcBahRate} 
-                onChange={(e) => setCalcBahRate(Number(e.target.value))}
-                min={500}
-                max={6000}
-              />
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                {calcVenue === 'online' ? `Note: Since you selected Online training, the calculator will use the fixed Online MHA Rate ($${activeRates.p911_online_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
-                 calcVenue === 'foreign' ? `Note: Since you selected Foreign training, the calculator will use the fixed Foreign MHA Rate ($${activeRates.p911_foreign_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
-                 "Find local BAH rate automatically by using the school search bar above, or enter manually."}
+              <p className="text-[10px] text-slate-450 leading-relaxed mt-1.5 pl-7">
+                Active duty members do not receive regular subsistence allowance payouts, but are eligible for tuition reimbursement and supply packages.
               </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Tuition & Supplies Inputs */}
-          {calcCalculatorTab === 'tuition' && (
-            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'var(--hover-bg)', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
-              <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-color)', marginBottom: '12px', borderBottom: '1px dashed var(--card-border)', paddingBottom: '6px' }}>Tuition & Supplies Comparison Settings</h4>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>Estimated Annual Tuition & Fees ($)</span>
-                    {calcSelectedSchool && (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.12)', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                        Auto-populated
-                      </span>
-                    )}
-                  </label>
-                  <input 
-                    type="number"
-                    className="form-control"
-                    value={calcTuition}
-                    onChange={(e) => setCalcTuition(Number(e.target.value))}
-                    min={0}
-                  />
+        {/* STEP 2: SUBSISTENCE RATE TYPE */}
+        {currentStep === 2 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 2: Compare Subsistence Options</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              If you have remaining Post-9/11 GI Bill eligibility, you can elect to receive the Post-9/11 subsistence allowance (P911SA) rate, which is tied to E-5 BAH. Otherwise, you will receive the standard Chapter 31 rate.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                onClick={() => setSelectedSubsistenceType('p911')}
+                className={`border rounded-xl p-5 cursor-pointer transition select-none flex flex-col justify-between h-36 ${
+                  selectedSubsistenceType === 'p911' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-750'
+                }`}
+              >
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-200">Post-9/11 GI Bill Housing Rate (P911SA)</span>
+                  <p className="text-[10px] text-slate-455 leading-relaxed">Tied to E-5 BAH rates based on the school's zip code. Typically yields a much higher payout.</p>
                 </div>
-
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>School Classification</span>
-                    {calcSelectedSchool && (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.12)', padding: '1px 6px', borderRadius: '4px', fontWeight: '600' }}>
-                        Auto-populated
-                      </span>
-                    )}
-                  </label>
-                  <select 
-                    className="form-control"
-                    value={calcSchoolType}
-                    onChange={(e) => {
-                      const newType = e.target.value;
-                      setCalcSchoolType(newType);
-                      if (newType !== 'private' && calcVenue === 'foreign') {
-                        setCalcVenue('in-person');
-                      }
-                    }}
-                  >
-                    <option value="public">Public University / Community College</option>
-                    <option value="private">Private / Foreign Institution</option>
-                    <option value="flight">Vocational Flight School</option>
-                    <option value="correspondence">Correspondence School</option>
-                    <option value="ojt">On-the-Job Training Employer</option>
-                  </select>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-bold uppercase w-fit mt-2">
+                  Recommended (If Eligible)
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px', borderTop: '1px dashed var(--card-border)', paddingTop: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                  <input 
-                    type="checkbox"
-                    checked={calcIncludeComputer}
-                    onChange={(e) => {
-                      setCalcIncludeComputer(e.target.checked);
-                      if (e.target.checked && !calcComputerCost) {
-                        setCalcComputerCost(activeRates.ch31_computer_package_value || 2000.00);
-                      }
-                    }}
-                  />
-                  My program requires a computer/tech package
-                </label>
+              <div 
+                onClick={() => setSelectedSubsistenceType('ch31')}
+                className={`border rounded-xl p-5 cursor-pointer transition select-none flex flex-col justify-between h-36 ${
+                  selectedSubsistenceType === 'ch31' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-750'
+                }`}
+              >
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-200">Standard Chapter 31 Rate</span>
+                  <p className="text-[10px] text-slate-455 leading-relaxed">Fixed statutory rates adjusted annually based on the number of dependents. Safe default with no GI Bill usage requirement.</p>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-2">Select Standard Ch 31</span>
+              </div>
+            </div>
 
-                {calcIncludeComputer && (
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Estimated Computer/Tech Package Cost ($)</label>
+            {selectedSubsistenceType === 'p911' && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-xs text-amber-400 flex gap-2">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <div>
+                  <strong>Election Letter Required:</strong> To receive the Post-9/11 rate, you must submit a written election form alongside proof of remaining GI Bill entitlement (Certificate of Eligibility) to your VRC counselor before courses commence.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* STEP 3: SCHOOL / TRAINING LOCATION */}
+        {currentStep === 3 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 3: Where is your school or training located?</h3>
+            
+            {calcTrainingType === 'institutional' ? (
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="form-group" style={{ position: 'relative' }}>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">Search College or Technical School</label>
+                  <div style={{ position: 'relative' }}>
                     <input 
-                      type="number"
+                      type="text"
                       className="form-control"
-                      value={calcComputerCost}
-                      onChange={(e) => setCalcComputerCost(Number(e.target.value))}
-                      min={0}
+                      placeholder="Type school name or zip code (e.g. Arizona State)..."
+                      value={calcSchoolSearchQuery}
+                      onChange={(e) => {
+                        setCalcSchoolSearchQuery(e.target.value);
+                        setCalcShowSuggestions(true);
+                      }}
+                      onFocus={() => setCalcShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setCalcShowSuggestions(false), 200)}
                     />
+                    <Search size={16} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   </div>
-                )}
-              </div>
 
-              {/* Scholarships & Yellow Ribbon Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px', borderTop: '1px dashed var(--card-border)', paddingTop: '12px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Other Scholarships / Partner Grants ($/yr)</label>
-                  <input 
-                    type="number"
-                    className="form-control"
-                    value={calcScholarships}
-                    onChange={(e) => setCalcScholarships(Number(e.target.value))}
-                    min={0}
-                    placeholder="e.g. 5000"
-                  />
+                  {calcShowSuggestions && calcSchoolSearchQuery.trim().length > 1 && (
+                    <div className="autocomplete-dropdown" style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', zIndex: 1000, maxHeight: '200px', overflowY: 'auto', marginTop: '4px' }}>
+                      {activeSchools.filter(school => {
+                        const q = calcSchoolSearchQuery.toLowerCase();
+                        return school.name.toLowerCase().includes(q) || school.zipCode.includes(q) || school.state.toLowerCase().includes(q);
+                      }).slice(0, 6).map(school => (
+                        <div 
+                          key={school.id}
+                          className="autocomplete-item"
+                          style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--card-border)' }}
+                          onMouseDown={() => {
+                            setCalcSelectedSchool(school);
+                            setCalcSchoolSearchQuery(school.name);
+                            setCalcShowSuggestions(false);
+                            setCalcBahRate(school.bahRate);
+                            setCalcSchoolType(school.type);
+                            setCalcTuition(school.tuition);
+                            setCalcYellowRibbon(school.yellowRibbon || false);
+                            if (school.foreign) setCalcVenue('foreign');
+                            else if (school.onlineOnly) setCalcVenue('online');
+                            else setCalcVenue('in-person');
+                          }}
+                        >
+                          <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>{school.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{school.city}, {school.state} {school.zipCode}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)', marginTop: '8px' }}>
-                  <input 
-                    type="checkbox"
-                    checked={calcYellowRibbon}
-                    onChange={(e) => setCalcYellowRibbon(e.target.checked)}
-                  />
-                  Participate in Yellow Ribbon Program
-                </label>
-
-                {calcYellowRibbon && (
-                  <div style={{ marginTop: '4px', padding: '12px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {calcActiveDuty ? (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--danger-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Info size={12} />
-                        <span>Active duty service members are not eligible for Yellow Ribbon matching under Post-9/11 rules.</span>
+                {/* Selected School Stats & Federal Caution Flags */}
+                {calcSelectedSchool ? (
+                  <div className="bg-slate-950/40 p-4 border border-indigo-500/25 rounded-xl space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-200">🏫 {calcSelectedSchool.name}</h4>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{calcSelectedSchool.city}, {calcSelectedSchool.state} • ZIP: {calcSelectedSchool.zipCode}</p>
                       </div>
-                    ) : calcTier < 1.0 ? (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--danger-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Info size={12} />
-                        <span>Yellow Ribbon only applies if Post-9/11 eligibility tier is 100%. Currently: {calcTier * 100}%.</span>
-                      </div>
-                    ) : (
-                      <>
-                        {calcSelectedSchool && calcSelectedSchool.yellowRibbonDetails ? (
-                          <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label>Select Degree / Division Mappings</label>
-                            <select
-                              className="form-control"
-                              value={calcYrDivision}
-                              onChange={(e) => {
-                                const div = e.target.value;
-                                setCalcYrDivision(div);
-                                if (div && div !== 'custom') {
-                                  const amt = calcSelectedSchool.yellowRibbonDetails[div];
-                                  setCalcYrSchoolContribution(amt);
-                                }
-                              }}
-                            >
-                              <option value="">-- Choose Division --</option>
-                              {Object.keys(calcSelectedSchool.yellowRibbonDetails).map(k => (
-                                <option key={k} value={k}>{k} (${calcSelectedSchool.yellowRibbonDetails[k].toLocaleString()})</option>
-                              ))}
-                              <option value="custom">Custom Contribution</option>
-                            </select>
-                          </div>
-                        ) : calcSelectedSchool && !calcSelectedSchool.yellowRibbon ? (
-                          <div style={{ fontSize: '0.75rem', color: 'var(--warning-color)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Info size={12} />
-                            <span>Note: Database indicates school does not participate. Enter override contribution below.</span>
-                          </div>
-                        ) : null}
+                      <span className="text-[9px] bg-slate-900 border border-slate-800 text-indigo-400 px-2 py-0.5 rounded font-bold uppercase">
+                        {calcSelectedSchool.type}
+                      </span>
+                    </div>
 
-                        {(!calcSelectedSchool || !calcSelectedSchool.yellowRibbonDetails || calcYrDivision === 'custom' || calcYrDivision === '') && (
-                          <div className="form-group" style={{ marginBottom: 0 }}>
-                            <label>School's Annual Contribution ($)</label>
-                            <input
-                              type="number"
-                              className="form-control"
-                              value={calcYrSchoolContribution}
-                              onChange={(e) => {
-                                setCalcYrSchoolContribution(Number(e.target.value));
-                                setCalcYrDivision('custom');
-                              }}
-                              min={0}
-                              placeholder="e.g. 5000"
-                            />
-                          </div>
-                        )}
-                        
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                          The VA will match the school contribution 1:1, reducing out-of-pocket tuition by up to <strong>${(calcYrSchoolContribution * 2).toLocaleString()}</strong>.
-                        </div>
-                      </>
+                    {/* caution flags list */}
+                    {(calcSelectedSchool.complaints > 0 || calcSelectedSchool.benefitsSuspended || calcSelectedSchool.oigInvestigation) && (
+                      <div className="bg-red-950/20 border border-red-900/30 p-3 rounded-lg space-y-1.5">
+                        <span className="text-[10px] font-bold text-red-400 flex items-center gap-1 uppercase">
+                          <AlertTriangle size={12} />
+                          <span>VA Caution Flags Active</span>
+                        </span>
+                        <ul className="text-[10px] text-red-300 list-disc pl-4 space-y-0.5">
+                          {calcSelectedSchool.complaints > 0 && <li>Student Complaints: {calcSelectedSchool.complaints} submitted to VA.</li>}
+                          {calcSelectedSchool.benefitsSuspended && <li>VA has suspended new enrollments due to deceptive practice audits.</li>}
+                          {calcSelectedSchool.oigInvestigation && <li>School is under investigation by the VA Inspector General.</li>}
+                        </ul>
+                      </div>
                     )}
+
+                    <div className="grid grid-cols-2 gap-3 text-[11px] text-slate-350 border-t border-slate-850 pt-2.5">
+                      <div>Local E-5 BAH Rate: <strong className="text-slate-200">${calcSelectedSchool.bahRate}/mo</strong></div>
+                      <div>Accreditation: <strong className={calcSelectedSchool.accredited ? 'text-emerald-400' : 'text-red-400'}>{calcSelectedSchool.accredited ? 'Accredited' : 'Unaccredited'}</strong></div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="block text-xs text-slate-450 mb-1">Local ZIP Code BAH Rate ($)</label>
+                      <input 
+                        type="number"
+                        className="form-control"
+                        value={calcBahRate}
+                        onChange={(e) => setCalcBahRate(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="block text-xs text-slate-450 mb-1">Training Venue</label>
+                      <select 
+                        value={calcVenue}
+                        onChange={(e) => setCalcVenue(e.target.value)}
+                        className="form-control"
+                        aria-label="Training venue select"
+                      >
+                        <option value="in-person">In-Person Classes</option>
+                        <option value="online">Online-Only (Distance Learning)</option>
+                      </select>
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* OJT details */}
-          {calcTrainingType === 'ojt' && (
-            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'var(--hover-bg)', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
-              <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-color)', marginBottom: '12px', borderBottom: '1px dashed var(--card-border)', paddingBottom: '6px' }}>Apprenticeship / OJT Wage Information</h4>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                The VA caps monthly OJT subsistence payments so that the sum of your training wage + the subsistence allowance does not exceed the journeyman wage.
-              </p>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Your Hourly Training Wage ($)</label>
-                  <input 
+            ) : (
+              // OJT WAGES INSTEAD
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/20 p-5 border border-slate-850 rounded-xl">
+                <div className="form-group">
+                  <label className="block text-xs text-slate-450 mb-1">OJT Training Wage ($ / month)</label>
+                  <input
                     type="number"
                     className="form-control"
                     value={calcOjtTrainingWage}
                     onChange={(e) => setCalcOjtTrainingWage(Number(e.target.value))}
-                    min={0}
                   />
                 </div>
-
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Fully Qualified Journeyman Wage ($)</label>
-                  <input 
+                <div className="form-group">
+                  <label className="block text-xs text-slate-450 mb-1">Journeyman Job Wage ($ / month)</label>
+                  <input
                     type="number"
                     className="form-control"
                     value={calcOjtJourneymanWage}
                     onChange={(e) => setCalcOjtJourneymanWage(Number(e.target.value))}
-                    min={0}
                   />
                 </div>
               </div>
-              <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
-                <label>Employer's Local BAH Rate (E-5 with Dependents) ($)</label>
-                <input 
-                  type="number"
+            )}
+          </div>
+        )}
+
+        {/* STEP 4: DEPENDENTS & ATTENDANCE RATE */}
+        {currentStep === 4 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 4: Dependents & Rate of Pursuit</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Your standard Chapter 31 allowance changes dynamically based on how many dependents you claim. Your attendance rate determines the final payout percentage.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="block text-xs text-slate-450 mb-1">Number of Dependents</label>
+                <select
+                  value={calcDependents}
+                  onChange={(e) => setCalcDependents(Number(e.target.value))}
                   className="form-control"
-                  value={calcBahRate}
-                  onChange={(e) => setCalcBahRate(Number(e.target.value))}
-                  min={500}
+                  aria-label="Dependents count select"
+                >
+                  <option value={0}>No Dependents</option>
+                  <option value={1}>1 Dependent</option>
+                  <option value={2}>2 Dependents</option>
+                  <option value={3}>3 or More Dependents</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs text-slate-455">Attendance Rate</label>
+                  <span 
+                    onClick={() => setCalcUseCredits(!calcUseCredits)}
+                    className="text-[10px] text-indigo-400 cursor-pointer underline"
+                  >
+                    {calcUseCredits ? 'Use standard selection' : 'Enter specific credits'}
+                  </span>
+                </div>
+                
+                {calcUseCredits ? (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="number"
+                      value={calcCredits}
+                      onChange={(e) => setCalcCredits(Math.max(1, Number(e.target.value)))}
+                      className="form-control"
+                      style={{ width: '80px' }}
+                      min={1}
+                    />
+                    <span className="text-xs text-slate-450">/</span>
+                    <input
+                      type="number"
+                      value={calcFullTimeThreshold}
+                      onChange={(e) => setCalcFullTimeThreshold(Math.max(1, Number(e.target.value)))}
+                      className="form-control"
+                      style={{ width: '80px' }}
+                      min={1}
+                    />
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase">credits (full-time)</span>
+                  </div>
+                ) : (
+                  <select
+                    value={calcTime}
+                    onChange={(e) => setCalcTime(e.target.value)}
+                    className="form-control"
+                    aria-label="Attendance rate select"
+                  >
+                    <option value="full">Full-Time (100%)</option>
+                    <option value="three-quarters">3/4-Time (75%)</option>
+                    <option value="half">1/2-Time (50%)</option>
+                  </select>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 5: TUITION, BOOKS & TECHNOLOGY */}
+        {currentStep === 5 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 5: Tuition, Books & supplies</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Enter program tuition cost and supply details. Standard Mode handles basic options, while Advanced Mode lets you configure Yellow Ribbon waivers, kickers, and OJT wage schedules.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="block text-xs text-slate-450 mb-1">Annual Tuition & Fees ($)</label>
+                <input
+                  type="number"
+                  value={calcTuition}
+                  onChange={(e) => setCalcTuition(Number(e.target.value))}
+                  className="form-control"
+                  placeholder="e.g. 15000"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="block text-xs text-slate-450 mb-1">Monthly GI Bill Kicker Stipend ($)</label>
+                <input
+                  type="number"
+                  value={calcKicker}
+                  onChange={(e) => setCalcKicker(Number(e.target.value))}
+                  className="form-control"
+                  placeholder="e.g. 200"
                 />
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Right Column: Calculations Result Panel */}
-        <div>
-          {calculatorResults && (
-            <div className="result-box" style={{ borderLeft: '4px solid var(--accent-color)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0 }}>Comparison Payouts</h4>
-                  <span className="badge badge-info">
-                    {selectedRateYear === 'ay2026_2027'
-                      ? 'Post-9/11 AY 2026–2027 / Chapter 31 FY 2026 (until FY27 is published)'
-                      : 'Post-9/11 AY 2025–2026 / Chapter 31 FY 2026'}
+            {/* Supplies and tech checklist */}
+            <div className="bg-slate-950/40 p-4 border border-slate-850 rounded-xl space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer select-none text-xs text-slate-250">
+                <input
+                  type="checkbox"
+                  checked={calcIncludeComputer}
+                  onChange={(e) => setCalcIncludeComputer(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                />
+                <span>Include VR&E Laptop/Technology Package Request</span>
+              </label>
+
+              {calcIncludeComputer && (
+                <div className="form-group animate-slideDown pl-7">
+                  <label className="block text-[10px] font-bold text-slate-450 mb-1">Estimated Computer/Tech Cost ($)</label>
+                  <input
+                    type="number"
+                    value={calcComputerCost}
+                    onChange={(e) => setCalcComputerCost(Number(e.target.value))}
+                    className="form-control max-w-xs"
+                  />
+                  <span className="text-[10px] text-slate-400 font-semibold block mt-1">
+                    Typical benchmark cost for basic academic tech package: <strong>${activeRates.ch31_computer_package_value || 2000}</strong>
                   </span>
                 </div>
+              )}
+            </div>
 
-                {/* WARNING BADGES */}
-                {calcActiveDuty && (
-                  <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--warning-color)', margin: 0 }}>
-                      <strong>Active Duty Restriction:</strong> MHA & subsistence allowance are $0. Only tuition & course supplies are paid.
-                    </p>
-                  </div>
-                )}
+            {/* Advanced features: Yellow Ribbon */}
+            {calculatorMode === 'advanced' && calcSchoolType === 'private' && (
+              <div className="bg-slate-900/30 p-4 border border-slate-800 rounded-xl space-y-3 animate-fadeIn">
+                <label className="flex items-center gap-3 cursor-pointer select-none text-xs text-slate-250">
+                  <input
+                    type="checkbox"
+                    checked={calcYellowRibbon}
+                    onChange={(e) => setCalcYellowRibbon(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500"
+                  />
+                  <span>Utilize School Yellow Ribbon Contribution</span>
+                </label>
 
-                {calcTrainingType === 'institutional' && calculatorResults.rateOfPursuit <= 0.5 && !calcActiveDuty && (
-                  <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', marginBottom: '16px' }}>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--danger-color)', margin: 0 }}>
-                      <strong>Course Load Alert:</strong> Rate of pursuit is {Math.round(calculatorResults.rateOfPursuit * 100)}%. Post-9/11 MHA pays $0 for a course load of 50% or less.
-                    </p>
-                  </div>
-                )}
-
-                {(() => {
-                  const annualTuitionAndFees = Number(calcTuition);
-                  const annualSupplies = calcIncludeComputer ? Number(calcComputerCost) : 0;
-                  const totalAnnualCost = annualTuitionAndFees + annualSupplies;
-                  
-                  if (totalAnnualCost >= 50000) {
-                    return (
-                      <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', marginBottom: '16px' }}>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--danger-color)', margin: 0 }}>
-                          <strong>VREO Approval Required:</strong> Annual program cost of ${totalAnnualCost.toLocaleString()} exceeds the $50,000 threshold. Rehabilitation plans with annual costs of $50,000 to $75,000 require VR&E Officer (VREO) approval. Costs above $75,000 require higher-level executive approval. (M28C.V.B.5.01)
-                        </p>
-                      </div>
-                    );
-                  } else if (totalAnnualCost > 25000) {
-                    return (
-                      <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--warning-color)', margin: 0 }}>
-                          <strong>VREO Threshold Alert:</strong> Annual program cost is ${totalAnnualCost.toLocaleString()}. If this is an Individualized Extended Evaluation Plan (IEEP), VREO approval is required because it exceeds the $25,000 threshold. For regular plans, VREO approval is required starting at $50,000. (M28C.V.B.5.01)
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                {/* MONTHLY HOUSING TAB RESULT */}
-                {calcCalculatorTab === 'monthly' && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Standard Ch 31 Subsistence:</span>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                          ${calculatorResults.regularRate} / mo
-                        </span>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                          ${(Number(calculatorResults.regularRate) * 9).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} / acad yr (9 mos)<br />
-                          ${(Number(calculatorResults.regularRate) * 12).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} / calendar yr (12 mos)
-                        </span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Post-9/11 MHA Option Rate:</span>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                          ${calculatorResults.p911Rate} / mo
-                        </span>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                          ${(Number(calculatorResults.p911Rate) * 9).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} / acad yr (9 mos)<br />
-                          ${(Number(calculatorResults.p911Rate) * 12).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} / calendar yr (12 mos)
-                        </span>
-                      </div>
-                    </div>
-
-                    {calcTier < 1.0 && calcTier > 0 && (
-                      <p style={{ fontSize: '0.75rem', color: 'var(--success-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <ShieldCheck size={14} style={{ flexShrink: 0 }} />
-                        <span>Note: Under Chapter 31 VR&E, your Post-9/11 MHA Option Rate is paid at the 100% level (not scaled down to your Chapter 33 eligibility tier of {calcTier * 100}%).</span>
-                      </p>
-                    )}
-
-                    <div className="doc-divider" style={{ margin: '12px 0' }}></div>
-
-                    <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--card-border)' }}>
-                      <h5 style={{ fontSize: '0.8rem', color: 'var(--accent-color)', marginBottom: '4px' }}>Recommendation:</h5>
-                      <p style={{ fontSize: '0.8rem', lineHeight: '1.4', margin: 0 }}>
-                        {Number(calculatorResults.p911Rate) > Number(calculatorResults.regularRate) 
-                          ? `Elect the Post-9/11 housing rate (P911SA) by filing VA Form 28-0987. This yields an additional $${(Number(calculatorResults.p911Rate) - Number(calculatorResults.regularRate)).toFixed(2)} per month.` 
-                          : Number(calculatorResults.p911Rate) === Number(calculatorResults.regularRate)
-                          ? `Both options offer the same monthly payout ($${calculatorResults.regularRate}).`
-                          : `Stay with the standard Chapter 31 subsistence allowance. This yields an additional $${(Number(calculatorResults.regularRate) - Number(calculatorResults.p911Rate)).toFixed(2)} per month.`}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* TUITION AND SUPPLIES TAB RESULT */}
-                {calcCalculatorTab === 'tuition' && (
-                  <div>
-                    <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--card-border)', backgroundColor: 'var(--glass-bg)', marginBottom: '16px' }}>
-                      <h5 style={{ fontSize: '0.8rem', color: 'var(--accent-color)', marginBottom: '8px' }}>Chapter 31 VR&E</h5>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                        <span>Tuition Covered (100% Uncapped):</span>
-                        <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>100% (${calculatorResults.tuitionCh31Covered.toFixed(2)})</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                        <span>Books & Supplies (Approved necessary):</span>
-                        <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>100%</span>
-                      </div>
-                      {calcIncludeComputer && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                          <span>Laptop/Tech Package (Approved necessary):</span>
-                          <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>Potentially Covered (${calculatorResults.computerCh31Covered.toFixed(2)})</span>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginTop: '6px', borderTop: '1px dashed var(--card-border)', paddingTop: '6px', fontWeight: '700' }}>
-                        <span>Out of Pocket Cost:</span>
-                        <span>$0.00</span>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--card-border)', backgroundColor: 'var(--glass-bg)' }}>
-                      <h5 style={{ fontSize: '0.8rem', color: 'var(--accent-color)', marginBottom: '8px' }}>Post-9/11 GI Bill (Chapter 33)</h5>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                        <span>Base Tuition Paid by VA:</span>
-                        <span>${Number(calculatorResults.tuitionP911CoveredBase).toFixed(2)}</span>
-                      </div>
-                      
-                      {calcYellowRibbon && calcTier === 1.0 && (
-                        <>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                            <span>Yellow Ribbon VA Match:</span>
-                            <span style={{ color: 'var(--success-color)' }}>+${Number(calculatorResults.yrVaMatch).toFixed(2)}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                            <span>Yellow Ribbon School Paid:</span>
-                            <span style={{ color: 'var(--success-color)' }}>+${Number(calculatorResults.yrSchoolPaid).toFixed(2)}</span>
-                          </div>
-                        </>
-                      )}
-
-                      {calcScholarships > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                          <span>Other Scholarships/Grants:</span>
-                          <span style={{ color: 'var(--success-color)' }}>+${calcScholarships.toFixed(2)}</span>
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                        <span>Books Stipend (Up to $1000/yr):</span>
-                        <span>${Number(calculatorResults.booksP911Covered).toFixed(2)}</span>
-                      </div>
-
-                      {calcIncludeComputer && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                          <span>Laptop/Tech Package (Not Covered):</span>
-                          <span style={{ color: 'var(--danger-color)' }}>$0.00</span>
-                        </div>
-                      )}
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginTop: '6px', borderTop: '1px dashed var(--card-border)', paddingTop: '6px', fontWeight: '700' }}>
-                        <span>Total Out of Pocket Cost:</span>
-                        {(() => {
-                          const outOfPocketTuition = Math.max(0, calcTuition - Number(calculatorResults.tuitionP911Covered) - Number(calculatorResults.yrSchoolPaid) - calcScholarships);
-                          const outOfPocketTotal = outOfPocketTuition + (calcIncludeComputer ? calcComputerCost : 0);
-                          return (
-                            <span style={{ color: outOfPocketTotal > 0 ? 'var(--danger-color)' : 'var(--success-color)' }}>
-                              ${outOfPocketTotal.toFixed(2)}
-                            </span>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {calcSchoolType === 'private' && calcTuition > activeRates.p911_private_tuition_cap && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits private/foreign school tuition payments to ${activeRates.p911_private_tuition_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
-                      </p>
-                    )}
-                    {calcSchoolType === 'flight' && calcTuition > activeRates.p911_flight_cap && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits vocational flight school tuition payments to ${activeRates.p911_flight_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
-                      </p>
-                    )}
-                    {calcSchoolType === 'correspondence' && calcTuition > activeRates.p911_correspondence_cap && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits correspondence school tuition payments to ${activeRates.p911_correspondence_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
-                      </p>
-                    )}
-                    {(calcSchoolType === 'flight' || calcSchoolType === 'correspondence') && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--warning-color)', marginTop: '8px' }}>
-                        *Under Post-9/11 (Chapter 33), flight and correspondence programs receive $0 monthly housing allowance (MHA) and $0 books stipend. Chapter 31 pays normal subsistence allowances for approved tracks.
-                      </p>
-                    )}
-                    {calcIncludeComputer && (
-                      <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                        *Post-9/11 Chapter 33 does not cover computer packages. Under Chapter 31, VA may cover 100% of approved, necessary books, supplies, equipment, and technology required for the rehabilitation plan. A computer package is potentially covered under 38 C.F.R. § 21.212 when required by the program, disability-related, or necessary to avoid a distinct disadvantage.
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* OJT PROGRESSION TAB RESULT */}
-                {calcCalculatorTab === 'ojt' && calcTrainingType === 'ojt' && (
-                  <div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                      OJT housing allowances decrease 20% every 6 months under Post-9/11, while standard Chapter 31 remains flat.
-                    </p>
-                    <div style={{ border: '1px solid var(--card-border)', borderRadius: '6px', overflow: 'hidden' }}>
-                      <div className="ojt-step-row header-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Period</span>
-                        <span>Ch 31 Rate (Mo / Yr)</span>
-                        <span>Post-9/11 Rate (Mo / Yr)</span>
-                      </div>
-                      <div className="ojt-step-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Months 1 - 6</span>
-                        <span>${calculatorResults.ojtCh31Steps[0].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtCh31Steps[0] * 12).toFixed(2)} / yr)</span></span>
-                        <span style={{ fontWeight: '600' }}>${calculatorResults.ojtP911Steps[0].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtP911Steps[0] * 12).toFixed(2)} / yr)</span></span>
-                      </div>
-                      <div className="ojt-step-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Months 7 - 12</span>
-                        <span>${calculatorResults.ojtCh31Steps[1].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtCh31Steps[1] * 12).toFixed(2)} / yr)</span></span>
-                        <span style={{ fontWeight: '600' }}>${calculatorResults.ojtP911Steps[1].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtP911Steps[1] * 12).toFixed(2)} / yr)</span></span>
-                      </div>
-                      <div className="ojt-step-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Months 13 - 18</span>
-                        <span>${calculatorResults.ojtCh31Steps[2].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtCh31Steps[2] * 12).toFixed(2)} / yr)</span></span>
-                        <span style={{ fontWeight: '600' }}>${calculatorResults.ojtP911Steps[2].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtP911Steps[2] * 12).toFixed(2)} / yr)</span></span>
-                      </div>
-                      <div className="ojt-step-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Months 19 - 24</span>
-                        <span>${calculatorResults.ojtCh31Steps[3].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtCh31Steps[3] * 12).toFixed(2)} / yr)</span></span>
-                        <span style={{ fontWeight: '600' }}>${calculatorResults.ojtP911Steps[3].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtP911Steps[3] * 12).toFixed(2)} / yr)</span></span>
-                      </div>
-                      <div className="ojt-step-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '8px' }}>
-                        <span>Months 25+</span>
-                        <span>${calculatorResults.ojtCh31Steps[4].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtCh31Steps[4] * 12).toFixed(2)} / yr)</span></span>
-                        <span style={{ fontWeight: '600' }}>${calculatorResults.ojtP911Steps[4].toFixed(2)} / mo<br /><span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>(${(calculatorResults.ojtP911Steps[4] * 12).toFixed(2)} / yr)</span></span>
-                      </div>
-                    </div>
+                {calcYellowRibbon && (
+                  <div className="form-group pl-7">
+                    <label className="block text-[10px] font-bold text-slate-450 mb-1">School Yellow Ribbon Contribution ($)</label>
+                    <input
+                      type="number"
+                      value={calcYrSchoolContribution}
+                      onChange={(e) => setCalcYrSchoolContribution(Number(e.target.value))}
+                      className="form-control max-w-xs"
+                      placeholder="e.g. 5000"
+                    />
                   </div>
                 )}
               </div>
+            )}
+          </div>
+        )}
 
-              <p style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '20px', lineHeight: '1.3', borderTop: '1px solid var(--card-border)', paddingTop: '8px' }}>
-                *Calculated from user inputs and active rates config. The Post-9/11 option requires a valid certificate of eligibility (COE) and remaining entitlement.
-              </p>
+        {/* STEP 6: CALCULATION RESULTS */}
+        {currentStep === 6 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 6: Payout & Housing Results</h3>
+            
+            {calculatorResults ? (
+              <div className="space-y-4">
+                {/* Comparative box */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className={`p-5 border rounded-xl space-y-2 bg-slate-950/20 ${
+                    selectedSubsistenceType === 'p911' ? 'border-indigo-500/30' : 'border-slate-850'
+                  }`}>
+                    <span className="text-[10px] font-bold text-slate-450 uppercase block">Post-9/11 GI Bill rate (P911SA)</span>
+                    <div className="text-2xl font-black text-slate-200">
+                      ${Number(calculatorResults.p911Rate).toLocaleString()}<span className="text-xs text-slate-400 font-normal"> / mo</span>
+                    </div>
+                    <span className="text-[10px] text-slate-450 leading-relaxed block">
+                      Based on E-5 BAH for ZIP code <strong>{calcSelectedSchool ? calcSelectedSchool.zipCode : 'Local'}</strong>
+                    </span>
+                  </div>
+
+                  <div className={`p-5 border rounded-xl space-y-2 bg-slate-950/20 ${
+                    selectedSubsistenceType === 'ch31' ? 'border-indigo-500/30' : 'border-slate-850'
+                  }`}>
+                    <span className="text-[10px] font-bold text-slate-450 uppercase block">Standard Chapter 31 Rate</span>
+                    <div className="text-2xl font-black text-slate-200">
+                      ${Number(calculatorResults.regularRate).toLocaleString()}<span className="text-xs text-slate-400 font-normal"> / mo</span>
+                    </div>
+                    <span className="text-[10px] text-slate-455 leading-relaxed block">
+                      Fixed rate based on <strong>{calcDependents} dependents</strong> and Full-Time status.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Recommendation alert */}
+                <div className="flex gap-2 items-start bg-emerald-950/20 border border-emerald-900/30 p-4 rounded-xl text-xs text-emerald-400">
+                  <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                  <div>
+                    <strong>Option Recommendation:</strong> {
+                      Number(calculatorResults.p911Rate) > Number(calculatorResults.regularRate) 
+                        ? `The Post-9/11 rate yields $${Math.abs(Number(calculatorResults.p911Rate) - Number(calculatorResults.regularRate)).toFixed(2)}/mo MORE than the standard rate.`
+                        : `The standard Chapter 31 rate yields $${Math.abs(Number(calculatorResults.p911Rate) - Number(calculatorResults.regularRate)).toFixed(2)}/mo MORE than the Post-9/11 rate.`
+                    } Ensure your election choice matches the highest payout rate.
+                  </div>
+                </div>
+
+                {/* Additional offsets */}
+                <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4 space-y-2.5 text-xs">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuition & Supplies Offsets (100% Covered under Ch 31)</span>
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>Tuition Payable to School:</span>
+                    <span className="font-semibold text-slate-200">${calculatorResults.tuitionPayable.toLocaleString()} / year</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>Books & Supplies Allocation:</span>
+                    <span className="font-semibold text-slate-200">${calculatorResults.suppliesValue.toLocaleString()} / year</span>
+                  </div>
+                  {calcIncludeComputer && (
+                    <div className="flex justify-between items-center text-slate-300">
+                      <span>Tech Package Benchmark:</span>
+                      <span className="font-semibold text-slate-200">${calcComputerCost.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Confidence notice */}
+                <div className="border-l-2 border-indigo-500/40 bg-slate-950/10 p-3 rounded-r text-[10px] text-slate-450 leading-relaxed">
+                  <strong>Estimate verification:</strong> This calculation is based on published rate figures last verified on May 25, 2026. The final payment plan must be confirmed with your VRC and verified against tungsten authorizations.
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-xs text-slate-500 font-semibold">Error processing calculations. Check input parameters.</div>
+            )}
+          </div>
+        )}
+
+        {/* STEP 7: ACTIONS & EXPORTS */}
+        {currentStep === 7 && (
+          <div className="space-y-5 animate-fadeIn">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 7: Actions & Data Exports</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Export your calculation results, generate payment-monitoring checklists for your school certifying official, or save your settings locally in session.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button 
+                onClick={handleCopySummary}
+                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+              >
+                {copySuccess ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Clipboard size={18} className="text-indigo-400 shrink-0" />}
+                <div>
+                  <span className="text-slate-200 block">Copy Estimate Summary</span>
+                  <span className="text-[10px] text-slate-450 block font-normal mt-0.5">{copySuccess ? 'Copied to clipboard' : 'Copy formatted text for emails'}</span>
+                </div>
+              </button>
+
+              <button 
+                onClick={handlePrintSummary}
+                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+              >
+                <Printer size={18} className="text-blue-400 shrink-0" />
+                <div>
+                  <span className="text-slate-200 block">Print Estimate Summary</span>
+                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Generate a clean physical printout</span>
+                </div>
+              </button>
+
+              <button 
+                onClick={handleSaveEstimate}
+                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+              >
+                {estimateSaved ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Save size={18} className="text-amber-400 shrink-0" />}
+                <div>
+                  <span className="text-slate-200 block">Save Estimate (Session Storage)</span>
+                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">{estimateSaved ? 'Saved in session' : 'Persist parameters in current tab'}</span>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => setShowChecklistModal(true)}
+                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+              >
+                <CheckSquare size={18} className="text-emerald-400 shrink-0" />
+                <div>
+                  <span className="text-slate-200 block">School Payment Checklist</span>
+                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Build payment timelines & contact sheets</span>
+                </div>
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      <div className="doc-divider mt-6 mb-4"></div>
+
+      {/* STEPPER BUTTONS */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={prevStep}
+          disabled={currentStep === 1}
+          className="btn btn-secondary flex items-center gap-1.5 h-9 text-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <ChevronLeft size={16} />
+          <span>Back</span>
+        </button>
+
+        {currentStep < 7 ? (
+          <button
+            onClick={nextStep}
+            className="btn btn-primary flex items-center gap-1.5 h-9 text-xs cursor-pointer"
+          >
+            <span>Next</span>
+            <ChevronRight size={16} />
+          </button>
+        ) : (
+          <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+            All steps complete
+          </div>
+        )}
+      </div>
+
+      {/* SCHOOL COMPLIANCE CHECKLIST MODAL */}
+      {showChecklistModal && (
+        <div className="modal-overlay" onClick={() => setShowChecklistModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>School Term payment Checklist</h2>
+              <button className="close-btn" onClick={() => setShowChecklistModal(false)}>&times;</button>
+            </div>
+            <div className="modal-body space-y-4 text-xs leading-relaxed">
+              <p className="text-slate-400">
+                Follow this checklist to guarantee your tuition, books, and monthly housing payments process on time.
+              </p>
+
+              <div className="space-y-3 text-slate-200">
+                <div className="flex gap-3 items-start">
+                  <input type="checkbox" className="mt-1" id="chk_auth" />
+                  <label htmlFor="chk_auth" className="cursor-pointer">
+                    <strong>Submit VAF 28-1905 / Tungsten Authorization:</strong> Contact your counselor at least 30 days prior to class start to ensure they submit the digital authorization to the school.
+                  </label>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <input type="checkbox" className="mt-1" id="chk_cert" />
+                  <label htmlFor="chk_cert" className="cursor-pointer">
+                    <strong>Coordinate with School Certifying Official (SCO):</strong> Ensure your SCO certifies your enrollment hours in the VA system to release monthly payments.
+                  </label>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <input type="checkbox" className="mt-1" id="chk_invoice" />
+                  <label htmlFor="chk_invoice" className="cursor-pointer">
+                    <strong>Submit Invoices:</strong> Private private caps or additional fees must be coordinated via Yellow Ribbon offsets or payment waivers.
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer flex justify-end">
+              <button className="btn btn-primary" onClick={() => setShowChecklistModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { GLOSSARY_TERMS } from '../data/data';
 import { motion } from 'framer-motion';
 

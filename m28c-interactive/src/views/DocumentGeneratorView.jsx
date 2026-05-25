@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { 
-  FileText, Copy, Printer, RotateCcw, User, CreditCard, 
-  MapPin, Calendar, Check, AlertCircle, FilePlus, ChevronRight 
+  Copy, Printer, RotateCcw, User, CreditCard, 
+  MapPin, Calendar, Check, AlertCircle, FilePlus
 } from 'lucide-react';
 import * as generators from '../utils/letterGenerators';
 
@@ -20,8 +20,18 @@ const LETTER_TEMPLATES = [
   { id: 'self_employment', name: 'Self-Employment Track Request', citation: '38 CFR § 21.258', fn: 'generateSelfEmploymentLetter' }
 ];
 
-function DocumentGeneratorView({ reduceMotion, plainLanguageMode }) {
-  const [selectedTemplate, setSelectedTemplate] = useState('ipe_amendment');
+function DocumentGeneratorView() {
+  const [selectedTemplate, setSelectedTemplate] = useState(() => {
+    const preselected = localStorage.getItem('m28c_preselected_letter');
+    if (preselected) {
+      const match = LETTER_TEMPLATES.find(t => t.id === preselected || t.id.includes(preselected));
+      localStorage.removeItem('m28c_preselected_letter');
+      if (match) {
+        return match.id;
+      }
+    }
+    return 'ipe_amendment';
+  });
   const [copySuccess, setCopySuccess] = useState(false);
   const previewRef = useRef(null);
 
@@ -98,66 +108,123 @@ function DocumentGeneratorView({ reduceMotion, plainLanguageMode }) {
   });
 
   // Custom text edited by the user in the preview pane
-  const [editedText, setEditedText] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Load preselected letter type from localStorage (set by VA Error Spotter)
-  useEffect(() => {
+  const [editedText, setEditedText] = useState(() => {
     const preselected = localStorage.getItem('m28c_preselected_letter');
+    let templateId = 'ipe_amendment';
     if (preselected) {
       const match = LETTER_TEMPLATES.find(t => t.id === preselected || t.id.includes(preselected));
       if (match) {
-        setSelectedTemplate(match.id);
+        templateId = match.id;
       }
-      localStorage.removeItem('m28c_preselected_letter');
     }
-  }, []);
-
-  // Recalculate preview text when fields change (unless user is manually typing in the editor)
-  useEffect(() => {
-    if (!isEditing) {
-      compileDocument();
-    }
-  }, [commonFields, specificFields, selectedTemplate, isEditing]);
-
-  const compileDocument = () => {
-    const template = LETTER_TEMPLATES.find(t => t.id === selectedTemplate);
-    if (!template) return;
-
+    const template = LETTER_TEMPLATES.find(t => t.id === templateId);
+    if (!template) return '';
     const generatorFn = generators[template.fn];
-    if (typeof generatorFn !== 'function') {
-      setEditedText('Error: Template generator function not found.');
-      return;
-    }
+    if (typeof generatorFn !== 'function') return '';
 
-    let payload = {
-      ...commonFields,
-      ...specificFields
+    const defaultCommonFields = {
+      dateStr: new Date().toLocaleDateString(),
+      veteranName: '',
+      claimNumber: '',
+      address: '',
+      emailPhone: '',
+      counselorName: '',
+      regionalOffice: ''
     };
+    const defaultSpecificFields = {
+      currentGoal: '',
+      proposedGoal: '',
+      amendmentReason: '',
+      medicalEvidenceEnclosed: false,
+      trainingProgram: '',
+      institutionName: '',
+      itemsRequested: 'High-performance laptop, operating system, productivity office software suite, external backup drive.',
+      specificNeedJustification: 'Required for programming courses and remote lectures as part of curriculum requirements.',
+      syllabusEnclosed: false,
+      escalationTarget: 'VR&E Officer',
+      datesOfAttempts: '',
+      pendingRequestDetails: '',
+      daysElapsed: '30',
+      verbalDecisionDescription: '',
+      verbalDecisionDate: '',
+      decisionDate: '',
+      issueAppealed: '',
+      errorArguments: '',
+      originalDecisionDate: '',
+      claimIssue: '',
+      newEvidenceList: '',
+      dailyLivingLimitations: '',
+      proposedIlServices: '',
+      rehabPotentialJustification: '',
+      disabilityEffects: '',
+      extensionNeedReason: '',
+      unfeasibilityAssertion: '',
+      rebuttalArguments: '',
+      doctorStatementEnclosed: false,
+      selfChecklist1: false,
+      selfChecklist2: false,
+      selfChecklist3: false,
+      selfChecklist4: false,
+      selfBizName: '',
+      selfBizType: 'LLC',
+      selfBizIndustry: '',
+      selfBizConcept: '',
+      selfFundingCategory: 'II'
+    };
+    return generatorFn({ ...defaultCommonFields, ...defaultSpecificFields });
+  });
+  const [isEditing, setIsEditing] = useState(false);
 
-    // Special mappings for existing templates
-    if (selectedTemplate === 'program_change') {
-      payload.career = {
-        title: specificFields.proposedGoal || "[Proposed Career]",
-        soc: "[SOC Code]",
-        dot: "[DOT Code]",
-        sic: "[SIC Code]",
-        outlook: "Stable",
-        medianPay: 75000,
-        svp: "7",
-        physicalDemand: "Light",
-        education: "Bachelor's Degree",
-        duties: specificFields.amendmentReason || "[Career Duties]"
-      };
-      payload.justReason = 'disability_worsened';
-      payload.justCurrentGoal = specificFields.currentGoal;
-      payload.justPhysicalImpact = specificFields.amendmentReason;
-      payload.justMedicalEvidence = specificFields.medicalEvidenceEnclosed;
+  const [prevInputs, setPrevInputs] = useState({
+    commonFields,
+    specificFields,
+    selectedTemplate,
+    isEditing
+  });
+
+  if (
+    commonFields !== prevInputs.commonFields ||
+    specificFields !== prevInputs.specificFields ||
+    selectedTemplate !== prevInputs.selectedTemplate ||
+    isEditing !== prevInputs.isEditing
+  ) {
+    setPrevInputs({ commonFields, specificFields, selectedTemplate, isEditing });
+    if (!isEditing) {
+      const template = LETTER_TEMPLATES.find(t => t.id === selectedTemplate);
+      if (template) {
+        const generatorFn = generators[template.fn];
+        if (typeof generatorFn === 'function') {
+          let payload = {
+            ...commonFields,
+            ...specificFields
+          };
+
+          // Special mappings for existing templates
+          if (selectedTemplate === 'program_change') {
+            payload.career = {
+              title: specificFields.proposedGoal || "[Proposed Career]",
+              soc: "[SOC Code]",
+              dot: "[DOT Code]",
+              sic: "[SIC Code]",
+              outlook: "Stable",
+              medianPay: 75000,
+              svp: "7",
+              physicalDemand: "Light",
+              education: "Bachelor's Degree",
+              duties: specificFields.amendmentReason || "[Career Duties]"
+            };
+            payload.justReason = 'disability_worsened';
+            payload.justCurrentGoal = specificFields.currentGoal;
+            payload.justPhysicalImpact = specificFields.amendmentReason;
+            payload.justMedicalEvidence = specificFields.medicalEvidenceEnclosed;
+          }
+
+          const text = generatorFn(payload);
+          setEditedText(text);
+        }
+      }
     }
-
-    const text = generatorFn(payload);
-    setEditedText(text);
-  };
+  }
 
   const handleCommonFieldChange = (e) => {
     const { name, value } = e.target;

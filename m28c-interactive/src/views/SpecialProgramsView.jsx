@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { GraduationCap, Award, BookOpen, TrendingUp, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 

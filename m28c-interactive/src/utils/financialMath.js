@@ -14,7 +14,7 @@ export const getLoanRepayments = (loanInterest, loanDebt, loanFamilySize, loanAg
   const r = (loanInterest / 100) / 12;
   const n = 120; // 10 years
   
-  let standardMonthly = 0;
+  let standardMonthly;
   if (r > 0) {
     standardMonthly = loanDebt * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
   } else {
