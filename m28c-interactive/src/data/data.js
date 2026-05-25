@@ -667,6 +667,29 @@ export const M28C_PARTS = [
             <p>Regular Chapter 31 rates pay fixed amounts depending on the number of dependents (e.g. No dependents, 1 dependent, 2 dependents, and additional amounts for more than 2 dependents). Under 38 U.S.C. § 3108(f), if the veteran qualifies for Post-9/11 GI Bill benefits, they may elect the Post-9/11 rate (P911SA), which pays the housing allowance (BAH) rate of the training location. VRCs must calculate both options to advise the veteran on the most financially advantageous choice.</p>
           </div>
         `
+      },
+      {
+        id: "m28c-part-5-ch-6",
+        title: "Chapter 6: Retroactive Induction",
+        content: `
+          <p><strong>M28C.V.B.6.03: Retroactive Inductions for a Period Previously Completed via Self-Pay</strong></p>
+          <p>Under M28C.V.B.6.03, a veteran can request a retroactive induction for a past period of training or education that they completed via self-pay (or using other benefits) before being approved for Chapter 31 services, provided they met the eligibility and entitlement criteria during that period.</p>
+          
+          <div class="callout-panel">
+            <h4>Key Retroactive Induction Requirements</h4>
+            <ul>
+              <li><strong>Prior Entitlement:</strong> The veteran must establish that they would have been eligible and entitled to Chapter 31 services at the time the training was completed (i.e., had a service-connected rating and an employment handicap).</li>
+              <li><strong>Required Evidence:</strong> The veteran must submit:
+                <ol>
+                  <li>Official enrollment agreement or admissions letters.</li>
+                  <li>Official transcripts and course curriculum showing satisfactory progress.</li>
+                  <li>Itemized receipts/invoices demonstrating tuition, fees, and books were paid out-of-pocket or via self-funded student loans.</li>
+                </ol>
+              </li>
+              <li><strong>Approval Threshold:</strong> Retroactive Inductions require approval from the VR&E Officer (VREO).</li>
+            </ul>
+          </div>
+        `
       }
     ]
   },

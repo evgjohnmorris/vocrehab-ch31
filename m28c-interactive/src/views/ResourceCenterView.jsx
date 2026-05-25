@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   BookOpen, FileText, Info, Users, ShieldCheck, 
-  BookMarked, Calculator, HelpCircle, CheckCircle, ExternalLink 
+  BookMarked, Calculator, HelpCircle, CheckCircle, ExternalLink, Scale 
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -60,6 +60,40 @@ function ResourceCenterView({ reduceMotion }) {
               Open Misc Resources <ExternalLink size={12} />
             </a>
           </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BookOpen size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>VR&E Guidebook 3.0</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Comprehensive transition guidebook detailing application strategies, the 5 tracks, duty to assist, retroactive inductions, and VREO cost thresholds. Includes a key preparation checklist.
+            </p>
+            <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '6px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              <strong>Pre-Assessment Checklist:</strong>
+              <ul style={{ listStyleType: 'disc', paddingLeft: '14px', margin: '4px 0 0 0' }}>
+                <li>Updated Resume</li>
+                <li>Transcripts & Training Records</li>
+                <li>Retroactive requests: Invoices, Admissions Letters, Curricula</li>
+              </ul>
+            </div>
+            <a href="https://static1.squarespace.com/static/5e35dcc77332cf46d567118b/t/6852948eec86c35052307de1/1750242446430/VR%26E+Guidebook+3.0.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
+              Download VR&E Guidebook 3.0 <ExternalLink size={12} />
+            </a>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Scale size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>U.S. Code Download Portal</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official portal to download the complete United States Code. Relevant for researching Title 38 U.S.C. Chapter 31 (Sections 3100-3122) for statutory guidance on entitlement, tracks, and allowances.
+            </p>
+            <a href="https://uscode.house.gov/download/download.shtml" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
+              Open US Code Portal <ExternalLink size={12} />
+            </a>
+          </div>
         </div>
 
         {/* Category 2: Portals & Career Services */}
@@ -102,6 +136,19 @@ function ResourceCenterView({ reduceMotion }) {
             </p>
             <a href="https://www.va.gov/careers-employment/veteran-resources/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
               Open Resources Catalog <ExternalLink size={12} />
+            </a>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>VA QuickSubmit Portal</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Direct document upload portal to bypass standard EVA email processing. Use to upload your VA Form 28-1900, tuition invoices, transcripts, and medical evidence directly into your electronic case file.
+            </p>
+            <a href="https://access.va.gov/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
+              Open QuickSubmit Portal <ExternalLink size={12} />
             </a>
           </div>
         </div>
@@ -203,6 +250,19 @@ function ResourceCenterView({ reduceMotion }) {
             </p>
             <a href="https://nvf.org/veterans-vocational-rehabilitation/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
               Open NVF Guide <ExternalLink size={12} />
+            </a>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BookMarked size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>VA TAP Benefits Guide (v6.1)</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official Department of Defense and VA transition guide (September 2025). Explains Chapter 31 VR&E eligibility, IDES early entry, National Guard/Reserve requirements, and program tracks (Module 4, Page 110-115).
+            </p>
+            <a href="https://www.tapevents.mil/Assets/ResourceContent/TAP/VA-Benefits-Participant-Guide.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}>
+              Download TAP Benefits Guide <ExternalLink size={12} />
             </a>
           </div>
         </div>

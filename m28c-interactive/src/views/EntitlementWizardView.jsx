@@ -21,6 +21,11 @@ function EntitlementWizardView({
   const [extApproachingLimit, setExtApproachingLimit] = useState(false);
   const [extNeedMoreTime, setExtNeedMoreTime] = useState(false);
 
+  // Localized Retroactive Induction Pre-Screener States
+  const [retroHadRating, setRetroHadRating] = useState(false);
+  const [retroPaidSelf, setRetroPaidSelf] = useState(false);
+  const [retroHasDocuments, setRetroHasDocuments] = useState(false);
+
   // Localized Eligibility Wizard Logic
   const calculateEligibility = () => {
     if (dischargeStatus === 'dishonorable') {
@@ -434,6 +439,105 @@ function EntitlementWizardView({
                     <Info size={28} className="text-slate-600 mb-2" />
                     <p className="text-[11px] max-w-xs leading-relaxed">
                       Toggle all three criteria checkboxes on the left to verify if you qualify for a statutory program extension.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Retroactive Induction Pre-Screener Section */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Award className="text-cyan-400" size={20} />
+                VR&E Retroactive Induction Pre-Screener
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20">
+                M28C.V.B.6.03
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              If you completed academic or vocational training before being approved for Chapter 31, you may qualify for retroactive reimbursement of tuition, fees, and books.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">Retroactive Pre-Screening Criteria</h4>
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-cyan-500 cursor-pointer"
+                    checked={retroHadRating} 
+                    onChange={(e) => setRetroHadRating(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Service-Connected Rating during Study</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Did you have a 10%+ service-connected rating (or was one pending/effective retroactively) during the past training?</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-cyan-500 cursor-pointer"
+                    checked={retroPaidSelf} 
+                    onChange={(e) => setRetroPaidSelf(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Self-Paid or Student Loans</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Did you pay tuition/fees out-of-pocket, using self-funded student loans, or with non-VA educational programs?</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-cyan-500 cursor-pointer"
+                    checked={retroHasDocuments} 
+                    onChange={(e) => setRetroHasDocuments(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Documentation & Invoices Available</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Can you produce itemized invoices, receipts, transcripts, admissions letters, and course curriculum?</span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                {retroHadRating && retroPaidSelf && retroHasDocuments ? (
+                  <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-5 text-cyan-400 relative overflow-hidden animate-fade-in">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle size={22} className="text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong className="text-sm font-semibold text-cyan-300 block mb-1">Strong Candidate for Retroactive Induction</strong>
+                        <p className="text-xs text-cyan-400/90 leading-relaxed mb-3">
+                          You meet the key pre-screening elements under **M28C.V.B.6.03**. Work with your Vocational Rehabilitation Counselor (VRC) to submit a formal request.
+                        </p>
+                        <strong className="text-[11px] text-slate-200 block mb-1">Items to Gather:</strong>
+                        <ul className="list-disc pl-4 space-y-1 text-[11px] text-slate-300">
+                          <li>Official transcripts & curriculum outlines showing progress.</li>
+                          <li>Itemized invoices/receipts for tuition, fees, and books.</li>
+                          <li>DD-214 and rating decision validating retroactivity.</li>
+                        </ul>
+                        <p className="text-[10px] text-slate-500 mt-3 font-semibold">
+                          *NOTE: All Retroactive Inductions require approval from the VR&E Officer (VREO).
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                    <Info size={28} className="text-slate-600 mb-2" />
+                    <p className="text-[11px] max-w-xs leading-relaxed">
+                      Toggle all three criteria checkboxes on the left to verify if you meet the baseline requirements for a Retroactive Induction review.
                     </p>
                   </div>
                 )}

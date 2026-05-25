@@ -1028,6 +1028,31 @@ function CalculatorView({
                   </div>
                 )}
 
+                {(() => {
+                  const annualTuitionAndFees = Number(calcTuition);
+                  const annualSupplies = calcIncludeComputer ? Number(calcComputerCost) : 0;
+                  const totalAnnualCost = annualTuitionAndFees + annualSupplies;
+                  
+                  if (totalAnnualCost >= 50000) {
+                    return (
+                      <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', marginBottom: '16px' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--danger-color)', margin: 0 }}>
+                          <strong>VREO Approval Required:</strong> Annual program cost of ${totalAnnualCost.toLocaleString()} exceeds the $50,000 threshold. Rehabilitation plans with annual costs of $50,000 to $75,000 require VR&E Officer (VREO) approval. Costs above $75,000 require higher-level executive approval. (M28C.V.B.5.01)
+                        </p>
+                      </div>
+                    );
+                  } else if (totalAnnualCost > 25000) {
+                    return (
+                      <div style={{ padding: '8px 12px', borderRadius: '6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', marginBottom: '16px' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--warning-color)', margin: 0 }}>
+                          <strong>VREO Threshold Alert:</strong> Annual program cost is ${totalAnnualCost.toLocaleString()}. If this is an Individualized Extended Evaluation Plan (IEEP), VREO approval is required because it exceeds the $25,000 threshold. For regular plans, VREO approval is required starting at $50,000. (M28C.V.B.5.01)
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 {/* MONTHLY HOUSING TAB RESULT */}
                 {calcCalculatorTab === 'monthly' && (
                   <div>
