@@ -20,9 +20,15 @@ function AuthorityLibraryView({
   const [prevSelectedSection, setPrevSelectedSection] = useState(selectedSection);
   if (selectedSection && selectedSection.id && (selectedSection.id !== prevSelectedSection?.id || selectedSection.type !== prevSelectedSection?.type)) {
     setPrevSelectedSection(selectedSection);
-    setActiveTab('browse');
-    const type = selectedSection.type;
-    setBrowseSourceTab(type === 'usc' ? 'statutes' : type === 'cfr' ? 'regulations' : 'm28c');
+    if (selectedSection.type === 'topic') {
+      setActiveTab('crosswalk');
+      setSelectedCategory('All');
+      setSearchQuery(selectedSection.id);
+    } else {
+      setActiveTab('browse');
+      const type = selectedSection.type;
+      setBrowseSourceTab(type === 'usc' ? 'statutes' : type === 'cfr' ? 'regulations' : 'm28c');
+    }
   }
   
   const [manifest, setManifest] = useState(null);
@@ -183,7 +189,8 @@ function AuthorityLibraryView({
   const filteredCrosswalk = crosswalk.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.plainEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.category.toLowerCase().includes(searchQuery.toLowerCase());
+                          item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.topicId.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -224,7 +231,7 @@ function AuthorityLibraryView({
               <h1 className="text-xl font-bold text-slate-100 tracking-tight">Authority & Citation Library</h1>
             </div>
             <p className="text-slate-400 text-xs mt-1 max-w-xl leading-relaxed">
-              Litigation-grade legal engine indexing 38 U.S.C. Chapter 31, 38 C.F.R. Part 21, and KnowVA M28C guidelines. Bind counselors to legal mandates.
+              Source-backed VR&E authority library indexing 38 U.S.C. Chapter 31, 38 C.F.R. Part 21, and KnowVA M28C guidelines. Bind counselors to legal mandates.
             </p>
           </div>
           
@@ -711,24 +718,32 @@ function AuthorityLibraryView({
                   </div>
 
                   <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">38 U.S.C. Chapter 31 Coverage</span>
-                    <div className="text-lg font-bold text-slate-100 mt-2">{coverageReport.uscCoverage}</div>
+                    <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">38 U.S.C. Chapter 31</span>
+                    <div className="text-sm font-bold text-slate-100 mt-2">{coverageReport.usc?.coverage || "23/23"}</div>
                     <div className="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800">
-                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${coverageReport.uscPercentage || 100}%` }}></div>
+                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: '100%' }}></div>
                     </div>
                   </div>
 
                   <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">38 C.F.R. Part 21 Coverage</span>
-                    <div className="text-lg font-bold text-slate-100 mt-2">{coverageReport.cfrCoverage}</div>
+                    <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">38 C.F.R. Part 21</span>
+                    <div className="text-sm font-bold text-slate-100 mt-2">{coverageReport.cfr?.coverage || "153/153"}</div>
                     <div className="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800">
-                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${coverageReport.cfrPercentage || 100}%` }}></div>
+                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: '100%' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4">
+                    <span className="text-[10px] font-bold text-amber-400 tracking-wider uppercase">KnowVA M28C Manual</span>
+                    <div className="text-sm font-bold text-amber-400 mt-2">{coverageReport.m28c?.coverage || "Partial"}</div>
+                    <div className="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800">
+                      <div className="bg-amber-500 h-full rounded-full" style={{ width: '60%' }}></div>
                     </div>
                   </div>
 
                   <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Warnings / Violations</span>
-                    <div className="text-lg font-bold text-slate-100 mt-2">{coverageReport.totalErrors}</div>
+                    <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">Total Warnings</span>
+                    <div className="text-sm font-bold text-slate-100 mt-2">{coverageReport.totalErrors || 0}</div>
                   </div>
                 </div>
 

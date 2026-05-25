@@ -194,6 +194,7 @@ function SelfEmploymentView({ reduceMotion }) {
                 Full scope of services including business license fees, specialized workspace setup, tools, equipment, and up to a 60-day inventory of startup supplies.
               </div>
               <div className="p-2.5 bg-slate-950/50 border border-slate-800 rounded-xl">
+                {/* @cite 38-cfr-21-258 */}
                 <strong className="text-slate-200 block mb-1">Category II (Employment Handicap)</strong>
                 Limited to basic startup supplies and standard licensing required to begin working. Does not fund heavy capital equipment or extensive supply inventory.
               </div>

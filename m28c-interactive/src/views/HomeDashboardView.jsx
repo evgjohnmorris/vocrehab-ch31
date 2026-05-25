@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, ArrowRight, BookOpen, Shield, 
-  AlertOctagon, Scale, Award, Compass, 
+  AlertOctagon, Award, Compass, 
   AlertTriangle, Clock, 
-  Briefcase, Mail, Check, Copy, ArrowLeft
+  Briefcase, Mail, Check, Copy, ArrowLeft,
+  FileText, Printer, CheckCircle2, Plus, Trash2
 } from 'lucide-react';
 
 import { renderTemplate } from '../utils/templateRenderer.js';
@@ -26,6 +27,8 @@ import discontinuanceRebuttalTpl from '../data/templates/discontinuance-rebuttal
 import feasibilityRebuttalTpl from '../data/templates/feasibility-rebuttal.json';
 import ipeChangeLetterTpl from '../data/templates/ipe-change-letter.json';
 import sehExtensionLetterTpl from '../data/templates/seh-extension-letter.json';
+
+import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
 
 const WORKFLOWS = [
   counselorDelayWf,
@@ -101,6 +104,28 @@ function HomeDashboardView({
   const [formFacts, setFormFacts] = useState({});
   const [copiedLetter, setCopiedLetter] = useState(false);
 
+  // Case Packet additional states
+  const [packetTab, setPacketTab] = useState('summary'); // 'summary' | 'evidence' | 'timeline' | 'authorities' | 'letter'
+  const [checkedEvidence, setCheckedEvidence] = useState({});
+  const [contactsLog, setContactsLog] = useState([
+    { id: '1', date: '2026-05-01', method: 'Email', request: 'Requested status update from counselor', response: 'No response' }
+  ]);
+  const [newContact, setNewContact] = useState({ date: '', method: 'Email', request: '', response: 'No response' });
+  const [hasWrittenNoticeState, setHasWrittenNoticeState] = useState('no'); // 'yes' | 'no'
+
+  const getDisputeAreaForWorkflow = (wfId) => {
+    const map = {
+      'counselor-delay': 'counselor_delay',
+      'supplies-denial': 'computer_denial',
+      'tuition-unpaid': 'tuition_unpaid',
+      'case-closed': 'case_closed',
+      'feasibility-denial': 'feasibility_denial',
+      'seh-extension': 'seh_extension'
+    };
+    const areaId = map[wfId];
+    return DISPUTE_AREAS.find(a => a.id === areaId);
+  };
+
   const getModeAdvice = () => {
     switch (userMode) {
       case 'advocate':
@@ -124,7 +149,7 @@ function HomeDashboardView({
       default:
         return {
           title: 'Veteran Strategy Tip',
-          text: 'Keep communications in writing. Never accept verbal counselor denials. If your counselor refuses a laptop or training goal, request that they provide their decision and reasons in writing on VA Form 20-0998.',
+          text: 'Keep communications in writing. Never accept verbal counselor denials. If your counselor refuses a laptop or training goal, request that they provide their decision and reasons in writing on VA Form 20-0998.', // @cite 38-cfr-21-198
           badge: 'VETERAN SELF-ADVOCACY'
         };
     }
@@ -384,76 +409,527 @@ function HomeDashboardView({
               </div>
             )}
 
-            {/* STEP 3: SOLUTION REPORT & LETTER DRAFT */}
-            {wizardStep === 2 && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Left col: Errors and Citations */}
-                <div className="lg:col-span-5 space-y-5">
-                  <div className="space-y-3.5">
-                    <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Identified VA Errors</h3>
-                    <div className="space-y-2.5">
-                      {activeWorkflow.errors.map((err, idx) => (
-                        <div key={idx} className="flex gap-2.5 items-start p-3 bg-red-950/20 border border-red-900/35 rounded-lg text-[11px] text-red-300 leading-relaxed">
-                          <AlertOctagon size={14} className="shrink-0 mt-0.5" />
-                          <span>{err}</span>
-                        </div>
-                      ))}
+            {/* STEP 3: SOLUTIONS CASE PACKET DRAFT */}
+            {wizardStep === 2 && (() => {
+              const mappedArea = getDisputeAreaForWorkflow(activeWorkflow.workflowId);
+              
+              // Compute evidence score
+              const currentChecklist = mappedArea?.evidenceChecklist || [];
+              const evidenceScore = currentChecklist.reduce((acc, item) => {
+                return checkedEvidence[item.id] ? acc + item.weight : acc;
+              }, 0);
+
+              const getScoreStatus = (score) => {
+                if (score >= 75) return { label: 'Strong Evidence Package', color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-950/20' };
+                if (score >= 50) return { label: 'Borderline Evidence Package', color: 'text-amber-400', border: 'border-amber-500/30', bg: 'bg-amber-950/20' };
+                return { label: 'Insufficient Evidence Package', color: 'text-red-400', border: 'border-red-500/30', bg: 'bg-red-950/20' };
+              };
+              const scoreStatus = getScoreStatus(evidenceScore);
+
+              // Compile timeline text for the letter if applicable
+              const compiledTimeline = contactsLog.map(c => `* ${c.date} | Method: ${c.method} | Notes: ${c.request}`).join('\n');
+              
+              // Compile dynamic letter body
+              const dynamicFacts = {
+                ...formFacts,
+                timelineText: compiledTimeline ? `\nCommunication Timeline:\n${compiledTimeline}` : ''
+              };
+              const compiledLetter = getCompiledLetter(activeWorkflow, dynamicFacts, tempStage);
+
+              // Generate Case Packet Markdown File content
+              const handleDownloadPacket = () => {
+                const mdContent = `# VR&E STRATEGIC CASE PACKET
+Compiled: ${new Date().toLocaleDateString()}
+Issue: ${activeWorkflow.title}
+Case Status Stage: ${tempStage}
+User Mode: ${userMode.toUpperCase()}
+
+============================================================
+1. STRATEGIC OVERVIEW & STATEMENT OF FACTS
+VA Errors Identified:
+${activeWorkflow.errors.map((e, idx) => `${idx + 1}. [ERROR] ${e}`).join('\n')}
+
+Next Action Recommended:
+${activeWorkflow.workflowId === 'counselor-delay' ? 'Request local supervisor intervention.' : 'Demand formal written decision notice under 38 U.S.C. § 5104.'}
+
+============================================================
+2. EVIDENCE SUFFICIENCY INDEX
+Score: ${evidenceScore} / 100 (${scoreStatus.label})
+${currentChecklist.map(e => `* [${checkedEvidence[e.id] ? 'X' : ' '}] ${e.text} (+${e.weight} pts)`).join('\n')}
+
+============================================================
+3. CONTACT TIMELINE RECORDS
+${contactsLog.map(c => `* ${c.date} | Method: ${c.method} | details: ${c.request}`).join('\n') || 'No timeline entries logged.'}
+
+============================================================
+4. FORMAL ACTION LETTER DRAFT
+\`\`\`
+${compiledLetter}
+\`\`\`
+
+*** CONFIDENTIALITY NOTE: Private case packet generated in local session. Do not commit PII to public files. ***`;
+
+                const blob = new Blob([mdContent], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vre_case_packet_${activeWorkflow.workflowId}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              };
+
+              // Print Layout
+              const handlePrintPacket = () => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                  <html>
+                    <head>
+                      <title>VR&E Case Packet - ${activeWorkflow.title}</title>
+                      <style>
+                        body { font-family: 'Courier New', Courier, monospace; color: #000; padding: 40px; font-size: 0.9rem; line-height: 1.5; }
+                        h1 { font-family: Arial, sans-serif; font-size: 1.4rem; border-bottom: 2px solid #334155; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; }
+                        h2 { font-family: Arial, sans-serif; font-size: 1.1rem; margin-top: 25px; margin-bottom: 10px; color: #334155; }
+                        pre { white-space: pre-wrap; font-family: inherit; font-size: inherit; background: #f8fafc; padding: 15px; border: 1px solid #cbd5e1; border-radius: 8px; }
+                        .score { font-weight: bold; color: #059669; }
+                      </style>
+                    </head>
+                    <body>
+                      <h1>VR&E Strategic Case Packet Brief</h1>
+                      <p><strong>Issue:</strong> ${activeWorkflow.title}</p>
+                      <p><strong>Stage:</strong> ${tempStage}</p>
+                      <p><strong>Date Compiled:</strong> ${new Date().toLocaleDateString()}</p>
+                      <hr/>
+                      <h2>1. Identified VA Errors</h2>
+                      <ul>${activeWorkflow.errors.map(e => `<li><strong>[ERROR]</strong> ${e}</li>`).join('')}</ul>
+                      <h2>2. Evidence Sufficiency Index (Score: ${evidenceScore} / 100)</h2>
+                      <ul>${currentChecklist.map(e => `<li>[${checkedEvidence[e.id] ? 'X' : ' '}] ${e.text}</li>`).join('')}</ul>
+                      <h2>3. Communication Timeline Logs</h2>
+                      <pre>${contactsLog.map(c => `* ${c.date} | ${c.method} | ${c.request}`).join('\n') || 'No timeline records logged.'}</pre>
+                      <h2>4. Formal Action Letter Draft</h2>
+                      <pre>${compiledLetter}</pre>
+                      <script>window.print();</script>
+                    </body>
+                  </html>
+                `);
+                printWindow.document.close();
+              };
+
+              const showTimelineTab = ['counselor-delay', 'tuition-unpaid', 'case-closed'].includes(activeWorkflow.workflowId);
+
+              return (
+                <div className="space-y-6">
+                  {/* Case Packet Header Control Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 p-4 border border-slate-800 rounded-xl">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Case Packet Compiler</span>
+                      <h4 className="text-xs font-bold text-slate-200">Assembled Strategy Dossier</h4>
+                    </div>
+                    <div className="flex gap-2.5">
+                      <button
+                        onClick={handleDownloadPacket}
+                        className="btn btn-sm btn-secondary text-xs inline-flex items-center gap-1.5 h-8.5 py-1.5 px-3"
+                      >
+                        <FileText size={13} />
+                        <span>Download Packet (.md)</span>
+                      </button>
+                      <button
+                        onClick={handlePrintPacket}
+                        className="btn btn-sm btn-secondary text-xs inline-flex items-center gap-1.5 h-8.5 py-1.5 px-3"
+                      >
+                        <Printer size={13} />
+                        <span>Print Packet</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Governing Legal Citations</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {activeWorkflow.citations.map((cite) => {
-                        let display = cite.toUpperCase();
-                        if (cite.startsWith('38-usc')) {
-                          display = `38 U.S.C. § ${cite.split('-').pop()}`;
-                        } else if (cite.startsWith('38-cfr')) {
-                          const section = cite.replace('38-cfr-21-', '21.').replace('38-cfr-', '').replace('-', '.');
-                          display = `38 C.F.R. § ${section}`;
-                        }
-                        return (
-                          <button
-                            key={cite}
-                            onClick={() => handleCitationClick(cite)}
-                            className="text-[10px] bg-slate-950 hover:bg-slate-950/90 border border-slate-800 hover:border-slate-700 text-emerald-400 font-semibold px-2.5 py-1.5 rounded inline-flex items-center gap-1 transition"
-                          >
-                            <Scale size={11} />
-                            <span>{display}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/50 border border-slate-800/80 p-4 rounded-xl space-y-2 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Recommended Next Action</span>
-                    <p className="text-slate-300 leading-relaxed font-bold">
-                      {activeWorkflow.workflowId === 'counselor-delay' ? 'Submit this letter to the VR&E Officer at your local VA Regional Office.' : 'Submit this formal written request via the eVA portal or via certified mail, and demand a written decision notice (VA Form 20-0998).'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right col: Letter Generation */}
-                <div className="lg:col-span-7 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Custom Action Letter Draft</span>
+                  {/* Packet Tabs */}
+                  <div className="tabs-header border-b border-slate-800 pb-px mb-2">
                     <button
-                      onClick={() => handleCopyLetter(getCompiledLetter(activeWorkflow, formFacts, tempStage))}
-                      className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 rounded-lg text-[10px] font-semibold transition flex items-center gap-1"
+                      className={`tab-btn ${packetTab === 'summary' ? 'active' : ''}`}
+                      onClick={() => setPacketTab('summary')}
                     >
-                      {copiedLetter ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
-                      <span>{copiedLetter ? 'Copied' : 'Copy Text'}</span>
+                      1. Dossier & Summary
+                    </button>
+                    {currentChecklist.length > 0 && (
+                      <button
+                        className={`tab-btn ${packetTab === 'evidence' ? 'active' : ''}`}
+                        onClick={() => setPacketTab('evidence')}
+                      >
+                        2. Evidence Score
+                      </button>
+                    )}
+                    {showTimelineTab && (
+                      <button
+                        className={`tab-btn ${packetTab === 'timeline' ? 'active' : ''}`}
+                        onClick={() => setPacketTab('timeline')}
+                      >
+                        3. Contact Timeline
+                      </button>
+                    )}
+                    <button
+                      className={`tab-btn ${packetTab === 'authorities' ? 'active' : ''}`}
+                      onClick={() => setPacketTab('authorities')}
+                    >
+                      {showTimelineTab ? '4. Authorities' : '3. Authorities'}
+                    </button>
+                    <button
+                      className={`tab-btn ${packetTab === 'letter' ? 'active' : ''}`}
+                      onClick={() => setPacketTab('letter')}
+                    >
+                      {showTimelineTab ? '5. Action Letter' : '4. Action Letter'}
                     </button>
                   </div>
 
-                  <textarea
-                    readOnly
-                    className="w-full h-80 bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-[11px] font-mono text-slate-300 leading-relaxed select-all focus:outline-none focus:border-slate-700"
-                    value={getCompiledLetter(activeWorkflow, formFacts, tempStage)}
-                  />
+                  {/* TAB CONTENT: DOSSIER & SUMMARY */}
+                  {packetTab === 'summary' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      <div className="lg:col-span-7 space-y-5">
+                        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Identified VA Errors</span>
+                          <div className="space-y-2.5">
+                            {activeWorkflow.errors.map((err, idx) => (
+                              <div key={idx} className="flex gap-2.5 items-start p-3 bg-red-950/10 border border-red-900/30 rounded-lg text-xs text-red-300 leading-relaxed">
+                                <AlertOctagon size={15} className="shrink-0 mt-0.5" />
+                                <span>{err}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
 
+                        {/* Written Decision Branching Warning */}
+                        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+                          <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Written Decision Notice Audit</span>
+                          <div className="space-y-3">
+                            <label className="text-xs text-slate-350 block">Have you received a formal, written VA Decision Notice (such as VA Form 20-0998) regarding this dispute?</label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="wf_written_notice"
+                                  checked={hasWrittenNoticeState === 'yes'}
+                                  onChange={() => setHasWrittenNoticeState('yes')}
+                                  className="accent-indigo-500"
+                                />
+                                <span>Yes, formal written letter</span>
+                              </label>
+                              <label className="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="wf_written_notice"
+                                  checked={hasWrittenNoticeState === 'no'}
+                                  onChange={() => setHasWrittenNoticeState('no')}
+                                  className="accent-indigo-500"
+                                />
+                                <span>No, verbal or email only</span>
+                              </label>
+                            </div>
+
+                            {hasWrittenNoticeState === 'no' ? (
+                              <div className="p-4 bg-amber-950/10 border border-amber-500/30 rounded-xl">
+                                <div className="flex items-center gap-2">
+                                  <AlertTriangle size={15} className="text-amber-400" />
+                                  <span className="text-xs font-bold text-slate-200 font-sans">HLR Appeals Premature Warning</span>
+                                </div>
+                                <p className="text-[10.5px] text-slate-400 mt-2 leading-relaxed">
+                                  An email is not a formal VA decision. Filing a Higher-Level Review (HLR) or Board Appeal requires a completed VA Form 20-0998 decision notice. Your first step is to submit your Action Letter (Tab 5) requesting a formal written decision under 38 C.F.R. § 21.50 or § 21.360. Do not file HLR yet.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="p-4 bg-emerald-950/10 border border-emerald-900/30 rounded-xl">
+                                <div className="flex items-center gap-2">
+                                  <AlertTriangle size={15} className="text-emerald-400" />
+                                  <span className="text-xs font-bold text-slate-200 font-sans">Formal Appeal Path Active</span>
+                                </div>
+                                <p className="text-[10.5px] text-slate-400 mt-2 leading-relaxed">
+                                  Since you have a written decision letter, you have 1 year from the notice date to file a Higher-Level Review (VAF 20-0996) or a Supplemental Claim (VAF 20-0995). Review the evidence checklist in Tab 2 to strengthen your appeal package before submission.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:col-span-5 space-y-4">
+                        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-3">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Recommended Escalation Track</span>
+                          <div className="space-y-2.5 text-xs">
+                            <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg">
+                              <span className="font-semibold text-slate-200 block">Primary Action:</span>
+                              <span className="text-slate-400 leading-normal block mt-1">
+                                {activeWorkflow.workflowId === 'counselor-delay'
+                                  ? 'Request supervisor review by sending the escalation letter (Tab 5) to the Regional office VR&E Officer.'
+                                  : 'Transmit the formal written necessity statement to your counselor via QuickSubmit or eVA portal, demanding a formal written decision.'}
+                              </span>
+                            </div>
+                            <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg">
+                              <span className="font-semibold text-slate-200 block">Supervisor Referral:</span>
+                              <span className="text-slate-400 leading-normal block mt-1">
+                                If no response within 5 business days, locate your VARO VR&E Officer contact information using the Authority Library or local directories, and escalate.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB CONTENT: EVIDENCE SUFFICIENCY & SCORE */}
+                  {packetTab === 'evidence' && currentChecklist.length > 0 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Left: checklist check-boxes */}
+                      <div className="lg:col-span-7 space-y-3">
+                        <h4 className="text-xs font-bold text-slate-250">Check off documents you possess or can submit:</h4>
+                        <div className="space-y-2">
+                          {currentChecklist.map(item => (
+                            <div
+                              key={item.id}
+                              onClick={() => setCheckedEvidence(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                              className={`border rounded-lg p-4 cursor-pointer transition select-none flex items-start gap-3.5 ${
+                                checkedEvidence[item.id]
+                                  ? 'bg-emerald-500/5 border-emerald-800/80'
+                                  : 'bg-slate-950/20 border-slate-800 hover:border-slate-700/80'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={!!checkedEvidence[item.id]}
+                                onChange={() => {}}
+                                className="mt-0.5 pointer-events-none accent-emerald-500"
+                                aria-label={item.text}
+                              />
+                              <div className="flex-1 flex justify-between items-center gap-4">
+                                <span className="text-xs text-slate-250 leading-relaxed">{item.text}</span>
+                                <span className="text-[10px] bg-slate-900 px-2 py-0.5 border border-slate-800 rounded font-mono text-emerald-400 shrink-0">
+                                  +{item.weight} pts
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right: sufficiency indicators and gaps */}
+                      <div className="lg:col-span-5 space-y-4">
+                        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Dossier Strength Index</span>
+                            <h4 className="text-xs font-bold text-slate-200">Evidence Weight Meter</h4>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-mono text-slate-400">Total Points:</span>
+                              <span className="font-bold text-slate-200">{evidenceScore} / 100</span>
+                            </div>
+                            <div className="w-full bg-slate-950 border border-slate-850 h-3 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-300 ${
+                                  evidenceScore >= 75 ? 'bg-emerald-500' : evidenceScore >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${evidenceScore}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className={`p-4 border rounded-xl ${scoreStatus.bg} ${scoreStatus.border}`}>
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 size={16} className={scoreStatus.color} />
+                              <span className={`text-xs font-bold ${scoreStatus.color}`}>{scoreStatus.label}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 leading-relaxed mt-2">
+                              {evidenceScore >= 75 
+                                ? 'Your evidence package is extremely strong and complies fully with C.F.R. regulations. You have minimized VRC pushback opportunities.'
+                                : evidenceScore >= 50
+                                ? 'Your package is decent, but VRCs may argue lack of necessity. It is highly recommended to append a detailed personal statement or therapist letter.'
+                                : 'Your evidence is currently insufficient. Filing appeals with this score has a high probability of denial. Gather required curriculum syllabi or policy letters before escalation.' /* @cite 38-cfr-21-198 */
+                              }
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Missing evidence list */}
+                        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-3">
+                          <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Missing Evidence Gaps</span>
+                          {currentChecklist.filter(e => !checkedEvidence[e.id]).length > 0 ? (
+                            <div className="space-y-2">
+                              {currentChecklist.filter(e => !checkedEvidence[e.id]).map(e => (
+                                <div key={e.id} className="flex gap-2 items-start text-[10px] text-slate-400 bg-slate-950/20 p-2.5 border border-slate-850 rounded">
+                                  <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                                  <div>
+                                    <strong className="text-slate-350 block">Missing: {e.text}</strong>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 items-center text-[10px] text-emerald-400 bg-slate-950/20 p-3 border border-emerald-900/30 rounded">
+                              <CheckCircle2 size={14} className="shrink-0" />
+                              <span>Evidence package fully assembled! Zero gaps detected.</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB CONTENT: CONTACT TIMELINE LOG */}
+                  {packetTab === 'timeline' && showTimelineTab && (
+                    <div className="space-y-4">
+                      <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+                        <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Escalation contact attempt timeline Logger</span>
+                        <p className="text-[10px] text-slate-400 leading-relaxed">
+                          Enter your communication timeline records below. This log is appended to your packet and provides proof of the VRC non-responsiveness or delay.
+                        </p>
+
+                        {/* Input row */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end bg-slate-950/40 p-4 border border-slate-850 rounded-lg">
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-450 uppercase mb-1">Date</label>
+                            <input
+                              type="date"
+                              value={newContact.date}
+                              onChange={(e) => setNewContact({...newContact, date: e.target.value})}
+                              className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-450 uppercase mb-1">Method</label>
+                            <select
+                              value={newContact.method}
+                              onChange={(e) => setNewContact({...newContact, method: e.target.value})}
+                              className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200"
+                              aria-label="Contact method"
+                            >
+                              <option value="Email">Email</option>
+                              <option value="Phone Call">Phone Call</option>
+                              <option value="eVA Msg">eVA Msg</option>
+                              <option value="Office Visit">Office Visit</option>
+                              <option value="Certified Mail">Certified Mail</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-450 uppercase mb-1">Details of Request</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Sent syllabus and request for laptop voucher"
+                              value={newContact.request}
+                              onChange={(e) => setNewContact({...newContact, request: e.target.value})}
+                              className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => {
+                                if (!newContact.date || !newContact.request) {
+                                  alert('Please fill out date and details.');
+                                  return;
+                                }
+                                setContactsLog([...contactsLog, { ...newContact, id: Date.now().toString() }]);
+                                setNewContact({ date: '', method: 'Email', request: '', response: 'No response' });
+                              }}
+                              className="w-full btn btn-primary flex justify-center items-center gap-1 h-9"
+                            >
+                              <Plus size={14} />
+                              <span>Add Attempt</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* List */}
+                        {contactsLog.length > 0 ? (
+                          <div className="space-y-2 mt-4">
+                            {contactsLog.map((log) => (
+                              <div key={log.id} className="flex justify-between items-center bg-slate-950/20 border border-slate-850 rounded-lg p-3 text-xs">
+                                <div className="flex flex-wrap gap-2.5 items-center">
+                                  <span className="font-mono text-indigo-400 font-semibold">{log.date}</span>
+                                  <span className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-[10px] text-slate-350 rounded font-semibold">{log.method}</span>
+                                  <span className="text-slate-200">{log.request}</span>
+                                </div>
+                                <button 
+                                  onClick={() => setContactsLog(contactsLog.filter(c => c.id !== log.id))}
+                                  className="text-red-400 hover:text-red-300 p-1"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 border border-dashed border-slate-850 rounded-lg text-xs text-slate-500 font-semibold">
+                            No contact records logged.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB CONTENT: AUTHORITIES */}
+                  {packetTab === 'authorities' && (
+                    <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Governing Legal Citations</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {activeWorkflow.citations.map((cite) => {
+                          let display = cite.toUpperCase();
+                          let relevanceText = 'Governs this specific vocational rehabilitation dispute.';
+                          if (cite.startsWith('38-usc')) {
+                            display = `38 U.S.C. § ${cite.split('-').pop()}`;
+                            relevanceText = 'Statutory authority establishing Chapter 31 services and parameters.';
+                          } else if (cite.startsWith('38-cfr')) {
+                            const section = cite.replace('38-cfr-21-', '21.').replace('38-cfr-', '').replace('-', '.');
+                            display = `38 C.F.R. § ${section}`;
+                            relevanceText = 'Binding regulatory requirements that VA case managers should follow.';
+                          }
+                          return (
+                            <div 
+                              key={cite} 
+                              onClick={() => handleCitationClick(cite)}
+                              className="bg-slate-950/40 hover:bg-slate-950/80 border border-slate-850 hover:border-slate-750 p-4 rounded-xl cursor-pointer transition flex flex-col justify-between"
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold text-slate-200">{display}</span>
+                                  <span className="text-[9px] uppercase font-bold text-emerald-400 bg-emerald-500/5 px-2 py-0.5 border border-emerald-500/10 rounded">
+                                    {cite.startsWith('38-usc') ? 'Statute' : 'Regulation'}
+                                  </span>
+                                </div>
+                                <p className="text-[10.5px] text-slate-400 mt-2 leading-relaxed">{relevanceText}</p>
+                              </div>
+                              <span className="text-[10px] text-indigo-400 font-semibold mt-3 flex items-center gap-1">
+                                <span>View Full Text in Library</span>
+                                <ArrowRight size={10} />
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB CONTENT: ACTION LETTER */}
+                  {packetTab === 'letter' && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Custom Action Letter Draft</span>
+                        <button
+                          onClick={() => handleCopyLetter(compiledLetter)}
+                          className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 rounded-lg text-[10px] font-semibold transition flex items-center gap-1"
+                        >
+                          {copiedLetter ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                          <span>{copiedLetter ? 'Copied' : 'Copy Text'}</span>
+                        </button>
+                      </div>
+
+                      <textarea
+                        readOnly
+                        className="w-full h-80 bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-[11px] font-mono text-slate-300 leading-relaxed select-all focus:outline-none focus:border-slate-700"
+                        value={compiledLetter}
+                      />
+                    </div>
+                  )}
+
+                  {/* Bottom Reset buttons */}
                   <div className="flex justify-between pt-4 border-t border-slate-850">
                     <button 
                       onClick={handleBackStep}
@@ -469,9 +945,8 @@ function HomeDashboardView({
                     </button>
                   </div>
                 </div>
-
-              </div>
-            )}
+              );
+            })()}
 
           </motion.div>
         )}

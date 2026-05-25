@@ -13,6 +13,8 @@ const MANIFEST_PATH = path.join(PUBLIC_PATH, 'index.json');
 const STATUTES_DIR = path.join(PUBLIC_PATH, 'usc');
 const REGS_DIR = path.join(PUBLIC_PATH, 'cfr');
 const M28C_DIR = path.join(PUBLIC_PATH, 'm28c');
+const PL_DIR = path.join(PUBLIC_PATH, 'public-law');
+const FR_DIR = path.join(PUBLIC_PATH, 'federal-register');
 
 function hashText(text) {
   return crypto.createHash("sha256").update(text.trim()).digest("hex");
@@ -37,6 +39,50 @@ function validateFile(filePath, expectedId, sectionType) {
     if (computedHash !== data.hash) {
       console.error(`[HASH ERROR] File '${path.basename(filePath)}' internal hash '${data.hash}' does not match computed hash '${computedHash}'`);
       return { success: false, hash: computedHash };
+    }
+
+    // Enforce no-truncation verification (P0-1)
+    if (data.status === 'full-text-loaded') {
+      if (!data.noTruncation || data.noTruncation.passed !== true) {
+        console.error(`[SCHEMA ERROR] File '${path.basename(filePath)}' has status 'full-text-loaded' but lacks passing noTruncation check`);
+        return { success: false, hash: computedHash };
+      }
+      if (!data.fullTextSha256) {
+        console.error(`[SCHEMA ERROR] File '${path.basename(filePath)}' has status 'full-text-loaded' but lacks fullTextSha256`);
+        return { success: false, hash: computedHash };
+      }
+      if (!data.retrievedAt) {
+        console.error(`[SCHEMA ERROR] File '${path.basename(filePath)}' has status 'full-text-loaded' but lacks retrievedAt timestamp`);
+        return { success: false, hash: computedHash };
+      }
+      if (data.headingCount === undefined || data.headingCount <= 0) {
+        console.error(`[SCHEMA ERROR] File '${path.basename(filePath)}' has status 'full-text-loaded' but lacks valid headingCount`);
+        return { success: false, hash: computedHash };
+      }
+
+      // Additional strict checks for M28C full-text-loaded records
+      if (data.sourceType === 'm28c') {
+        if (!data.articleId) {
+          console.error(`[SCHEMA ERROR] M28C full-text file '${path.basename(filePath)}' lacks articleId`);
+          return { success: false, hash: computedHash };
+        }
+        if (!data.sourceUpdated) {
+          console.error(`[SCHEMA ERROR] M28C full-text file '${path.basename(filePath)}' lacks sourceUpdated date`);
+          return { success: false, hash: computedHash };
+        }
+        if (!data.rawHtmlSha256) {
+          console.error(`[SCHEMA ERROR] M28C full-text file '${path.basename(filePath)}' lacks rawHtmlSha256`);
+          return { success: false, hash: computedHash };
+        }
+        if (data.tableCount === undefined) {
+          console.error(`[SCHEMA ERROR] M28C full-text file '${path.basename(filePath)}' lacks tableCount`);
+          return { success: false, hash: computedHash };
+        }
+        if (data.attachmentCount === undefined) {
+          console.error(`[SCHEMA ERROR] M28C full-text file '${path.basename(filePath)}' lacks attachmentCount`);
+          return { success: false, hash: computedHash };
+        }
+      }
     }
     
     return { success: true, hash: computedHash };
@@ -120,6 +166,50 @@ function main() {
       verifiedCount++;
     }
   });
+
+  // 4. Validate Public Laws
+  if (manifest.publicLaws) {
+    manifest.publicLaws.forEach(pl => {
+      const filename = `${pl.id}.json`;
+      const filePath = path.join(PL_DIR, filename);
+      const expectedId = pl.id;
+
+      if (!fs.existsSync(filePath)) {
+        console.error(`[ERROR] Public Law file does not exist: ${filePath}`);
+        errors++;
+        return;
+      }
+
+      const { success } = validateFile(filePath, expectedId, 'public-law');
+      if (!success) {
+        errors++;
+      } else {
+        verifiedCount++;
+      }
+    });
+  }
+
+  // 5. Validate Federal Register
+  if (manifest.federalRegister) {
+    manifest.federalRegister.forEach(fr => {
+      const filename = `${fr.id}.json`;
+      const filePath = path.join(FR_DIR, filename);
+      const expectedId = fr.id;
+
+      if (!fs.existsSync(filePath)) {
+        console.error(`[ERROR] Federal Register file does not exist: ${filePath}`);
+        errors++;
+        return;
+      }
+
+      const { success } = validateFile(filePath, expectedId, 'federal-register');
+      if (!success) {
+        errors++;
+      } else {
+        verifiedCount++;
+      }
+    });
+  }
 
   console.log(`\nValidation complete:`);
   console.log(`  - Verified files: ${verifiedCount}`);

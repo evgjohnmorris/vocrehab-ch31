@@ -6,6 +6,7 @@ import {
   FileText, Check, Calendar, AlertTriangle, ShieldCheck
 } from 'lucide-react';
 import { renderTemplate } from '../utils/templateRenderer.js';
+import { analyzeEntitlement } from '../utils/adjudicationEngine.js';
 
 // JSON Templates
 import extendedEvaluationRequestTpl from '../data/templates/extended-evaluation-request.json';
@@ -283,7 +284,7 @@ function EntitlementWizardView({
     if (s.hasProposedDenial) {
       setCaseStage('discontinued');
       setDateOfConversation('2026-05-20');
-      setWhatVrcSaid('The counselor stated verbally that I am not entitled because my current employment indicates I have overcome my disability.');
+      setWhatVrcSaid('The counselor stated verbally that I am not entitled because my current employment indicates I have overcome my disability.'); // @cite 38-cfr-21-51
     } else {
       setCaseStage('evaluation');
       setDateOfConversation('');
@@ -321,306 +322,25 @@ function EntitlementWizardView({
 
   const activeSehIndicators = getActiveSehIndicators();
 
-  // Sequential Adjudication Rules Engine
-  const performAdjudication = () => {
-    // 13-Stage sequential analysis
-    
-    // Stage 1: Statutory Discharge Bar (38 U.S.C. § 5303)
-    const isStatutoryDischargeBar = dischargeStatus === 'dishonorable' && !isActiveDuty;
-    
-    // Stage 2: Active Duty / IDES Pathway (38 C.F.R. § 21.40)
-    const isIdesPathway = isActiveDuty;
-    
-    // Stage 3: Basic Rating Threshold (38 U.S.C. § 3102)
-    const isBelowRatingThreshold = rating === 0 && !isActiveDuty;
-    
-    // Stage 4: 12-Year Delimiting Date Expiration (38 C.F.R. § 21.44)
-    const is12YearExpired = delimitingStatus?.isExpired || false;
-    
-    // Stage 5 & 6: Basic EH vs SEH requirement derivation
-    const requiresSEH = rating === 10 || is12YearExpired || dischargeStatus === 'oth';
-    const requiresEH = rating >= 20 && !requiresSEH;
-    
-    // Stage 7: Employment Handicap (EH) Scoring
-    const barrierCount = Object.keys(checkedBarriers).filter(k => checkedBarriers[k] && EH_BARRIERS.some(b => b.id === k)).length;
-    
-    const isJobUnsuitable = currentEmploymentStatus === 'employed' && (
-      jobSuitabilityCheckboxes.aggravates_disability ||
-      jobSuitabilityCheckboxes.underemployed ||
-      jobSuitabilityCheckboxes.job_loss ||
-      jobSuitabilityCheckboxes.accommodations_needed
-    );
-    
-    let ehScore = barrierCount;
-    if (currentEmploymentStatus === 'employed') {
-      if (isJobUnsuitable) ehScore += 1;
-      else ehScore = 0; // If employed in suitable job, EH score falls to zero
-    }
-    
-    // EH criteria: requires service connected contribution, score >= 1, and suitable employment barriers if employed
-    const isEhEstablished = scContributionPresent && ehScore >= 1 && (currentEmploymentStatus === 'unemployed' || isJobUnsuitable);
-    
-    // Stage 8: Serious Employment Handicap (SEH) Scoring
-    const manualSehCount = Object.keys(manualSehIndicators).filter(k => manualSehIndicators[k] && SEH_INDICATORS.some(ind => ind.id === k)).length;
-    let sehScore = manualSehCount;
-    if (rating === 10) sehScore += 1;
-    if (dischargeStatus === 'oth') sehScore += 1;
-    if (is12YearExpired) sehScore += 1;
-    if (checkedBarriers['ptsd_crowds'] || checkedBarriers['concentration'] || checkedBarriers['social_interaction']) {
-      sehScore += 1; // Severe neuropsychiatric indicator count
-    }
-    
-    const isSehEstablished = isEhEstablished && (sehScore >= 2 || is12YearExpired || rating === 10);
-    
-    // Stage 9: SC Disability Contribution Check
-    const hasScContribution = scContributionPresent;
-    
-    // Stage 10: Feasibility Assessment
-    const isFeasibilityUncertain = Object.values(checkedFeasibility).filter(Boolean).length > 0;
-    
-    // Stage 11: Evidence Checklist Index
-    const evidenceScore = EVIDENCE_ITEMS.reduce((acc, item) => {
-      return checkedEvidence[item.id] ? acc + item.weight : acc;
-    }, 0);
-    
-    // Stage 12: Procedural VA Errors Spotting
-    const activeErrors = [];
-    if (rating === 10 && caseStage === 'discontinued' && denialReason === 'not_eligible') {
-      activeErrors.push({
-        id: "10-percent-categorical-denial",
-        error: "VA may have treated a 10% Veteran as categorically ineligible.",
-        whyItMatters: "A 10% rating supports entitlement if the VA finds a Serious Employment Handicap.",
-        authorities: ["38-usc-3102", "38-cfr-21-40", "38-cfr-21-52"],
-        bestMove: "Request a Serious Employment Handicap determination and submit supporting SEH evidence."
-      });
-    }
-    if (currentEmploymentStatus === 'employed' && denialReason === 'suitable_employment') {
-      activeErrors.push({
-        id: "current-employment-improper-denial",
-        error: "VA may have treated current employment as categorically overcoming impairment.",
-        whyItMatters: "The analysis must address suitability, stability, and whether impairment has actually been overcome.",
-        authorities: ["38-cfr-21-51"],
-        bestMove: "Submit medical and occupational evidence that the job is unsuitable, unstable, or aggravates your conditions."
-      });
-    }
-    if (denialReason === 'no_eh' && hasScContribution) {
-      activeErrors.push({
-        id: "no-sc-contribution-analysis",
-        error: "VA may have failed to analyze service-connected disability contribution.",
-        whyItMatters: "An Employment Handicap requires analyzing whether service-connected disability contributes to vocational impairment.",
-        authorities: ["38-cfr-21-51"],
-        bestMove: "Submit a direct service-connected contribution statement and functional clinical evidence."
-      });
-    }
-    if (rating === 10 && denialReason === 'no_eh' && (is12YearExpired || Object.keys(manualSehIndicators).filter(k => manualSehIndicators[k]).length > 0)) {
-      activeErrors.push({
-        id: "seh-not-separately-analyzed",
-        error: "VA may have failed to perform a separate Serious Employment Handicap determination.",
-        whyItMatters: "A separate SEH determination is required when basic Employment Handicap criteria are not fully met but SEH indicators exist.",
-        authorities: ["38-cfr-21-52"],
-        bestMove: "Request a written, formal SEH determination."
-      });
-    }
-    if (denialReason === 'not_feasible' && isFeasibilityUncertain) {
-      activeErrors.push({
-        id: "unsupported-infeasibility",
-        error: "VA may have made an unsupported feasibility denial.",
-        whyItMatters: "Feasibility evaluations must consider appropriate supports and accommodations, or authorize an Extended Evaluation.",
-        authorities: ["38-cfr-21-53", "38-cfr-21-57", "38-cfr-21-74"],
-        bestMove: "Request an Extended Evaluation under 38 C.F.R. § 21.74 to test capacity with support."
-      });
-    }
-    if (!hasWrittenDecision && hasProposedDenial) {
-      activeErrors.push({
-        id: "no-written-rationale",
-        error: "Counselor proposed denial or closed case without providing written rationale.",
-        whyItMatters: "Veterans must be provided a written decision notice containing reasons and evidence relied upon.",
-        authorities: ["38-cfr-21-50"],
-        bestMove: "Request a formal written decision and counseling narrative (VA Form 28-1902b)."
-      });
-    }
-
-    // Stage 13: Derive Adjudication Pathway
-    let path;
-    let law;
-    let title;
-    
-    if (isStatutoryDischargeBar || isBelowRatingThreshold) {
-      path = 'STATUTORY_BAR_ACTIVE';
-      law = '38 U.S.C. § 5303; 38 C.F.R. § 21.42';
-      title = 'Statutory Criteria Not Satisfied';
-    } else if (hasProposedDenial && !hasWrittenDecision) {
-      path = 'WRITTEN_DECISION_NEEDED';
-      law = '38 C.F.R. § 21.50';
-      title = 'Denial Posture (Formal Written Rationale Requested)';
-    } else if (isFeasibilityUncertain && (isEhEstablished || isSehEstablished)) {
-      path = 'FEASIBILITY_DISPUTE';
-      law = '38 U.S.C. § 3106; 38 C.F.R. § 21.57; 38 C.F.R. § 21.74';
-      title = 'Entitled, but Vocational Feasibility Disputed';
-    } else if (requiresSEH) {
-      if (isSehEstablished) {
-        path = 'LIKELY_10_SEH_SUPPORT';
-        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.52';
-        title = 'Likely Entitled (10% Rating & Serious Employment Handicap)';
-      } else {
-        path = 'TEN_PERCENT_SEH_EVIDENCE_NEEDED';
-        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.52';
-        title = 'Eligible, but SEH Evidence Required (10% Rating)';
-      }
-    } else {
-      if (isEhEstablished) {
-        path = 'LIKELY_20_EH_SUPPORT';
-        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.51';
-        title = 'Likely Entitled (20%+ Rating & Active Employment Handicap)';
-      } else {
-        path = 'TWENTY_PERCENT_EH_EVIDENCE_NEEDED';
-        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.51';
-        title = 'Eligible, but EH Evidence Required (20%+ Rating)';
-      }
-    }
-
-    // Facts Supporting & Hurting
-    const factsSupport = [];
-    const factsHurt = [];
-    const missingEvidence = [];
-    
-    // Facts supporting
-    if (isIdesPathway) {
-      factsSupport.push('Active-duty service member undergoing IDES satisfies basic eligibility under 38 C.F.R. § 21.40.');
-    } else {
-      if (rating >= 20) {
-        factsSupport.push(`Disability rating of ${rating}% satisfies baseline application criteria for standard Employment Handicap evaluation.`);
-      } else if (rating === 10) {
-        factsSupport.push('Disability rating of 10% satisfies basic eligibility to apply.');
-      }
-    }
-
-    if (dischargeStatus === 'honorable' || dischargeStatus === 'general') {
-      factsSupport.push(`Discharge characterization (${dischargeStatus}) represents a non-barring military service record.`);
-    }
-
-    if (delimitingStatus && !delimitingStatus.isExpired) {
-      factsSupport.push(`Basic eligibility window is active and remains open until ${delimitingStatus.delimitingStr}.`);
-    }
-
-    if (hasScContribution) {
-      factsSupport.push('Rated service-connected conditions directly cause or contribute to current vocational impairment.');
-    }
-
-    if (barrierCount > 0) {
-      factsSupport.push(`Factual record documents ${barrierCount} active physical or cognitive occupational barriers.`);
-    }
-
-    if (currentEmploymentStatus === 'employed' && isJobUnsuitable) {
-      factsSupport.push('Current employment is unsuitable due to disability aggravation or severe underemployment.');
-    } else if (currentEmploymentStatus === 'unemployed') {
-      factsSupport.push('Unemployed status demonstrates vocational displacement caused in part by rating limitations.');
-    }
-
-    // Facts hurting
-    if (dischargeStatus === 'dishonorable') {
-      factsHurt.push('Dishonorable discharge status acts as a statutory bar under 38 U.S.C. § 5303.');
-    } else if (dischargeStatus === 'oth') {
-      factsHurt.push('Other Than Honorable (OTH) discharge characterization necessitates administrative Character of Service review.');
-    }
-
-    if (rating === 0 && !isActiveDuty) {
-      factsHurt.push('VA disability rating is 0%, failing to satisfy basic application requirements.');
-    }
-
-    if (is12YearExpired) {
-      factsHurt.push('Basic 12-year eligibility period has expired, requiring an assessed Serious Employment Handicap (SEH).');
-    }
-
-    if (!hasScContribution) {
-      factsHurt.push('Lacking direct connection between service-connected rating and vocational impairment.');
-    }
-
-    if (barrierCount === 0) {
-      factsHurt.push('No physical or cognitive occupational barriers checked, failing to demonstrate vocational impairment.');
-    }
-
-    if (currentEmploymentStatus === 'employed' && !isJobUnsuitable) {
-      factsHurt.push('Employed in a job not marked as unsuitable, which the VA may interpret as having overcome impairment.');
-    }
-
-    if (isFeasibilityUncertain) {
-      factsHurt.push('Medical instability or treatment schedule introduces uncertainty regarding immediate training feasibility.');
-    }
-
-    // Missing evidence derivation
-    EVIDENCE_ITEMS.forEach(item => {
-      if (!checkedEvidence[item.id]) {
-        missingEvidence.push(item.label);
-      }
-    });
-
-    // Next steps formulation
-    const nextSteps = [];
-    if (path === 'STATUTORY_BAR_ACTIVE') {
-      if (dischargeStatus === 'dishonorable') {
-        nextSteps.push('Apply to the Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR) for character upgrade.');
-      } else {
-        nextSteps.push('File for a rating increase or new service connections on VA.gov to reach the 10% threshold.');
-      }
-    } else if (path === 'WRITTEN_DECISION_NEEDED') {
-      nextSteps.push('Request a formal written Decision Notice and counseling narrative under 38 C.F.R. § 21.50.');
-      nextSteps.push('Draft a written record request letter using the template below to present to your counselor.');
-    } else if (path === 'FEASIBILITY_DISPUTE') {
-      nextSteps.push('Submit a formal request for an Extended Evaluation plan (up to 12 months) under 38 C.F.R. § 21.74.');
-      nextSteps.push('Gather treating doctor statements explaining that you can train with accommodations.');
-    } else if (requiresSEH && !isSehEstablished) {
-      nextSteps.push('Gather evidence of failed work or training attempts to demonstrate significant impairment.');
-      nextSteps.push('Submit a Serious Employment Handicap (SEH) statement detailing severe functional barriers.');
-    } else if (requiresEH && !isEhEstablished) {
-      nextSteps.push('Document how your service-connected conditions interfere with specific physical or cognitive job tasks.');
-      nextSteps.push('Submit an Employment Handicap Remarks Narrative to detail occupational barriers.');
-    } else {
-      nextSteps.push('File VA Form 28-1900 on VA.gov.');
-      nextSteps.push('Assemble your evidence portfolio (VA rating letter, resume, doctor letters) for your evaluation.');
-    }
-
-    // Authorities list
-    const authorities = [];
-    if (isStatutoryDischargeBar) authorities.push("38-usc-5303", "38-cfr-21-42");
-    if (isBelowRatingThreshold) authorities.push("38-usc-3102", "38-cfr-21-40");
-    if (isIdesPathway) authorities.push("38-cfr-21-40");
-    if (is12YearExpired) authorities.push("38-usc-3103", "38-cfr-21-44");
-    if (requiresEH) authorities.push("38-usc-3102", "38-cfr-21-51");
-    if (requiresSEH) authorities.push("38-usc-3102", "38-cfr-21-52");
-    if (isFeasibilityUncertain) authorities.push("38-usc-3106", "38-cfr-21-57", "38-cfr-21-74");
-    if (hasProposedDenial) authorities.push("38-cfr-21-50");
-
-    // Document to generate
-    let recommendedDocument = 'remarks';
-    if (path === 'WRITTEN_DECISION_NEEDED') recommendedDocument = 'written_rationale';
-    else if (path === 'FEASIBILITY_DISPUTE') recommendedDocument = 'ext_eval';
-    else if (requiresSEH) recommendedDocument = 'seh_statement';
-
-    // Review-Lane Warning
-    const reviewLaneWarning = path === 'STATUTORY_BAR_ACTIVE'
-      ? "Review lanes are unavailable. You must satisfy statutory requirements before any appeals can be lodged."
-      : !hasWrittenDecision
-      ? "Higher-Level Review (HLR), Supplemental Claim, or Board Appeals cannot be filed without a finalized, written VA Decision Notice. If you only received verbal counselor feedback, you must request a formal written decision."
-      : "Ensure you submit your appeal within 1 year of the date on the written Decision Notice. Choose Higher-Level Review (HLR) for legal/procedural errors, or Supplemental Claim if you have new and relevant evidence.";
-
-    return {
-      pathCode: path,
-      pathTitle: title,
-      pathLaw: law,
-      factsSupport,
-      factsHurt,
-      evidenceMissing: missingEvidence,
-      activeErrors,
-      nextSteps,
-      recommendedDocument,
-      reviewLaneWarning,
-      authorities,
-      evidenceScore
-    };
-  };
-
-  const adj = performAdjudication();
+  // Sequential Adjudication Rules Engine (Imported)
+  const adj = analyzeEntitlement({
+    rating,
+    dischargeStatus,
+    isActiveDuty,
+    dischargeDate,
+    ratingDecisionDate,
+    scContributionPresent,
+    currentEmploymentStatus,
+    jobSuitability: jobSuitabilityCheckboxes,
+    hasProposedDenial,
+    denialReason,
+    hasWrittenDecision,
+    checkedBarriers,
+    manualSehIndicators,
+    checkedFeasibility,
+    checkedEvidence,
+    caseStage
+  });
 
   // Remarks Narratives (Section IV of VA Form 28-1900)
   const compileRemarksText = () => {
@@ -1156,6 +876,7 @@ function EntitlementWizardView({
                       <div className="text-xs">
                         <span className="font-semibold text-slate-200 block">I have received the formal written Decision Notice letter</span>
                         <span className="text-slate-400 text-[10px] block mt-0.5 leading-relaxed">
+                          {/* @cite 38-cfr-21-198 */}
                           Check only if you have a physical or digital copy of the VA Decision Notice outlining your appeal rights. (Required to file formal appeal lanes).
                         </span>
                       </div>
@@ -1793,6 +1514,26 @@ function EntitlementWizardView({
             <div className="space-y-0.5">
               <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Adjudication Analysis Dashboard</span>
               <h3 className="text-xs font-bold text-slate-250">Statutory Entitlement Assessment</h3>
+            </div>
+
+            {/* Visual Split Indicators */}
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className={`p-2 rounded-lg border text-center ${
+                adj.visualSplit.eligibleToApply 
+                  ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' 
+                  : 'bg-red-500/5 border-red-500/20 text-red-400'
+              }`}>
+                <span className="text-[8px] font-bold uppercase tracking-wider block">Eligibility to Apply</span>
+                <span className="text-xs font-bold">{adj.visualSplit.eligibleToApply ? 'Eligible' : 'Ineligible'}</span>
+              </div>
+              <div className={`p-2 rounded-lg border text-center ${
+                adj.visualSplit.entitledToServices 
+                  ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' 
+                  : 'bg-amber-500/5 border-amber-500/20 text-amber-400'
+              }`}>
+                <span className="text-[8px] font-bold uppercase tracking-wider block">Entitlement to Services</span>
+                <span className="text-xs font-bold">{adj.visualSplit.entitledToServices ? 'Likely Entitled' : 'Evidence Needed'}</span>
+              </div>
             </div>
 
             {/* Pathway Status Card */}

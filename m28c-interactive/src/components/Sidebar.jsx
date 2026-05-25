@@ -39,8 +39,8 @@ function Sidebar({
           <ShieldCheck size={22} />
         </div>
         <div className="branding-text">
-          <h1 style={{ fontSize: '0.9rem', lineHeight: '1.2' }}>VR&E Guide</h1>
-          <p style={{ fontSize: '0.62rem', letterSpacing: '0' }}>Veterans Vocational Rehab & Employment</p>
+          <h1 style={{ fontSize: '0.85rem', lineHeight: '1.2' }}>Veteran Resource Guide</h1>
+          <p style={{ fontSize: '0.62rem', letterSpacing: '0' }}>Chapter 31 VR&E & Veteran Benefits</p>
         </div>
       </div>
 

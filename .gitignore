@@ -23,3 +23,4 @@ lerna-debug.log*
 *.sln
 *.sw?
 .tmp/
+m28c-interactive/scratch/

@@ -11,11 +11,15 @@ const SRC_BASE = path.join(PROJECT_ROOT, 'src/data/authority');
 const SRC_USC = path.join(SRC_BASE, 'generated/usc/sections');
 const SRC_CFR = path.join(SRC_BASE, 'generated/cfr/sections');
 const SRC_M28C = path.join(SRC_BASE, 'generated/m28c/chapters');
+const SRC_PL = path.join(SRC_BASE, 'generated/public-law');
+const SRC_FR = path.join(SRC_BASE, 'generated/federal-register');
 
 const PUBLIC_BASE = path.join(PROJECT_ROOT, 'public/authority');
 const PUBLIC_USC = path.join(PUBLIC_BASE, 'usc');
 const PUBLIC_CFR = path.join(PUBLIC_BASE, 'cfr');
 const PUBLIC_M28C = path.join(PUBLIC_BASE, 'm28c');
+const PUBLIC_PL = path.join(PUBLIC_BASE, 'public-law');
+const PUBLIC_FR = path.join(PUBLIC_BASE, 'federal-register');
 const PUBLIC_SEARCH = path.join(PROJECT_ROOT, 'public/search');
 
 function hashText(text) {
@@ -33,6 +37,8 @@ function main() {
   ensureDir(PUBLIC_USC);
   ensureDir(PUBLIC_CFR);
   ensureDir(PUBLIC_M28C);
+  ensureDir(PUBLIC_PL);
+  ensureDir(PUBLIC_FR);
   ensureDir(PUBLIC_SEARCH);
 
   const manifest = {
@@ -40,7 +46,9 @@ function main() {
     lastUpdated: new Date().toISOString().split('T')[0],
     statutes: [],
     regulations: [],
-    m28c: []
+    m28c: [],
+    publicLaws: [],
+    federalRegister: []
   };
 
   const searchIndex = [];
@@ -157,6 +165,80 @@ function main() {
       topics: data.topics
     });
   });
+
+  // 4. Process Public Laws
+  if (fs.existsSync(SRC_PL)) {
+    const plFiles = fs.readdirSync(SRC_PL).filter(f => f.endsWith('.json'));
+    plFiles.forEach(file => {
+      const raw = fs.readFileSync(path.join(SRC_PL, file), 'utf8');
+      const data = JSON.parse(raw);
+      const id = data.id;
+      const destName = `${id}.json`;
+      const destPath = path.join(PUBLIC_PL, destName);
+
+      data.snapshotDate = data.snapshotDate || "2026-05-25";
+      data.sourceLastChecked = data.sourceLastChecked || "2026-05-25";
+      data.hash = hashText(data.fullText || data.text || '');
+      data.previousHash = data.previousHash || data.hash;
+      data.changedSinceLastSnapshot = data.changedSinceLastSnapshot || false;
+
+      fs.writeFileSync(destPath, JSON.stringify(data, null, 2));
+
+      manifest.publicLaws.push({
+        id: id,
+        citation: data.canonicalCitation,
+        title: data.title,
+        hash: data.hash,
+        lastChecked: data.lastChecked
+      });
+
+      searchIndex.push({
+        id: data.id,
+        type: "public-law",
+        citation: data.canonicalCitation,
+        title: data.title,
+        text: data.fullText,
+        topics: data.topics
+      });
+    });
+  }
+
+  // 5. Process Federal Register
+  if (fs.existsSync(SRC_FR)) {
+    const frFiles = fs.readdirSync(SRC_FR).filter(f => f.endsWith('.json'));
+    frFiles.forEach(file => {
+      const raw = fs.readFileSync(path.join(SRC_FR, file), 'utf8');
+      const data = JSON.parse(raw);
+      const id = data.id;
+      const destName = `${id}.json`;
+      const destPath = path.join(PUBLIC_FR, destName);
+
+      data.snapshotDate = data.snapshotDate || "2026-05-25";
+      data.sourceLastChecked = data.sourceLastChecked || "2026-05-25";
+      data.hash = hashText(data.fullText || data.text || '');
+      data.previousHash = data.previousHash || data.hash;
+      data.changedSinceLastSnapshot = data.changedSinceLastSnapshot || false;
+
+      fs.writeFileSync(destPath, JSON.stringify(data, null, 2));
+
+      manifest.federalRegister.push({
+        id: id,
+        citation: data.canonicalCitation,
+        title: data.title,
+        hash: data.hash,
+        lastChecked: data.lastChecked
+      });
+
+      searchIndex.push({
+        id: data.id,
+        type: "federal-register",
+        citation: data.canonicalCitation,
+        title: data.title,
+        text: data.fullText,
+        topics: data.topics
+      });
+    });
+  }
 
   // Save manifest to /public/authority/index.json
   fs.writeFileSync(path.join(PUBLIC_BASE, 'index.json'), JSON.stringify(manifest, null, 2));

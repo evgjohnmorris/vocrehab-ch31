@@ -55,6 +55,7 @@ function BookmarkSidebar({
         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           <div style={{ marginBottom: '12px', padding: '10px', backgroundColor: 'var(--hover-bg)', borderRadius: '6px' }}>
             <strong style={{ display: 'block', color: 'var(--text-primary)', marginBottom: '4px' }}>VA Form 28-1900</strong>
+            {/* @cite 38-cfr-21-30 */}
             The required application form for Chapter 31 benefits. Must be filed to begin the VRC evaluation process.
           </div>
           

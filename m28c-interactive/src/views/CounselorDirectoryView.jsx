@@ -34,6 +34,7 @@ function CounselorDirectoryView({ reduceMotion }) {
             <strong>Contact the VR&E Officer (VREO):</strong> Use the directory below to find the VR&E Officer (the counselor's direct supervisor) at your Regional Office. Call their direct line or send an email.
           </li>
           <li style={{ marginBottom: '8px' }}>
+            {/* @cite 38-cfr-21-33 */}
             <strong>Submit a Formal Ask VA (AVA) Inquiry:</strong> Submit a formal, documented tracking ticket at <a href="https://ask.va.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}>ask.va.gov</a>. Select "Veteran Readiness & Employment" as the topic. This starts an official federal timeline that the office must resolve.
           </li>
           <li>

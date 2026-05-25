@@ -14,6 +14,7 @@
     "authority:ingest:manifest": "node scripts/authority/generate-manifest.mjs",
     "authority:ingest:all": "node scripts/authority/orchestrate-pipeline.mjs --stage ingest",
     "legal:check": "node scripts/authority/orchestrate-pipeline.mjs --stage validate",
+    "legal:diff": "node scripts/authority/orchestrate-pipeline.mjs --stage diff",
     "legal:schema": "node scripts/legal/validate-authority-schema.mjs",
     "legal:coverage": "node scripts/legal/check-topic-coverage.mjs",
     "legal:citations": "node scripts/legal/audit-citations.mjs",

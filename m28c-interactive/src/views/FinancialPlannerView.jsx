@@ -988,7 +988,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
                         <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', cursor: 'pointer' }}>
                           <input type="checkbox" style={{ marginTop: '2px' }} />
-                          <span>Download VA Benefit Summary Letter (must show 100% P&T or TDIU status).</span>
+                          <span>Download VA Benefit Summary Letter (must show 100% P&T or TDIU status). {/* @cite 38-cfr-21-198 */}</span>
                         </label>
                         <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', cursor: 'pointer' }}>
                           <input type="checkbox" style={{ marginTop: '2px' }} />

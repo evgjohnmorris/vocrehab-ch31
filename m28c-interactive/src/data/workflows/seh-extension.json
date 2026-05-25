@@ -26,7 +26,10 @@
           "name": "hasSeh",
           "label": "Has the VRC declared you have a Serious Employment Handicap (SEH)?",
           "type": "select",
-          "options": ["Yes", "No"]
+          "options": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "name": "extensionReason",
@@ -49,5 +52,68 @@
   "templates": [
     "seh-extension-letter"
   ],
-  "reviewLaneWarning": true
+  "reviewLaneWarning": true,
+  "evidenceChecklist": [
+    {
+      "id": "seh_documented",
+      "text": "Initial evaluation document finding a Serious Employment Handicap (SEH)",
+      "weight": 30
+    },
+    {
+      "id": "iwrp_signed",
+      "text": "Copy of signed IWRP or course rehabilitation plan",
+      "weight": 20
+    },
+    {
+      "id": "incomplete_credits",
+      "text": "Transcripts showing outstanding credits to complete approved goal",
+      "weight": 25
+    },
+    {
+      "id": "lmi_viability",
+      "text": "Labor market listings showing target goal is the only suitable placement",
+      "weight": 25
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 75,
+      "borderline": 50
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "48-month cap reached with active SEH finding",
+      "action": "Request program extension citing Serious Employment Handicap under 38 U.S.C. § 3105(c).",
+      "reference": "38-usc-3105"
+    }
+  ],
+  "vaErrorTriggers": [
+    "hard_cap_assertion",
+    "delegation_denial"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "has_seh_finding",
+      "question": "Has the VA officially documented that you have a Serious Employment Handicap?",
+      "options": [
+        "Yes",
+        "No",
+        "Unsure"
+      ]
+    },
+    {
+      "id": "months_used",
+      "question": "Have you used 48 months or more of VA education benefits?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "seh-extension-letter",
+    "seh-determination-request"
+  ]
 }

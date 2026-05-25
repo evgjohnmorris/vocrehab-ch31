@@ -10,7 +10,7 @@ function AuthorityBadge({ level, className = '' }) {
           border: 'border-emerald-800/60',
           text: 'text-emerald-300 font-semibold',
           label: 'BINDING LAW',
-          desc: 'Statute or regulation: VA must adhere strictly.',
+          desc: 'Statute or regulation: VA must adhere strictly.', // @cite 38-cfr-21-40
           icon: <Scale size={13} className="mr-1 inline-block" />
         };
       case 'va_manual':

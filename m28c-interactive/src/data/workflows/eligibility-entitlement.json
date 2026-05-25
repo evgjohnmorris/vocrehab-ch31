@@ -3,41 +3,139 @@
   "title": "Eligibility, Entitlement & Employment Handicap Builder",
   "desc": "Build your strategy and evidence portfolio to prove basic eligibility, vocational impairment, and Serious Employment Handicap needs.",
   "dischargeOptions": [
-    { "value": "honorable", "label": "Honorable", "status": "clear" },
-    { "value": "general", "label": "General under honorable conditions", "status": "clear" },
-    { "value": "oth", "label": "Other than honorable (OTH)", "status": "review-required" },
-    { "value": "bad-conduct", "label": "Bad conduct discharge (BCD)", "status": "review-required" },
-    { "value": "dishonorable", "label": "Dishonorable", "status": "bar" },
-    { "value": "uncharacterized", "label": "Uncharacterized / Entry-level separation", "status": "review-required" },
-    { "value": "not-sure", "label": "Not sure", "status": "review-required" }
+    {
+      "value": "honorable",
+      "label": "Honorable",
+      "status": "clear"
+    },
+    {
+      "value": "general",
+      "label": "General under honorable conditions",
+      "status": "clear"
+    },
+    {
+      "value": "oth",
+      "label": "Other than honorable (OTH)",
+      "status": "review-required"
+    },
+    {
+      "value": "bad-conduct",
+      "label": "Bad conduct discharge (BCD)",
+      "status": "review-required"
+    },
+    {
+      "value": "dishonorable",
+      "label": "Dishonorable",
+      "status": "bar"
+    },
+    {
+      "value": "uncharacterized",
+      "label": "Uncharacterized / Entry-level separation",
+      "status": "review-required"
+    },
+    {
+      "value": "not-sure",
+      "label": "Not sure",
+      "status": "review-required"
+    }
   ],
   "ehIndicators": [
-    { "id": "unemployed", "label": "Currently unemployed or unable to secure stable work" },
-    { "id": "underemployed", "label": "Underemployed (working in a job below skill level or potential)" },
-    { "id": "aggravates_disability", "label": "Current job aggravates service-connected medical conditions" },
-    { "id": "job_loss", "label": "Frequent job changes or recent job losses due to limitations" },
-    { "id": "prior_occ_blocked", "label": "Unable to perform prior primary civilian or military occupation" },
-    { "id": "accommodations_needed", "label": "Requires significant physical or cognitive workplace accommodations" },
-    { "id": "lacks_skills", "label": "Lacks the training, credentials, or licenses for a suitable career" },
-    { "id": "medical_restrictions", "label": "Active medical restrictions on lifting, standing, sitting, or cognitive workload" },
-    { "id": "failed_training", "label": "Failed attempts at prior training programs or university courses due to symptoms" }
+    {
+      "id": "unemployed",
+      "label": "Currently unemployed or unable to secure stable work"
+    },
+    {
+      "id": "underemployed",
+      "label": "Underemployed (working in a job below skill level or potential)"
+    },
+    {
+      "id": "aggravates_disability",
+      "label": "Current job aggravates service-connected medical conditions"
+    },
+    {
+      "id": "job_loss",
+      "label": "Frequent job changes or recent job losses due to limitations"
+    },
+    {
+      "id": "prior_occ_blocked",
+      "label": "Unable to perform prior primary civilian or military occupation"
+    },
+    {
+      "id": "accommodations_needed",
+      "label": "Requires significant physical or cognitive workplace accommodations"
+    },
+    {
+      "id": "lacks_skills",
+      "label": "Lacks the training, credentials, or licenses for a suitable career"
+    },
+    {
+      "id": "medical_restrictions",
+      "label": "Active medical restrictions on lifting, standing, sitting, or cognitive workload"
+    },
+    {
+      "id": "failed_training",
+      "label": "Failed attempts at prior training programs or university courses due to symptoms"
+    }
   ],
   "sehIndicators": [
-    { "id": "multiple_disabilities", "label": "Multiple severe rating decisions (e.g. combined orthopedic, mental, or neurological)" },
-    { "id": "severe_restrictions", "label": "Severe functional restrictions on major daily activities" },
-    { "id": "long_term_unemployment", "label": "Long-term unemployment (exceeding 12 consecutive months)" },
-    { "id": "repeated_failed_work", "label": "Repeated failed attempts to sustain suitable employment" },
-    { "id": "extensive_training_need", "label": "Requires extensive or specialized training (e.g. grad school, specialized equipment)" },
-    { "id": "il_need", "label": "Needs Independent Living services to perform basic family/community tasks" },
-    { "id": "prior_vre_failure", "label": "Prior Chapter 31 case was interrupted or discontinued without successful placement" },
-    { "id": "limit_48_months", "label": "Requires more than 48 months of training to achieve vocational recovery" },
-    { "id": "medical_instability", "label": "Medical instability causing frequent absences or disruptions in training/work" }
+    {
+      "id": "multiple_disabilities",
+      "label": "Multiple severe rating decisions (e.g. combined orthopedic, mental, or neurological)"
+    },
+    {
+      "id": "severe_restrictions",
+      "label": "Severe functional restrictions on major daily activities"
+    },
+    {
+      "id": "long_term_unemployment",
+      "label": "Long-term unemployment (exceeding 12 consecutive months)"
+    },
+    {
+      "id": "repeated_failed_work",
+      "label": "Repeated failed attempts to sustain suitable employment"
+    },
+    {
+      "id": "extensive_training_need",
+      "label": "Requires extensive or specialized training (e.g. grad school, specialized equipment)"
+    },
+    {
+      "id": "il_need",
+      "label": "Needs Independent Living services to perform basic family/community tasks"
+    },
+    {
+      "id": "prior_vre_failure",
+      "label": "Prior Chapter 31 case was interrupted or discontinued without successful placement"
+    },
+    {
+      "id": "limit_48_months",
+      "label": "Requires more than 48 months of training to achieve vocational recovery"
+    },
+    {
+      "id": "medical_instability",
+      "label": "Medical instability causing frequent absences or disruptions in training/work"
+    }
   ],
   "feasibilityFactors": [
-    { "id": "stable_condition", "label": "My medical conditions are stable enough to allow active participation in a training program", "expected": true },
-    { "id": "accommodation_plan", "label": "I have identified the specific accommodations needed to handle training and coursework", "expected": true },
-    { "id": "doctor_clearance", "label": "A treating physician has confirmed I can safely train for this specific vocational goal", "expected": true },
-    { "id": "extended_eval_needed", "label": "The VRC has expressed doubt about my feasibility, and I want an Extended Evaluation", "expected": false }
+    {
+      "id": "stable_condition",
+      "label": "My medical conditions are stable enough to allow active participation in a training program",
+      "expected": true
+    },
+    {
+      "id": "accommodation_plan",
+      "label": "I have identified the specific accommodations needed to handle training and coursework",
+      "expected": true
+    },
+    {
+      "id": "doctor_clearance",
+      "label": "A treating physician has confirmed I can safely train for this specific vocational goal",
+      "expected": true
+    },
+    {
+      "id": "extended_eval_needed",
+      "label": "The VRC has expressed doubt about my feasibility, and I want an Extended Evaluation",
+      "expected": false
+    }
   ],
   "vaErrors": [
     {
@@ -76,5 +174,65 @@
     "38-cfr-21-52",
     "38-cfr-21-53"
   ],
-  "reviewLaneWarning": false
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "rating_decision",
+      "text": "VA Rating Decision copy establishing 10% or higher combined rating",
+      "weight": 35
+    },
+    {
+      "id": "dd214_copy",
+      "text": "DD-214 copy showing discharge character (other than dishonorable)",
+      "weight": 25
+    },
+    {
+      "id": "employment_barriers_log",
+      "text": "Detailed history/log of employment barriers or aggravation of conditions",
+      "weight": 40
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 65,
+      "borderline": 35
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "Rated 10% with employment handicap finding",
+      "action": "Demand VRC complete Serious Employment Handicap (SEH) evaluation before rendering a decision.",
+      "reference": "38-cfr-21-52"
+    }
+  ],
+  "vaErrorTriggers": [
+    "rating_eligibility_mixup",
+    "automatic_entitlement_assumption",
+    "employment_defeats_eh"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "disability_rating",
+      "question": "What is your combined service-connected disability rating?",
+      "options": [
+        "0%",
+        "10%",
+        "20% or higher"
+      ]
+    },
+    {
+      "id": "discharge_character",
+      "question": "What is your character of discharge on DD-214?",
+      "options": [
+        "Honorable / General",
+        "OTH",
+        "BCD / Dishonorable"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "employment-handicap-statement",
+    "seh-statement"
+  ]
 }

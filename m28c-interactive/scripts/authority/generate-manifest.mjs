@@ -39,7 +39,35 @@ function main() {
       articleId: ch.articleId,
       sourceUpdated: ch.sourceUpdated,
       hash: ch.hash
-    }))
+    })),
+    publicLaws: fs.existsSync(path.join(GENERATED_DIR, 'public-law'))
+      ? fs.readdirSync(path.join(GENERATED_DIR, 'public-law'))
+          .filter(f => f.endsWith('.json'))
+          .map(f => {
+            const data = JSON.parse(fs.readFileSync(path.join(GENERATED_DIR, 'public-law', f), 'utf8'));
+            return {
+              id: data.id,
+              citation: data.canonicalCitation,
+              title: data.title,
+              hash: data.hash,
+              lastChecked: data.lastChecked
+            };
+          })
+      : [],
+    federalRegister: fs.existsSync(path.join(GENERATED_DIR, 'federal-register'))
+      ? fs.readdirSync(path.join(GENERATED_DIR, 'federal-register'))
+          .filter(f => f.endsWith('.json'))
+          .map(f => {
+            const data = JSON.parse(fs.readFileSync(path.join(GENERATED_DIR, 'federal-register', f), 'utf8'));
+            return {
+              id: data.id,
+              citation: data.canonicalCitation,
+              title: data.title,
+              hash: data.hash,
+              lastChecked: data.lastChecked
+            };
+          })
+      : []
   };
 
   fs.writeFileSync(path.join(BASE_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2));

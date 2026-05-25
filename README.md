@@ -1,8 +1,8 @@
-# Veterans Vocational Rehabilitation & Employment Guide
+# Veteran Resource Guide
 
 [![Deploy to GitHub Pages](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/deploy.yml/badge.svg)](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/deploy.yml)
 
-An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calculator, and VREO Contact Directory developed for Chapter 31 Vocational Rehabilitation and Employment (VR&E).
+An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calculator, and VREO Contact Directory for Chapter 31 Vocational Rehabilitation and Employment (VR&E) and other veteran benefits/resources.
 
 🔗 **Live Interactive App**: **[https://evgjohnmorris.github.io/vocrehab-ch31/](https://evgjohnmorris.github.io/vocrehab-ch31/)**
 

@@ -57,11 +57,11 @@ function CoverageReportView({ reduceMotion }) {
         </p>
 
         {/* Global Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
           <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">
             <div className="text-[10px] font-bold text-slate-500 uppercase">U.S. Code Chapter 31</div>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-black text-slate-200">{report?.uscCoverage || "23/23"}</span>
+              <span className="text-xl font-black text-slate-200">{report?.usc?.coverage || "23/23"}</span>
               <span className="text-[10px] text-emerald-400 font-bold">100% Ingested</span>
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Statutory §§ 3100–3122</p>
@@ -70,19 +70,28 @@ function CoverageReportView({ reduceMotion }) {
           <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">
             <div className="text-[10px] font-bold text-slate-500 uppercase">38 C.F.R. Part 21</div>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-black text-slate-200">{report?.cfrCoverage || "153/153"}</span>
+              <span className="text-xl font-black text-slate-200">{report?.cfr?.coverage || "153/153"}</span>
               <span className="text-[10px] text-emerald-400 font-bold">100% Ingested</span>
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Regulatory Subpart A sections</p>
           </div>
 
           <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">
-            <div className="text-[10px] font-bold text-slate-500 uppercase">Verification Status</div>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <CheckCircle2 size={16} className="text-emerald-400" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Verification Passing</span>
+            <div className="text-[10px] font-bold text-amber-400 uppercase">KnowVA M28C Manual</div>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-xl font-black text-amber-450">{report?.m28c?.coverage || "Partial"}</span>
+              <span className="text-[9px] text-amber-500 font-semibold uppercase">Summary-Only</span>
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">Zero schema or integrity errors</p>
+            <p className="text-[10px] text-slate-400 mt-1">M28C details are summary-only</p>
+          </div>
+
+          <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">
+            <div className="text-[10px] font-bold text-slate-500 uppercase">Public Law / FR</div>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-xl font-black text-slate-450">{report?.publicLaw?.coverage || "Pending"}</span>
+              <span className="text-[9px] text-slate-500 font-semibold uppercase">Pending</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">Federal Register & Amendments</p>
           </div>
 
           <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">

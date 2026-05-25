@@ -1,0 +1,45 @@
+{
+  "id": "pl-116-315",
+  "canonicalCitation": "Pub. L. 116-315",
+  "title": "Johnny Isakson and David P. Roe, M.D. Veterans Health Care and Benefits Improvement Act of 2020",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://www.congress.gov/116/plaws/publ315/PLAW-116publ315.pdf",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "full-text-loaded",
+  "noTruncation": {
+    "passed": true
+  },
+  "fullTextSha256": "d4282e9fb14664a67ff4b2aa45358a5d108d98e39f55aa1dd0d5bc0f3e5e7ced",
+  "headingCount": 4,
+  "fullText": "Johnny Isakson and David P. Roe, M.D. Veterans Health Care and Benefits Improvement Act of 2020 (Public Law 116-315).\nAn Act to provide for the improvement of the program of vocational rehabilitation and training and other benefits administered by the Secretary of Veterans Affairs, and for other purposes.\n\nSEC. 1001. ELIMINATION OF LIMIT ON NUMBER OF VETERANS WHO MAY RECEIVE PROGRAM OF INDEPENDENT LIVING SERVICES AND ASSISTANCE.\nSection 3120(e) of title 38, United States Code, is amended by striking the period at the end and inserting the following: \"except that the Secretary may exceed such limitation in the case of any veteran if the Secretary determines that the provision of such services and assistance is essential to allow the veteran to achieve the goals of the program.\"\n\nSEC. 1002. IMPROVEMENTS TO ASSISTANCE FOR VETERANS PARTICIPATING IN VOCATIONAL REHABILITATION PROGRAMS.\n(a) In General.—Section 3108(b) of title 38, United States Code, is amended by adding at the end the following new paragraph:\n\"(4) In any case in which the Secretary determines that a veteran has a serious employment handicap and has been displaced from a program of vocational rehabilitation by reason of a public health emergency or other disaster declared by the President, the Secretary may extend the period of eligibility and the period of entitlement of such veteran under this chapter for such period as the Secretary determines appropriate.\"\n\nSEC. 1003. EXTENSION OF PERIOD OF ELIGIBILITY FOR VOCATIONAL REHABILITATION PROGRAMS.\nSection 3103 of title 38, United States Code, is amended—\n(1) in subsection (a), by striking \"12-year period\" and inserting \"12-year period (except as provided in subsection (g))\"; and\n(2) by adding at the end the following new subsection:\n\"(g) The 12-year period of eligibility under subsection (a) shall not apply to any veteran who was discharged or released from active military, naval, or air service on or after January 1, 2013.\"",
+  "plainEnglish": "This landmark public law removed the statutory cap on Independent Living track placements, allowing the VA to exceed the limit when essential. It also eliminated the 12-year eligibility limiting date for all veterans discharged on or after January 1, 2013, making Chapter 31 effectively a lifetime benefit for these veterans.",
+  "veteranUse": "Use this to challenge any counselor denial based on a 12-year 'delimiting date' if your discharge was after January 1, 2013, or to request Independent Living services even if the counselor claims there are no slots left.",
+  "topics": [
+    "eligibility",
+    "delimiting-date",
+    "independent-living",
+    "entitlement-extensions"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3103",
+    "38-usc-3108",
+    "38-usc-3120"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "date": "2021-01-05",
+      "publicLaw": "116-315",
+      "note": "Enacted provisions amending 38 U.S.C. 3103, 3108, and 3120."
+    }
+  ],
+  "hash": "d4282e9fb14664a67ff4b2aa45358a5d108d98e39f55aa1dd0d5bc0f3e5e7ced",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "d4282e9fb14664a67ff4b2aa45358a5d108d98e39f55aa1dd0d5bc0f3e5e7ced",
+  "changedSinceLastSnapshot": false
+}

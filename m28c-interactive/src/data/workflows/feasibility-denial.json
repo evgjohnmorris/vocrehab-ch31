@@ -1,7 +1,7 @@
 {
   "workflowId": "feasibility-denial",
   "title": "Feasibility Denial",
-  "desc": "VRC claims training is not feasible because your disabilities are too severe.",
+  "desc": "VRC claims training or employment is not reasonably feasible because your disabilities are too severe.",
   "riskLevel": "high",
   "caseStages": [
     "Evaluation Phase"
@@ -26,20 +26,47 @@
           "name": "hasDoctorLetter",
           "label": "Do you have a letter from a physician supporting training?",
           "type": "select",
-          "options": ["Yes", "No"]
+          "options": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "name": "resolvedDoubt",
+          "label": "Did the VRC resolve reasonable doubts in your favor under 38 C.F.R. § 21.57?",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "name": "extendedEvalOffered",
+          "label": "Did the VRC offer or evaluate you for an Extended Evaluation plan?",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "name": "proposedGoal",
           "label": "Proposed Vocational Goal",
           "type": "text",
           "placeholder": "e.g. Accountant"
+        },
+        {
+          "name": "personalFeasibilityRemarks",
+          "label": "Explain why you believe the goal is feasible (e.g., successful courses, recent volunteering, or accommodations that work)",
+          "type": "text",
+          "placeholder": "e.g. I successfully completed two accounting courses online with a 3.8 GPA."
         }
       ]
     }
   ],
   "errors": [
     "Failing to resolve reasonable doubt in favor of feasibility as mandated by 38 C.F.R. § 21.57.",
-    "Denying feasibility without offering an Extended Evaluation (38 C.F.R. § 21.74) to fully evaluate capabilities."
+    "Denying feasibility without evaluating or offering an Extended Evaluation (38 C.F.R. § 21.74) to fully test capabilities."
   ],
   "citations": [
     "38-usc-3106",
@@ -50,5 +77,62 @@
   "templates": [
     "feasibility-rebuttal"
   ],
-  "reviewLaneWarning": true
+  "reviewLaneWarning": true,
+  "evidenceChecklist": [
+    {
+      "id": "medical_clearance",
+      "text": "Physician letter stating training/work is possible with accommodations",
+      "weight": 35
+    },
+    {
+      "id": "functional_capacity",
+      "text": "Records of recent volunteer work, courses completed, or active hobbies",
+      "weight": 35
+    },
+    {
+      "id": "assessment_report",
+      "text": "Copy of the VRC vocational assessment detailing unfeasibility reasons",
+      "weight": 30
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 70,
+      "borderline": 35
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "VRC asserts unfeasibility without extended evaluation",
+      "action": "Formally request a 12-month Extended Evaluation under 38 C.F.R. § 21.74 to test capacity.",
+      "reference": "38-cfr-21-74"
+    }
+  ],
+  "vaErrorTriggers": [
+    "checklist_only_decision",
+    "doubt_resolved_against_veteran"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "extended_eval_offered",
+      "question": "Did the counselor offer an Extended Evaluation to test feasibility before closing?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "id": "medical_support",
+      "question": "Do you have a treating doctor who supports your ability to participate in this training?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "feasibility-rebuttal",
+    "extended-evaluation-request"
+  ]
 }

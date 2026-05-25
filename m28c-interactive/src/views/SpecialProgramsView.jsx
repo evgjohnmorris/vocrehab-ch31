@@ -118,6 +118,7 @@ function SpecialProgramsView({ rates, reduceMotion }) {
               <ul className="list-disc pl-5 space-y-2 text-slate-400">
                 <li><strong>Entry-Level Justification:</strong> Obtain formal letters from employers or industry regulations showing that the master's or doctorate is mandatory for employment in your chosen sector (e.g. licensed psychologist, occupational therapist).</li>
                 <li><strong>Labor Market Data:</strong> Present data showing employment options with an undergraduate degree are not compatible with your disability, whereas post-grad roles are compatible.</li>
+                {/* @cite 38-cfr-21-50 */}
                 <li><strong>Track Alignment:</strong> Always align postgraduate requests under the Long-Term Services track and compile this evidence before requesting your IWRP review.</li>
               </ul>
             </div>

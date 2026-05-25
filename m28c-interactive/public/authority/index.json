@@ -1496,5 +1496,23 @@
       "hash": "13df6b6a2a36ca76d9084307eef07b83996b0c9e18859f95641fd9eed7cc0445",
       "lastChecked": "2026-05-25"
     }
+  ],
+  "publicLaws": [
+    {
+      "id": "pl-116-315",
+      "citation": "Pub. L. 116-315",
+      "title": "Johnny Isakson and David P. Roe, M.D. Veterans Health Care and Benefits Improvement Act of 2020",
+      "hash": "d4282e9fb14664a67ff4b2aa45358a5d108d98e39f55aa1dd0d5bc0f3e5e7ced",
+      "lastChecked": "2026-05-25"
+    }
+  ],
+  "federalRegister": [
+    {
+      "id": "fr-2024-18419",
+      "citation": "89 FR 18419",
+      "title": "Delegation of Authority on Entitlement Extensions Beyond 48 Months",
+      "hash": "6104fce2d340cf10385fcbd3cba8a80a9aacde6f5c30b49b527580589f8afc10",
+      "lastChecked": "2026-05-25"
+    }
   ]
 }

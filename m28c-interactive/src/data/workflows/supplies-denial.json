@@ -27,13 +27,19 @@
           "name": "schoolRequired",
           "label": "Does the school require a computer for all students in this program?",
           "type": "select",
-          "options": ["Yes", "No"]
+          "options": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "name": "disabilityNeed",
           "label": "Is a computer package necessary to accommodate your disability limitations?",
           "type": "select",
-          "options": ["Yes", "No"]
+          "options": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "name": "verbalDenialReason",
@@ -57,5 +63,67 @@
   "templates": [
     "supplies-request"
   ],
-  "reviewLaneWarning": true
+  "reviewLaneWarning": true,
+  "evidenceChecklist": [
+    {
+      "id": "syllabus_req",
+      "text": "Syllabus explicitly requiring a personal computer or specialized tools",
+      "weight": 25
+    },
+    {
+      "id": "school_letter",
+      "text": "School policy letter stating laptop/tech is required for all students",
+      "weight": 25
+    },
+    {
+      "id": "necessity_statement",
+      "text": "Personal statement explaining technology need due to disability or disadvantages",
+      "weight": 30
+    },
+    {
+      "id": "adaptive_backing",
+      "text": "OT report or doctor recommendation for adaptive hardware/software",
+      "weight": 20
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 75,
+      "borderline": 50
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "Syllabus or policy requires computer",
+      "action": "Submit supplies request under 38 C.F.R. § 21.212 showing necessity.",
+      "reference": "38-cfr-21-212"
+    }
+  ],
+  "vaErrorTriggers": [
+    "flat_cap_claim",
+    "no_written_necessity_analysis",
+    "ch33_conflation"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "has_syllabus_req",
+      "question": "Does your course syllabus explicitly state a computer or laptop is required?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "id": "budget_cap_cited",
+      "question": "Did the counselor cite an office budget cap (e.g., $500 or $1,000) for supplies?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "supplies-request"
+  ]
 }

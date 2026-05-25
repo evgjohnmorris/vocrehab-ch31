@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, BookMarked, Settings, Sun, Moon, Eye, Menu, X, Shield, Trash2, HelpCircle } from 'lucide-react';
-import authorityManifest from '../data/authority/manifest.json';
+import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
 
 function Header({
   setActiveView,
@@ -40,6 +40,11 @@ function Header({
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   
+  // Dynamic search data states
+  const [manifest, setManifest] = useState(null);
+  const [crosswalk, setCrosswalk] = useState([]);
+  const [searchFilter, setSearchFilter] = useState('all'); // 'all' | 'usc' | 'cfr' | 'm28c' | 'topic' | 'workflow'
+
   // Bind settingsForm to the active rates year subset
   const [settingsForm, setSettingsForm] = useState(rates[selectedRateYear] || rates.ay2025_2026);
   const [prevSelectedRateYear, setPrevSelectedRateYear] = useState(selectedRateYear);
@@ -56,6 +61,39 @@ function Header({
     const handleOpenAccess = () => setIsAccessibilityOpen(true);
     window.addEventListener('open-accessibility-settings', handleOpenAccess);
     return () => window.removeEventListener('open-accessibility-settings', handleOpenAccess);
+  }, []);
+
+  // Fetch search metadata from the authority backend
+  useEffect(() => {
+    const loadSearchMetadata = async () => {
+      try {
+        const baseUrl = import.meta.env?.BASE_URL || '/';
+        const manifestRes = await fetch(`${baseUrl}authority/index.json`);
+        if (manifestRes.ok) {
+          const manifestData = await manifestRes.json();
+          setManifest(manifestData);
+        }
+        const crosswalkRes = await fetch(`${baseUrl}authority/topic-crosswalk.json`);
+        if (crosswalkRes.ok) {
+          const crosswalkData = await crosswalkRes.json();
+          setCrosswalk(crosswalkData);
+        }
+      } catch (err) {
+        console.error("Failed to load header search metadata:", err);
+      }
+    };
+    loadSearchMetadata();
+  }, []);
+
+  // Close search results dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest('.search-container')) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
   }, []);
 
   // Real-time Search Logic calculated synchronously on render
@@ -100,44 +138,82 @@ function Header({
       return searchPhrases.some(phrase => lowerText.includes(phrase) || lowerCitation.includes(phrase));
     };
 
-    // Search U.S. Code
-    authorityManifest.statutes.forEach(sec => {
-      if (isMatch(sec.title, sec.citation)) {
-        results.push({
-          type: 'usc',
-          id: sec.id,
-          title: sec.citation,
-          snippet: sec.title,
-          category: 'U.S. Code'
-        });
-      }
-    });
+    // 1. Search U.S. Code
+    if (searchFilter === 'all' || searchFilter === 'usc') {
+      (manifest?.statutes || []).forEach(sec => {
+        if (isMatch(sec.title, sec.citation)) {
+          results.push({
+            type: 'usc',
+            id: sec.id,
+            title: sec.citation,
+            snippet: sec.title,
+            category: 'U.S. Code'
+          });
+        }
+      });
+    }
 
-    // Search CFR
-    authorityManifest.regulations.forEach(reg => {
-      if (isMatch(reg.title, reg.citation)) {
-        results.push({
-          type: 'cfr',
-          id: reg.id,
-          title: reg.citation,
-          snippet: reg.title,
-          category: '38 CFR Part 21'
-        });
-      }
-    });
+    // 2. Search CFR
+    if (searchFilter === 'all' || searchFilter === 'cfr') {
+      (manifest?.regulations || []).forEach(reg => {
+        if (isMatch(reg.title, reg.citation)) {
+          results.push({
+            type: 'cfr',
+            id: reg.id,
+            title: reg.citation,
+            snippet: reg.title,
+            category: '38 CFR Part 21'
+          });
+        }
+      });
+    }
 
-    // Search M28C
-    authorityManifest.m28c.forEach(ch => {
-      if (isMatch(ch.title, ch.citation)) {
-        results.push({
-          type: 'm28c',
-          id: ch.id,
-          title: ch.citation,
-          snippet: ch.title,
-          category: 'KnowVA M28C Manual'
-        });
-      }
-    });
+    // 3. Search M28C
+    if (searchFilter === 'all' || searchFilter === 'm28c') {
+      (manifest?.m28c || []).forEach(ch => {
+        if (isMatch(ch.title, ch.citation)) {
+          results.push({
+            type: 'm28c',
+            id: ch.id,
+            title: ch.citation,
+            snippet: ch.title,
+            category: 'KnowVA M28C Manual'
+          });
+        }
+      });
+    }
+
+    // 4. Search Topics
+    if (searchFilter === 'all' || searchFilter === 'topic') {
+      (crosswalk || []).forEach(item => {
+        const topicText = `${item.name} ${item.plainEnglish} ${item.category}`;
+        if (isMatch(topicText, item.topicId)) {
+          results.push({
+            type: 'topic',
+            id: item.topicId,
+            title: item.name,
+            snippet: item.plainEnglish,
+            category: `Topic: ${item.category}`
+          });
+        }
+      });
+    }
+
+    // 5. Search Workflows
+    if (searchFilter === 'all' || searchFilter === 'workflow') {
+      DISPUTE_AREAS.forEach(area => {
+        const workflowText = `${area.name} ${area.description} ${area.rebuttalPushback}`;
+        if (isMatch(workflowText, area.id)) {
+          results.push({
+            type: 'workflow',
+            id: area.id,
+            title: area.name,
+            snippet: area.description,
+            category: 'Objections & Workflows'
+          });
+        }
+      });
+    }
 
     return results.slice(0, 10); // Limit to top 10
   })();
@@ -169,23 +245,87 @@ function Header({
             />
           </div>
           
-          {showSearchResults && searchResults.length > 0 && (
+          {showSearchResults && (searchQuery.trim().length > 0) && (
             <div className="search-results-dropdown">
-              {searchResults.map(res => (
-                <div 
-                  key={res.id} 
-                  className="search-result-item"
-                  onClick={() => {
-                    setSelectedSection({ type: res.type, id: res.id });
-                    setActiveView('reference');
-                    setShowSearchResults(false);
-                    setSearchQuery('');
-                  }}
-                >
-                  <div className="search-result-title">{res.title}</div>
-                  <div className="search-result-snippet">{res.snippet}</div>
+              {/* Search filter tabs */}
+              <div 
+                style={{
+                  display: 'flex',
+                  gap: '4px',
+                  padding: '8px',
+                  borderBottom: '1px solid var(--card-border)',
+                  backgroundColor: 'rgba(11, 15, 25, 0.98)',
+                  overflowX: 'auto',
+                  whiteSpace: 'nowrap'
+                }}
+                className="scrollbar-none"
+              >
+                {[
+                  { label: 'All', value: 'all' },
+                  { label: 'Statutes', value: 'usc' },
+                  { label: 'Regulations', value: 'cfr' },
+                  { label: 'Manual (M28C)', value: 'm28c' },
+                  { label: 'Topics', value: 'topic' },
+                  { label: 'Workflows', value: 'workflow' }
+                ].map(tab => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchFilter(tab.value);
+                    }}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      border: '1px solid',
+                      borderColor: searchFilter === tab.value ? 'var(--accent-color)' : 'transparent',
+                      color: searchFilter === tab.value ? 'var(--accent-color)' : 'var(--text-secondary)',
+                      backgroundColor: searchFilter === tab.value ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {searchResults.length > 0 ? (
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {searchResults.map(res => (
+                    <div 
+                      key={`${res.type}-${res.id}`} 
+                      className="search-result-item"
+                      onClick={() => {
+                        if (res.type === 'workflow') {
+                          const event = new CustomEvent('change-dispute-area', { detail: res.id });
+                          window.dispatchEvent(event);
+                          setActiveView('dispute_hub');
+                        } else {
+                          setSelectedSection({ type: res.type, id: res.id });
+                          setActiveView('reference');
+                        }
+                        setShowSearchResults(false);
+                        setSearchQuery('');
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="search-result-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{res.title}</span>
+                        <span style={{ fontSize: '9px', opacity: 0.6, textTransform: 'uppercase', marginLeft: '8px' }}>{res.category}</span>
+                      </div>
+                      <div className="search-result-snippet">{res.snippet}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div style={{ padding: '16px', textAlign: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  No matches found for "{searchQuery}" under {searchFilter.toUpperCase()} filter.
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -470,6 +610,7 @@ function Header({
                     />
                   </div>
                   <div className="form-group">
+                    {/* @cite 38-cfr-21-212 */}
                     <label>VR&E Required Laptop Benchmark ($)</label>
                     <input 
                       type="number" 

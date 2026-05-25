@@ -62,5 +62,62 @@
   "templates": [
     "counselor-escalation"
   ],
-  "reviewLaneWarning": false
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "email_stamps",
+      "text": "Sent emails/messages with timestamps proving attempts to reach VRC",
+      "weight": 40
+    },
+    {
+      "id": "contact_timeline",
+      "text": "Documented contact log timeline detailing method, date, and lack of reply",
+      "weight": 40
+    },
+    {
+      "id": "school_delay_impact",
+      "text": "Letter from school confirming registration or payment is at risk due to lack of auth",
+      "weight": 20
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 80,
+      "borderline": 40
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "Unresponsive for more than 14 days",
+      "action": "Submit a supervisory escalation letter to the VR&E Officer (VREO) demanding case manager intervention.",
+      "reference": "M28C.IV.C.1"
+    }
+  ],
+  "vaErrorTriggers": [
+    "delay_exceeds_14_days",
+    "failure_to_assist_inquiry"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "days_unresponsive",
+      "question": "How many days have elapsed since your last response or contact attempt?",
+      "options": [
+        "Under 14 days",
+        "14-29 days",
+        "30+ days"
+      ]
+    },
+    {
+      "id": "written_record",
+      "question": "Do you have email read receipts or written logs of your attempts?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "counselor-escalation"
+  ]
 }

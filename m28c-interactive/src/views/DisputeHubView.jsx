@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import AuthorityBadge from '../components/AuthorityBadge';
 
-import DISPUTE_AREAS from '../data/dispute-areas.json';
+import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
 import { renderTemplate } from '../utils/templateRenderer.js';
 
 
@@ -217,20 +217,20 @@ function DisputeHubView({
     if (hasWrittenNotice === 'yes') {
       return {
         lane: 'Decision Review Request (HLR or Supplemental Claim)',
-        why: 'Since you received a formal written decision (such as VA Form 20-0998), you have access to the AMA appeals process. File a Higher-Level Review (VAF 20-0996) if you want a senior reviewer to check the decision on the record, or a Supplemental Claim (VAF 20-0995) if you have new medical or occupational evidence.',
+        why: 'Since you received a formal written decision (VA Form 20-0998), you have access to the AMA appeals process. File a Higher-Level Review (VAF 20-0996) if you want a senior reviewer to check the decision on the record, or a Supplemental Claim (VAF 20-0995) if you have new evidence. Note: You must possess a finalized VA Form 20-0998 decision notice to file a valid appeal; verbal notifications or emails are not legally sufficient.', // @cite 38-cfr-21-198
         alertLevel: 'warning'
       };
     }
     if (hasWrittenNotice === 'email') {
       return {
         lane: 'Written Rationale Request & VREO Escalation',
-        why: 'An email is NOT a formal VA decision. Under 38 U.S.C. § 5104, the VA must issue a formal decision notice with statements of reasons and bases. Your first step is to generate a Written Rationale Request letter. Send it to your counselor, and escalate to the local VR&E Officer (VREO) if ignored.',
+        why: 'An email is NOT a formal VA decision. Under 38 U.S.C. § 5104, the VA must issue a formal decision notice with statements of reasons and bases. Your first step is to generate a Written Rationale Request letter. Note: A Higher-Level Review (HLR) or Board Appeal cannot be filed without a completed, formal VA Form 20-0998 decision notice. Filing an appeal now is premature and will result in rejection.',
         alertLevel: 'important'
       };
     }
     return {
       lane: 'Administrative Correction / Supervisor Contact',
-      why: 'No formal written decision has been made. Escalating to formal HLR appeals is premature. Log your contact attempts, generate a supervisor/VREO escalation letter, and request a collaborative conference to adjust the plan before filing appeals.',
+      why: 'No formal written decision has been made. Escalating to formal HLR appeals is premature. Note: Higher-Level Reviews (HLR) and Board Appeals cannot be filed without a completed VA Form 20-0998 decision notice. Log your contact attempts, generate an escalation letter, and request a collaborative supervisor conference.',
       alertLevel: 'info'
     };
   };
@@ -528,6 +528,29 @@ The Veteran formally requests:
             </div>
           </div>
 
+          {/* Facts that Hurt / Adverse Facts Panel */}
+          {selectedArea.adverseFacts && selectedArea.adverseFacts.length > 0 && (
+            <div className="bg-red-950/10 border border-red-900/30 rounded-xl p-5 space-y-3">
+              <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider block flex items-center gap-1.5">
+                <AlertTriangle size={12} />
+                Adverse Facts & Gaps ("Facts that Hurt")
+              </span>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Rebuttal success requires mitigating the following adverse facts or procedural barriers under Chapter 31 regulations:
+              </p>
+              <div className="space-y-2">
+                {selectedArea.adverseFacts.map(fact => (
+                  <div key={fact.id} className="p-3 bg-slate-950/40 border border-red-950/50 rounded-lg text-xs">
+                    <span className="font-semibold text-slate-200 block">{fact.text}</span>
+                    <span className="text-[10px] text-slate-400 block mt-1">
+                      <strong className="text-indigo-400">Mitigation Strategy:</strong> {fact.rule}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end mt-4">
             <button 
               onClick={() => setActiveTab( (selectedArea.id === 'counselor_delay' || selectedArea.id === 'tuition_unpaid') ? 'timeline' : 'evidence' )}
@@ -746,7 +769,7 @@ The Veteran formally requests:
                       ? 'Your evidence package is extremely strong and complies fully with C.F.R. regulations. You have minimized VRC pushback opportunities.'
                       : evidenceScore >= 50
                       ? 'Your package is decent, but VRCs may argue lack of necessity. It is highly recommended to append a detailed personal statement or therapist letter.'
-                      : 'Your evidence is insufficient. Filing appeals with this score has a high probability of denial. Gather required curriculum syllabi or policy letters before escalation.'
+                      : 'Your evidence is insufficient. Filing appeals with this score has a high probability of denial. Gather required curriculum syllabi or policy letters before escalation.' /* @cite 38-cfr-21-198 */
                     }
                   </p>
                 </div>

@@ -12,12 +12,32 @@ const STATEMENTS_PATH = path.join(PROJECT_ROOT, 'src/data/legal-statements.json'
 const WORKFLOWS_DIR = path.join(PROJECT_ROOT, 'src/data/workflows');
 const TEMPLATES_DIR = path.join(PROJECT_ROOT, 'src/data/templates');
 
+const VIEWS_DIR = path.join(PROJECT_ROOT, 'src/views');
+const COMPONENTS_DIR = path.join(PROJECT_ROOT, 'src/components');
+const UTILS_DIR = path.join(PROJECT_ROOT, 'src/utils');
+
+function getFilesRecursively(dir, extensions = ['.js', '.jsx']) {
+  if (!fs.existsSync(dir)) return [];
+  let files = [];
+  const list = fs.readdirSync(dir);
+  list.forEach(file => {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      files = files.concat(getFilesRecursively(fullPath, extensions));
+    } else {
+      if (extensions.includes(path.extname(file))) {
+        files.push(fullPath);
+      }
+    }
+  });
+  return files;
+}
+
 const VIEWS_TO_SCAN = [
-  path.join(PROJECT_ROOT, 'src/views/HomeDashboardView.jsx'),
-  path.join(PROJECT_ROOT, 'src/views/DisputeHubView.jsx'),
-  path.join(PROJECT_ROOT, 'src/views/DocumentGeneratorView.jsx'),
-  path.join(PROJECT_ROOT, 'src/views/EntitlementWizardView.jsx'),
-  path.join(PROJECT_ROOT, 'src/utils/letterGenerators.js')
+  ...getFilesRecursively(VIEWS_DIR),
+  ...getFilesRecursively(COMPONENTS_DIR),
+  ...getFilesRecursively(UTILS_DIR)
 ];
 
 // Target modal verbs and forbidden claims
@@ -129,19 +149,54 @@ function main() {
     });
   }
 
-  // 5. Audit Views and Javascript files
+  // 5. Audit Views and Javascript files (Statement-level checks)
+  const LEGAL_CONTEXT = /\b(va|counselor|vrc|rehabilitation|supplies|laptop|computer|entitlement|allowance|track|vet|veteran|eligibility|regulation|statute|manual|clinical|policy|discharge|character|election)\b/i;
+
   VIEWS_TO_SCAN.forEach(filePath => {
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf8');
       const lines = content.split('\n');
       lines.forEach((line, idx) => {
-        // Exclude lines with import, require, or comments where we may define rules
-        if (line.trim().startsWith('import ') || line.trim().startsWith('//') || line.trim().startsWith('*')) {
+        // Exclude import statements or requires
+        if (line.trim().startsWith('import ') || line.trim().startsWith('require(')) {
           return;
         }
-        
-        // Scan each line, assuming the file has citations overall
-        auditText(line, `${path.basename(filePath)} (line ${idx + 1})`, true);
+
+        const verbMatch = line.match(BINDING_VERBS);
+        if (verbMatch) {
+          const verb = verbMatch[1].toLowerCase();
+          
+          // Guaranteed or automatic are forbidden unconditionally in any legal context
+          const hasLegalContext = line.match(LEGAL_CONTEXT);
+          if ((verb === 'guaranteed' || verb === 'automatic') && hasLegalContext) {
+            console.error(`[LEGAL VIOLATION] ${path.basename(filePath)} (line ${idx + 1}) uses forbidden word "${verb}" in legal context:`);
+            console.error(`  Line: "${line.trim()}"`);
+            errors++;
+            return;
+          }
+
+          // If it matches binding verbs (must/shall/required/entitled/cannot deny/always/never/uncapped/100% covered)
+          // and has legal context, check for citation in the line or adjacent lines (2-line window)
+          if (hasLegalContext) {
+            let hasExclusion = false;
+            const startIdx = Math.max(0, idx - 2);
+            const endIdx = Math.min(lines.length - 1, idx + 2);
+            
+            for (let i = startIdx; i <= endIdx; i++) {
+              const contextLine = lines[i];
+              if (contextLine.match(CITATION_PATTERN) || contextLine.includes('@cite') || contextLine.includes('@allow-modal')) {
+                hasExclusion = true;
+                break;
+              }
+            }
+
+            if (!hasExclusion) {
+              console.error(`[LEGAL VIOLATION] ${path.basename(filePath)} (line ${idx + 1}) makes binding claim ("${verb}") in legal context but lacks a nearby citation or @cite annotation:`);
+              console.error(`  Line: "${line.trim()}"`);
+              errors++;
+            }
+          }
+        }
       });
     }
   });

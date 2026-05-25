@@ -33,6 +33,10 @@ const VALIDATION_SCRIPTS = [
   { name: 'Audit Workflows', path: 'scripts/legal/audit-workflows.mjs' }
 ];
 
+const DIFF_SCRIPTS = [
+  { name: 'Source Diff Generator', path: 'scripts/authority/diff/build-source-diff.mjs' }
+];
+
 function cleanCache() {
   logger.info(`Cleaning cache directory: ${CACHE_DIR}...`);
   if (isDryRun) {
@@ -89,17 +93,24 @@ function main() {
 
   const stagesToRun = [];
   if (!selectedStage) {
-    stagesToRun.push('ingest', 'validate');
-  } else if (['ingest', 'validate'].includes(selectedStage)) {
+    stagesToRun.push('ingest', 'validate', 'diff');
+  } else if (['ingest', 'validate', 'diff'].includes(selectedStage)) {
     stagesToRun.push(selectedStage);
   } else {
-    logger.error(`Invalid stage specified: "${selectedStage}". Use "ingest" or "validate".`);
+    logger.error(`Invalid stage specified: "${selectedStage}". Use "ingest", "validate", or "diff".`);
     process.exit(1);
   }
 
   for (const stage of stagesToRun) {
     logger.info(`=== Starting Pipeline Stage: ${stage.toUpperCase()} ===`);
-    const scripts = stage === 'ingest' ? INGESTION_SCRIPTS : VALIDATION_SCRIPTS;
+    let scripts = [];
+    if (stage === 'ingest') {
+      scripts = INGESTION_SCRIPTS;
+    } else if (stage === 'validate') {
+      scripts = VALIDATION_SCRIPTS;
+    } else if (stage === 'diff') {
+      scripts = DIFF_SCRIPTS;
+    }
 
     for (const script of scripts) {
       const success = runScript(script);

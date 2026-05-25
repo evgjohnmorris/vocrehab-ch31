@@ -45,6 +45,12 @@ function CalculatorView({
   const [calcSelectedSchool, setCalcSelectedSchool] = useState(null);
   const [calcShowSuggestions, setCalcShowSuggestions] = useState(false);
   const [schoolsDatabase, setSchoolsDatabase] = useState([]);
+  const [calcTermStartDate, setCalcTermStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + 1);
+    return d.toISOString().slice(0, 10);
+  });
   
   // Custom Stepper States
   const [selectedSubsistenceType, setSelectedSubsistenceType] = useState('p911'); // 'p911' | 'ch31'
@@ -101,7 +107,7 @@ function CalculatorView({
   const activeSchools = schoolsDatabase.length > 0 ? schoolsDatabase : SCHOOLS_DATABASE;
 
   // Run calculation
-  const calculatorResults = calculateAllowance({
+  const calculatorResultsRaw = calculateAllowance({
     rates: activeRates,
     calcTrainingType,
     calcTime,
@@ -124,6 +130,42 @@ function CalculatorView({
     calcOjtTrainingWage,
     calcOjtJourneymanWage
   });
+
+  const calculatorResults = calculatorResultsRaw ? {
+    ...calculatorResultsRaw,
+    tuitionPayable: selectedSubsistenceType === 'p911' ? calculatorResultsRaw.tuitionP911Covered : calculatorResultsRaw.tuitionCh31Covered,
+    suppliesValue: selectedSubsistenceType === 'p911' ? calculatorResultsRaw.booksP911Covered : (calcIncludeComputer ? calcComputerCost + 1000 : 1000)
+  } : null;
+
+  const getTimelineMilestones = (startDateStr) => {
+    if (!startDateStr) return [];
+    const base = new Date(startDateStr);
+    
+    // Milestone 1: 30 days prior
+    const authDate = new Date(base);
+    authDate.setDate(authDate.getDate() - 30);
+    
+    // Milestone 2: Enrollment Certification (Day of classes start)
+    const certDate = new Date(base);
+    
+    // Milestone 3: First Housing Payout (1st of month following start date)
+    const firstPayDate = new Date(base);
+    firstPayDate.setMonth(firstPayDate.getMonth() + 1);
+    firstPayDate.setDate(1);
+    
+    // Milestone 4: Tuition Invoice Processed (45 days post start)
+    const tuitionInvoiceDate = new Date(base);
+    tuitionInvoiceDate.setDate(tuitionInvoiceDate.getDate() + 45);
+
+    const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
+    return [
+      { label: 'VR&E Tungsten Authorization (VAF 28-1905)', dateStr: fmt(authDate), desc: 'Counselor must upload digital authorization prior to school drop deadlines.' }, // @cite 38-cfr-21-262
+      { label: 'School Certifying Official (SCO) Certification', dateStr: fmt(certDate), desc: 'School certifies active enrollment in VA systems to trigger subsistence allowance.' },
+      { label: 'First Subsistence Payout (MHA/Regular)', dateStr: fmt(firstPayDate), desc: 'VA pays monthly housing allowance in arrears on the first of the month.' },
+      { label: 'Tuition Payment Authorized & Disbursed', dateStr: fmt(tuitionInvoiceDate), desc: 'School receives direct tuition payment from VA via Tungsten invoice clearance.' }
+    ];
+  };
 
   const budgetMhaAmount = calculatorResults 
     ? (Number(calculatorResults.p911Rate) > Number(calculatorResults.regularRate) 
@@ -278,6 +320,14 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
             <option value="ay2025_2026">AY 25–26 / FY 26</option>
             <option value="ay2026_2027">AY 26–27 / FY 26</option>
           </select>
+          <a 
+            href="https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ss/#!/portal/554400000001006/article/554400000146266/M28CVB2-Subsistence-Allowance" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[10px] text-indigo-400 hover:text-indigo-300 underline font-semibold ml-2 inline-flex items-center gap-0.5"
+          >
+            View Official M28C Rate Source
+          </a>
         </div>
         <div className="text-[10px] italic">
           Last verified: {rates.lastVerified || '2026-05-25'} • Rates are estimates.
@@ -383,6 +433,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-xs text-amber-400 flex gap-2">
                 <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                 <div>
+                  {/* @cite 38-cfr-21-264 */}
                   <strong>Election Letter Required:</strong> To receive the Post-9/11 rate, you must submit a written election form alongside proof of remaining GI Bill entitlement (Certificate of Eligibility) to your VRC counselor before courses commence.
                 </div>
               </div>
@@ -631,7 +682,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
               Enter program tuition cost and supply details. Standard Mode handles basic options, while Advanced Mode lets you configure Yellow Ribbon waivers, kickers, and OJT wage schedules.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="form-group">
                 <label className="block text-xs text-slate-450 mb-1">Annual Tuition & Fees ($)</label>
                 <input
@@ -644,13 +695,23 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
               </div>
 
               <div className="form-group">
-                <label className="block text-xs text-slate-450 mb-1">Monthly GI Bill Kicker Stipend ($)</label>
+                <label className="block text-xs text-slate-450 mb-1">Monthly GI Bill Kicker ($)</label>
                 <input
                   type="number"
                   value={calcKicker}
                   onChange={(e) => setCalcKicker(Number(e.target.value))}
                   className="form-control"
                   placeholder="e.g. 200"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="block text-xs text-slate-450 mb-1">Term Start Date</label>
+                <input
+                  type="date"
+                  value={calcTermStartDate}
+                  onChange={(e) => setCalcTermStartDate(e.target.value)}
+                  className="form-control"
                 />
               </div>
             </div>
@@ -761,22 +822,71 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
 
                 {/* Additional offsets */}
                 <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4 space-y-2.5 text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuition and fees: generally covered when approved as part of the rehabilitation plan</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuition & Supplies: Subject to VRC authorization based on rehabilitation necessity</span>
                   <div className="flex justify-between items-center text-slate-300">
-                    <span>Tuition Payable to School:</span>
+                    <span>Authorized Tuition Estimate:</span>
                     <span className="font-semibold text-slate-200">${calculatorResults.tuitionPayable.toLocaleString()} / year</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-300">
-                    <span>Books & Supplies Allocation:</span>
+                    <span>Authorized Books & Supplies Estimate:</span>
                     <span className="font-semibold text-slate-200">${calculatorResults.suppliesValue.toLocaleString()} / year</span>
                   </div>
                   {calcIncludeComputer && (
                     <div className="flex justify-between items-center text-slate-300">
-                      <span>Tech Package Benchmark:</span>
+                      <span>Authorized Tech Package Benchmark:</span>
                       <span className="font-semibold text-slate-200">${calcComputerCost.toLocaleString()}</span>
                     </div>
                   )}
+                  <p className="text-[9px] text-slate-450 italic leading-normal border-t border-slate-850 pt-2 mt-1">
+                    Needs-based standard under 38 C.F.R. § 21.212: VRC counselor must determine if training supplies/tuition are required for the vocational goal. Entitlement is not automatic.
+                  </p>
                 </div>
+
+                {/* Term Payment Timeline */}
+                {calcTermStartDate && (
+                  <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-3">
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Estimated Term Payment & Auth Timeline</span>
+                    <div className="space-y-3 mt-2 border-l border-slate-800 pl-4 ml-2">
+                      {getTimelineMilestones(calcTermStartDate).map((m, idx) => (
+                        <div key={idx} className="relative">
+                          <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-indigo-500 border border-slate-950"></span>
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-xs font-bold text-slate-200">{m.label}</span>
+                            <span className="font-mono text-[10px] text-indigo-400 font-semibold">{m.dateStr}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-450 mt-0.5 leading-normal">{m.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Post-9/11 SA Election Statement Remarks Generator */}
+                {selectedSubsistenceType === 'p911' && (
+                  <div className="bg-indigo-950/20 border border-indigo-900/30 rounded-xl p-5 space-y-3">
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Post-9/11 SA Election Statement (VA Form 28-1900 Remarks)</span>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Copy the statutory election statement below to include in your VA Form 28-1900 remarks or upload via AccessVA QuickSubmit to request the higher BAH housing rate:
+                    </p>
+                    <textarea
+                      readOnly
+                      value={`ELECTION OF SUBSISTENCE ALLOWANCE AT THE POST-9/11 GI BILL RATE\n\nPursuant to 38 U.S.C. § 3108(f) and 38 C.F.R. § 21.260(c), I hereby elect to receive the subsistence allowance at the Post-9/11 GI Bill rate (P911SA) in lieu of the standard Chapter 31 subsistence allowance. I certify that I have remaining entitlement under the Post-9/11 GI Bill (Chapter 33) as of the date of this election. I request that my counselor process my enrollment certification remarks and authorize this rate starting on my term start date of ${new Date(calcTermStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`}
+                      rows={5}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-[10px] text-slate-350 font-mono focus:outline-none resize-none"
+                    />
+                    <button
+                      onClick={() => {
+                        const stmt = `ELECTION OF SUBSISTENCE ALLOWANCE AT THE POST-9/11 GI BILL RATE\n\nPursuant to 38 U.S.C. § 3108(f) and 38 C.F.R. § 21.260(c), I hereby elect to receive the subsistence allowance at the Post-9/11 GI Bill rate (P911SA) in lieu of the standard Chapter 31 subsistence allowance. I certify that I have remaining entitlement under the Post-9/11 GI Bill (Chapter 33) as of the date of this election. I request that my counselor process my enrollment certification remarks and authorize this rate starting on my term start date of ${new Date(calcTermStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`;
+                        navigator.clipboard.writeText(stmt);
+                        alert('Election statement copied to clipboard!');
+                      }}
+                      className="btn btn-sm btn-secondary text-[10px] py-1 px-2.5 inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Clipboard size={12} />
+                      <span>Copy Election Statement</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-850 pt-4">
@@ -826,6 +936,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                 </div>
 
                 {/* Confidence notice */}
+                {/* @cite 38-cfr-21-262 */}
                 <div className="border-l-2 border-indigo-500/40 bg-slate-950/10 p-3 rounded-r text-[10px] text-slate-450 leading-relaxed">
                   <strong>Estimate verification:</strong> This calculation is based on published rate figures last verified on May 25, 2026. The final payment plan must be confirmed with your VRC and verified against tungsten authorizations.
                 </div>

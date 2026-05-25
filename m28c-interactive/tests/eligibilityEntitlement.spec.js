@@ -19,7 +19,7 @@ test.describe('VR&E Eligibility & Entitlement Adjudication E2E Tests', () => {
     const dashboard = page.locator('h3:has-text("Statutory Entitlement Assessment")').locator('xpath=../..');
     
     // Verify path title
-    await expect(dashboard).toContainText('Likely Entitled (20%+ Rating & Active Employment Handicap)');
+    await expect(dashboard).toContainText('Likely entitlement support — VRC determination still required (EH Path)');
     
     // Verify controlling law
     await expect(dashboard).toContainText('38 C.F.R. § 21.51');
@@ -43,7 +43,7 @@ test.describe('VR&E Eligibility & Entitlement Adjudication E2E Tests', () => {
     const dashboard = page.locator('h3:has-text("Statutory Entitlement Assessment")').locator('xpath=../..');
     
     // Verify path title
-    await expect(dashboard).toContainText('Likely Entitled (10% Rating & Serious Employment Handicap)');
+    await expect(dashboard).toContainText('Likely entitlement support — VRC determination still required (SEH Path)');
     
     // Verify controlling law
     await expect(dashboard).toContainText('38 C.F.R. § 21.52');

@@ -207,7 +207,7 @@ Subject: Request for Essential Supplies and Technology Package (38 CFR §§ 21.2
 
 Dear Counselor,
 
-I am writing to formally request the authorization and procurement of essential supplies and technology items required for my approved program of rehabilitation at ${institutionName}, where I am pursuing a goal in ${trainingProgram}.
+I am writing to formally request the authorization and procurement of essential supplies and technology items required${/* @cite 38 CFR 21.210 */ ''} for my approved program of rehabilitation at ${institutionName}, where I am pursuing a goal in ${trainingProgram}.
 
 Requested Items:
 ${itemsRequested}
@@ -220,7 +220,7 @@ Under 38 CFR § 21.212, supplies must be authorized when they are required of al
 Specifically, these items are necessary because:
 ${specificNeedJustification}
 
-${syllabusEnclosed ? "I have enclosed official documentation, such as the school's computer recommendation policy, course syllabi, or department resource sheets, verifying that these items are required or highly recommended." : "I can provide course syllabi or letter from my academic advisor demonstrating these requirements if needed."}
+${syllabusEnclosed ? "I have enclosed official documentation, such as the school's computer recommendation policy, course syllabi, or department resource sheets, verifying that these items are required or highly recommended." : "I can provide course syllabi or letter from my academic advisor demonstrating these requirements if needed." /* @cite 38 CFR 21.212 */}
 
 I request that these items be authorized under VAF 28-1905 or purchased directly using VA procurement protocols at your earliest convenience to ensure I do not fall behind in my academic/vocational studies.
 
@@ -269,7 +269,7 @@ Pending Case Actions:
 ${pendingRequestDetails}
 
 Impact on Rehabilitation:
-The absence of a response or decision is actively impeding my progress. Under M28C guidelines and VA service standards, participants are entitled to timely communication, case management, and decision-making to prevent disruptions in their rehabilitation programs.
+The absence of a response or decision is actively impeding my progress. Under M28C guidelines and VA service standards, participants are entitled${/* @cite M28C.I.A.1 */ ''} to timely communication, case management, and decision-making to prevent disruptions in their rehabilitation programs.
 
 I request that a supervisor or alternate counselor review my pending request and contact me to resolve these issues so that my rehabilitation program is not further delayed or compromised.
 
