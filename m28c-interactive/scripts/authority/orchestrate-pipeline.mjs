@@ -1,9 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
+import { fileURLToPath } from 'url';
 import { logger } from './utils/logger.mjs';
 
-const PROJECT_ROOT = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
 const CACHE_DIR = path.join(PROJECT_ROOT, '.tmp/cache');
 
 // Parse CLI Arguments
@@ -18,7 +21,8 @@ const INGESTION_SCRIPTS = [
   { name: 'U.S. Code Ingestion', path: 'scripts/authority/ingest-usc-ch31.mjs' },
   { name: 'CFR Ingestion', path: 'scripts/authority/ingest-cfr-part21-subpart-a.mjs' },
   { name: 'M28C Ingestion', path: 'scripts/authority/ingest-m28c-knowva.mjs' },
-  { name: 'Generate Manifest', path: 'scripts/authority/generate-manifest.mjs' }
+  { name: 'Generate Manifest', path: 'scripts/authority/generate-manifest.mjs' },
+  { name: 'Distribute Corpus', path: 'scripts/legal/distribute-corpus.mjs' }
 ];
 
 const VALIDATION_SCRIPTS = [

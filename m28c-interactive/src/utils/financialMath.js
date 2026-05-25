@@ -58,7 +58,7 @@ export const calculateDebtSnowball = (debtsList, snowballExtra) => {
   // We clone the list to keep track of active balances
   let activeDebts = list.filter(d => d.balance > 0).map(d => ({ ...d }));
   
-  if (activeDebts.length === 0) return { months: 0, payoffProjection: [] };
+  if (activeDebts.length === 0) return { months: 0, payoffProjection: [], isDebtFree: true };
   
   while (activeDebts.length > 0 && months < 360) {
     months++;
@@ -108,5 +108,5 @@ export const calculateDebtSnowball = (debtsList, snowballExtra) => {
     activeDebts = activeDebts.filter(d => d.balance > 0);
   }
   
-  return { months, payoffProjection };
+  return { months, payoffProjection, isDebtFree: activeDebts.length === 0 };
 };

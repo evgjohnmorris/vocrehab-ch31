@@ -6,6 +6,7 @@
       "id": "m28c-i-a-1",
       "citation": "M28C.I.A.1",
       "title": "Overview of VR&E Services",
+      "articleId": "554400000144000",
       "sourceUpdated": "2026-05-23",
       "hash": "fc46e5f09ce35d9da5e9189d0490bc62f7c5a6161388d7aef75ac07e56c24d68"
     },
@@ -13,6 +14,7 @@
       "id": "m28c-i-a-2",
       "citation": "M28C.I.A.2",
       "title": "Partnerships and Memoranda of Agreement or Understanding",
+      "articleId": "554400000150222",
       "sourceUpdated": "2025-01-30",
       "hash": "fea2820cb1b09f04837e673b94a36969733a90a969cebcb158c8cace7aed5679"
     },
@@ -20,6 +22,7 @@
       "id": "m28c-ii-a-4",
       "citation": "M28C.II.A.4",
       "title": "Advisory Committees",
+      "articleId": "554400000144225",
       "sourceUpdated": "2024-08-14",
       "hash": "5e3f84bda5b436bebd9d74f272843749d0e244e5413bf1c2a3b35bfc16eb3a24"
     },
@@ -27,6 +30,7 @@
       "id": "m28c-iv-a-2",
       "citation": "M28C.IV.A.2",
       "title": "Eligibility and Entitlement",
+      "articleId": "554400000150221",
       "sourceUpdated": "2024-11-20",
       "hash": "e0c0f7e11d7f504b7003e3f5ed03f4b5c80d2fbde0ed8a5ebccf512a00f203c9"
     },
@@ -34,6 +38,7 @@
       "id": "m28c-iv-b-1",
       "citation": "M28C.IV.B.1",
       "title": "Evaluation Process",
+      "articleId": "554400000150222",
       "sourceUpdated": "2024-11-20",
       "hash": "864016d21124d309e239345bb6f346a0a512a29f9e44f4e9c21231d5faf9a36a"
     },
@@ -41,6 +46,7 @@
       "id": "m28c-iv-b-2",
       "citation": "M28C.IV.B.2",
       "title": "Vocational Exploration",
+      "articleId": "554400000150223",
       "sourceUpdated": "2024-11-20",
       "hash": "6ca69329b4b86c33cfbae4efb2edffd63ea4e5c6b4d8ea148f22d89e5f206995"
     },
@@ -48,6 +54,7 @@
       "id": "m28c-iv-b-3",
       "citation": "M28C.IV.B.3",
       "title": "Feasibility of Achieving a Vocational Goal",
+      "articleId": "554400000150224",
       "sourceUpdated": "2024-11-20",
       "hash": "578989cf952507cf088f8875a52283d594cfe0a853dfa4c497098cfe0ff7a839"
     },
@@ -55,6 +62,7 @@
       "id": "m28c-iv-c-1",
       "citation": "M28C.IV.C.1",
       "title": "Courses of Education or Training and Facilities",
+      "articleId": "554400000150227",
       "sourceUpdated": "2024-08-14",
       "hash": "4dfdb004b40e4f4e5e68f2e83db7c34bba5c2608c3c2aea14ade2ef6f5c97ca3"
     },
@@ -62,6 +70,7 @@
       "id": "m28c-iv-c-4",
       "citation": "M28C.IV.C.4",
       "title": "Rehabilitation Plans to Employability",
+      "articleId": "554400000150225",
       "sourceUpdated": "2024-08-14",
       "hash": "50b700c466e10691966c5c8805748b89768bfc230b8f34da676a0e6453866d82"
     },
@@ -69,6 +78,7 @@
       "id": "m28c-iv-c-6",
       "citation": "M28C.IV.C.6",
       "title": "Independent Living Plan",
+      "articleId": "554400000150226",
       "sourceUpdated": "2025-02-15",
       "hash": "e45175682b8da344158fa2d0fc72aa30b2b1b734734bcb89487f0379fdad38fd"
     },
@@ -76,6 +86,7 @@
       "id": "m28c-v-a-3",
       "citation": "M28C.V.A.3",
       "title": "Services, Supplies, and Equipment",
+      "articleId": "554400000146298",
       "sourceUpdated": "2025-12-01",
       "hash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151"
     },
@@ -83,6 +94,7 @@
       "id": "m28c-v-b-1",
       "citation": "M28C.V.B.1",
       "title": "Program Costs and Approval Levels",
+      "articleId": "554400000146300",
       "sourceUpdated": "2025-05-23",
       "hash": "33b5687c173d1953335076cf6805ef9db4bf41ba7955738d09709217c0981f35"
     },
@@ -90,6 +102,7 @@
       "id": "m28c-v-b-5-01",
       "citation": "M28C.V.B.5.01",
       "title": "Cost Approval Thresholds and Procurement",
+      "articleId": "554400000146302",
       "sourceUpdated": "2025-12-01",
       "hash": "26c37246cea15948458aa2b884f36800a23fea151db8e312fefcd7a9e9869d1f"
     },
@@ -97,6 +110,7 @@
       "id": "m28c-v-b-6",
       "citation": "M28C.V.B.6",
       "title": "Retroactive Induction Guidelines",
+      "articleId": "554400000146303",
       "sourceUpdated": "2025-10-15",
       "hash": "85f60f8cc693436fb20dbef3c0ac5bda295e1487bcfeafb46f73b5614939a915"
     },
@@ -104,6 +118,7 @@
       "id": "m28c-v-b-7",
       "citation": "M28C.V.B.7",
       "title": "Subsistence Allowance Administration",
+      "articleId": "554400000146304",
       "sourceUpdated": "2026-02-06",
       "hash": "13df6b6a2a36ca76d9084307eef07b83996b0c9e18859f95641fd9eed7cc0445"
     }

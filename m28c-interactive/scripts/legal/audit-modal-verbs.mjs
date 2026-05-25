@@ -1,8 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const CROSSWALK_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/topic-crosswalk.json';
-const STATEMENTS_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/legal-statements.json';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
+const CROSSWALK_PATH = path.join(PROJECT_ROOT, 'src/data/authority/topic-crosswalk.json');
+const STATEMENTS_PATH = path.join(PROJECT_ROOT, 'src/data/legal-statements.json');
 
 const BINDING_VERBS = /\b(must|shall|required|entitled|cannot\s+deny|always|never)\b/i;
 const FORBIDDEN_VERBS = /\b(guaranteed|automatic)\b/i;

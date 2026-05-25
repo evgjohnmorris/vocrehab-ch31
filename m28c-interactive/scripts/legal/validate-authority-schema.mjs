@@ -1,10 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { z } from 'zod';
+import { fileURLToPath } from 'url';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
 
-const PUBLIC_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/public/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
+const PUBLIC_PATH = path.join(PROJECT_ROOT, 'public/authority');
 const MANIFEST_PATH = path.join(PUBLIC_PATH, 'index.json');
 const STATUTES_DIR = path.join(PUBLIC_PATH, 'usc');
 const REGS_DIR = path.join(PUBLIC_PATH, 'cfr');
@@ -45,7 +49,7 @@ function validateFile(filePath, expectedId, sectionType) {
 
 function main() {
   console.log("--------------------------------------------------");
-  console.log("Legal CI Gate: Validating Authority Schema & Cheksums...");
+  console.log("Legal CI Gate: Validating Authority Schema & Checksums...");
   console.log("--------------------------------------------------");
   
   if (!fs.existsSync(MANIFEST_PATH)) {
@@ -59,9 +63,9 @@ function main() {
 
   // 1. Validate Statutes
   manifest.statutes.forEach(statute => {
-    const filename = `38-usc-${statute.id}.json`;
+    const filename = `${statute.id}.json`;
     const filePath = path.join(STATUTES_DIR, filename);
-    const expectedId = `38-usc-${statute.id}`;
+    const expectedId = statute.id;
 
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Statute file does not exist: ${filePath}`);
@@ -69,7 +73,7 @@ function main() {
       return;
     }
 
-    const { success, hash } = validateFile(filePath, expectedId, 'statute');
+    const { success } = validateFile(filePath, expectedId, 'statute');
     if (!success) {
       errors++;
     } else {
@@ -79,9 +83,9 @@ function main() {
 
   // 2. Validate Regulations
   manifest.regulations.forEach(reg => {
-    const filename = `38-cfr-${reg.id}.json`;
+    const filename = `${reg.id}.json`;
     const filePath = path.join(REGS_DIR, filename);
-    const expectedId = `38-cfr-${reg.id}`;
+    const expectedId = reg.id;
 
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Regulation file does not exist: ${filePath}`);
@@ -89,7 +93,7 @@ function main() {
       return;
     }
 
-    const { success, hash } = validateFile(filePath, expectedId, 'regulation');
+    const { success } = validateFile(filePath, expectedId, 'regulation');
     if (!success) {
       errors++;
     } else {
@@ -109,7 +113,7 @@ function main() {
       return;
     }
 
-    const { success, hash } = validateFile(filePath, expectedId, 'm28c');
+    const { success } = validateFile(filePath, expectedId, 'm28c');
     if (!success) {
       errors++;
     } else {

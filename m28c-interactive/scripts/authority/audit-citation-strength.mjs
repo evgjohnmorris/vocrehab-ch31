@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const BASE_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const BASE_PATH = path.join(PROJECT_ROOT, 'src/data/authority');
 const CROSSWALK_PATH = path.join(BASE_PATH, 'topic-crosswalk.json');
 
 const STRICT_WORDS = /\b(must|shall|required|entitled|guaranteed|automatic|cannot\s+deny|always|never)\b/i;

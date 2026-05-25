@@ -66,11 +66,21 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
   // Autofill helpers
   const autofillCalculatedIncome = () => {
     let current = [...budgetIncomes];
-    if (calculatedDisabilityPay > 0 && !current.some(i => i.type === 'va_disability')) {
-      current.push({ id: Date.now() + Math.random(), type: 'va_disability', name: 'VA Disability Pay', amount: calculatedDisabilityPay });
+    if (calculatedDisabilityPay > 0) {
+      const idx = current.findIndex(i => i.type === 'va_disability');
+      if (idx > -1) {
+        current[idx].amount = calculatedDisabilityPay;
+      } else {
+        current.push({ id: Date.now() + Math.random(), type: 'va_disability', name: 'VA Disability Pay', amount: calculatedDisabilityPay });
+      }
     }
-    if (budgetMhaAmount > 0 && !current.some(i => i.type === 'va_bah')) {
-      current.push({ id: Date.now() + Math.random(), type: 'va_bah', name: 'VA BAH / MHA Allowance', amount: budgetMhaAmount });
+    if (budgetMhaAmount > 0) {
+      const idx = current.findIndex(i => i.type === 'va_bah');
+      if (idx > -1) {
+        current[idx].amount = budgetMhaAmount;
+      } else {
+        current.push({ id: Date.now() + Math.random(), type: 'va_bah', name: 'VA BAH / MHA Allowance', amount: budgetMhaAmount });
+      }
     }
     setBudgetIncomes(current);
   };
@@ -531,7 +541,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                   type="number"
                   className="form-control"
                   value={pellAgi}
-                  onChange={(e) => setPellAgi(Number(e.target.value))}
+                  onChange={(e) => setPellAgi(Math.max(0, Number(e.target.value)))}
                   min={0}
                 />
               </div>
@@ -549,7 +559,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                   type="number"
                   className="form-control"
                   value={loanDebt}
-                  onChange={(e) => setLoanDebt(Number(e.target.value))}
+                  onChange={(e) => setLoanDebt(Math.max(0, Number(e.target.value)))}
                   min={0}
                 />
               </div>
@@ -560,7 +570,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                   type="number"
                   className="form-control"
                   value={loanInterest}
-                  onChange={(e) => setLoanInterest(Number(e.target.value))}
+                  onChange={(e) => setLoanInterest(Math.max(0, Number(e.target.value)))}
                   min={0}
                   step={0.1}
                 />
@@ -574,7 +584,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                   type="number"
                   className="form-control"
                   value={loanAgi}
-                  onChange={(e) => setLoanAgi(Number(e.target.value))}
+                  onChange={(e) => setLoanAgi(Math.max(0, Number(e.target.value)))}
                   min={0}
                 />
               </div>
@@ -672,7 +682,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                           value={inc.amount || ''}
                           onChange={(e) => {
                             const list = [...budgetIncomes];
-                            list[index].amount = Number(e.target.value);
+                            list[index].amount = Math.max(0, Number(e.target.value));
                             setBudgetIncomes(list);
                           }}
                           placeholder="Amount/mo"
@@ -705,8 +715,12 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                       const totalMins = debtsList.reduce((sum, d) => sum + Number(d.minPayment || 0), 0);
                       if (totalMins > 0) {
                         const current = [...budgetExpenses];
-                        if (!current.some(e => e.name.includes("Snowball Min Payments"))) {
-                          setBudgetExpenses([...budgetExpenses, { id: Date.now(), category: 'saving_debt', name: 'Debt Snowball Min Payments', amount: totalMins }]);
+                        const existingIdx = current.findIndex(e => e.name.includes("Debt Snowball Min Payments"));
+                        if (existingIdx > -1) {
+                          current[existingIdx].amount = totalMins;
+                          setBudgetExpenses(current);
+                        } else {
+                          setBudgetExpenses([...current, { id: Date.now(), category: 'saving_debt', name: 'Debt Snowball Min Payments', amount: totalMins }]);
                         }
                       }
                     }}
@@ -787,7 +801,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                           value={exp.amount || ''}
                           onChange={(e) => {
                             const list = [...budgetExpenses];
-                            list[index].amount = Number(e.target.value);
+                            list[index].amount = Math.max(0, Number(e.target.value));
                             setBudgetExpenses(list);
                           }}
                           placeholder="Amount/mo"
@@ -859,7 +873,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                       value={d.balance || ''}
                       onChange={(e) => {
                         const list = [...debtsList];
-                        list[index].balance = Number(e.target.value);
+                        list[index].balance = Math.max(0, Number(e.target.value));
                         setDebtsList(list);
                       }}
                       placeholder="Balance"
@@ -873,7 +887,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                       value={d.minPayment || ''}
                       onChange={(e) => {
                         const list = [...debtsList];
-                        list[index].minPayment = Number(e.target.value);
+                        list[index].minPayment = Math.max(0, Number(e.target.value));
                         setDebtsList(list);
                       }}
                       placeholder="Min Pay"
@@ -902,7 +916,7 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
                 type="number"
                 className="form-control"
                 value={snowballExtra}
-                onChange={(e) => setSnowballExtra(Number(e.target.value))}
+                onChange={(e) => setSnowballExtra(Math.max(0, Number(e.target.value)))}
                 min={0}
               />
             </div>
@@ -1092,9 +1106,15 @@ function FinancialPlannerView({ calculatedDisabilityPay, budgetMhaAmount, combin
               <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '8px' }}>Debt Snowball Payoff Projection</h4>
               {snowballResult.months > 0 ? (
                 <div style={{ fontSize: '0.75rem' }}>
-                  <div style={{ fontWeight: '700', color: 'var(--success-color)', marginBottom: '8px' }}>
-                    Debt-Free in {snowballResult.months} Months!
-                  </div>
+                  {snowballResult.isDebtFree ? (
+                    <div style={{ fontWeight: '700', color: 'var(--success-color)', marginBottom: '8px' }}>
+                      Debt-Free in {snowballResult.months} Months!
+                    </div>
+                  ) : (
+                    <div style={{ fontWeight: '700', color: 'var(--warning-color)', marginBottom: '8px' }}>
+                      Payments insufficient to clear debt within 30 years (360 months).
+                    </div>
+                  )}
                   <ul style={{ paddingLeft: '16px', margin: 0, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {snowballResult.payoffProjection.map((proj, idx) => (
                       <li key={idx}>

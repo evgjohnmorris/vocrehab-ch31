@@ -51,8 +51,20 @@ export const AuthorityRecordSchema = z.object({
     "superseded",
     "not-public",
     "fetch-failed",
-    "needs-review"
+    "needs-review",
+    "summary-only"
   ]),
+
+  fullTextStatus: z.string().optional(),
+  displayWarning: z.string().optional(),
+  rawHtmlSha256: z.string().optional(),
+  fullTextSha256: z.string().optional(),
+  articleId: z.string().optional(),
+  retrievedAt: z.string().optional(),
+  headingCount: z.number().optional(),
+  tableCount: z.number().optional(),
+  attachmentCount: z.number().optional(),
+  noTruncation: z.object({ passed: z.boolean() }).optional(),
 
   fullText: z.string(),
   plainEnglish: z.string().optional(),

@@ -1,204 +1,378 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ShieldCheck, ArrowRight, BookOpen, Shield, CheckSquare, 
-  CheckCircle2, RefreshCw, AlertOctagon, Scale, Award, Compass, 
-  Calculator, FileEdit, Users, HelpCircle, AlertTriangle, Clock, Briefcase
+  ShieldCheck, ArrowRight, BookOpen, Shield, 
+  AlertOctagon, Scale, Award, Compass, 
+  AlertTriangle, Clock, 
+  Briefcase, Mail, Check, Copy, ArrowLeft
 } from 'lucide-react';
 
-const CASE_STAGES_DATA = [
+const WORKFLOWS = [
   {
-    id: 'not_applied',
-    label: 'Not Applied',
-    title: 'Not Applied Yet',
-    description: 'You are researching VR&E (Chapter 31) and want to know if you qualify and how to apply.',
-    nextAction: 'File VA Form 28-1900 on VA.gov to establish eligibility.',
-    actionRoute: 'wizard',
-    checklist: [
-      'Confirm compensable VA disability rating of 10% or higher',
-      'Verify discharge characterization is other than dishonorable',
-      'Check basic 12-year eligibility period'
-    ]
+    id: 'counselor_delay',
+    title: 'Counselor Nonresponse',
+    desc: 'Your VRC hasn\'t answered your email, eVA, or phone calls for weeks.',
+    icon: <Mail className="text-amber-400" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'vrcName', label: 'Counselor\'s Name', type: 'text', placeholder: 'e.g. John Doe' },
+          { name: 'lastContactDate', label: 'Date of Last Response', type: 'text', placeholder: 'e.g. April 12, 2026' },
+          { name: 'followUpCount', label: 'Number of Follow-up Attempts', type: 'number', placeholder: 'e.g. 3' },
+          { name: 'contactMethod', label: 'Primary Contact Method Used', type: 'select', options: ['eVA Portal', 'Email', 'Phone Call', 'Certified Mail'] }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Vocational Rehabilitation and Employment Officer (VREO)
+VA Regional Office
+
+Subject: Request for Administrative Intervention – Counselor Nonresponse
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Vocational Rehabilitation and Employment Officer,
+
+I am writing to formally request administrative intervention regarding my Chapter 31 Vocational Rehabilitation case. My assigned Vocational Rehabilitation Counselor (VRC), ${facts.vrcName || '[VRC Name]'}, has not responded to my repeated inquiries for an extended period.
+
+My last successful contact with my counselor was on ${facts.lastContactDate || '[Date]'}. Since that date, I have attempted to follow up ${facts.followUpCount || 'several'} times via ${facts.contactMethod || 'email/eVA'}, with no response.
+
+Under M28C guidelines and the VA's statutory duty to assist (38 U.S.C. § 5103A and 38 C.F.R. § 21.33), counselors are required to maintain active communication and assist veterans in executing their rehabilitation plans. The lack of response has caused significant administrative delay in my program.
+
+Please contact me at your earliest convenience to assist in resolving this communication block, or assign an alternate counselor to my file.
+
+Sincerely,
+
+[Your Name]
+[Your Contact Information]`;
+    },
+    errors: [
+      'Failure to maintain contact constitutes a violation of the VA\'s Duty to Assist under 38 C.F.R. § 21.33.',
+      'M28C policy guidelines require timely counselor action on veteran inquiries (typically 5 business days).'
+    ],
+    citations: ['38-usc-3115', '38-cfr-21-33']
   },
   {
-    id: 'waiting_appointment',
-    label: 'Applied, Waiting Appointment',
-    title: 'Applied & Waiting for VRC Appointment',
-    description: 'You submitted VAF 28-1900 and are waiting for your initial evaluation call.',
-    nextAction: 'Prepare employment handicap statements and collect medical records.',
-    actionRoute: 'wizard',
-    checklist: [
-      'Document active physical/mental limitations at work',
-      'Gather recent treatment reports showing job barriers',
-      'Draft vocational goals compatible with limitations'
-    ]
+    id: 'supplies_denial',
+    title: 'Supplies / Laptop Denial',
+    desc: 'VA counselor verbally denied a computer or claimed a flat annual spending cap.',
+    icon: <Briefcase className="text-blue-400" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'programName', label: 'Degree / Training Program Name', type: 'text', placeholder: 'e.g. BS in Computer Science' },
+          { name: 'schoolRequired', label: 'Does the school require a computer for all students in this program?', type: 'select', options: ['Yes', 'No'] },
+          { name: 'disabilityNeed', label: 'Is a computer package necessary to accommodate your disability limitations?', type: 'select', options: ['Yes', 'No'] },
+          { name: 'verbalDenialReason', label: 'What reason did the counselor give for the verbal denial?', type: 'text', placeholder: 'e.g. Said there is a flat $500 cap on supplies' }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Assigned Vocational Rehabilitation Counselor (VRC)
+VA Regional Office
+
+Subject: Formal Request for Computer Technology Package (38 C.F.R. § 21.212)
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Counselor,
+
+Please accept this letter as a formal, written request for authorization of a computer technology package required to pursue my approved rehabilitation plan in ${facts.programName || '[Program Name]'}.
+
+Under 38 C.F.R. § 21.212 and § 21.220, the Department of Veterans Affairs is required to furnish all necessary supplies, including computer technology packages, when:
+1. The school requires such supplies for all students in the program (School Required: ${facts.schoolRequired || 'Yes'}), or
+2. The supplies are necessary to mitigate my disability limitations (Disability Necessity: ${facts.disabilityNeed || 'Yes'}), or
+3. Lacking these supplies would place me at a distinct disadvantage.
+
+Chapter 31 supplies are uncapped and based strictly on individual need. Any verbal assertion of flat annual dollar limits (such as a $500 cap) contradicts controlling regulations.
+
+Please provide a formal written decision on VA Form 20-0998 explaining the legal basis and reasons for your decision if this request is denied, as required by 38 U.S.C. § 5104(b).
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'VA counselor verbally denying necessary supplies instead of providing a written decision notice (VA Form 20-0998).',
+      'Citing Post-9/11 GI Bill cap rules ($1,000/yr) or a flat $500 VR&E limit — Chapter 31 supplies are legally uncapped under 38 C.F.R. § 21.212.'
+    ],
+    citations: ['38-usc-3104', '38-cfr-21-210', '38-cfr-21-212', '38-cfr-21-220']
   },
   {
-    id: 'evaluation',
-    label: 'Evaluation Phase',
-    title: 'Entitlement Evaluation',
-    description: 'Your VRC is determining if you have an Employment Handicap (EH) or Serious Employment Handicap (SEH).',
-    nextAction: 'Focus on explaining how disability prevents you from securing suitable employment.',
-    actionRoute: 'wizard',
-    checklist: [
-      'Review EH definition under 38 CFR § 21.51',
-      'Prepare to show past job attempts that aggravated conditions',
-      'Organize educational transcripts'
-    ]
+    id: 'tuition_unpaid',
+    title: 'Tuition or Books Not Paid',
+    desc: 'The school hasn\'t received payment, threatening late fees or registration holds.',
+    icon: <Clock className="text-red-400" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'schoolName', label: 'Name of Educational Institution', type: 'text', placeholder: 'e.g. State University' },
+          { name: 'termDates', label: 'Term Dates (e.g. Fall 2026)', type: 'text', placeholder: 'e.g. Sept - Dec 2026' },
+          { name: 'daysDelayed', label: 'Days Payment is Overdue', type: 'number', placeholder: 'e.g. 45' },
+          { name: 'hasHold', label: 'Has the school threatened registration holds or late fees?', type: 'select', options: ['Yes', 'No'] }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Vocational Rehabilitation and Employment Officer (VREO)
+VA Regional Office
+
+Subject: URGENT: Overdue Tuition / Fee Payment to ${facts.schoolName || '[School Name]'}
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Vocational Rehabilitation and Employment Officer,
+
+I am writing to bring an urgent payment delay to your attention. My tuition and fees for the term ${facts.termDates || '[Term Dates]'} at ${facts.schoolName || '[School Name]'} remain unpaid. This payment is currently ${facts.daysDelayed || 'many'} days overdue.
+
+Due to this delay, the institution has threatened administrative holds or late fees (Hold Status: ${facts.hasHold || 'Yes'}). 
+
+Under 38 C.F.R. § 21.260 and M28C guidelines, Chapter 31 services are direct-payment authorizations. The veteran is not responsible for tuition payment when acting under an approved IPE. Furthermore, VA billing guidelines protect veterans from registration holds or penalties due to VA administrative delays.
+
+I request that my case file be reviewed immediately and the overdue payment authorization be transmitted via Tungsten/VA channels to prevent enrollment cancellation.
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'Allowing administrative delays to penalize the veteran\'s active enrollment.',
+      'Failing to coordinate with the School Certifying Official to resolve billing errors.'
+    ],
+    citations: ['38-usc-3108', '38-cfr-21-260']
   },
   {
-    id: 'entitled_no_ipe',
-    label: 'Entitled, No IPE',
-    title: 'Entitlement Approved, Plan Pending',
-    description: 'You are entitled to services, but your Individualized Written Rehabilitation Plan (IWRP) is not signed.',
-    nextAction: 'Perform O*NET labor market research and school cost evaluations.',
-    actionRoute: 'planning',
-    checklist: [
-      'Identify target SOC codes and employment projections',
-      'Ensure target program is approved in WebLAMS',
-      'Document required supplies, computer, or tools'
-    ]
+    id: 'case_closed',
+    title: 'Interrupted / Discontinued Case',
+    desc: 'Your counselor paused (interrupted) or closed (discontinued) your case.',
+    icon: <AlertTriangle className="text-red-500" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'reasonGiven', label: 'Reason counselor gave for pause/closure', type: 'text', placeholder: 'e.g. Claimed lack of contact or no progress' },
+          { name: 'hadNotice', label: 'Did you receive a written 10-day warning before closure?', type: 'select', options: ['Yes', 'No'] },
+          { name: 'hadVaf200998', label: 'Did you receive a formal written decision (VA Form 20-0998)?', type: 'select', options: ['Yes', 'No'] }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Assigned Vocational Rehabilitation Counselor (VRC) / VREO
+VA Regional Office
+
+Subject: Request for Reinstatement and Administrative Review of Case Status
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear VRC / VREO,
+
+I am writing to formally request an administrative review and reinstatement of my Chapter 31 case, which was recently interrupted or discontinued.
+
+My case was paused/closed based on the assertion: "${facts.reasonGiven || '[Reason]'}"
+Notice Defect Details:
+- Written 10-day warning received: ${facts.hadNotice || 'No'}
+- Formal decision VA Form 20-0998 received: ${facts.hadVaf200998 || 'No'}
+
+Under 38 C.F.R. § 21.197, § 21.198, and M28C guidelines, the VA cannot discontinue or interrupt a veteran's active rehabilitation plan without issuing prior written warning and a formal opportunity to respond. Closing a case without providing these notices is a procedural violation.
+
+I request a local administrative conference to discuss the reinstatement of my case and to amend my IPE if medical or vocational adjustments are needed.
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'Closing a case without sending a written 10-day notice of intent to discontinue.',
+      'Failing to issue a formal written decision notice (VA Form 20-0998) explaining appeal rights.'
+    ],
+    citations: ['38-cfr-21-197', '38-cfr-21-198', '38-cfr-21-362']
   },
   {
-    id: 'ipe_signed',
-    label: 'IPE Signed',
-    title: 'IWRP Plan Signed & Active',
-    description: 'Your rehabilitation plan is signed. Services are formally authorized.',
-    nextAction: 'Ensure school certifying official receives VAF 28-1905 / tungsten auth.',
-    actionRoute: 'calculator',
-    checklist: [
-      'Verify term start date auth is active',
-      'Review supplies listing in signed plan objectives',
-      'Compare Chapter 31 standard rates vs Post-9/11 MHA'
-    ]
+    id: 'feasibility_denial',
+    title: 'Feasibility Denial',
+    desc: 'VRC claims training is not feasible because your disabilities are too severe.',
+    icon: <AlertOctagon className="text-amber-500" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'ratingPercentage', label: 'Disability Rating Percentage', type: 'text', placeholder: 'e.g. 70%' },
+          { name: 'hasDoctorLetter', label: 'Do you have a letter from a physician supporting training?', type: 'select', options: ['Yes', 'No'] },
+          { name: 'proposedGoal', label: 'Proposed Vocational Goal', type: 'text', placeholder: 'e.g. Accountant' }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Assigned Vocational Rehabilitation Counselor (VRC)
+VA Regional Office
+
+Subject: Request for Extended Evaluation / Rebuttal of Feasibility Denial (38 C.F.R. § 21.57)
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Counselor,
+
+I am writing to formally rebut the determination that it is not reasonably feasible for me to achieve a vocational goal under Chapter 31 due to the severity of my service-connected disabilities.
+
+I hold a disability rating of ${facts.ratingPercentage || '[Rating]'}. My proposed vocational goal is ${facts.proposedGoal || '[Goal]'}. 
+
+Under 38 C.F.R. § 21.57, the counselor must resolve all reasonable doubt in favor of the veteran regarding feasibility. If there is doubt, the VA must authorize an Extended Evaluation under 38 C.F.R. § 21.74 to assess my capability rather than issuing an immediate feasibility denial.
+
+I have medical support (Doctor Letter Available: ${facts.hasDoctorLetter || 'Yes'}) confirming that with reasonable accommodations, I am fully capable of training and pursuing employment in my proposed field.
+
+I request that my file be placed in Extended Evaluation status to formally evaluate my feasibility over a structured period.
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'Failing to resolve reasonable doubt in favor of feasibility as mandated by 38 C.F.R. § 21.57.',
+      'Denying feasibility without offering an Extended Evaluation (38 C.F.R. § 21.74) to fully evaluate capabilities.'
+    ],
+    citations: ['38-usc-3106', '38-cfr-21-53', '38-cfr-21-57', '38-cfr-21-74']
   },
   {
-    id: 'in_training',
-    label: 'In School / Training',
-    title: 'Active Education or Vocational Training',
-    description: 'You are actively attending classes, OJT, or vocational courses.',
-    nextAction: 'Submit supply lists early and track monthly subsistence payments.',
-    actionRoute: 'calculator',
-    checklist: [
-      'Coordinate with School Certifying Official (SCO) for enrollment certs',
-      'Log monthly attendance hours if OJT or coop training',
-      'Submit tech package requests at least 30 days prior to term'
-    ]
+    id: 'ipe_change',
+    title: 'IPE Amendment / Goal Change',
+    desc: 'You want to change your training goal, but your VRC refuses to update the plan.',
+    icon: <Compass className="text-indigo-400" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'currentGoal', label: 'Current Approved Goal in IPE', type: 'text', placeholder: 'e.g. Sales Manager' },
+          { name: 'newGoal', label: 'Proposed New Goal', type: 'text', placeholder: 'e.g. Software Engineer' },
+          { name: 'changeReason', label: 'Reason for the change (e.g. condition worsened)', type: 'text', placeholder: 'e.g. Physical standing requirements aggravate back condition' }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Assigned Vocational Rehabilitation Counselor (VRC)
+VA Regional Office
+
+Subject: Request for Individualized Written Rehabilitation Plan (IWRP) Amendment
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Counselor,
+
+I am writing to formally request an amendment to my Individualized Written Rehabilitation Plan (IWRP) under 38 C.F.R. § 21.94.
+
+My current approved goal is ${facts.currentGoal || '[Goal]'}. I request to amend my plan to target the vocational goal of ${facts.newGoal || '[Goal]'}.
+
+This amendment is necessary due to the following changes/facts:
+${facts.changeReason || '[Reason]'}
+
+Under 38 C.F.R. § 21.94, a rehabilitation plan may be changed or amended when there is a documented change in the veteran's condition, new vocational limitations, or when the original goal is determined to no longer be suitable.
+
+I request a counselor conference to discuss and formally sign the amended plan.
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'Arbitrarily denying plan changes when medical condition or limitations have changed.',
+      'Refusing to issue a written decision notice when IPE amendment request is denied.'
+    ],
+    citations: ['38-cfr-21-80', '38-cfr-21-94']
   },
   {
-    id: 'employment_services',
-    label: 'Employment Services',
-    title: 'Job Search & Placement Track',
-    description: 'You completed training and are receiving job search assistance (EES).',
-    nextAction: 'Request resume assistance, placement tools, and job interview clothes.',
-    actionRoute: 'self_employment',
-    checklist: [
-      'Submit job logs to VRC to claim Job Search Allowance (up to 2 months)',
-      'Confirm employer hiring tax incentives (WOTC)',
-      'Request workplace accommodations or assistive technology'
-    ]
-  },
-  {
-    id: 'interrupted',
-    label: 'Interrupted Status',
-    title: 'Case Placed in Interrupted Status',
-    description: 'Your plan is temporarily paused due to medical, personal, or administrative reasons.',
-    nextAction: 'Gather documentation to resume services or request plan amendment.',
-    actionRoute: 'dispute_hub',
-    checklist: [
-      'Review counselor interruption notice for accuracy',
-      'Document medical stability or capability to return',
-      'Request counselor conference under M28C guidelines'
-    ]
-  },
-  {
-    id: 'discontinued',
-    label: 'Discontinued Status',
-    title: 'Case Closed / Discontinued',
-    description: 'VA closed your case before rehabilitation, claiming lack of cooperation or progress.',
-    nextAction: 'File a reentrance request or appeal the case closure within 1 year.',
-    actionRoute: 'dispute_hub',
-    checklist: [
-      'Demand written decision notice (VA Form 20-0998)',
-      'Identify notice defects or failure of counselor duty to assist',
-      'Build reentrance brief arguing Serious Employment Handicap'
-    ]
-  },
-  {
-    id: 'rehabilitated',
-    label: 'Rehabilitated',
-    title: 'Rehabilitated / Case Completed',
-    description: 'VA formally declared you rehabilitated after holding suitable employment for 60+ days.',
-    nextAction: 'Keep records of completed training and credentials.',
-    checklist: [
-      'Ensure final subsistence payments are fully cleared',
-      'Retain copies of certification approvals',
-      'Note that rehabilitation does not block future VR&E applications if conditions worsen'
-    ]
-  },
-  {
-    id: 'independent_living',
-    label: 'Independent Living',
-    title: 'Independent Living (IL) Track Active',
-    description: 'You are receiving services to increase daily living independence in home and community.',
-    nextAction: 'Verify adaptive equipment deliveries and home modifications.',
-    actionRoute: 'special_programs',
-    checklist: [
-      'Maintain contact logs for home health evaluations',
-      'Ensure required ergonomic or structural mods are active',
-      'Identify community integration opportunities'
-    ]
-  },
-  {
-    id: 'appeal_pending',
-    label: 'Appeal Pending',
-    title: 'Appellate Review In Progress',
-    description: 'You filed a Higher-Level Review (HLR), Supplemental Claim, or Board Appeal.',
-    nextAction: 'Track review deadlines and submit new evidence if in Supplemental lane.',
-    actionRoute: 'dispute_hub',
-    checklist: [
-      'Confirm HLR receipt or Board docket status',
-      'Log communications with decision review officer',
-      'Keep records of original VAF 20-0998 decision notices'
-    ]
+    id: 'seh_extension',
+    title: '48-Month Extension / SEH',
+    desc: 'You are approaching 48 months of benefits and need an extension to graduate.',
+    icon: <Award className="text-emerald-400" size={20} />,
+    steps: [
+      {
+        title: 'Collected Facts',
+        fields: [
+          { name: 'monthsUsed', label: 'Months of Entitlement Used So Far', type: 'number', placeholder: 'e.g. 44' },
+          { name: 'hasSeh', label: 'Has the VRC declared you have a Serious Employment Handicap (SEH)?', type: 'select', options: ['Yes', 'No'] },
+          { name: 'extensionReason', label: 'Reason extension is needed to complete plan', type: 'text', placeholder: 'e.g. Double major required to secure suitable entry-level placement' }
+        ]
+      }
+    ],
+    generateLetter: (facts, stage) => {
+      return `Date: ${new Date().toLocaleDateString()}
+
+To: Assigned Vocational Rehabilitation Counselor (VRC)
+VA Regional Office
+
+Subject: Request for Program Extension Beyond 48 Months (38 C.F.R. § 21.78)
+Veteran: [Your Name]
+Case Status Stage: ${stage}
+
+Dear Counselor,
+
+I am writing to formally request an extension of my Chapter 31 entitlement beyond the standard 48-month limitation, as authorized under 38 U.S.C. § 3105 and 38 C.F.R. § 21.78.
+
+I have currently used ${facts.monthsUsed || '44'} months of entitlement. (Serious Employment Handicap Status: ${facts.hasSeh || 'Yes'}).
+
+Under 38 C.F.R. § 21.78, the VA may approve training beyond 48 months when the veteran is determined to have a Serious Employment Handicap (SEH) and additional training is necessary to achieve the rehabilitation goal. 
+
+An extension is required to complete my vocational program due to:
+${facts.extensionReason || '[Reason]'}
+
+I request that you review my eligibility and process this extension to prevent any interruption in my academic enrollment.
+
+Sincerely,
+
+[Your Name]`;
+    },
+    errors: [
+      'Asserting that the 48-month limit is a hard statutory cap that can never be extended.',
+      'Claiming VREO signature is always required when extension concurrence was legally delegated under the 2024 final rule.'
+    ],
+    citations: ['38-usc-3105', '38-cfr-21-44', '38-cfr-21-78']
   }
+];
+
+const CASE_STAGES = [
+  'Not Applied',
+  'Applied, Waiting Appointment',
+  'Evaluation Phase',
+  'Entitled, No IPE',
+  'IPE Signed',
+  'In School / Training',
+  'Employment Services',
+  'Interrupted Status',
+  'Discontinued Status',
+  'Rehabilitated',
+  'Independent Living',
+  'Appeal Pending'
 ];
 
 function HomeDashboardView({ 
   reduceMotion, 
   setActiveView, 
   setSelectedSection,
-  privacyMode,
   bookmarksCount,
   userMode,
   currentCaseStage,
   setCurrentCaseStage
 }) {
-  const activeStageObj = CASE_STAGES_DATA.find(s => s.id === currentCaseStage) || CASE_STAGES_DATA[0];
-  const handleRoute = (view, context) => {
-    if (context) {
-      sessionStorage.setItem('dispute_hub_prefill', context);
-      localStorage.setItem('dispute_hub_prefill', context);
-      window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: context }));
-    }
-    setActiveView(view);
-  };
+  const [activeWorkflow, setActiveWorkflow] = useState(null);
+  const [wizardStep, setWizardStep] = useState(0); // 0: Case Stage, 1: Collect Facts, 2: Report / Letter
+  const [tempStage, setTempStage] = useState(currentCaseStage ? currentCaseStage.replace(/_/g, ' ') : CASE_STAGES[0]);
+  const [formFacts, setFormFacts] = useState({});
+  const [copiedLetter, setCopiedLetter] = useState(false);
 
-  const handleKeyDown = (e, callback) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      callback();
-    }
-  };
-
-  const handleEmergencyClick = (workflowContext, targetView = 'dispute_hub') => {
-    sessionStorage.setItem('dispute_hub_prefill', workflowContext);
-    localStorage.setItem('dispute_hub_prefill', workflowContext);
-    window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: workflowContext }));
-    setActiveView(targetView);
-  };
-
-  // Plain-language advice adapted to User Modes
   const getModeAdvice = () => {
     switch (userMode) {
       case 'advocate':
@@ -230,368 +404,350 @@ function HomeDashboardView({
 
   const modeAdvice = getModeAdvice();
 
+  const handleStartWorkflow = (wf) => {
+    setActiveWorkflow(wf);
+    setWizardStep(0);
+    setFormFacts({});
+    setCopiedLetter(false);
+  };
+
+  const handleNextStep = () => {
+    if (wizardStep === 0) {
+      // Sync temp stage back to App state if needed
+      const normalizedStage = tempStage.toLowerCase().replace(/, /g, '_').replace(/ \/ /g, '_').replace(/ /g, '_');
+      setCurrentCaseStage(normalizedStage);
+    }
+    setWizardStep(prev => prev + 1);
+  };
+
+  const handleBackStep = () => {
+    setWizardStep(prev => prev - 1);
+  };
+
+  const handleReset = () => {
+    setActiveWorkflow(null);
+    setWizardStep(0);
+    setFormFacts({});
+    setCopiedLetter(false);
+  };
+
+  const handleFactChange = (name, value) => {
+    setFormFacts(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCopyLetter = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedLetter(true);
+    setTimeout(() => setCopiedLetter(false), 2000);
+  };
+
+  const handleCitationClick = (citationId) => {
+    // Navigate to reference tab and load document
+    setSelectedSection({ type: citationId.startsWith('38-usc') ? 'usc' : citationId.startsWith('38-cfr') ? 'cfr' : 'm28c', id: citationId });
+    setActiveView('authority_library');
+  };
+
   return (
     <motion.div
       initial={reduceMotion ? {} : { opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 select-text text-slate-100"
     >
-      {/* EMERGENCY URGENT STRIP */}
-      <div className="bg-red-950/40 border border-red-900/60 rounded-xl p-4 space-y-2">
-        <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider">
-          <AlertOctagon size={16} />
-          <span>Urgent Issue? Select a Case Emergency Pathway</span>
-        </div>
-        <div className="flex flex-wrap gap-2 pt-1">
-          <button 
-            onClick={() => handleEmergencyClick('tuition_unpaid')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            School starts soon
-          </button>
-          <button 
-            onClick={() => handleEmergencyClick('case_closed')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            Benefits stopped
-          </button>
-          <button 
-            onClick={() => handleEmergencyClick('tuition_unpaid')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            Tuition/books unpaid
-          </button>
-          <button 
-            onClick={() => handleEmergencyClick('case_closed')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            Case closed
-          </button>
-          <button 
-            onClick={() => handleEmergencyClick('seh_extension')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            Deadline approaching
-          </button>
-          <button 
-            onClick={() => handleEmergencyClick('counselor_delay')}
-            className="px-3 py-1 bg-red-950/60 hover:bg-red-900/40 text-red-300 border border-red-900/40 rounded text-[11px] font-semibold cursor-pointer transition"
-          >
-            Counselor not responding
-          </button>
-        </div>
-      </div>
-
-      {/* Main Banner */}
-      <div className="relative overflow-hidden bg-slate-900/40 border border-slate-800 rounded-2xl p-8 backdrop-blur-md">
+      {/* Title & Info Strip */}
+      <div className="relative overflow-hidden bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-md">
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
-            <ShieldCheck size={12} />
-            <span>{modeAdvice.badge}</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight">
-            Get Help With Your VR&E Case
-          </h1>
-          <p className="text-slate-400 text-xs md:text-sm max-w-2xl leading-relaxed">
-            A self-advocacy console helping Veterans, VSOs, and attorneys build case strategies, track deadlines, spot VA errors, and generate legal appeal briefs.
-          </p>
-        </div>
-
-        {/* System parameters display */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/80">
-          <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-bold uppercase block">Privacy Level</span>
-            <div className="flex items-center gap-1 text-emerald-400 font-semibold text-xs">
-              <Shield size={12} />
-              <span>{privacyMode ? 'Session-Only (Safe)' : 'Browser Storage'}</span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <ShieldCheck size={12} />
+              <span>{modeAdvice.badge}</span>
             </div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-bold uppercase block">Database Integrity</span>
-            <div className="flex items-center gap-1 text-slate-200 font-semibold text-xs">
-              <CheckCircle2 size={12} className="text-emerald-400" />
-              <span>100% Verifiable eCFR</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-bold uppercase block">Verified Rates</span>
-            <div className="flex items-center gap-1 text-slate-200 font-semibold text-xs">
-              <RefreshCw size={12} className="text-indigo-400" />
-              <span>FY 2026 Active Rates</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <span className="text-[10px] text-slate-400 font-bold uppercase block">Your Bookmarks</span>
-            <div className="flex items-center gap-1 text-slate-200 font-semibold text-xs">
-              <BookOpen size={12} className="text-blue-400" />
-              <span>{bookmarksCount} Saved Sections</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid: Onboarding Case Stage & Next Best Action */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Onboarding Stage Selector */}
-        <div className="lg:col-span-8 bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-6">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Where are you in the VR&E process?</span>
-            <h2 className="text-sm font-bold text-slate-200">Interactive Onboarding Stage Selector</h2>
+            <h1 className="text-xl md:text-2xl font-extrabold text-slate-100 tracking-tight">
+              Get Help Now Case Console
+            </h1>
+            <p className="text-slate-400 text-xs max-w-2xl leading-relaxed">
+              Problem-first self-advocacy wizards helping Veterans solve Counselor delays, laptop denials, unpaid tuition, and illegal case closures.
+            </p>
           </div>
 
-          {/* Selector Grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 border-b border-slate-800 pb-5">
-            {CASE_STAGES_DATA.map((stage) => (
-              <button
-                key={stage.id}
-                onClick={() => setCurrentCaseStage(stage.id)}
-                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer text-center ${
-                  currentCaseStage === stage.id
-                    ? 'bg-indigo-600 border-indigo-600 text-white font-bold'
-                    : 'bg-slate-950/40 border-slate-850 text-slate-400 hover:border-slate-700 hover:text-slate-300'
-                }`}
-              >
-                {stage.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Stage Specific Details */}
-          <div className="space-y-5">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wide">{activeStageObj.title}</span>
-              <p className="text-xs text-slate-300 leading-relaxed">{activeStageObj.description}</p>
-            </div>
-
-            {/* Next Best Action Card */}
-            <div className="bg-slate-950/40 border border-indigo-500/20 rounded-xl p-4 space-y-3">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
-                <Clock size={12} className="text-indigo-400" />
-                <span>Next Best Action Step</span>
+          {/* System parameters display */}
+          <div className="grid grid-cols-2 gap-4 bg-slate-950/40 border border-slate-800/80 p-3 rounded-xl">
+            <div className="space-y-0.5">
+              <span className="text-[9px] text-slate-400 font-bold uppercase block">Privacy Level</span>
+              <span className="text-emerald-400 font-semibold text-[10px] flex items-center gap-1">
+                <Shield size={10} />
+                <span>Session-Only</span>
               </span>
-              <p className="text-xs text-slate-200 font-bold leading-normal">{activeStageObj.nextAction}</p>
-              
-              <div className="space-y-1.5 pt-1.5 border-t border-slate-850">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Required Checklist:</span>
-                <ul className="space-y-1">
-                  {activeStageObj.checklist.map((item, idx) => (
-                    <li key={idx} className="flex gap-2 items-center text-[11px] text-slate-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
-
-            {/* Mode-Specific Guidance */}
-            <div className="border-l-2 border-amber-500/60 bg-amber-950/10 p-4 rounded-r-xl space-y-1">
-              <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">{modeAdvice.title}</h4>
-              <p className="text-[11px] text-slate-300 leading-relaxed">{modeAdvice.text}</p>
+            <div className="space-y-0.5">
+              <span className="text-[9px] text-slate-400 font-bold uppercase block">Bookmarks</span>
+              <span className="text-blue-400 font-semibold text-[10px] flex items-center gap-1">
+                <BookOpen size={10} />
+                <span>{bookmarksCount} Saved</span>
+              </span>
             </div>
-
-            {/* Route Action Button */}
-            {activeStageObj.actionRoute && (
-              <button
-                onClick={() => handleRoute(activeStageObj.actionRoute)}
-                className="btn btn-primary inline-flex items-center gap-2"
-              >
-                <span>Navigate to Phase Tool</span>
-                <ArrowRight size={14} />
-              </button>
-            )}
           </div>
         </div>
-
-        {/* 12 Primary Cards: Problem Navigation Grid */}
-        <div className="lg:col-span-4 bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Find solutions by topic</span>
-            <h2 className="text-sm font-bold text-slate-200 flex items-center gap-1.5">
-              <span>Browse Primary Situation Cards</span>
-            </h2>
-          </div>
-
-          <div 
-            tabIndex={0}
-            aria-label="Primary Situation Solutions"
-            className="grid grid-cols-1 gap-2.5 max-h-[460px] overflow-y-auto pr-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 rounded-xl"
-          >
-            
-            <div 
-              onClick={() => handleRoute('wizard')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('wizard'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Award size={14} className="text-indigo-400" />
-                <span>Apply for VR&E</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Form 28-1900 filing instructions and eligibility limits.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('wizard')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('wizard'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <ShieldCheck size={14} className="text-emerald-400" />
-                <span>Check Eligibility / Entitlement</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Determine if you qualify for Chapter 31 Vocational Rehab.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('planning')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('planning'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Compass size={14} className="text-blue-400" />
-                <span>Plan College or Training</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Conduct labor-market match reviews and select targets.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('calculator')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('calculator'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Calculator size={14} className="text-amber-400" />
-                <span>Calculate Monthly Payment</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Compare traditional subsistence allowance vs Post-9/11 rates.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('dispute_hub', 'computer_denial')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('dispute_hub', 'computer_denial'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Briefcase size={14} className="text-indigo-400" />
-                <span>Fix Tuition / Books / Supplies</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Obtain technology supply packages, course gear, and tools.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('dispute_hub')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('dispute_hub'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Scale size={14} className="text-red-400" />
-                <span>Challenge a Denial</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Identify counselor mistakes and construct formal appeals.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('dispute_hub', 'counselor_delay')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('dispute_hub', 'counselor_delay'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Clock size={14} className="text-amber-400" />
-                <span>Fix Counselor Delay</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Generate escalation packets if counselor stops responding.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('dispute_hub', 'case_closed')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('dispute_hub', 'case_closed'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <AlertTriangle size={14} className="text-red-400" />
-                <span>Case Interrupted or Closed</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">re-enter the program or argue notice defect violations.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('document_generator')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('document_generator'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <FileEdit size={14} className="text-indigo-400" />
-                <span>Request IPE Change</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Change vocational goals or programs mid-stream.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('special_programs')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('special_programs'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <Shield size={14} className="text-emerald-400" />
-                <span>Independent Living Help</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Access services for veterans unable to seek employment.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('document_generator')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('document_generator'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <FileEdit size={14} className="text-blue-400" />
-                <span>Build a Letter</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Draft FOIA, extension, or technology request memos.</p>
-            </div>
-
-            <div 
-              onClick={() => handleRoute('authority_library')}
-              onKeyDown={(e) => handleKeyDown(e, () => handleRoute('authority_library'))}
-              role="button"
-              tabIndex={0}
-              className="bg-slate-950/30 border border-slate-850 p-3.5 rounded-xl cursor-pointer hover:border-slate-700 transition space-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-            >
-              <h4 className="text-xs font-bold text-slate-250 flex items-center gap-2">
-                <BookOpen size={14} className="text-slate-400" />
-                <span>Research the Law</span>
-              </h4>
-              <p className="text-[10px] text-slate-405 leading-normal">Examine 38 U.S.C. Chapter 31, C.F.R. regulations, and M28C.</p>
-            </div>
-
-          </div>
-        </div>
-
       </div>
+
+      {/* Mode-Specific Guidance Callout */}
+      <div className="border-l-2 border-amber-500/60 bg-amber-950/10 p-4 rounded-r-xl space-y-1">
+        <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">{modeAdvice.title}</h4>
+        <p className="text-[11px] text-slate-300 leading-relaxed">{modeAdvice.text}</p>
+      </div>
+
+      {/* MAIN WORKFLOW AREA */}
+      <AnimatePresence mode="wait">
+        {!activeWorkflow ? (
+          <motion.div
+            key="console-dashboard"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-2 text-slate-300 font-bold text-xs uppercase tracking-wider">
+              <AlertOctagon size={16} className="text-red-400" />
+              <span>Select Your Active Case Challenge</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {WORKFLOWS.map((wf) => (
+                <div 
+                  key={wf.id}
+                  className="bg-slate-900/40 border border-slate-800 rounded-xl p-5 hover:border-slate-700 hover:bg-slate-900/60 transition duration-300 flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 bg-slate-950/60 border border-slate-800 rounded-lg">
+                        {wf.icon}
+                      </span>
+                      <h3 className="text-xs font-bold text-slate-200">{wf.title}</h3>
+                    </div>
+                    <p className="text-slate-400 text-xs leading-relaxed">{wf.desc}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleStartWorkflow(wf)}
+                    className="mt-4 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1"
+                  >
+                    <span>Start Guided Help</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="active-wizard"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-slate-900/30 border border-slate-800 rounded-xl p-6 space-y-6"
+          >
+            {/* Wizard Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleReset} 
+                  className="p-1 bg-slate-950/60 border border-slate-800 hover:border-slate-750 text-slate-400 hover:text-slate-200 rounded-md transition"
+                >
+                  <ArrowLeft size={14} />
+                </button>
+                <div>
+                  <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">{activeWorkflow.title}</h2>
+                  <span className="text-[10px] text-slate-500">Step {wizardStep + 1} of 3</span>
+                </div>
+              </div>
+              <button 
+                onClick={handleReset}
+                className="text-xs text-slate-500 hover:text-slate-300 font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* STEP 1: SELECT CASE STAGE */}
+            {wizardStep === 0 && (
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-slate-200">What is your current VR&E Case Stage?</h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">This helps tailor the letter to your counselor\'s active file context.</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {CASE_STAGES.map((stageName) => (
+                    <button
+                      key={stageName}
+                      onClick={() => setTempStage(stageName)}
+                      className={`px-3 py-2 rounded-lg text-[10px] font-semibold border transition text-center cursor-pointer ${
+                        tempStage === stageName
+                          ? 'bg-indigo-600 border-indigo-600 text-white font-bold'
+                          : 'bg-slate-950/40 border-slate-850 text-slate-400 hover:border-slate-750'
+                      }`}
+                    >
+                      {stageName}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-end pt-4">
+                  <button 
+                    onClick={handleNextStep}
+                    className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold transition flex items-center gap-1"
+                  >
+                    <span>Continue to Facts</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: COLLECT FACTS */}
+            {wizardStep === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-slate-200">Collect Case Facts</h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">Input details regarding this occurrence to populate the legal claim brief.</p>
+                </div>
+
+                <div className="space-y-4 max-w-lg">
+                  {activeWorkflow.steps[0].fields.map((field) => (
+                    <div key={field.name} className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase block">{field.label}</label>
+                      {field.type === 'select' ? (
+                        <select
+                          value={formFacts[field.name] || ''}
+                          onChange={(e) => handleFactChange(field.name, e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                        >
+                          <option value="">-- Select Option --</option>
+                          {field.options.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={formFacts[field.name] || ''}
+                          onChange={(e) => handleFactChange(field.name, e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between pt-4 border-t border-slate-850">
+                  <button 
+                    onClick={handleBackStep}
+                    className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-750 text-slate-300 rounded-lg text-xs font-bold transition"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={handleNextStep}
+                    className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold transition flex items-center gap-1"
+                  >
+                    <span>Generate Solution</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: SOLUTION REPORT & LETTER DRAFT */}
+            {wizardStep === 2 && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left col: Errors and Citations */}
+                <div className="lg:col-span-5 space-y-5">
+                  <div className="space-y-3.5">
+                    <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Identified VA Errors</h3>
+                    <div className="space-y-2.5">
+                      {activeWorkflow.errors.map((err, idx) => (
+                        <div key={idx} className="flex gap-2.5 items-start p-3 bg-red-950/20 border border-red-900/35 rounded-lg text-[11px] text-red-300 leading-relaxed">
+                          <AlertOctagon size={14} className="shrink-0 mt-0.5" />
+                          <span>{err}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Governing Legal Citations</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {activeWorkflow.citations.map((cite) => {
+                        let display = cite.toUpperCase();
+                        if (cite.startsWith('38-usc')) {
+                          display = `38 U.S.C. § ${cite.split('-').pop()}`;
+                        } else if (cite.startsWith('38-cfr')) {
+                          const section = cite.replace('38-cfr-21-', '21.').replace('38-cfr-', '').replace('-', '.');
+                          display = `38 C.F.R. § ${section}`;
+                        }
+                        return (
+                          <button
+                            key={cite}
+                            onClick={() => handleCitationClick(cite)}
+                            className="text-[10px] bg-slate-950 hover:bg-slate-950/90 border border-slate-800 hover:border-slate-700 text-emerald-400 font-semibold px-2.5 py-1.5 rounded inline-flex items-center gap-1 transition"
+                          >
+                            <Scale size={11} />
+                            <span>{display}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/50 border border-slate-800/80 p-4 rounded-xl space-y-2 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Recommended Next Action</span>
+                    <p className="text-slate-300 leading-relaxed font-bold">
+                      {activeWorkflow.id === 'counselor_delay' ? 'Submit this letter to the VR&E Officer at your local VA Regional Office.' : 'Submit this formal written request via the eVA portal or via certified mail, and demand a written decision notice (VA Form 20-0998).'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right col: Letter Generation */}
+                <div className="lg:col-span-7 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Custom Action Letter Draft</span>
+                    <button
+                      onClick={() => handleCopyLetter(activeWorkflow.generateLetter(formFacts, tempStage))}
+                      className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 rounded-lg text-[10px] font-semibold transition flex items-center gap-1"
+                    >
+                      {copiedLetter ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                      <span>{copiedLetter ? 'Copied' : 'Copy Text'}</span>
+                    </button>
+                  </div>
+
+                  <textarea
+                    readOnly
+                    className="w-full h-80 bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-[11px] font-mono text-slate-300 leading-relaxed select-all focus:outline-none focus:border-slate-700"
+                    value={activeWorkflow.generateLetter(formFacts, tempStage)}
+                  />
+
+                  <div className="flex justify-between pt-4 border-t border-slate-850">
+                    <button 
+                      onClick={handleBackStep}
+                      className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-750 text-slate-300 rounded-lg text-xs font-bold transition"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      onClick={handleReset}
+                      className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold transition"
+                    >
+                      Reset Wizard
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

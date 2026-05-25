@@ -1,11 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
 import { logger } from './utils/logger.mjs';
 
-const OUTPUT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/m28c/chapters';
-const PARENT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/m28c';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
+const OUTPUT_DIR = path.join(PROJECT_ROOT, 'src/data/authority/generated/m28c/chapters');
+const PARENT_DIR = path.join(PROJECT_ROOT, 'src/data/authority/generated/m28c');
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -506,6 +511,9 @@ function main() {
     
     const record = {
       ...chapter,
+      status: "summary-only",
+      fullTextStatus: "not-full-official-text",
+      displayWarning: "This record is a summary. It is not the full public KnowVA chapter text.",
       officialStatus: "va-public",
       hash: textHash
     };

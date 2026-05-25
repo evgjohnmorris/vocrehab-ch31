@@ -1,7 +1,7 @@
 import { 
-  ShieldCheck, BookOpen, Award, Calculator, Scale, 
-  DollarSign, Compass, Briefcase, GraduationCap, Users, 
-  FileText, ExternalLink, ChevronRight, AlertTriangle, FileEdit,
+  ShieldCheck, Award, Calculator, Scale, 
+  Compass, Briefcase, GraduationCap, Users, 
+  FileText, ChevronRight, FileEdit,
   Gavel, FileCheck, CheckCircle2, RefreshCw, Home, Shield, Settings
 } from 'lucide-react';
 import authorityManifest from '../data/authority/manifest.json';
@@ -244,18 +244,7 @@ function Sidebar({
             onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('source_diff'))}
           >
             <RefreshCw size={18} className="text-indigo-400" />
-            <span>Source Updates & Diffs</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'reference' ? 'active' : ''}`}
-            onClick={() => handleNavClick('reference')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('reference'))}
-          >
-            <BookOpen size={18} />
-            <span>Citation Search (eCFR/USC)</span>
+            <span>Source Updates</span>
           </div>
         </div>
 
@@ -286,7 +275,7 @@ function Sidebar({
           </div>
         </div>
         
-        {activeView === 'reference' && (
+        {(activeView === 'authority_library' || activeView === 'reference') && (
           <div style={{ marginTop: '16px', borderTop: '1px solid var(--sidebar-border)', paddingTop: '16px' }}>
             {/* U.S. Code Accordion */}
             <div>
@@ -316,7 +305,7 @@ function Sidebar({
                       tabIndex={0}
                       onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); })}
                     >
-                      § {sec.id}: {sec.title}
+                      § {sec.id.split('-').pop()}: {sec.title}
                     </div>
                   ))}
                 </div>

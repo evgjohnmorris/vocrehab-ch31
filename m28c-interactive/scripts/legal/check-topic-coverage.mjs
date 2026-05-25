@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const REQUIRED_USC_CH31 = [
   "3100", "3101", "3102", "3103", "3104", "3105", "3106",
@@ -36,9 +37,12 @@ const REQUIRED_CFR = [
   "21.446","21.447","21.448","21.449"
 ];
 
-const PUBLIC_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/public/authority';
-const STATUTES_DIR = path.join(PUBLIC_PATH, 'generated/statutes');
-const REGS_DIR = path.join(PUBLIC_PATH, 'generated/regulations');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const PUBLIC_PATH = path.join(PROJECT_ROOT, 'public/authority');
+const STATUTES_DIR = path.join(PUBLIC_PATH, 'usc');
+const REGS_DIR = path.join(PUBLIC_PATH, 'cfr');
 
 function main() {
   console.log("--------------------------------------------------");
@@ -50,7 +54,7 @@ function main() {
 
   // 1. Verify USC Statutes
   REQUIRED_USC_CH31.forEach(sec => {
-    const filename = `${sec}.json`;
+    const filename = `38-usc-${sec}.json`;
     const filePath = path.join(STATUTES_DIR, filename);
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Missing required U.S. Code section: 38 U.S.C. § ${sec}`);
@@ -62,8 +66,7 @@ function main() {
 
   // 2. Verify CFR Regulations
   REQUIRED_CFR.forEach(sec => {
-    const fileId = `21_${sec.split('.')[1]}`;
-    const filename = `${fileId}.json`;
+    const filename = `38-cfr-${sec.replace('.', '-')}.json`;
     const filePath = path.join(REGS_DIR, filename);
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Missing required C.F.R. section: 38 C.F.R. § ${sec}`);

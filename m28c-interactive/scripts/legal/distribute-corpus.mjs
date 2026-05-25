@@ -1,17 +1,22 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 
-const SRC_BASE = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
+const SRC_BASE = path.join(PROJECT_ROOT, 'src/data/authority');
 const SRC_USC = path.join(SRC_BASE, 'generated/usc/sections');
 const SRC_CFR = path.join(SRC_BASE, 'generated/cfr/sections');
 const SRC_M28C = path.join(SRC_BASE, 'generated/m28c/chapters');
 
-const PUBLIC_BASE = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/public/authority';
+const PUBLIC_BASE = path.join(PROJECT_ROOT, 'public/authority');
 const PUBLIC_USC = path.join(PUBLIC_BASE, 'usc');
 const PUBLIC_CFR = path.join(PUBLIC_BASE, 'cfr');
 const PUBLIC_M28C = path.join(PUBLIC_BASE, 'm28c');
-const PUBLIC_SEARCH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/public/search';
+const PUBLIC_SEARCH = path.join(PROJECT_ROOT, 'public/search');
 
 function hashText(text) {
   return crypto.createHash("sha256").update(text.trim()).digest("hex");
@@ -46,9 +51,9 @@ function main() {
     const raw = fs.readFileSync(path.join(SRC_USC, file), 'utf8');
     const data = JSON.parse(raw);
     
-    // Naming pattern: 38-usc-3104.json
-    const id = data.id.replace('38-usc-', '');
-    const destName = `38-usc-${id}.json`;
+    // Naming pattern matches standard ID: e.g. 38-usc-3104.json
+    const id = data.id; // e.g. "38-usc-3104"
+    const destName = `${id}.json`;
     const destPath = path.join(PUBLIC_USC, destName);
     
     // Add snapshot/pinning metadata if missing
@@ -61,8 +66,8 @@ function main() {
     fs.writeFileSync(destPath, JSON.stringify(data, null, 2));
 
     manifest.statutes.push({
-      id: id,
-      citation: data.canonicalCitation || `38 U.S.C. § ${id}`,
+      id: id, // keep full canonical ID
+      citation: data.canonicalCitation || `38 U.S.C. § ${id.split('-').pop()}`,
       title: data.title,
       hash: data.hash,
       lastChecked: data.lastChecked
@@ -84,9 +89,9 @@ function main() {
     const raw = fs.readFileSync(path.join(SRC_CFR, file), 'utf8');
     const data = JSON.parse(raw);
     
-    // Naming pattern: 38-cfr-21-212.json
-    const sectionNum = data.id.replace('38-cfr-21-', '21-').replace('38-cfr-', '');
-    const destName = `38-cfr-${sectionNum}.json`;
+    // Naming pattern matches standard ID: e.g. 38-cfr-21-212.json
+    const id = data.id; // e.g. "38-cfr-21-212"
+    const destName = `${id}.json`;
     const destPath = path.join(PUBLIC_CFR, destName);
 
     data.snapshotDate = data.snapshotDate || "2026-05-25";
@@ -98,7 +103,7 @@ function main() {
     fs.writeFileSync(destPath, JSON.stringify(data, null, 2));
 
     manifest.regulations.push({
-      id: sectionNum,
+      id: id, // keep full canonical ID
       citation: data.canonicalCitation,
       title: data.title,
       status: data.status,
@@ -122,7 +127,7 @@ function main() {
     const raw = fs.readFileSync(path.join(SRC_M28C, file), 'utf8');
     const data = JSON.parse(raw);
 
-    // Naming pattern: m28c-iv-a-2.json
+    // Naming pattern matches standard ID: e.g. m28c-iv-a-2.json
     const id = data.id; // e.g. "m28c-iv-a-2"
     const destName = `${id}.json`;
     const destPath = path.join(PUBLIC_M28C, destName);
@@ -136,7 +141,7 @@ function main() {
     fs.writeFileSync(destPath, JSON.stringify(data, null, 2));
 
     manifest.m28c.push({
-      id: id,
+      id: id, // keep full canonical ID
       citation: data.canonicalCitation,
       title: data.title,
       hash: data.hash,

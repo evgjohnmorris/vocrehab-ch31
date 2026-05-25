@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, BookMarked, Settings, Sun, Moon, Eye, EyeOff, Menu, X, Shield, Trash2, HelpCircle } from 'lucide-react';
+import { Search, BookMarked, Settings, Sun, Moon, Eye, Menu, X, Shield, Trash2, HelpCircle } from 'lucide-react';
 import authorityManifest from '../data/authority/manifest.json';
 
 function Header({

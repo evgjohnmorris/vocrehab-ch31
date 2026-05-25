@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const BASE_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const BASE_PATH = path.join(PROJECT_ROOT, 'src/data/authority');
 const USC_DIR = path.join(BASE_PATH, 'generated/usc/sections');
 const CFR_DIR = path.join(BASE_PATH, 'generated/cfr/sections');
 const M28C_DIR = path.join(BASE_PATH, 'generated/m28c/chapters');

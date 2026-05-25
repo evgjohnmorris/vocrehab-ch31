@@ -1,18 +1,16 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const PUBLIC_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/public/authority';
-const CROSSWALK_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/topic-crosswalk.json';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const PUBLIC_PATH = path.join(PROJECT_ROOT, 'public/authority');
+const CROSSWALK_PATH = path.join(PROJECT_ROOT, 'src/data/authority/topic-crosswalk.json');
 
 function checkFileExists(type, id) {
-  let relativePath = '';
-  if (type === 'usc') {
-    relativePath = `usc/38-usc-${id}.json`;
-  } else if (type === 'cfr') {
-    relativePath = `cfr/38-cfr-${id.replace('_', '-')}.json`;
-  } else if (type === 'm28c') {
-    relativePath = `m28c/${id.replace(/_/g, '-')}.json`;
-  }
+  // Standardized lookup: e.g. public/authority/usc/38-usc-3104.json
+  const relativePath = `${type}/${id}.json`;
   const fullPath = path.join(PUBLIC_PATH, relativePath);
   return fs.existsSync(fullPath);
 }
@@ -35,10 +33,9 @@ function main() {
 
     // Audit Statutes
     if (topic.requiredAuthorities.usc) {
-      topic.requiredAuthorities.usc.forEach(s => {
-        const docId = s.replace('38-usc-', '');
+      topic.requiredAuthorities.usc.forEach(docId => {
         if (!checkFileExists('usc', docId)) {
-          console.error(`  [ERROR] Topic "${topic.name}" references missing statute file: usc/38-usc-${docId}.json`);
+          console.error(`  [ERROR] Topic "${topic.name}" references missing statute file: usc/${docId}.json`);
           errors++;
         }
       });
@@ -46,10 +43,9 @@ function main() {
 
     // Audit Regulations
     if (topic.requiredAuthorities.cfr) {
-      topic.requiredAuthorities.cfr.forEach(c => {
-        const docId = c.replace('38-cfr-21-', '21_');
+      topic.requiredAuthorities.cfr.forEach(docId => {
         if (!checkFileExists('cfr', docId)) {
-          console.error(`  [ERROR] Topic "${topic.name}" references missing regulation file: cfr/38-cfr-${docId.replace('21_', '21-')}.json`);
+          console.error(`  [ERROR] Topic "${topic.name}" references missing regulation file: cfr/${docId}.json`);
           errors++;
         }
       });
@@ -57,10 +53,9 @@ function main() {
 
     // Audit M28C Manuals
     if (topic.requiredAuthorities.m28c) {
-      topic.requiredAuthorities.m28c.forEach(m => {
-        const docId = m.replace(/-/g, '_');
+      topic.requiredAuthorities.m28c.forEach(docId => {
         if (!checkFileExists('m28c', docId)) {
-          console.error(`  [ERROR] Topic "${topic.name}" references missing manual file: m28c/${docId.replace(/_/g, '-')}.json`);
+          console.error(`  [ERROR] Topic "${topic.name}" references missing manual file: m28c/${docId}.json`);
           errors++;
         }
       });

@@ -22,11 +22,16 @@ const LETTER_TEMPLATES = [
 ];
 
 function DocumentGeneratorView() {
+  const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+  const storage = isPrivacy ? sessionStorage : localStorage;
+  const initialPreselected = storage.getItem('m28c_preselected_letter');
+  if (initialPreselected) {
+    storage.removeItem('m28c_preselected_letter');
+  }
+
   const [selectedTemplate, setSelectedTemplate] = useState(() => {
-    const preselected = localStorage.getItem('m28c_preselected_letter');
-    if (preselected) {
-      const match = LETTER_TEMPLATES.find(t => t.id === preselected || t.id.includes(preselected));
-      localStorage.removeItem('m28c_preselected_letter');
+    if (initialPreselected) {
+      const match = LETTER_TEMPLATES.find(t => t.id === initialPreselected || t.id.includes(initialPreselected));
       if (match) {
         return match.id;
       }
@@ -110,10 +115,9 @@ function DocumentGeneratorView() {
 
   // Custom text edited by the user in the preview pane
   const [editedText, setEditedText] = useState(() => {
-    const preselected = localStorage.getItem('m28c_preselected_letter');
     let templateId = 'ipe_amendment';
-    if (preselected) {
-      const match = LETTER_TEMPLATES.find(t => t.id === preselected || t.id.includes(preselected));
+    if (initialPreselected) {
+      const match = LETTER_TEMPLATES.find(t => t.id === initialPreselected || t.id.includes(initialPreselected));
       if (match) {
         templateId = match.id;
       }

@@ -270,14 +270,37 @@ function EntitlementWizardView({
             </div>
           )}
 
-          <button 
-            className="btn btn-primary" 
-            onClick={calculateEligibility}
-            style={{ marginTop: '16px', width: '100%' }}
-          >
-            <Award size={18} />
-            <span>Evaluate Entitlement</span>
-          </button>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+            <button 
+              className="btn btn-primary" 
+              onClick={calculateEligibility}
+              style={{ flex: 1 }}
+            >
+              <Award size={18} />
+              <span>Evaluate Entitlement</span>
+            </button>
+            {wizardResult && (
+              <button
+                type="button"
+                className="px-4 py-2 bg-red-950/20 border border-red-900/30 text-red-400 hover:text-red-300 rounded text-xs font-semibold cursor-pointer transition"
+                onClick={() => {
+                  setRating(20);
+                  setDischargeStatus('other-than-dishonorable');
+                  setEmploymentHandicap(true);
+                  setSehAssessment(null);
+                  setWizardResult(null);
+                  setExtHasSeh(false);
+                  setExtApproachingLimit(false);
+                  setExtNeedMoreTime(false);
+                  setRetroHadRating(false);
+                  setRetroPaidSelf(false);
+                  setRetroHasDocuments(false);
+                }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </div>
 
         <div>

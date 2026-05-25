@@ -271,7 +271,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
               type="button"
               className="btn btn-primary"
               style={{ height: '30px', fontSize: '0.75rem' }}
-              onClick={() => setDisabilityRatings([...disabilityRatings, { id: Date.now(), value: 10, bilateral: false, affectedLimbs: { leftArm: false, rightArm: false, leftLeg: false, rightLeg: false } }])}
+              onClick={() => setDisabilityRatings([...disabilityRatings, { id: Date.now() + Math.random(), value: 10, bilateral: false, affectedLimbs: { leftArm: false, rightArm: false, leftLeg: false, rightLeg: false } }])}
             >
               + Add Disability
             </button>
@@ -482,7 +482,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                       type="number"
                       className="form-control"
                       value={pensionIncome}
-                      onChange={(e) => setPensionIncome(Number(e.target.value))}
+                      onChange={(e) => setPensionIncome(Math.max(0, Number(e.target.value)))}
                       min={0}
                     />
                   </div>
@@ -493,7 +493,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                       type="number"
                       className="form-control"
                       value={pensionExpenses}
-                      onChange={(e) => setPensionExpenses(Number(e.target.value))}
+                      onChange={(e) => setPensionExpenses(Math.max(0, Number(e.target.value)))}
                       min={0}
                     />
                   </div>
@@ -506,7 +506,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                       type="number"
                       className="form-control"
                       value={pensionNetWorth}
-                      onChange={(e) => setPensionNetWorth(Number(e.target.value))}
+                      onChange={(e) => setPensionNetWorth(Math.max(0, Number(e.target.value)))}
                       min={0}
                     />
                   </div>
@@ -550,7 +550,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                       type="number"
                       className="form-control"
                       value={retBasePay}
-                      onChange={(e) => setRetBasePay(Number(e.target.value))}
+                      onChange={(e) => setRetBasePay(Math.max(0, Number(e.target.value)))}
                       min={0}
                     />
                   </div>
@@ -561,7 +561,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                       type="number"
                       className="form-control"
                       value={retYearsService}
-                      onChange={(e) => setRetYearsService(Number(e.target.value))}
+                      onChange={(e) => setRetYearsService(Math.max(0, Number(e.target.value)))}
                       min={0}
                       max={40}
                     />

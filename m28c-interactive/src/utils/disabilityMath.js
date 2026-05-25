@@ -4,8 +4,26 @@ export const calculateCombinedRating = (ratings) => {
   // Sort ratings
   const ratingsList = [...ratings].map(r => ({ ...r, value: Number(r.value) }));
   
-  const bilateralRatings = ratingsList.filter(r => r.bilateral).map(r => r.value).sort((a, b) => b - a);
-  const normalRatings = ratingsList.filter(r => !r.bilateral).map(r => r.value).sort((a, b) => b - a);
+  // Calculate unique extremities affected across all ratings to see if bilateral rules apply
+  const allLimbs = {
+    leftArm: ratingsList.some(r => r.affectedLimbs?.leftArm),
+    rightArm: ratingsList.some(r => r.affectedLimbs?.rightArm),
+    leftLeg: ratingsList.some(r => r.affectedLimbs?.leftLeg),
+    rightLeg: ratingsList.some(r => r.affectedLimbs?.rightLeg)
+  };
+  const numAffectedLimbs = (allLimbs.leftArm ? 1 : 0) + 
+                           (allLimbs.rightArm ? 1 : 0) + 
+                           (allLimbs.leftLeg ? 1 : 0) + 
+                           (allLimbs.rightLeg ? 1 : 0);
+  const useBilateralMath = numAffectedLimbs >= 2;
+
+  const bilateralRatings = useBilateralMath 
+    ? ratingsList.filter(r => r.affectedLimbs && Object.values(r.affectedLimbs).some(v => v === true)).map(r => r.value).sort((a, b) => b - a)
+    : [];
+  
+  const normalRatings = useBilateralMath
+    ? ratingsList.filter(r => !r.affectedLimbs || !Object.values(r.affectedLimbs).some(v => v === true)).map(r => r.value).sort((a, b) => b - a)
+    : ratingsList.map(r => r.value).sort((a, b) => b - a);
   
   let bilateralCombined = 0;
   let steps = [];
@@ -24,7 +42,7 @@ export const calculateCombinedRating = (ratings) => {
     const bilateralFactor = combined * 0.1;
     bilateralCombined = combined + bilateralFactor;
     steps.push(`Combine Bilateral Extremities: ${combinationStr}`);
-    steps.push(`Apply 10% Bilateral Factor: ${combined.toFixed(1)}% + 10% (${bilateralFactor.toFixed(1)}%) = ${bilateralCombined.toFixed(2)}%`);
+    steps.push(`Apply 10% Bilateral Factor (since multiple extremities are affected): ${combined.toFixed(1)}% + 10% (${bilateralFactor.toFixed(1)}%) = ${bilateralCombined.toFixed(2)}%`);
   }
   
   const allRatings = [...normalRatings];

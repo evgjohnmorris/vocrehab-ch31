@@ -1,13 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
 import { logger } from './utils/logger.mjs';
 import { fetchWithCache } from './utils/cache.mjs';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
 const SECTIONS = Array.from({ length: 23 }, (_, i) => (3100 + i).toString());
-const OUTPUT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/usc/sections';
-const PARENT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/usc';
+const OUTPUT_DIR = path.join(PROJECT_ROOT, 'src/data/authority/generated/usc/sections');
+const PARENT_DIR = path.join(PROJECT_ROOT, 'src/data/authority/generated/usc');
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });

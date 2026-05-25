@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
 
 const REQUIRED_USC_CH31 = [
@@ -37,7 +38,10 @@ const REQUIRED_CFR = [
   "21.446","21.447","21.448","21.449"
 ];
 
-const BASE_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const BASE_PATH = path.join(PROJECT_ROOT, 'src/data/authority');
 const USC_DIR = path.join(BASE_PATH, 'generated/usc/sections');
 const CFR_DIR = path.join(BASE_PATH, 'generated/cfr/sections');
 
@@ -56,7 +60,8 @@ function validateFileSchema(filePath) {
 
 function main() {
   console.log("Checking U.S. Code & C.F.R. coverage...");
-  let errors = 0;
+  let uscErrors = 0;
+  let cfrErrors = 0;
 
   // 1. Verify USC Statutes
   for (const sec of REQUIRED_USC_CH31) {
@@ -64,10 +69,10 @@ function main() {
     const filePath = path.join(USC_DIR, filename);
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Missing required U.S. Code section: ${sec}`);
-      errors++;
+      uscErrors++;
     } else {
       if (!validateFileSchema(filePath)) {
-        errors++;
+        uscErrors++;
       }
     }
   }
@@ -78,26 +83,28 @@ function main() {
     const filePath = path.join(CFR_DIR, filename);
     if (!fs.existsSync(filePath)) {
       console.error(`[ERROR] Missing required C.F.R. section: ${sec}`);
-      errors++;
+      cfrErrors++;
     } else {
       if (!validateFileSchema(filePath)) {
-        errors++;
+        cfrErrors++;
       }
     }
   }
 
+  const totalErrors = uscErrors + cfrErrors;
+
   // Generate public coverage report json
   const coverageReport = {
-    uscCoverage: `${REQUIRED_USC_CH31.length - errors}/${REQUIRED_USC_CH31.length}`,
-    cfrCoverage: `${REQUIRED_CFR.length - errors}/${REQUIRED_CFR.length}`,
-    totalErrors: errors,
-    status: errors === 0 ? "pass" : "fail",
+    uscCoverage: `${REQUIRED_USC_CH31.length - uscErrors}/${REQUIRED_USC_CH31.length}`,
+    cfrCoverage: `${REQUIRED_CFR.length - cfrErrors}/${REQUIRED_CFR.length}`,
+    totalErrors: totalErrors,
+    status: totalErrors === 0 ? "pass" : "fail",
     lastUpdated: new Date().toISOString().split('T')[0]
   };
   fs.writeFileSync(path.join(BASE_PATH, 'coverage-report.json'), JSON.stringify(coverageReport, null, 2));
 
-  if (errors > 0) {
-    console.error(`\nCoverage check failed with ${errors} error(s). Build aborted.`);
+  if (totalErrors > 0) {
+    console.error(`\nCoverage check failed with ${totalErrors} error(s). Build aborted.`);
     process.exit(1);
   }
 

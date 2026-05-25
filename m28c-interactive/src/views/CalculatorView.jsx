@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
-  Search, Info, Settings, HelpCircle, ShieldCheck, 
+  Search, Settings, 
   AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, 
-  Printer, Clipboard, FileText, CheckSquare, Save
+  Printer, Clipboard, CheckSquare, Save, Check
 } from 'lucide-react';
 import { SCHOOLS_DATABASE } from '../data/school_data';
 import { calculateAllowance } from '../utils/ch31Calculations';
@@ -12,8 +12,7 @@ function CalculatorView({
   selectedRateYear, 
   setSelectedRateYear, 
   openSettings, 
-  onMhaChange,
-  reduceMotion
+  onMhaChange
 }) {
   const activeRates = rates[selectedRateYear] || rates.ay2025_2026 || rates;
 
@@ -28,7 +27,7 @@ function CalculatorView({
   const [calcBahRate, setCalcBahRate] = useState(1950);
   const [calcActiveDuty, setCalcActiveDuty] = useState(false);
   const [calcVenue, setCalcVenue] = useState('in-person'); // 'in-person' | 'online' | 'foreign'
-  const [calcTier, setCalcTier] = useState(1.0); // 1.0, 0.9, 0.8...
+  const [calcTier] = useState(1.0); // 1.0, 0.9, 0.8...
   const [calcUseCredits, setCalcUseCredits] = useState(false);
   const [calcCredits, setCalcCredits] = useState(12);
   const [calcFullTimeThreshold, setCalcFullTimeThreshold] = useState(12);
@@ -36,9 +35,8 @@ function CalculatorView({
   const [calcSchoolType, setCalcSchoolType] = useState('public');
   const [calcYellowRibbon, setCalcYellowRibbon] = useState(false);
   const [calcYrSchoolContribution, setCalcYrSchoolContribution] = useState(0);
-  const [calcYrDivision, setCalcYrDivision] = useState('');
   const [calcKicker, setCalcKicker] = useState(0);
-  const [calcScholarships, setCalcScholarships] = useState(0);
+  const [calcScholarships] = useState(0);
   const [calcIncludeComputer, setCalcIncludeComputer] = useState(false);
   const [calcComputerCost, setCalcComputerCost] = useState(activeRates.ch31_computer_package_value || 2000.00);
   const [calcOjtTrainingWage, setCalcOjtTrainingWage] = useState(0);
@@ -145,7 +143,7 @@ function CalculatorView({
 
   // Stepper helper
   const nextStep = () => {
-    if (currentStep < 7) setCurrentStep(prev => prev + 1);
+    if (currentStep < 6) setCurrentStep(prev => prev + 1);
   };
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(prev => prev - 1);
@@ -250,20 +248,19 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
       {/* Stepper Progress Bar */}
       <div className="relative mb-6">
         <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-          <span>Step {currentStep} of 7: {
+          <span>Step {currentStep} of 6: {
             currentStep === 1 ? 'Program Type' :
             currentStep === 2 ? 'Subsistence Type' :
             currentStep === 3 ? 'Training Location' :
             currentStep === 4 ? 'Dependents & Attendance' :
-            currentStep === 5 ? 'Tuition & Supplies' :
-            currentStep === 6 ? 'Calculation Results' : 'Actions & Exports'
+            currentStep === 5 ? 'Tuition & Supplies' : 'Calculation Results & Actions'
           }</span>
-          <span>{Math.round((currentStep / 7) * 100)}% Complete</span>
+          <span>{Math.round((currentStep / 6) * 100)}% Complete</span>
         </div>
         <div className="w-full bg-slate-950 border border-slate-850 h-2.5 rounded-full overflow-hidden">
           <div 
             className="h-full bg-indigo-500 transition-all duration-300"
-            style={{ width: `${(currentStep / 7) * 100}%` }}
+            style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
       </div>
@@ -435,6 +432,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                             setCalcShowSuggestions(false);
                             setCalcBahRate(school.bahRate);
                             setCalcSchoolType(school.type);
+                            setCalcTrainingType(school.type === 'ojt' ? 'ojt' : 'institutional');
                             setCalcTuition(school.tuition);
                             setCalcYellowRibbon(school.yellowRibbon || false);
                             if (school.foreign) setCalcVenue('foreign');
@@ -458,9 +456,26 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                         <h4 className="text-xs font-bold text-slate-200">🏫 {calcSelectedSchool.name}</h4>
                         <p className="text-[10px] text-slate-400 mt-0.5">{calcSelectedSchool.city}, {calcSelectedSchool.state} • ZIP: {calcSelectedSchool.zipCode}</p>
                       </div>
-                      <span className="text-[9px] bg-slate-900 border border-slate-800 text-indigo-400 px-2 py-0.5 rounded font-bold uppercase">
-                        {calcSelectedSchool.type}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] bg-slate-900 border border-slate-800 text-indigo-400 px-2 py-0.5 rounded font-bold uppercase">
+                          {calcSelectedSchool.type}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCalcSelectedSchool(null);
+                            setCalcSchoolSearchQuery('');
+                            setCalcBahRate(1950);
+                            setCalcSchoolType('public');
+                            setCalcTuition(0);
+                            setCalcYellowRibbon(false);
+                            setCalcVenue('in-person');
+                          }}
+                          className="text-[10px] text-red-400 hover:text-red-300 underline cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      </div>
                     </div>
 
                     {/* caution flags list */}
@@ -513,7 +528,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
               // OJT WAGES INSTEAD
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/20 p-5 border border-slate-850 rounded-xl">
                 <div className="form-group">
-                  <label className="block text-xs text-slate-450 mb-1">OJT Training Wage ($ / month)</label>
+                  <label className="block text-xs text-slate-450 mb-1">OJT Training Wage ($ / hour)</label>
                   <input
                     type="number"
                     className="form-control"
@@ -522,7 +537,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                   />
                 </div>
                 <div className="form-group">
-                  <label className="block text-xs text-slate-450 mb-1">Journeyman Job Wage ($ / month)</label>
+                  <label className="block text-xs text-slate-450 mb-1">Journeyman Job Wage ($ / hour)</label>
                   <input
                     type="number"
                     className="form-control"
@@ -698,10 +713,10 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
           </div>
         )}
 
-        {/* STEP 6: CALCULATION RESULTS */}
+        {/* STEP 6: CALCULATION RESULTS & ACTIONS */}
         {currentStep === 6 && (
           <div className="space-y-5 animate-fadeIn">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 6: Payout & Housing Results</h3>
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 6: Payout Results & Actions</h3>
             
             {calculatorResults ? (
               <div className="space-y-4">
@@ -710,7 +725,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                   <div className={`p-5 border rounded-xl space-y-2 bg-slate-950/20 ${
                     selectedSubsistenceType === 'p911' ? 'border-indigo-500/30' : 'border-slate-850'
                   }`}>
-                    <span className="text-[10px] font-bold text-slate-450 uppercase block">Post-9/11 GI Bill rate (P911SA)</span>
+                    <span className="text-[10px] font-bold text-slate-455 uppercase block">Post-9/11 GI Bill rate (P911SA)</span>
                     <div className="text-2xl font-black text-slate-200">
                       ${Number(calculatorResults.p911Rate).toLocaleString()}<span className="text-xs text-slate-400 font-normal"> / mo</span>
                     </div>
@@ -746,7 +761,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
 
                 {/* Additional offsets */}
                 <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4 space-y-2.5 text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuition & Supplies Offsets (100% Covered under Ch 31)</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuition and fees: generally covered when approved as part of the rehabilitation plan</span>
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Tuition Payable to School:</span>
                     <span className="font-semibold text-slate-200">${calculatorResults.tuitionPayable.toLocaleString()} / year</span>
@@ -763,6 +778,53 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
                   )}
                 </div>
 
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-850 pt-4">
+                  <button 
+                    onClick={handleCopySummary}
+                    className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+                  >
+                    {copySuccess ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Clipboard size={18} className="text-indigo-400 shrink-0" />}
+                    <div>
+                      <span className="text-slate-200 block">Copy Estimate Summary</span>
+                      <span className="text-[10px] text-slate-450 block font-normal mt-0.5">{copySuccess ? 'Copied to clipboard' : 'Copy formatted text for emails'}</span>
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={handlePrintSummary}
+                    className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+                  >
+                    <Printer size={18} className="text-blue-400 shrink-0" />
+                    <div>
+                      <span className="text-slate-200 block">Print Estimate Summary</span>
+                      <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Generate a clean physical printout</span>
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={handleSaveEstimate}
+                    className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+                  >
+                    {estimateSaved ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Save size={18} className="text-amber-400 shrink-0" />}
+                    <div>
+                      <span className="text-slate-200 block">Save Estimate (Session Storage)</span>
+                      <span className="text-[10px] text-slate-455 block font-normal mt-0.5">{estimateSaved ? 'Saved in session' : 'Persist parameters in current tab'}</span>
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={() => setShowChecklistModal(true)}
+                    className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
+                  >
+                    <CheckSquare size={18} className="text-emerald-400 shrink-0" />
+                    <div>
+                      <span className="text-slate-200 block">School Payment Checklist</span>
+                      <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Build payment timelines & contact sheets</span>
+                    </div>
+                  </button>
+                </div>
+
                 {/* Confidence notice */}
                 <div className="border-l-2 border-indigo-500/40 bg-slate-950/10 p-3 rounded-r text-[10px] text-slate-450 leading-relaxed">
                   <strong>Estimate verification:</strong> This calculation is based on published rate figures last verified on May 25, 2026. The final payment plan must be confirmed with your VRC and verified against tungsten authorizations.
@@ -771,62 +833,6 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
             ) : (
               <div className="text-center py-8 text-xs text-slate-500 font-semibold">Error processing calculations. Check input parameters.</div>
             )}
-          </div>
-        )}
-
-        {/* STEP 7: ACTIONS & EXPORTS */}
-        {currentStep === 7 && (
-          <div className="space-y-5 animate-fadeIn">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Step 7: Actions & Data Exports</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Export your calculation results, generate payment-monitoring checklists for your school certifying official, or save your settings locally in session.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button 
-                onClick={handleCopySummary}
-                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
-              >
-                {copySuccess ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Clipboard size={18} className="text-indigo-400 shrink-0" />}
-                <div>
-                  <span className="text-slate-200 block">Copy Estimate Summary</span>
-                  <span className="text-[10px] text-slate-450 block font-normal mt-0.5">{copySuccess ? 'Copied to clipboard' : 'Copy formatted text for emails'}</span>
-                </div>
-              </button>
-
-              <button 
-                onClick={handlePrintSummary}
-                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
-              >
-                <Printer size={18} className="text-blue-400 shrink-0" />
-                <div>
-                  <span className="text-slate-200 block">Print Estimate Summary</span>
-                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Generate a clean physical printout</span>
-                </div>
-              </button>
-
-              <button 
-                onClick={handleSaveEstimate}
-                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
-              >
-                {estimateSaved ? <Check size={18} className="text-emerald-400 shrink-0" /> : <Save size={18} className="text-amber-400 shrink-0" />}
-                <div>
-                  <span className="text-slate-200 block">Save Estimate (Session Storage)</span>
-                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">{estimateSaved ? 'Saved in session' : 'Persist parameters in current tab'}</span>
-                </div>
-              </button>
-
-              <button 
-                onClick={() => setShowChecklistModal(true)}
-                className="flex items-center gap-3 bg-slate-950/30 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl text-left cursor-pointer transition select-none text-xs font-semibold"
-              >
-                <CheckSquare size={18} className="text-emerald-400 shrink-0" />
-                <div>
-                  <span className="text-slate-200 block">School Payment Checklist</span>
-                  <span className="text-[10px] text-slate-455 block font-normal mt-0.5">Build payment timelines & contact sheets</span>
-                </div>
-              </button>
-            </div>
           </div>
         )}
       </div>
@@ -844,7 +850,7 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
           <span>Back</span>
         </button>
 
-        {currentStep < 7 ? (
+        {currentStep < 6 ? (
           <button
             onClick={nextStep}
             className="btn btn-primary flex items-center gap-1.5 h-9 text-xs cursor-pointer"
@@ -853,8 +859,39 @@ Computer Technology Package Value: $${calcIncludeComputer ? `$${calcComputerCost
             <ChevronRight size={16} />
           </button>
         ) : (
-          <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-            All steps complete
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+              All steps complete
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentStep(1);
+                setCalcTrainingType('institutional');
+                setCalcTime('full');
+                setCalcDependents(0);
+                setCalcBahRate(1950);
+                setCalcActiveDuty(false);
+                setCalcVenue('in-person');
+                setCalcUseCredits(false);
+                setCalcCredits(12);
+                setCalcFullTimeThreshold(12);
+                setCalcTuition(0);
+                setCalcYellowRibbon(false);
+                setCalcYrSchoolContribution(0);
+                setCalcKicker(0);
+                setCalcIncludeComputer(false);
+                setCalcComputerCost(activeRates.ch31_computer_package_value || 2000.00);
+                setCalcOjtTrainingWage(0);
+                setCalcOjtJourneymanWage(0);
+                setCalcSchoolSearchQuery('');
+                setCalcSelectedSchool(null);
+                setSelectedSubsistenceType('p911');
+              }}
+              className="px-3 py-1 bg-red-950/20 border border-red-900/30 text-red-400 hover:text-red-300 rounded text-xs font-semibold cursor-pointer transition"
+            >
+              Reset Calculator
+            </button>
           </div>
         )}
       </div>

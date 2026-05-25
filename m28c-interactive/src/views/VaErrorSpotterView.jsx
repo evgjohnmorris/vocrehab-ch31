@@ -140,7 +140,9 @@ function VaErrorSpotterView({ setActiveView, plainLanguageMode, setPlainLanguage
   };
 
   const handleGenerateLetter = (letterType) => {
-    localStorage.setItem('m28c_preselected_letter', letterType);
+    const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
+    const storage = isPrivacy ? sessionStorage : localStorage;
+    storage.setItem('m28c_preselected_letter', letterType);
     setActiveView('document_generator');
   };
 

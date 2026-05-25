@@ -10,7 +10,6 @@ import BookmarkSidebar from './components/BookmarkSidebar';
 // Views
 import HomeDashboardView from './views/HomeDashboardView';
 import DisputeHubView from './views/DisputeHubView';
-import ReferenceLibraryView from './views/ReferenceLibraryView';
 import EntitlementWizardView from './views/EntitlementWizardView';
 import CalculatorView from './views/CalculatorView';
 import DisabilityHubView from './views/DisabilityHubView';
@@ -68,7 +67,7 @@ function App() {
 
   // Navigation State
   const [activeView, setActiveView] = useState('home'); // 'home' | 'reference' | 'wizard' | 'calculator' ...
-  const [selectedSection, setSelectedSection] = useState({ type: 'usc', id: '3100' });
+  const [selectedSection, setSelectedSection] = useState({ type: 'usc', id: '38-usc-3100' });
   
   // Accordion Expand/Collapse State
   const [expandedCategories, setExpandedCategories] = useState({
@@ -88,7 +87,7 @@ function App() {
   const [bookmarks, setBookmarks] = useState(() => {
     const isPrivacy = sessionStorage.getItem('m28c_privacy_mode') !== 'false';
     const saved = isPrivacy ? sessionStorage.getItem('m28c_bookmarks') : localStorage.getItem('m28c_bookmarks');
-    return saved ? JSON.parse(saved) : [{ type: 'usc', id: '3102' }];
+    return saved ? JSON.parse(saved) : [{ type: 'usc', id: '38-usc-3102' }];
   });
 
   // Rate Year Selection State ('ay2025_2026' | 'ay2026_2027')
@@ -342,59 +341,7 @@ function App() {
       });
   }, []);
 
-  const [activeContent, setActiveContent] = useState(null);
-  const [isLoadingContent, setIsLoadingContent] = useState(false);
-
-  useEffect(() => {
-    const loadContent = async () => {
-      if (!selectedSection || !selectedSection.type || !selectedSection.id) {
-        setActiveContent(null);
-        return;
-      }
-      setIsLoadingContent(true);
-      try {
-        let url = '';
-        if (selectedSection.type === 'usc') {
-          url = `${import.meta.env.BASE_URL}authority/usc/38-usc-${selectedSection.id}.json`;
-        } else if (selectedSection.type === 'cfr') {
-          const sec = selectedSection.id.replace('_', '-');
-          url = `${import.meta.env.BASE_URL}authority/cfr/38-cfr-${sec}.json`;
-        } else if (selectedSection.type === 'm28c') {
-          const ch = selectedSection.id.replace(/_/g, '-');
-          url = `${import.meta.env.BASE_URL}authority/m28c/${ch}.json`;
-        }
-        
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP error ${res.status} when loading ${url}`);
-        const data = await res.json();
-        
-        setActiveContent({
-          id: selectedSection.id,
-          title: data.title,
-          subtitle: data.canonicalCitation,
-          category: selectedSection.type === 'usc' ? '38 U.S.C. Chapter 31' : selectedSection.type === 'cfr' ? '38 CFR Part 21' : 'M28C Manual',
-          tag: data.authorityLevel,
-          content: `<div class="space-y-4">
-            <div class="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap select-text">${data.fullText || data.text}</div>
-            ${data.plainEnglish ? `<div class="bg-slate-900/60 p-4 border border-slate-800 rounded-lg mt-4">
-              <h4 class="text-xs font-bold text-emerald-400">Plain English Summary</h4>
-              <p class="text-xs text-slate-300 mt-1">${data.plainEnglish}</p>
-            </div>` : ''}
-            ${data.veteranUse ? `<div class="bg-emerald-950/20 p-4 border border-emerald-900/30 rounded-lg mt-3">
-              <h4 class="text-xs font-bold text-slate-200">How to use this in a VR&E Dispute</h4>
-              <p class="text-xs text-slate-300 mt-1">${data.veteranUse}</p>
-            </div>` : ''}
-          </div>`
-        });
-      } catch (err) {
-        console.error('Failed to load dynamic reference content:', err);
-        setActiveContent(null);
-      } finally {
-        setIsLoadingContent(false);
-      }
-    };
-    loadContent();
-  }, [selectedSection]);
+  // Dynamic reference content loading removed since it is handled directly in AuthorityLibraryView
 
   // Collapsible toggle helpers
   const toggleCategory = (cat) => {
@@ -447,15 +394,15 @@ function App() {
           />
         );
       case 'reference':
+      case 'authority_library':
         return (
-          <ReferenceLibraryView
-            activeContent={activeContent}
+          <AuthorityLibraryView 
+            reduceMotion={reduceMotion}
             selectedSection={selectedSection}
             setSelectedSection={setSelectedSection}
+            setActiveView={setActiveView}
             bookmarks={bookmarks}
             toggleBookmark={toggleBookmark}
-            reduceMotion={reduceMotion}
-            isLoadingContent={isLoadingContent}
           />
         );
       case 'wizard':
@@ -516,14 +463,6 @@ function App() {
           <DocumentGeneratorView 
             reduceMotion={reduceMotion} 
             plainLanguageMode={plainLanguageMode}
-          />
-        );
-      case 'authority_library':
-        return (
-          <AuthorityLibraryView 
-            reduceMotion={reduceMotion}
-            setSelectedSection={setSelectedSection}
-            setActiveView={setActiveView}
           />
         );
       case 'coverage_report':

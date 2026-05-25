@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  CheckCircle, Scale, Clipboard, Printer, 
-  ChevronRight, BarChart2, Calendar, Plus, Trash2, 
-  AlertTriangle, Shield, Check, Info, FileText
+  CheckCircle, Scale, Printer, 
+  ChevronRight, BarChart2, Plus, Trash2, 
+  AlertTriangle, Check, FileText
 } from 'lucide-react';
 import AuthorityBadge from '../components/AuthorityBadge';
 
@@ -177,8 +177,7 @@ const DISPUTE_AREAS = [
 function DisputeHubView({ 
   reduceMotion,
   userMode = 'veteran',
-  currentCaseStage = 'not_applied',
-  setCurrentCaseStage
+  currentCaseStage = 'not_applied'
 }) {
   const [activeTab, setActiveTab] = useState('analyzer'); // 'analyzer' | 'timeline' | 'evidence' | 'brief' | 'packet'
   const [selectedArea, setSelectedArea] = useState(() => {
@@ -248,7 +247,7 @@ function DisputeHubView({
     };
   }, []);
 
-  const handleAreaChange = (area) => {
+  function handleAreaChange(area) {
     setSelectedArea(area);
     setSelectedArgumentId(area.vrcArguments[0]?.id || '');
     

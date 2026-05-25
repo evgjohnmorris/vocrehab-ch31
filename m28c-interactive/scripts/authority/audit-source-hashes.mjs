@@ -1,8 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 
-const BASE_PATH = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const BASE_PATH = path.join(PROJECT_ROOT, 'src/data/authority');
 const MANIFEST_PATH = path.join(BASE_PATH, 'manifest.json');
 const USC_DIR = path.join(BASE_PATH, 'generated/usc/sections');
 const CFR_DIR = path.join(BASE_PATH, 'generated/cfr/sections');
@@ -26,7 +30,7 @@ function main() {
 
   // 1. Audit Statutes (38 U.S.C.)
   manifest.statutes.forEach(statute => {
-    const filename = `38-usc-${statute.id}.json`;
+    const filename = `${statute.id}.json`;
     const filePath = path.join(USC_DIR, filename);
 
     if (!fs.existsSync(filePath)) {
@@ -56,7 +60,7 @@ function main() {
 
   // 2. Audit Regulations (38 C.F.R.)
   manifest.regulations.forEach(reg => {
-    const filename = `38-cfr-${reg.id.replace('_', '-')}.json`;
+    const filename = `${reg.id}.json`;
     const filePath = path.join(CFR_DIR, filename);
 
     if (!fs.existsSync(filePath)) {
@@ -86,7 +90,7 @@ function main() {
 
   // 3. Audit M28C Chapters
   manifest.m28c.forEach(chapter => {
-    const filename = `${chapter.id.replace(/_/g, '-')}.json`;
+    const filename = `${chapter.id}.json`;
     const filePath = path.join(M28C_DIR, filename);
 
     if (!fs.existsSync(filePath)) {

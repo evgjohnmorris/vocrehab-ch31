@@ -1,9 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 import { logger } from './logger.mjs';
 
-const CACHE_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/.tmp/cache';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../../..");
+const CACHE_DIR = path.join(PROJECT_ROOT, '.tmp/cache');
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 if (!fs.existsSync(CACHE_DIR)) {
