@@ -43,8 +43,8 @@ An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calcu
 - **34 Comprehensive Terms**: Fully expanded the glossary array with detailed definitions and acronyms including EH, SEH, RTE, EMP, REH, IEEP, IEAP, Retroactive Induction, Revolving Fund Loans, Special Restorative Training, and more.
 
 ## Structure
-- [m28c_manual.pdf](file:///c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c_manual.pdf) — Static PDF mockup reference manual.
-- [m28c-interactive/](file:///c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive) — Core interactive SPA application.
+- [m28c_manual.pdf](m28c_manual.pdf) — Static PDF mockup reference manual.
+- [m28c-interactive/](m28c-interactive/) — Core interactive SPA application.
 
 ## Launching locally
 To run the interactive portal locally:

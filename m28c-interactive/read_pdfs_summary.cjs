@@ -3,7 +3,7 @@ const path = require('path');
 const https = require('https');
 const pdf = require('pdf-parse');
 
-const destDir = "c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/.tmp";
+const destDir = path.resolve(__dirname, './.tmp');
 const pdfFiles = [
     { name: "vr_guidebook_3", url: "https://static1.squarespace.com/static/5e35dcc77332cf46d567118b/t/6852948eec86c35052307de1/1750242446430/VR%26E+Guidebook+3.0.pdf" },
     { name: "ssa_vr_handbook", url: "https://yourtickettowork.ssa.gov/Assets/yttw/docs/vocational-rehabilitation/VR-Providers-Handbook-2020.pdf" },

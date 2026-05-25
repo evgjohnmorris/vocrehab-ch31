@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const pdf = require('pdf-parse');
 
-const destDir = "c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/.tmp";
+const destDir = path.resolve(__dirname, './.tmp');
 const pdfFiles = [
     "vr_guidebook_3",
     "ssa_vr_handbook",
