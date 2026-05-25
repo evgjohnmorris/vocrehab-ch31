@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Award, Info, Settings, CheckCircle, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { generateFeasibilityRebuttal } from '../utils/letterGenerators';
 
 function EntitlementWizardView({ 
   setSelectedSection, 
@@ -15,6 +16,21 @@ function EntitlementWizardView({
   const [employmentHandicap, setEmploymentHandicap] = useState(true);
   const [sehAssessment, setSehAssessment] = useState(null); // 'yes' | 'no'
   const [wizardResult, setWizardResult] = useState(null);
+
+  // Localized Delimiting Date Calculator States (Phase 18)
+  const [dischargeDate, setDischargeDate] = useState('');
+  const [ratingDecisionDate, setRatingDecisionDate] = useState('');
+
+  // Localized Five Tracks Diagnostic States (Phase 18)
+  const [diagIntent, setDiagIntent] = useState('');
+  const [diagSeverity, setDiagSeverity] = useState('');
+  const [diagSkillLevel, setDiagSkillLevel] = useState('');
+
+  // Localized Feasibility Rebuttal Planner States (Phase 18)
+  const [rebutCounselorClaim, setRebutCounselorClaim] = useState('');
+  const [rebutAccommodations, setRebutAccommodations] = useState('');
+  const [rebutMedicalClearance, setRebutMedicalClearance] = useState(false);
+  const [rebutCopySuccess, setRebutCopySuccess] = useState(false);
 
   // Localized Extension Pre-Screener States
   const [extHasSeh, setExtHasSeh] = useState(false);
@@ -298,6 +314,103 @@ function EntitlementWizardView({
       });
     }
   };
+
+  // Five Tracks to Employment Diagnostic Logic (Phase 18)
+  const runFiveTracksDiagnostic = (intent, severity, skillLevel) => {
+    if (!intent || !severity || !skillLevel) return null;
+    
+    let trackName = "";
+    let trackCfr = "";
+    let trackReason = "";
+    let trackAdvocacy = "";
+    
+    if (intent === 'reemployment') {
+      trackName = "Reemployment Track (Track 1)";
+      trackCfr = "38 CFR § 21.250(a)(1)";
+      trackReason = "For veterans who want to return to their previous employer or career field with accommodations if necessary.";
+      trackAdvocacy = "Ensure the VRC contacts your previous employer to coordinate adjustments and verify return-to-work suitability.";
+    } else if (intent === 'rapid') {
+      trackName = "Rapid Access to Employment (Track 2)";
+      trackCfr = "38 CFR § 21.250(a)(2)";
+      trackReason = "For veterans who already possess marketable career skills and need immediate placement assistance, resume prep, or credentialing.";
+      trackAdvocacy = "Note: VRCs often push veterans here to save costs. If your skills are obsolete or aggravated by your disability, demand Long-Term Services instead.";
+    } else if (intent === 'self') {
+      trackName = "Self-Employment Track (Track 3)";
+      trackCfr = "38 CFR § 21.257 & § 21.258";
+      trackReason = "For veterans with severe disabilities or unique vocational goals who want to establish their own business venture.";
+      trackAdvocacy = "Under Category I (Serious Employment Handicap), the VA can purchase start-up equipment, inventory, licenses, and marketing services.";
+    } else if (intent === 'training') {
+      trackName = "Employment through Long-Term Services (Track 4)";
+      trackCfr = "38 CFR § 21.250(a)(4)";
+      trackReason = "For veterans who need professional retraining (college, vocational school, OJT, or graduate studies) to overcome their disability limitations.";
+      trackAdvocacy = "The most utilized track. Your program must lead to a job that is medically compatible and has high labor demand.";
+    } else if (intent === 'independence') {
+      trackName = "Independent Living Services (Track 5)";
+      trackCfr = "38 U.S.C. § 3109 & 38 CFR § 21.160";
+      trackReason = "For veterans with severe limitations where a traditional vocational goal is not currently reasonably feasible.";
+      trackAdvocacy = "Focuses on assistive tech, home modifications, and daily mobility. Requires supervisor cost reviews.";
+    }
+    
+    return { trackName, trackCfr, trackReason, trackAdvocacy };
+  };
+
+  // Compile Feasibility Rebuttal Letter (Phase 18)
+  const compileFeasibilityRebuttalLetter = () => {
+    return generateFeasibilityRebuttal({
+      dateStr: new Date().toLocaleDateString(),
+      veteranName: "Veteran Candidate",
+      claimNumber: "SSN XXX-XX-XXXX",
+      address: "Mailing Address",
+      emailPhone: "Email / Phone",
+      counselorName: "Assigned VRC Counselor",
+      regionalOffice: "VA Regional Office",
+      unfeasibilityAssertion: rebutCounselorClaim || "[Detail the counselor's objection here, e.g. psychiatric rating prevents desk job]",
+      rebuttalArguments: rebutAccommodations || "[Detail your accommodations and feasibility arguments here]",
+      doctorStatementEnclosed: rebutMedicalClearance
+    });
+  };
+
+  // Compile VA Form 28-1900 Remarks Narrative (Phase 18)
+  const compileForm281900Remarks = () => {
+    // 1. Occupational barriers
+    const part1 = simQ1 === 'severe'
+      ? "Due to my service-connected disabilities, I experience severe physical or cognitive limitations that interfere with performing key duties of my current occupational field."
+      : simQ1 === 'moderate'
+      ? "My service-connected conditions cause moderate physical or cognitive limitations, requiring substantial compensatory effort, pain, or frequent breaks to complete basic duties."
+      : "I am seeking rehabilitation to identify a suitable occupation compatible with my disability limitations.";
+
+    // 2. Job suitability
+    const part2 = simQ2 === 'unemployed'
+      ? "Consequently, I am currently unemployed because of the worsening effects of these conditions."
+      : simQ2 === 'unaccommodated'
+      ? "My current employment is unsuitable as it does not accommodate my medical restrictions, resulting in ongoing physical strain and aggravation of my rated disabilities."
+      : "Although I am currently working, I require assistance to transition to a career track that provides sustainable long-term accommodation.";
+
+    // 3. Goal compatibility
+    const part3 = simQ3 === 'compatible'
+      ? `I am applying for Chapter 31 VR&E services to pursue a medically compatible, desk-based, or flexible vocational track under 38 CFR ${rating === 10 ? '§ 21.52 (Serious Employment Handicap)' : '§ 21.51 (Employment Handicap)'} criteria. This program will enable me to successfully prepare for and obtain suitable employment without aggravating my conditions.`
+      : `I request vocational counseling services under 38 CFR ${rating === 10 ? '§ 21.52' : '§ 21.51'} to identify and prepare for a career goal that is fully compatible with my VA rating limitations.`;
+
+    // Delimiting date integration
+    let delimitingNotice = "";
+    if (dischargeDate && ratingDecisionDate) {
+      const dTime = new Date(dischargeDate).getTime();
+      const rTime = new Date(ratingDecisionDate).getTime();
+      if (!isNaN(dTime) && !isNaN(rTime)) {
+        const baseDate = dTime > rTime ? new Date(dischargeDate) : new Date(ratingDecisionDate);
+        const delimitingDate = new Date(baseDate);
+        delimitingDate.setFullYear(delimitingDate.getFullYear() + 12);
+        const today = new Date('2026-05-25');
+        if (delimitingDate.getTime() - today.getTime() < 0) {
+          delimitingNotice = " As my basic 12-year period of eligibility under 38 U.S.C. § 3103 has expired, I request an extension and entitlement determination based on a Serious Employment Handicap (SEH) under 38 CFR § 21.44.";
+        }
+      }
+    }
+
+    return `${part1} ${part2} ${part3}${delimitingNotice}`;
+  };
+
+  const [remarksCopySuccess, setRemarksCopySuccess] = useState(false);
 
   return (
     <motion.div 
@@ -660,6 +773,15 @@ function EntitlementWizardView({
                   setIlpNotFeasible(false);
                   setIlpNeedAdl(false);
                   setIlpCostApproval(false);
+                  setDischargeDate('');
+                  setRatingDecisionDate('');
+                  setDiagIntent('');
+                  setDiagSeverity('');
+                  setDiagSkillLevel('');
+                  setRebutCounselorClaim('');
+                  setRebutAccommodations('');
+                  setRebutMedicalClearance(false);
+                  setRebutCopySuccess(false);
                 }}
               >
                 Reset
@@ -743,6 +865,128 @@ function EntitlementWizardView({
               <p style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Fill out the evaluation form on the left to determine entitlement status and eligible rehabilitation tracks.</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 12-Year Delimiting Date Calculator Section (Phase 18) */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-amber-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Settings className="text-amber-500" size={20} />
+                12-Year Delimiting Date Calculator
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20">
+                38 U.S.C. § 3103
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              Under 38 U.S.C. § 3103, your basic period of eligibility for VR&E services is 12 years from your military discharge date or your first 10%+ VA disability rating notification date (whichever is later). Enter your dates below to calculate your statutory delimiting window.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="form-group">
+                  <label htmlFor="discharge-date-input" className="text-xs font-bold text-slate-300 block mb-1">Military Discharge Date (DD-214 Block 12b)</label>
+                  <input
+                    id="discharge-date-input"
+                    type="date"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-250 focus:border-amber-500/50"
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px' }}
+                    value={dischargeDate}
+                    onChange={(e) => setDischargeDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="rating-date-input" className="text-xs font-bold text-slate-300 block mb-1">First VA 10%+ Rating Decision Date</label>
+                  <input
+                    id="rating-date-input"
+                    type="date"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-250 focus:border-amber-500/50"
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px' }}
+                    value={ratingDecisionDate}
+                    onChange={(e) => setRatingDecisionDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                {dischargeDate && ratingDecisionDate ? (() => {
+                  const dTime = new Date(dischargeDate).getTime();
+                  const rTime = new Date(ratingDecisionDate).getTime();
+                  if (isNaN(dTime) || isNaN(rTime)) {
+                    return (
+                      <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-6">
+                        <Info size={24} className="text-slate-600 mb-1" />
+                        <p className="text-[11px] max-w-xs">Please enter valid dates to execute the delimiting calculator.</p>
+                      </div>
+                    );
+                  }
+                  
+                  const baseDate = dTime > rTime ? new Date(dischargeDate) : new Date(ratingDecisionDate);
+                  const delimitingDate = new Date(baseDate);
+                  delimitingDate.setFullYear(delimitingDate.getFullYear() + 12);
+                  
+                  const today = new Date('2026-05-25'); // Locked current context date
+                  const diffTime = delimitingDate.getTime() - today.getTime();
+                  const isExpired = diffTime < 0;
+                  const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+                  const diffYears = (diffDays / 365).toFixed(1);
+                  
+                  const delimitingStr = delimitingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                  
+                  if (isExpired) {
+                    return (
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5 text-red-400 relative overflow-hidden animate-fade-in">
+                        <div className="flex items-start gap-3">
+                          <Info size={22} className="text-red-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <strong className="text-sm font-semibold text-red-300 block mb-1">Basic Period of Eligibility Expired</strong>
+                            <p className="text-xs text-red-400/90 leading-relaxed mb-3">
+                              Your 12-year basic eligibility window expired on <strong>{delimitingStr}</strong> ({diffYears} years ago).
+                            </p>
+                            <div className="bg-slate-950/60 border border-red-950/40 rounded p-3 text-[11px] text-slate-350 leading-relaxed">
+                              <strong className="text-amber-400 block mb-1">Advocacy Strategy (38 CFR § 21.44):</strong>
+                              To receive services now, your counselor must officially find that you have a <strong>Serious Employment Handicap (SEH)</strong>. An SEH designation overrides the 12-year expiration, reinstating your access to retraining. Focus on documenting how your service-connected conditions impose severe barriers to finding or holding a job.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 text-emerald-400 relative overflow-hidden animate-fade-in">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle size={22} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <strong className="text-sm font-semibold text-emerald-300 block mb-1">Basic Period of Eligibility Active</strong>
+                            <p className="text-xs text-emerald-400/90 leading-relaxed mb-2">
+                              Your basic period of eligibility is active and will remain open until <strong>{delimitingStr}</strong> (approximately {diffYears} years remaining).
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              Since you are within your 12-year window, you only require a finding of an <strong>Employment Handicap (EH)</strong> (for ratings &ge; 20%) to qualify for standard tracks.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                })() : (
+                  <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                    <Info size={28} className="text-slate-600 mb-2" />
+                    <p className="text-[11px] max-w-xs leading-relaxed">
+                      Enter your military discharge date and your first VA rating notification date on the left to calculate your delimiting date status.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1030,6 +1274,237 @@ function EntitlementWizardView({
                     <Info size={28} className="text-slate-600 mb-2" />
                     <p className="text-[11px] max-w-xs leading-relaxed">
                       Toggle all four criteria checkboxes on the left to verify if you qualify for Independent Living Program pre-screening.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Five Tracks to Employment Diagnostic Tool (Phase 18) */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Settings className="text-emerald-400" size={20} />
+                Five Tracks to Employment Diagnostic Tool
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
+                38 CFR § 21.35
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              Once entitled, the VA matches your goals and limitation profile to one of the Five Tracks. Fill out this brief diagnostic to analyze which program track represents your optimal rehabilitation path under federal criteria.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="form-group">
+                  <label htmlFor="diag-intent-select" className="text-xs font-bold text-slate-350 block mb-1">What is your primary career rehabilitation goal?</label>
+                  <select 
+                    id="diag-intent-select"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-200 focus:border-emerald-500/50"
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px' }}
+                    value={diagIntent} 
+                    onChange={(e) => setDiagIntent(e.target.value)}
+                  >
+                    <option value="">-- Select Intent --</option>
+                    <option value="reemployment">Return to a prior employer (Reemployment)</option>
+                    <option value="rapid">Find a job immediately using current skills (Rapid Access)</option>
+                    <option value="self">Establish a self-owned business (Self-Employment)</option>
+                    <option value="training">Retrain in a new career field via education/schooling (Long-Term Services)</option>
+                    <option value="independence">Improve daily independence / self-care limits (Independent Living)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="diag-severity-select" className="text-xs font-bold text-slate-350 block mb-1">How severe are your service-connected workplace restrictions?</label>
+                  <select 
+                    id="diag-severity-select"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-200 focus:border-emerald-500/50"
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px' }}
+                    value={diagSeverity} 
+                    onChange={(e) => setDiagSeverity(e.target.value)}
+                  >
+                    <option value="">-- Select Severity --</option>
+                    <option value="severe">Severe (Cannot stand, lift, or work in standard environments without significant accommodation)</option>
+                    <option value="moderate">Moderate (Can work in normal environments but need adjustments or ergonomic setups)</option>
+                    <option value="none">Managed (Minimal daily career impact under standard conditions)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="diag-skill-select" className="text-xs font-bold text-slate-350 block mb-1">Are your current vocational skills marketable and medically safe to use?</label>
+                  <select 
+                    id="diag-skill-select"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-200 focus:border-emerald-500/50"
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px' }}
+                    value={diagSkillLevel} 
+                    onChange={(e) => setDiagSkillLevel(e.target.value)}
+                  >
+                    <option value="">-- Select Skill Level --</option>
+                    <option value="has-skills">Yes, my skills are current, but I need placement assistance or minor accommodations</option>
+                    <option value="needs-retraining">No, my skills are obsolete or my service-connected disabilities prevent me from using them safely</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                {diagIntent && diagSeverity && diagSkillLevel ? (() => {
+                  const recommendation = runFiveTracksDiagnostic(diagIntent, diagSeverity, diagSkillLevel);
+                  if (!recommendation) return null;
+                  return (
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 text-emerald-400 relative overflow-hidden animate-fade-in">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle size={22} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <strong className="text-sm font-semibold text-emerald-300 block mb-1">Recommended Track: {recommendation.trackName}</strong>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">{recommendation.trackCfr}</span>
+                          <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                            {recommendation.trackReason}
+                          </p>
+                          <div className="bg-slate-950/60 border border-slate-850 rounded p-3 text-[11px] text-slate-300 leading-relaxed">
+                            <strong className="text-cyan-400 block mb-1">VRC Advocacy Strategy:</strong>
+                            {recommendation.trackAdvocacy}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })() : (
+                  <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                    <Info size={28} className="text-slate-600 mb-2" />
+                    <p className="text-[11px] max-w-xs leading-relaxed">
+                      Select your goals, severity, and skill levels on the left to analyze your optimal VR&E Track match.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feasibility Rebuttal Strategy Assistant Section (Phase 18) */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-red-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Settings className="text-red-400" size={20} />
+                Feasibility Rebuttal Strategy Assistant
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-red-500/10 text-red-400 rounded border border-red-500/20">
+                38 CFR § 21.35(i) & § 21.53
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              If your counselor asserts that a training program is "not currently reasonably feasible" due to your disabilities, you are entitled to rebut this finding. Draft a formal request for reconsideration using this compiler.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="form-group">
+                  <label htmlFor="rebut-claim-input" className="text-xs font-bold text-slate-350 block mb-1">What is the VRC's specific unfeasibility objection?</label>
+                  <textarea
+                    id="rebut-claim-input"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-200 focus:border-red-500/50"
+                    style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '6px', resize: 'vertical' }}
+                    placeholder="e.g. Counselor claims my physical spine rating makes desk work unfeasible."
+                    value={rebutCounselorClaim}
+                    onChange={(e) => setRebutCounselorClaim(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="rebut-accom-input" className="text-xs font-bold text-slate-350 block mb-1">What accommodations or factual indicators show you can succeed?</label>
+                  <textarea
+                    id="rebut-accom-input"
+                    className="form-control text-xs bg-slate-950/60 border border-slate-800 text-slate-200 focus:border-red-500/50"
+                    style={{ width: '100%', minHeight: '85px', padding: '10px', borderRadius: '6px', resize: 'vertical' }}
+                    placeholder="e.g. I will use ergonomic chairs, take regular standing breaks, and my physician cleared me."
+                    value={rebutAccommodations}
+                    onChange={(e) => setRebutAccommodations(e.target.value)}
+                  />
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                  <input
+                    type="checkbox"
+                    className="mt-1 accent-red-500 cursor-pointer"
+                    checked={rebutMedicalClearance}
+                    onChange={(e) => setRebutMedicalClearance(e.target.checked)}
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Treating Doctor Statement Available</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Do you have or can you get a signed letter from your physician clearing you to study or work?</span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                {rebutCounselorClaim || rebutAccommodations ? (
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-5 space-y-3.5 text-xs animate-fade-in">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                      <strong className="text-red-350">Generated Rebuttal Letter Preview</strong>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(compileFeasibilityRebuttalLetter());
+                            setRebutCopySuccess(true);
+                            setTimeout(() => setRebutCopySuccess(false), 2000);
+                          }}
+                          className="px-2 py-0.5 bg-slate-900 border border-slate-850 text-[10px] text-cyan-400 rounded font-semibold cursor-pointer"
+                        >
+                          {rebutCopySuccess ? '✓ Copied' : 'Copy'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const printWindow = window.open('', '_blank');
+                            printWindow.document.write(`
+                              <html>
+                                <head>
+                                  <title>Feasibility Rebuttal Letter</title>
+                                  <style>
+                                    body { font-family: sans-serif; padding: 40px; color: #111; line-height: 1.6; white-space: pre-wrap; }
+                                    .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; }
+                                  </style>
+                                </head>
+                                <body>
+                                  <div class="header">38 CFR § 21.53 Feasibility Rebuttal Letter</div>
+                                  <div>${compileFeasibilityRebuttalLetter()}</div>
+                                  <script>window.print();</script>
+                                </body>
+                              </html>
+                            `);
+                            printWindow.document.close();
+                          }}
+                          className="px-2 py-0.5 bg-slate-900 border border-slate-850 text-[10px] text-cyan-400 rounded font-semibold cursor-pointer"
+                        >
+                          Print
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bg-slate-950 border border-slate-900 rounded p-3 text-[10px] text-slate-350 leading-relaxed font-mono select-all overflow-y-auto max-h-[220px] white-space-pre-wrap">
+                      {compileFeasibilityRebuttalLetter()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                    <Info size={28} className="text-slate-600 mb-2" />
+                    <p className="text-[11px] max-w-xs leading-relaxed">
+                      Enter the VRC's objection and your proposed accommodations on the left to compile a formal feasibility rebuttal letter.
                     </p>
                   </div>
                 )}
@@ -1389,6 +1864,31 @@ function EntitlementWizardView({
 
                   <div className="text-[10px] text-slate-500 italic pt-2 border-t border-slate-850">
                     Prepared on {new Date().toLocaleDateString()} • Case planning tool under Chapter 31.
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-5 space-y-3 text-xs">
+                  <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+                      VA Form 28-1900 Remarks Compiler (Section IV: Remarks)
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(compileForm281900Remarks());
+                        setRemarksCopySuccess(true);
+                        setTimeout(() => setRemarksCopySuccess(false), 2000);
+                      }}
+                      className="px-2 py-1 bg-slate-900 border border-slate-800 text-[10px] text-cyan-400 hover:text-cyan-300 rounded font-semibold cursor-pointer"
+                    >
+                      {remarksCopySuccess ? '✓ Copied Remarks!' : 'Copy Remarks'}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Copy and paste the statement below directly into your VA Form 28-1900 application when submitting on VA.gov to establish your regulatory entitlement arguments early:
+                  </p>
+                  <div className="bg-slate-950 border border-slate-900 rounded p-3 text-[11px] text-slate-350 leading-relaxed font-mono select-all">
+                    {compileForm281900Remarks()}
                   </div>
                 </div>
 
