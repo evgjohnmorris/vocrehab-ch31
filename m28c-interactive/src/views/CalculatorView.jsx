@@ -174,12 +174,17 @@ function CalculatorView({
               setCalcComputerCost(active.ch31_computer_package_value || 2000.00);
             }}
           >
-            <option value="ay2025">AY 2025 - 2026</option>
-            <option value="ay2026">AY 2026 - 2027 (Future/Current)</option>
+            <option value="ay2025">Post-9/11 AY 2024–2025 / Chapter 31 FY 2025</option>
+            <option value="ay2026">Post-9/11 AY 2025–2026 / Chapter 31 FY 2026</option>
           </select>
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <span>Rates Last Verified: <strong>{rates.lastVerified || "2026-05-23"}</strong></span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <span>Rates Last Updated/Verified: <strong>{rates.lastUpdated || rates.lastVerified || "2026-05-25"}</strong></span>
+          </div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+            Rates are estimates. Confirm against VA’s current published Chapter 31 and Post-9/11 rate tables.
+          </div>
         </div>
       </div>
 
@@ -841,7 +846,7 @@ function CalculatorView({
                     onChange={(e) => {
                       setCalcIncludeComputer(e.target.checked);
                       if (e.target.checked && !calcComputerCost) {
-                        setCalcComputerCost(rates.ch31_computer_package_value || 2000.00);
+                        setCalcComputerCost(activeRates.ch31_computer_package_value || 2000.00);
                       }
                     }}
                   />
@@ -1008,7 +1013,11 @@ function CalculatorView({
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0 }}>Comparison Payouts</h4>
-                  <span className="badge badge-info">{selectedRateYear === 'ay2026' ? 'AY 2026–2027 / FY 2026 Rate Set' : 'AY 2025–2026 / FY 2025 Rate Set'}</span>
+                  <span className="badge badge-info">
+                    {selectedRateYear === 'ay2026'
+                      ? 'Post-9/11 AY 2025–2026 / Chapter 31 FY 2026'
+                      : 'Post-9/11 AY 2024–2025 / Chapter 31 FY 2025'}
+                  </span>
                 </div>
 
                 {/* WARNING BADGES */}

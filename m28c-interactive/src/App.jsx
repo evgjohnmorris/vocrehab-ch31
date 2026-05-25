@@ -24,8 +24,9 @@ import VaErrorSpotterView from './views/VaErrorSpotterView';
 import DocumentGeneratorView from './views/DocumentGeneratorView';
 
 const DEFAULT_RATES = {
-  version: "2026.1",
-  lastVerified: "2026-05-23",
+  version: "2026.2",
+  lastUpdated: "2026-05-25",
+  lastVerified: "2026-05-25",
   ay2025: {
     ch31_institutional_full: [776.74, 963.78, 1135.53, 82.90],
     ch31_institutional_threeQuarters: [583.56, 723.28, 851.62, 62.18],
@@ -40,9 +41,9 @@ const DEFAULT_RATES = {
     ch31_computer_package_value: 2000.00
   },
   ay2026: {
-    ch31_institutional_full: [861.10, 1067.81, 1258.13, 91.85],
-    ch31_institutional_threeQuarters: [646.71, 801.49, 943.40, 68.77],
-    ch31_institutional_half: [432.31, 534.86, 629.57, 45.92],
+    ch31_institutional_full: [812.84, 1008.24, 1188.15, 86.58],
+    ch31_institutional_threeQuarters: [610.76, 757.28, 888.32, 66.60],
+    ch31_institutional_half: [408.66, 506.32, 595.16, 44.42],
     ch31_ojt: [710.67, 859.43, 990.47, 64.41],
     p911_online_rate: 1169.00,
     p911_foreign_rate: 2338.00,
@@ -153,8 +154,11 @@ function App() {
         const saved = localStorage.getItem('m28c_calculator_rates');
         const active = saved ? JSON.parse(saved) : DEFAULT_RATES;
         
-        // If version from server is different, update
-        if (remoteData.version !== active.version) {
+        // If version or lastUpdated from server is different, update
+        if (
+          remoteData.version !== active.version ||
+          remoteData.lastUpdated !== active.lastUpdated
+        ) {
           const updatedRates = {
             ...active,
             ...remoteData

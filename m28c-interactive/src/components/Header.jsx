@@ -163,7 +163,7 @@ function Header({
           <button 
             className="action-btn"
             onClick={() => {
-              setSettingsForm(rates);
+              setSettingsForm(rates[selectedRateYear] || rates.ay2026);
               setIsSettingsOpen(true);
             }}
             title="Calculator Rate Settings & VA Sync"
@@ -247,8 +247,8 @@ function Header({
                   value={selectedRateYear}
                   onChange={(e) => setSelectedRateYear(e.target.value)}
                 >
-                  <option value="ay2025">AY 2025 - 2026 (Effective Oct 1, 2024 / Aug 1, 2025)</option>
-                  <option value="ay2026">AY 2026 - 2027 (Effective Oct 1, 2025 / Aug 1, 2026) [Future/Current]</option>
+                  <option value="ay2025">Post-9/11 AY 2024–2025 / Chapter 31 FY 2025</option>
+                  <option value="ay2026">Post-9/11 AY 2025–2026 / Chapter 31 FY 2026</option>
                 </select>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
                   Post-9/11 rates update on August 1st. Chapter 31 subsistence rates update on October 1st.
