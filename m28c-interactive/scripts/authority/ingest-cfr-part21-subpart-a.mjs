@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
+import { logger } from './utils/logger.mjs';
+import { fetchWithCache } from './utils/cache.mjs';
 
 const DATE = '2026-05-21';
 const TITLE = '38';
@@ -43,16 +45,16 @@ function cleanHtml(html) {
 }
 
 async function main() {
-  console.log("Fetching CFR Part 21 Subpart A from eCFR...");
+  logger.info("Fetching CFR Part 21 Subpart A from eCFR...");
   const url = `https://www.ecfr.gov/api/renderer/v1/content/enhanced/${DATE}/title-${TITLE}?part=${PART}&subpart=${SUBPART}`;
   
   try {
-    const res = await fetch(url);
+    const res = await fetchWithCache(url);
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
     const html = await res.text();
-    console.log("CFR Content downloaded, size:", html.length);
+    logger.success(`CFR Content downloaded, size: ${html.length} bytes`);
 
     // Find all sections by matching <div class="section" id="21.XXX">
     const sectionRegex = /<div class="section" id="([^"]+)">/g;
@@ -65,7 +67,7 @@ async function main() {
       });
     }
 
-    console.log(`Found ${matches.length} sections in Subpart A.`);
+    logger.info(`Found ${matches.length} sections in Subpart A.`);
     const sectionList = [];
 
     for (let i = 0; i < matches.length; i++) {
@@ -157,7 +159,7 @@ async function main() {
         hash: parsed.hash
       });
       
-      console.log(`[INGESTED] ${canonicalCitation} -> ${filename}`);
+      logger.success(`Ingested ${canonicalCitation} -> ${filename}`);
     }
 
     // Save parent index
@@ -168,10 +170,10 @@ async function main() {
       sections: sectionList
     };
     fs.writeFileSync(path.join(PARENT_DIR, 'part-21-subpart-a.json'), JSON.stringify(indexData, null, 2));
-    console.log(`[INDEX SAVED] -> ${path.join(PARENT_DIR, 'part-21-subpart-a.json')}`);
+    logger.success(`Index saved -> ${path.join(PARENT_DIR, 'part-21-subpart-a.json')}`);
 
   } catch (err) {
-    console.error("CFR Ingestion failed:", err.message);
+    logger.error(`CFR Ingestion failed: ${err.message}`);
     process.exit(1);
   }
 }

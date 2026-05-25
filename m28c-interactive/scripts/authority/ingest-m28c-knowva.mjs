@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
+import { logger } from './utils/logger.mjs';
 
 const OUTPUT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/m28c/chapters';
 const PARENT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/m28c';
@@ -497,7 +498,7 @@ Under 38 U.S.C. 3108(b) and 38 C.F.R. 21.264, a veteran who is entitled to Chapt
 ];
 
 function main() {
-  console.log("Writing M28C manual files with verified schema and hashes...");
+  logger.info("Writing M28C manual files with verified schema and hashes...");
   const chapterList = [];
 
   for (const chapter of M28C_CHAPTERS) {
@@ -525,7 +526,7 @@ function main() {
       hash: parsed.hash
     });
 
-    console.log(`[INGESTED] M28C Manual ${parsed.canonicalCitation} -> ${filename}`);
+    logger.success(`Ingested M28C Manual ${parsed.canonicalCitation} -> ${filename}`);
   }
 
   // Save index
@@ -535,7 +536,7 @@ function main() {
     chapters: chapterList
   };
   fs.writeFileSync(path.join(PARENT_DIR, 'm28c-index.json'), JSON.stringify(indexData, null, 2));
-  console.log(`[INDEX SAVED] -> ${path.join(PARENT_DIR, 'm28c-index.json')}`);
+  logger.success(`Index saved -> ${path.join(PARENT_DIR, 'm28c-index.json')}`);
 }
 
 main();

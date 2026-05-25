@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { AuthorityRecordSchema } from '../../src/data/authority/schema/authorityRecord.schema.js';
+import { logger } from './utils/logger.mjs';
+import { fetchWithCache } from './utils/cache.mjs';
 
 const SECTIONS = Array.from({ length: 23 }, (_, i) => (3100 + i).toString());
 const OUTPUT_DIR = 'c:/Users/johna/Desktop/Veterans/vocrehab_ch31/m28c-interactive/src/data/authority/generated/usc/sections';
@@ -50,10 +52,10 @@ function extractField(html, fieldName) {
 }
 
 async function ingestSection(sec) {
-  console.log(`Fetching 38 U.S.C. § ${sec}...`);
+  logger.info(`Processing 38 U.S.C. § ${sec}...`);
   const url = `https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section${sec}&num=0&edition=prelim`;
   
-  const res = await fetch(url);
+  const res = await fetchWithCache(url);
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`);
   }
@@ -115,13 +117,13 @@ async function ingestSection(sec) {
 
   const filePath = path.join(OUTPUT_DIR, `38-usc-${sec}.json`);
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
-  console.log(`[INGESTED] 38 U.S.C. § ${sec} -> ${filePath}`);
+  logger.success(`Ingested 38 U.S.C. § ${sec} -> ${filePath}`);
 
   return parsed;
 }
 
 async function main() {
-  console.log("Starting U.S. Code Chapter 31 Ingestion (Normalized Schema)...");
+  logger.info("Starting U.S. Code Chapter 31 Ingestion (Normalized Schema)...");
   const ingestedList = [];
   
   for (const sec of SECTIONS) {
@@ -133,9 +135,9 @@ async function main() {
         title: record.title,
         hash: record.hash
       });
-      await new Promise(r => setTimeout(r, 200)); // rate limiting
+      await new Promise(r => setTimeout(r, 100)); // rate limiting (reduced delay due to caching)
     } catch (err) {
-      console.error(`[ERROR] Ingesting section ${sec} failed:`, err.message);
+      logger.error(`Ingesting section ${sec} failed: ${err.message}`);
       process.exit(1);
     }
   }
@@ -148,10 +150,10 @@ async function main() {
     sections: ingestedList
   };
   fs.writeFileSync(path.join(PARENT_DIR, '38-usc-ch31.json'), JSON.stringify(indexData, null, 2));
-  console.log(`[INDEX SAVED] -> ${path.join(PARENT_DIR, '38-usc-ch31.json')}`);
+  logger.success(`Index saved -> ${path.join(PARENT_DIR, '38-usc-ch31.json')}`);
 }
 
 main().catch(err => {
-  console.error("Main execution failed:", err);
+  logger.error("Main execution failed", err);
   process.exit(1);
 });
