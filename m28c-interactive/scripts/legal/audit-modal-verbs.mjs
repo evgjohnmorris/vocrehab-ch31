@@ -16,6 +16,7 @@ const VIEWS_TO_SCAN = [
   path.join(PROJECT_ROOT, 'src/views/HomeDashboardView.jsx'),
   path.join(PROJECT_ROOT, 'src/views/DisputeHubView.jsx'),
   path.join(PROJECT_ROOT, 'src/views/DocumentGeneratorView.jsx'),
+  path.join(PROJECT_ROOT, 'src/views/EntitlementWizardView.jsx'),
   path.join(PROJECT_ROOT, 'src/utils/letterGenerators.js')
 ];
 

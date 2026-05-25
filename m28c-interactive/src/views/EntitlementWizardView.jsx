@@ -1,25 +1,28 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Award, Info, CheckCircle, HelpCircle, 
   ChevronRight, ShieldAlert, Printer, 
-  FileText, Check, Calendar
+  FileText, Check, Calendar, AlertTriangle, ShieldCheck
 } from 'lucide-react';
 import { renderTemplate } from '../utils/templateRenderer.js';
 
 // JSON Templates
 import extendedEvaluationRequestTpl from '../data/templates/extended-evaluation-request.json';
 import sehDeterminationRequestTpl from '../data/templates/seh-determination-request.json';
+import employmentHandicapStatementTpl from '../data/templates/employment-handicap-statement.json';
+import sehStatementTpl from '../data/templates/seh-statement.json';
+import writtenRationaleRequestTpl from '../data/templates/written-rationale-request.json';
 
 const CASE_STAGES = [
   { id: 'not_applied', label: 'Not Applied' },
-  { id: 'evaluation', label: 'Evaluation & Planning Phase' },
+  { id: 'evaluation', label: 'Evaluation & Planning Phase (VRC Evaluation)' },
   { id: 'entitled_no_ipe', label: 'Entitled, No IPE yet' },
   { id: 'ipe_signed', label: 'IPE Signed & Active' },
   { id: 'in_school', label: 'In School / Active Training' },
   { id: 'employment_services', label: 'Employment Services Phase' },
   { id: 'interrupted', label: 'Interrupted Status' },
-  { id: 'discontinued', label: 'Discontinued / Closed Case' }
+  { id: 'discontinued', label: 'Discontinued / Closed Case (VRC Denial/Closure)' }
 ];
 
 const DISCHARGE_OPTIONS = [
@@ -31,7 +34,7 @@ const DISCHARGE_OPTIONS = [
 ];
 
 const EH_BARRIERS = [
-  { id: 'lifting', label: 'Lifting restrictions (e.g. unable to lift > 20 lbs)', category: 'Physical' },
+  { id: 'lifting', label: 'Lifting restrictions (unable to lift > 20 lbs)', category: 'Physical' },
   { id: 'sitting_standing', label: 'Sitting or standing intolerance (unable to remain static > 45 mins)', category: 'Physical' },
   { id: 'repetitive_wrist', label: 'Repetitive hand/wrist pain or limitations (e.g. carpal tunnel)', category: 'Physical' },
   { id: 'mobility', label: 'Mobility/ambulatory limitations (difficulty walking, stairs, or climbing)', category: 'Physical' },
@@ -45,11 +48,15 @@ const EH_BARRIERS = [
 ];
 
 const SEH_INDICATORS = [
-  { id: 'oth_discharge', label: 'Other Than Honorable (OTH) discharge requiring character review', citation: '38 C.F.R. § 21.44' },
-  { id: 'expired_12year', label: 'Basic 12-year period of eligibility has expired (delimiting date passed)', citation: '38 C.F.R. § 21.44' },
-  { id: 'exhausted_48month', label: 'Entitlement limit has been reached or is near (48-month point)', citation: '38 C.F.R. § 21.78' },
-  { id: 'ten_percent', label: 'Disability rating is exactly 10% (requires SEH to establish entitlement)', citation: '38 C.F.R. § 21.52' },
-  { id: 'severe_neuro', label: 'Severe neuropsychiatric or physical limitations that severely restrict career options', citation: '38 C.F.R. § 21.52' }
+  { id: 'multiple_disabilities', label: 'Multiple severe rating decisions (combined orthopedic, mental, or neurological)', citation: '38 C.F.R. § 21.52' },
+  { id: 'severe_restrictions', label: 'Severe functional restrictions on major daily activities', citation: '38 C.F.R. § 21.52' },
+  { id: 'long_term_unemployment', label: 'Long-term unemployment (exceeding 12 consecutive months)', citation: '38 C.F.R. § 21.52' },
+  { id: 'repeated_failed_work', label: 'Repeated failed attempts to sustain suitable employment', citation: '38 C.F.R. § 21.52' },
+  { id: 'extensive_training_need', label: 'Requires extensive or specialized training (e.g. graduate school)', citation: '38 C.F.R. § 21.52' },
+  { id: 'il_need', label: 'Needs Independent Living services to perform basic family/community tasks', citation: '38 C.F.R. § 21.52' },
+  { id: 'prior_vre_failure', label: 'Prior Chapter 31 case was interrupted or discontinued without successful placement', citation: '38 C.F.R. § 21.52' },
+  { id: 'limit_48_months', label: 'Requires more than 48 months of training to achieve vocational recovery', citation: '38 C.F.R. § 21.78' },
+  { id: 'medical_instability', label: 'Medical instability causing frequent absences or disruptions in training/work', citation: '38 C.F.R. § 21.52' }
 ];
 
 const FEASIBILITY_CHECKLIST = [
@@ -68,6 +75,91 @@ const EVIDENCE_ITEMS = [
   { id: 'personal_statement', label: 'Personal statement of necessity (Form 21-4138 remarks)', weight: 10 }
 ];
 
+const SCENARIOS = [
+  {
+    id: 'clear_20_eh',
+    name: '20% Rating with Active EH',
+    rating: 20,
+    dischargeStatus: 'honorable',
+    isActiveDuty: false,
+    scContributionPresent: true,
+    currentEmploymentStatus: 'unemployed',
+    hasProposedDenial: false,
+    denialReason: 'none',
+    hasWrittenDecision: false,
+    barriers: { lifting: true, sitting_standing: true },
+    sehIndicators: {},
+    feasibility: {},
+    evidence: { rating_decision: true, resume: true }
+  },
+  {
+    id: '10_seh_expired',
+    name: '10% Rating (Expired 12-Year Window & SEH)',
+    rating: 10,
+    dischargeStatus: 'honorable',
+    isActiveDuty: false,
+    scContributionPresent: true,
+    currentEmploymentStatus: 'unemployed',
+    hasProposedDenial: false,
+    denialReason: 'none',
+    hasWrittenDecision: false,
+    dischargeDate: '2010-05-15',
+    ratingDecisionDate: '2012-08-20',
+    barriers: { ptsd_crowds: true, concentration: true },
+    sehIndicators: { repeated_failed_work: true, long_term_unemployment: true },
+    feasibility: {},
+    evidence: { rating_decision: true, treatment_notes: true, personal_statement: true }
+  },
+  {
+    id: 'employed_suitability_dispute',
+    name: 'Employed, but Unsuitable Job (Proposed Denial)',
+    rating: 30,
+    dischargeStatus: 'honorable',
+    isActiveDuty: false,
+    scContributionPresent: true,
+    currentEmploymentStatus: 'employed',
+    hasProposedDenial: true,
+    denialReason: 'suitable_employment',
+    hasWrittenDecision: false,
+    barriers: { repetitive_wrist: true, ergonomic: true },
+    sehIndicators: {},
+    feasibility: {},
+    evidence: { rating_decision: true, treatment_notes: true }
+  },
+  {
+    id: 'feasibility_extended_eval',
+    name: 'Severe Conditions (Feasibility Uncertainty)',
+    rating: 40,
+    dischargeStatus: 'honorable',
+    isActiveDuty: false,
+    scContributionPresent: true,
+    currentEmploymentStatus: 'unemployed',
+    hasProposedDenial: false,
+    denialReason: 'none',
+    hasWrittenDecision: false,
+    barriers: { ptsd_crowds: true, concentration: true, appointments: true, flareups: true },
+    sehIndicators: { medical_instability: true },
+    feasibility: { unstable: true, uncertain: true },
+    evidence: { rating_decision: true, treatment_notes: true }
+  },
+  {
+    id: 'dishonorable_discharge_bar',
+    name: 'Dishonorable Discharge statutory bar',
+    rating: 30,
+    dischargeStatus: 'dishonorable',
+    isActiveDuty: false,
+    scContributionPresent: true,
+    currentEmploymentStatus: 'unemployed',
+    hasProposedDenial: false,
+    denialReason: 'none',
+    hasWrittenDecision: false,
+    barriers: { lifting: true },
+    sehIndicators: {},
+    feasibility: {},
+    evidence: {}
+  }
+];
+
 function EntitlementWizardView({ 
   reduceMotion, 
   setSelectedSection, 
@@ -84,6 +176,23 @@ function EntitlementWizardView({
   const [caseStage, setCaseStage] = useState('evaluation');
   const [dischargeDate, setDischargeDate] = useState('');
   const [ratingDecisionDate, setRatingDecisionDate] = useState('');
+  const [scContributionPresent, setScContributionPresent] = useState(true);
+
+  // Job Suitability Status
+  const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('unemployed');
+  const [jobSuitabilityCheckboxes, setJobSuitabilityCheckboxes] = useState({
+    aggravates_disability: false,
+    underemployed: false,
+    job_loss: false,
+    accommodations_needed: false
+  });
+
+  // Denial Posture State
+  const [hasProposedDenial, setHasProposedDenial] = useState(false);
+  const [denialReason, setDenialReason] = useState('none');
+  const [hasWrittenDecision, setHasWrittenDecision] = useState(false);
+  const [dateOfConversation, setDateOfConversation] = useState('');
+  const [whatVrcSaid, setWhatVrcSaid] = useState('');
 
   // Checklist States
   const [checkedBarriers, setCheckedBarriers] = useState({});
@@ -91,15 +200,29 @@ function EntitlementWizardView({
   const [checkedFeasibility, setCheckedFeasibility] = useState({});
   const [checkedEvidence, setCheckedEvidence] = useState({});
 
-  // Letter Options
+  // Letter Options & Info
   const [activeLetterTab, setActiveLetterTab] = useState('remarks');
   const [copiedText, setCopiedText] = useState(false);
   const [userName, setUserName] = useState('');
   const [claimNumber, setClaimNumber] = useState('');
   const [programName, setProgramName] = useState('');
+  const [requestedRecords, setRequestedRecords] = useState('1. VA Form 28-1902b Counseling Narrative\n2. Complete vocational assessment and job goal analysis logs\n3. Copy of local LMI (Labor Market Information) and compatibility screens used.');
+
+  // Five Tracks Diagnostic
+  const [tracksInterest, setTracksInterest] = useState('rapid'); // 'rapid' | 'employment' | 'self_emp' | 'education' | 'independent'
+  const [tracksLimitation, setTracksLimitation] = useState('moderate'); // 'mild' | 'moderate' | 'severe'
+  const [tracksMarketability, setTracksMarketability] = useState('yes'); // 'yes' | 'no'
+
+  // Independent Living Pre-Screener Checklist
+  const [ilpChecklist, setIlpChecklist] = useState({
+    no_vocational_goal: false,
+    severe_limitations: false,
+    needs_assistance: false,
+    cost_warning: false
+  });
 
   // Compute Delimiting Date
-  const getDelimitingStatus = () => {
+  const getDelimitingStatus = useCallback(() => {
     if (!dischargeDate || !ratingDecisionDate) return null;
     const dTime = new Date(dischargeDate).getTime();
     const rTime = new Date(ratingDecisionDate).getTime();
@@ -117,11 +240,58 @@ function EntitlementWizardView({
     const delimitingStr = delimitingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     return { isExpired, delimitingStr, diffYears };
-  };
+  }, [dischargeDate, ratingDecisionDate]);
 
   const delimitingStatus = getDelimitingStatus();
 
-  // Derive active SEH indicators at render-time (removes useEffect setState side-effects)
+  // Load Scenario Preset
+  const handleLoadScenario = (scenarioId) => {
+    const s = SCENARIOS.find(x => x.id === scenarioId);
+    if (!s) return;
+    setRating(s.rating);
+    setDischargeStatus(s.dischargeStatus);
+    setIsActiveDuty(s.isActiveDuty);
+    setScContributionPresent(s.scContributionPresent);
+    setCurrentEmploymentStatus(s.currentEmploymentStatus);
+    setHasProposedDenial(s.hasProposedDenial);
+    setDenialReason(s.denialReason);
+    setHasWrittenDecision(s.hasWrittenDecision);
+    setCheckedBarriers(s.barriers || {});
+    setManualSehIndicators(s.sehIndicators || {});
+    setCheckedFeasibility(s.feasibility || {});
+    setCheckedEvidence(s.evidence || {});
+    setDischargeDate(s.dischargeDate || '');
+    setRatingDecisionDate(s.ratingDecisionDate || '');
+    
+    // Set some defaults for job suitability checklist if employed
+    if (s.currentEmploymentStatus === 'employed') {
+      setJobSuitabilityCheckboxes({
+        aggravates_disability: true,
+        underemployed: true,
+        job_loss: false,
+        accommodations_needed: false
+      });
+    } else {
+      setJobSuitabilityCheckboxes({
+        aggravates_disability: false,
+        underemployed: false,
+        job_loss: false,
+        accommodations_needed: false
+      });
+    }
+
+    if (s.hasProposedDenial) {
+      setCaseStage('discontinued');
+      setDateOfConversation('2026-05-20');
+      setWhatVrcSaid('The counselor stated verbally that I am not entitled because my current employment indicates I have overcome my disability.');
+    } else {
+      setCaseStage('evaluation');
+      setDateOfConversation('');
+      setWhatVrcSaid('');
+    }
+  };
+
+  // Derive active SEH indicators at render-time
   const getActiveSehIndicators = () => {
     const indicators = { ...manualSehIndicators };
     
@@ -151,145 +321,306 @@ function EntitlementWizardView({
 
   const activeSehIndicators = getActiveSehIndicators();
 
-  // Evaluated Entitlement Assessment (Uses softened terminology)
-  const assessLikelihood = () => {
-    // Dishonorable character of discharge is a statutory bar under 38 U.S.C. § 5303
-    if (dischargeStatus === 'dishonorable' && !isActiveDuty) {
-      return {
-        likelyEligible: false,
-        likelyEntitled: false,
-        status: 'Unlikely to Meet Criteria',
-        reason: 'Character of discharge is listed as Dishonorable, which represents a statutory bar under 38 U.S.C. § 5303.',
-        plainReason: 'Federal law does not permit the VA to grant VR&E benefits to individuals with a dishonorable discharge characterization.',
-        guidance: 'You may apply to the VA Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR) for a character of discharge upgrade.',
-        cfr: '38 C.F.R. § 21.42'
-      };
+  // Sequential Adjudication Rules Engine
+  const performAdjudication = () => {
+    // 13-Stage sequential analysis
+    
+    // Stage 1: Statutory Discharge Bar (38 U.S.C. § 5303)
+    const isStatutoryDischargeBar = dischargeStatus === 'dishonorable' && !isActiveDuty;
+    
+    // Stage 2: Active Duty / IDES Pathway (38 C.F.R. § 21.40)
+    const isIdesPathway = isActiveDuty;
+    
+    // Stage 3: Basic Rating Threshold (38 U.S.C. § 3102)
+    const isBelowRatingThreshold = rating === 0 && !isActiveDuty;
+    
+    // Stage 4: 12-Year Delimiting Date Expiration (38 C.F.R. § 21.44)
+    const is12YearExpired = delimitingStatus?.isExpired || false;
+    
+    // Stage 5 & 6: Basic EH vs SEH requirement derivation
+    const requiresSEH = rating === 10 || is12YearExpired || dischargeStatus === 'oth';
+    const requiresEH = rating >= 20 && !requiresSEH;
+    
+    // Stage 7: Employment Handicap (EH) Scoring
+    const barrierCount = Object.keys(checkedBarriers).filter(k => checkedBarriers[k] && EH_BARRIERS.some(b => b.id === k)).length;
+    
+    const isJobUnsuitable = currentEmploymentStatus === 'employed' && (
+      jobSuitabilityCheckboxes.aggravates_disability ||
+      jobSuitabilityCheckboxes.underemployed ||
+      jobSuitabilityCheckboxes.job_loss ||
+      jobSuitabilityCheckboxes.accommodations_needed
+    );
+    
+    let ehScore = barrierCount;
+    if (currentEmploymentStatus === 'employed') {
+      if (isJobUnsuitable) ehScore += 1;
+      else ehScore = 0; // If employed in suitable job, EH score falls to zero
+    }
+    
+    // EH criteria: requires service connected contribution, score >= 1, and suitable employment barriers if employed
+    const isEhEstablished = scContributionPresent && ehScore >= 1 && (currentEmploymentStatus === 'unemployed' || isJobUnsuitable);
+    
+    // Stage 8: Serious Employment Handicap (SEH) Scoring
+    const manualSehCount = Object.keys(manualSehIndicators).filter(k => manualSehIndicators[k] && SEH_INDICATORS.some(ind => ind.id === k)).length;
+    let sehScore = manualSehCount;
+    if (rating === 10) sehScore += 1;
+    if (dischargeStatus === 'oth') sehScore += 1;
+    if (is12YearExpired) sehScore += 1;
+    if (checkedBarriers['ptsd_crowds'] || checkedBarriers['concentration'] || checkedBarriers['social_interaction']) {
+      sehScore += 1; // Severe neuropsychiatric indicator count
+    }
+    
+    const isSehEstablished = isEhEstablished && (sehScore >= 2 || is12YearExpired || rating === 10);
+    
+    // Stage 9: SC Disability Contribution Check
+    const hasScContribution = scContributionPresent;
+    
+    // Stage 10: Feasibility Assessment
+    const isFeasibilityUncertain = Object.values(checkedFeasibility).filter(Boolean).length > 0;
+    
+    // Stage 11: Evidence Checklist Index
+    const evidenceScore = EVIDENCE_ITEMS.reduce((acc, item) => {
+      return checkedEvidence[item.id] ? acc + item.weight : acc;
+    }, 0);
+    
+    // Stage 12: Procedural VA Errors Spotting
+    const activeErrors = [];
+    if (rating === 10 && caseStage === 'discontinued' && denialReason === 'not_eligible') {
+      activeErrors.push({
+        id: "10-percent-categorical-denial",
+        error: "VA may have treated a 10% Veteran as categorically ineligible.",
+        whyItMatters: "A 10% rating supports entitlement if the VA finds a Serious Employment Handicap.",
+        authorities: ["38-usc-3102", "38-cfr-21-40", "38-cfr-21-52"],
+        bestMove: "Request a Serious Employment Handicap determination and submit supporting SEH evidence."
+      });
+    }
+    if (currentEmploymentStatus === 'employed' && denialReason === 'suitable_employment') {
+      activeErrors.push({
+        id: "current-employment-improper-denial",
+        error: "VA may have treated current employment as categorically overcoming impairment.",
+        whyItMatters: "The analysis must address suitability, stability, and whether impairment has actually been overcome.",
+        authorities: ["38-cfr-21-51"],
+        bestMove: "Submit medical and occupational evidence that the job is unsuitable, unstable, or aggravates your conditions."
+      });
+    }
+    if (denialReason === 'no_eh' && hasScContribution) {
+      activeErrors.push({
+        id: "no-sc-contribution-analysis",
+        error: "VA may have failed to analyze service-connected disability contribution.",
+        whyItMatters: "An Employment Handicap requires analyzing whether service-connected disability contributes to vocational impairment.",
+        authorities: ["38-cfr-21-51"],
+        bestMove: "Submit a direct service-connected contribution statement and functional clinical evidence."
+      });
+    }
+    if (rating === 10 && denialReason === 'no_eh' && (is12YearExpired || Object.keys(manualSehIndicators).filter(k => manualSehIndicators[k]).length > 0)) {
+      activeErrors.push({
+        id: "seh-not-separately-analyzed",
+        error: "VA may have failed to perform a separate Serious Employment Handicap determination.",
+        whyItMatters: "A separate SEH determination is required when basic Employment Handicap criteria are not fully met but SEH indicators exist.",
+        authorities: ["38-cfr-21-52"],
+        bestMove: "Request a written, formal SEH determination."
+      });
+    }
+    if (denialReason === 'not_feasible' && isFeasibilityUncertain) {
+      activeErrors.push({
+        id: "unsupported-infeasibility",
+        error: "VA may have made an unsupported feasibility denial.",
+        whyItMatters: "Feasibility evaluations must consider appropriate supports and accommodations, or authorize an Extended Evaluation.",
+        authorities: ["38-cfr-21-53", "38-cfr-21-57", "38-cfr-21-74"],
+        bestMove: "Request an Extended Evaluation under 38 C.F.R. § 21.74 to test capacity with support."
+      });
+    }
+    if (!hasWrittenDecision && hasProposedDenial) {
+      activeErrors.push({
+        id: "no-written-rationale",
+        error: "Counselor proposed denial or closed case without providing written rationale.",
+        whyItMatters: "Veterans must be provided a written decision notice containing reasons and evidence relied upon.",
+        authorities: ["38-cfr-21-50"],
+        bestMove: "Request a formal written decision and counseling narrative (VA Form 28-1902b)."
+      });
     }
 
-    // Active duty / IDES exception
-    if (isActiveDuty) {
-      return {
-        likelyEligible: true,
-        likelyEntitled: true,
-        status: 'Likely Criteria Satisfied (IDES Referral Pathway)',
-        reason: 'Active-duty service members undergoing the Integrated Disability Evaluation System (IDES) or holding a memorandum rating of 20% or more satisfy basic eligibility criteria under 38 C.F.R. § 21.40.',
-        plainReason: 'As an active-duty service member in the IDES process, you are fast-tracked for eligibility without needing a finalized DD-214 or VA rating decision.',
-        guidance: 'Ensure your IDES coordinator forwards your packet to the local VR&E office to schedule your initial evaluation.',
-        cfr: '38 C.F.R. § 21.40'
-      };
-    }
-
-    // 0% rating
-    if (rating === 0) {
-      return {
-        likelyEligible: false,
-        likelyEntitled: false,
-        status: 'Intake Threshold Not Met',
-        reason: 'A service-connected disability rating of at least 10% is required to apply for Chapter 31 VR&E under 38 U.S.C. § 3102.',
-        plainReason: 'To apply, you must first receive a service-connected disability rating of 10% or higher from the VA.',
-        guidance: 'If you have rated conditions that have worsened, consider filing for an increase or new service-connections on VA.gov.',
-        cfr: '38 C.F.R. § 21.40'
-      };
-    }
-
-    const barrierCount = Object.values(checkedBarriers).filter(Boolean).length;
-    const hasBarriers = barrierCount > 0;
-
-    // 10% rating requires an SEH
-    if (rating === 10) {
-      const hasSehIndicator = Object.values(activeSehIndicators).filter(Boolean).length > 0;
-      if (hasSehIndicator && hasBarriers) {
-        return {
-          likelyEligible: true,
-          likelyEntitled: true,
-          status: 'Likely Entitled (10% Rating + Serious Employment Handicap)',
-          reason: 'Veterans with a 10% rating satisfy entitlement criteria when a Serious Employment Handicap (SEH) is established under 38 C.F.R. § 21.52.',
-          plainReason: 'Even with a 10% rating, you are likely entitled to services because you have documented significant barriers to finding or keeping work (SEH).',
-          guidance: 'Prepare to explain to your counselor how your service-connected conditions severely restrict your employment options.',
-          cfr: '38 C.F.R. § 21.52'
-        };
+    // Stage 13: Derive Adjudication Pathway
+    let path;
+    let law;
+    let title;
+    
+    if (isStatutoryDischargeBar || isBelowRatingThreshold) {
+      path = 'STATUTORY_BAR_ACTIVE';
+      law = '38 U.S.C. § 5303; 38 C.F.R. § 21.42';
+      title = 'Statutory Criteria Not Satisfied';
+    } else if (hasProposedDenial && !hasWrittenDecision) {
+      path = 'WRITTEN_DECISION_NEEDED';
+      law = '38 C.F.R. § 21.50';
+      title = 'Denial Posture (Formal Written Rationale Requested)';
+    } else if (isFeasibilityUncertain && (isEhEstablished || isSehEstablished)) {
+      path = 'FEASIBILITY_DISPUTE';
+      law = '38 U.S.C. § 3106; 38 C.F.R. § 21.57; 38 C.F.R. § 21.74';
+      title = 'Entitled, but Vocational Feasibility Disputed';
+    } else if (requiresSEH) {
+      if (isSehEstablished) {
+        path = 'LIKELY_10_SEH_SUPPORT';
+        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.52';
+        title = 'Likely Entitled (10% Rating & Serious Employment Handicap)';
       } else {
-        return {
-          likelyEligible: true,
-          likelyEntitled: false,
-          status: 'Likely Eligible, but Entitlement Criteria Unmet',
-          reason: 'Basic eligibility to apply is satisfied at 10%, but entitlement requires establishing a Serious Employment Handicap (SEH) under 38 C.F.R. § 21.52.',
-          plainReason: 'You meet the baseline rules to apply, but the VA cannot provide services unless you establish that your disabilities create severe work barriers.',
-          guidance: 'Focus on gathering medical statements or occupational evidence that details the severity of your employment limitations.',
-          cfr: '38 C.F.R. § 21.52'
-        };
+        path = 'TEN_PERCENT_SEH_EVIDENCE_NEEDED';
+        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.52';
+        title = 'Eligible, but SEH Evidence Required (10% Rating)';
+      }
+    } else {
+      if (isEhEstablished) {
+        path = 'LIKELY_20_EH_SUPPORT';
+        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.51';
+        title = 'Likely Entitled (20%+ Rating & Active Employment Handicap)';
+      } else {
+        path = 'TWENTY_PERCENT_EH_EVIDENCE_NEEDED';
+        law = '38 U.S.C. § 3102; 38 C.F.R. § 21.51';
+        title = 'Eligible, but EH Evidence Required (20%+ Rating)';
       }
     }
 
-    // 20% or higher rating requires an EH
-    if (rating >= 20) {
-      if (hasBarriers) {
-        return {
-          likelyEligible: true,
-          likelyEntitled: true,
-          status: 'Likely Entitled (20%+ Rating + Employment Handicap)',
-          reason: 'A rating of 20% or higher satisfies entitlement criteria when an Employment Handicap (EH) is established under 38 C.F.R. § 21.51.',
-          plainReason: 'With a 20% or higher rating, you are likely entitled because your disabilities create clear barriers to preparing for, getting, or keeping a job.',
-          guidance: 'You are ready to proceed with your application. Submit VA Form 28-1900 to initiate your intake.',
-          cfr: '38 C.F.R. § 21.51'
-        };
-      } else {
-        return {
-          likelyEligible: true,
-          likelyEntitled: false,
-          status: 'Likely Eligible, but Entitlement Criteria Unmet',
-          reason: 'Basic eligibility to apply is satisfied, but entitlement requires finding an Employment Handicap (EH) under 38 C.F.R. § 21.51.',
-          plainReason: 'You can apply, but you must show that your disability creates a handicap in getting or keeping suitable employment.',
-          guidance: 'Identify physical or cognitive tasks in your past or current job that aggravate your service-connected conditions.',
-          cfr: '38 C.F.R. § 21.51'
-        };
+    // Facts Supporting & Hurting
+    const factsSupport = [];
+    const factsHurt = [];
+    const missingEvidence = [];
+    
+    // Facts supporting
+    if (isIdesPathway) {
+      factsSupport.push('Active-duty service member undergoing IDES satisfies basic eligibility under 38 C.F.R. § 21.40.');
+    } else {
+      if (rating >= 20) {
+        factsSupport.push(`Disability rating of ${rating}% satisfies baseline application criteria for standard Employment Handicap evaluation.`);
+      } else if (rating === 10) {
+        factsSupport.push('Disability rating of 10% satisfies basic eligibility to apply.');
       }
     }
 
-    return {
-      likelyEligible: false,
-      likelyEntitled: false,
-      status: 'Undetermined Profile',
-      reason: 'Please complete the intake parameters to assess your potential entitlement path.',
-      plainReason: 'Complete the intake details on the screen to view your personalized assessment.',
-      guidance: 'Select your disability rating, discharge character, and active barriers.',
-      cfr: '38 C.F.R. § 21.40'
-    };
-  };
-
-  const assessment = assessLikelihood();
-
-  // Feasibility Check
-  const getFeasibilityStatus = () => {
-    const checkedCount = Object.values(checkedFeasibility).filter(Boolean).length;
-    if (checkedCount > 0) {
-      return {
-        status: 'Uncertain Feasibility / Extended Evaluation Indicated',
-        reason: 'One or more indicators suggest that achieving a vocational goal is currently uncertain. Under 38 C.F.R. § 21.74, you should request an Extended Evaluation rather than accepting a feasibility denial.',
-        action: 'Recommending request for an Extended Evaluation (up to 12 months) to test capacity with support services.'
-      };
+    if (dischargeStatus === 'honorable' || dischargeStatus === 'general') {
+      factsSupport.push(`Discharge characterization (${dischargeStatus}) represents a non-barring military service record.`);
     }
+
+    if (delimitingStatus && !delimitingStatus.isExpired) {
+      factsSupport.push(`Basic eligibility window is active and remains open until ${delimitingStatus.delimitingStr}.`);
+    }
+
+    if (hasScContribution) {
+      factsSupport.push('Rated service-connected conditions directly cause or contribute to current vocational impairment.');
+    }
+
+    if (barrierCount > 0) {
+      factsSupport.push(`Factual record documents ${barrierCount} active physical or cognitive occupational barriers.`);
+    }
+
+    if (currentEmploymentStatus === 'employed' && isJobUnsuitable) {
+      factsSupport.push('Current employment is unsuitable due to disability aggravation or severe underemployment.');
+    } else if (currentEmploymentStatus === 'unemployed') {
+      factsSupport.push('Unemployed status demonstrates vocational displacement caused in part by rating limitations.');
+    }
+
+    // Facts hurting
+    if (dischargeStatus === 'dishonorable') {
+      factsHurt.push('Dishonorable discharge status acts as a statutory bar under 38 U.S.C. § 5303.');
+    } else if (dischargeStatus === 'oth') {
+      factsHurt.push('Other Than Honorable (OTH) discharge characterization necessitates administrative Character of Service review.');
+    }
+
+    if (rating === 0 && !isActiveDuty) {
+      factsHurt.push('VA disability rating is 0%, failing to satisfy basic application requirements.');
+    }
+
+    if (is12YearExpired) {
+      factsHurt.push('Basic 12-year eligibility period has expired, requiring an assessed Serious Employment Handicap (SEH).');
+    }
+
+    if (!hasScContribution) {
+      factsHurt.push('Lacking direct connection between service-connected rating and vocational impairment.');
+    }
+
+    if (barrierCount === 0) {
+      factsHurt.push('No physical or cognitive occupational barriers checked, failing to demonstrate vocational impairment.');
+    }
+
+    if (currentEmploymentStatus === 'employed' && !isJobUnsuitable) {
+      factsHurt.push('Employed in a job not marked as unsuitable, which the VA may interpret as having overcome impairment.');
+    }
+
+    if (isFeasibilityUncertain) {
+      factsHurt.push('Medical instability or treatment schedule introduces uncertainty regarding immediate training feasibility.');
+    }
+
+    // Missing evidence derivation
+    EVIDENCE_ITEMS.forEach(item => {
+      if (!checkedEvidence[item.id]) {
+        missingEvidence.push(item.label);
+      }
+    });
+
+    // Next steps formulation
+    const nextSteps = [];
+    if (path === 'STATUTORY_BAR_ACTIVE') {
+      if (dischargeStatus === 'dishonorable') {
+        nextSteps.push('Apply to the Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR) for character upgrade.');
+      } else {
+        nextSteps.push('File for a rating increase or new service connections on VA.gov to reach the 10% threshold.');
+      }
+    } else if (path === 'WRITTEN_DECISION_NEEDED') {
+      nextSteps.push('Request a formal written Decision Notice and counseling narrative under 38 C.F.R. § 21.50.');
+      nextSteps.push('Draft a written record request letter using the template below to present to your counselor.');
+    } else if (path === 'FEASIBILITY_DISPUTE') {
+      nextSteps.push('Submit a formal request for an Extended Evaluation plan (up to 12 months) under 38 C.F.R. § 21.74.');
+      nextSteps.push('Gather treating doctor statements explaining that you can train with accommodations.');
+    } else if (requiresSEH && !isSehEstablished) {
+      nextSteps.push('Gather evidence of failed work or training attempts to demonstrate significant impairment.');
+      nextSteps.push('Submit a Serious Employment Handicap (SEH) statement detailing severe functional barriers.');
+    } else if (requiresEH && !isEhEstablished) {
+      nextSteps.push('Document how your service-connected conditions interfere with specific physical or cognitive job tasks.');
+      nextSteps.push('Submit an Employment Handicap Remarks Narrative to detail occupational barriers.');
+    } else {
+      nextSteps.push('File VA Form 28-1900 on VA.gov.');
+      nextSteps.push('Assemble your evidence portfolio (VA rating letter, resume, doctor letters) for your evaluation.');
+    }
+
+    // Authorities list
+    const authorities = [];
+    if (isStatutoryDischargeBar) authorities.push("38-usc-5303", "38-cfr-21-42");
+    if (isBelowRatingThreshold) authorities.push("38-usc-3102", "38-cfr-21-40");
+    if (isIdesPathway) authorities.push("38-cfr-21-40");
+    if (is12YearExpired) authorities.push("38-usc-3103", "38-cfr-21-44");
+    if (requiresEH) authorities.push("38-usc-3102", "38-cfr-21-51");
+    if (requiresSEH) authorities.push("38-usc-3102", "38-cfr-21-52");
+    if (isFeasibilityUncertain) authorities.push("38-usc-3106", "38-cfr-21-57", "38-cfr-21-74");
+    if (hasProposedDenial) authorities.push("38-cfr-21-50");
+
+    // Document to generate
+    let recommendedDocument = 'remarks';
+    if (path === 'WRITTEN_DECISION_NEEDED') recommendedDocument = 'written_rationale';
+    else if (path === 'FEASIBILITY_DISPUTE') recommendedDocument = 'ext_eval';
+    else if (requiresSEH) recommendedDocument = 'seh_statement';
+
+    // Review-Lane Warning
+    const reviewLaneWarning = path === 'STATUTORY_BAR_ACTIVE'
+      ? "Review lanes are unavailable. You must satisfy statutory requirements before any appeals can be lodged."
+      : !hasWrittenDecision
+      ? "Higher-Level Review (HLR), Supplemental Claim, or Board Appeals cannot be filed without a finalized, written VA Decision Notice. If you only received verbal counselor feedback, you must request a formal written decision."
+      : "Ensure you submit your appeal within 1 year of the date on the written Decision Notice. Choose Higher-Level Review (HLR) for legal/procedural errors, or Supplemental Claim if you have new and relevant evidence.";
+
     return {
-      status: 'Goal Achievement Likely Feasible',
-      reason: 'No critical medical or rehabilitation instability indicators are checked. Your profile suggests you can successfully complete vocational training.',
-      action: 'Suggest proceeding directly with plan development (IWRP) once entitlement is approved.'
+      pathCode: path,
+      pathTitle: title,
+      pathLaw: law,
+      factsSupport,
+      factsHurt,
+      evidenceMissing: missingEvidence,
+      activeErrors,
+      nextSteps,
+      recommendedDocument,
+      reviewLaneWarning,
+      authorities,
+      evidenceScore
     };
   };
 
-  const feasibilityStatus = getFeasibilityStatus();
-
-  // Evidence Strength Meter Calculation
-  const evidenceScore = EVIDENCE_ITEMS.reduce((acc, item) => {
-    return checkedEvidence[item.id] ? acc + item.weight : acc;
-  }, 0);
-
-  const getEvidenceRating = (score) => {
-    if (score >= 75) return { label: 'Optimized Evidence Base', color: 'text-emerald-400', progressColor: 'bg-emerald-500' };
-    if (score >= 45) return { label: 'Moderate Evidence Base', color: 'text-amber-400', progressColor: 'bg-amber-500' };
-    return { label: 'Weak Evidence Base', color: 'text-red-400', progressColor: 'bg-red-500' };
-  };
-
-  const evidenceRating = getEvidenceRating(evidenceScore);
+  const adj = performAdjudication();
 
   // Remarks Narratives (Section IV of VA Form 28-1900)
   const compileRemarksText = () => {
@@ -298,32 +629,56 @@ function EntitlementWizardView({
       .map(b => b.label)
       .join(', ');
 
-    let text = `I am formally applying for Chapter 31 Veteran Readiness and Employment (VR&E) services to overcome my disability employment barriers.`;
+    const variables = {
+      userName: userName || '[VETERAN NAME]',
+      claimNumber: claimNumber || '[CLAIM NUMBER]',
+      date: new Date().toLocaleDateString(),
+      currentEmploymentStatus: currentEmploymentStatus === 'employed' ? 'Employed' : 'Unemployed',
+      programName: programName || '[TARGET GOAL]',
+      serviceConnectedConditions: `Rated service-connected conditions (${rating}%)`,
+      workLimitations: activeBarriersText || 'Physical and cognitive restrictions arising from service-connected conditions.',
+      workHistoryProblems: currentEmploymentStatus === 'unemployed' ? 'Unemployed or unable to maintain steady employment due to rated limitations.' : 'Experiencing difficulties maintaining steady work as detailed in current job suitability assessment.',
+      whyCurrentEmploymentNotSuitable: currentEmploymentStatus === 'employed' ? 'Aggravates disabilities or represents underemployment.' : 'Not applicable (currently unemployed).',
+      requestedAction: 'I request a collaborative evaluation to formulate a rehabilitation plan and address my occupational barriers.'
+    };
 
-    if (isActiveDuty) {
-      text += ` As an active-duty service member in the Integrated Disability Evaluation System (IDES) pathway, I request fast-track evaluation under 38 C.F.R. § 21.40.`;
-    }
+    return renderTemplate(employmentHandicapStatementTpl.body, variables);
+  };
 
-    if (activeBarriersText) {
-      text += ` My service-connected disabilities create specific occupational obstacles including: ${activeBarriersText}. These barriers interfere with my ability to obtain or maintain suitable, injury-free employment.`;
-    } else {
-      text += ` My service-connected conditions interfere with my ability to perform standard duties, and I request vocational evaluation to identify suitable, medically compatible career options.`;
-    }
+  // Compile SEH Statement
+  const compileSehRemarksText = () => {
+    const activeBarriersText = EH_BARRIERS
+      .filter(b => checkedBarriers[b.id])
+      .map(b => b.label)
+      .join(', ');
 
-    if (delimitingStatus?.isExpired) {
-      text += ` Although my basic 12-year window has expired, I request an extension of my eligibility period based on a Serious Employment Handicap (SEH) under 38 C.F.R. § 21.44.`;
-    }
+    const activeSehText = SEH_INDICATORS
+      .filter(ind => activeSehIndicators[ind.id] || manualSehIndicators[ind.id])
+      .map(ind => ind.label)
+      .join(', ');
 
-    text += ` I request a collaborative evaluation to formulate a rehabilitation plan.`;
-    return text;
+    const variables = {
+      userName: userName || '[VETERAN NAME]',
+      claimNumber: claimNumber || '[CLAIM NUMBER]',
+      date: new Date().toLocaleDateString(),
+      ratingPercent: rating,
+      seriousVocationalBarriers: activeSehText || 'Significant vocational barriers identified under 38 C.F.R. § 21.52.',
+      failedWorkAttempts: 'Unable to sustain stable employment due to rated limitations.',
+      trainingNeeds: 'Requires specialized training, accommodations, or extensions to overcome occupational limitations.',
+      functionalRestrictions: activeBarriersText || 'Severe functional restrictions arising from rated conditions.',
+      whyExtensiveServicesNeeded: 'Requires extensive rehabilitation services and potential extensions of eligibility or duration to achieve recovery.',
+      requestedAction: 'I request a Serious Employment Handicap determination to overcome my significant vocational barriers.'
+    };
+
+    return renderTemplate(sehStatementTpl.body, variables);
   };
 
   // Compile Letters using renderTemplate
   const compileExtendedEvalLetter = () => {
     const variables = {
       date: new Date().toLocaleDateString(),
-      'Your Name': userName || '[VETERAN NAME]',
-      'Your Claim Number': claimNumber || '[CLAIM NUMBER]'
+      userName: userName || '[VETERAN NAME]',
+      claimNumber: claimNumber || '[CLAIM NUMBER]'
     };
     return renderTemplate(extendedEvaluationRequestTpl.body, variables);
   };
@@ -335,18 +690,31 @@ function EntitlementWizardView({
       .join('\n');
 
     const indicatorList = SEH_INDICATORS
-      .filter(ind => activeSehIndicators[ind.id])
+      .filter(ind => activeSehIndicators[ind.id] || manualSehIndicators[ind.id])
       .map(ind => `* ${ind.label} (${ind.citation})`)
       .join('\n');
 
     const variables = {
       date: new Date().toLocaleDateString(),
-      'Your Name': userName || '[VETERAN NAME]',
-      'Your Claim Number': claimNumber || '[CLAIM NUMBER]',
+      userName: userName || '[VETERAN NAME]',
+      claimNumber: claimNumber || '[CLAIM NUMBER]',
       employmentBarriers: barrierList || '* General occupational barriers caused by rated disabilities.',
       sehJustification: indicatorList || '* Statutorily indicated Serious Employment Handicap circumstances.'
     };
     return renderTemplate(sehDeterminationRequestTpl.body, variables);
+  };
+
+  // Compile Written Rationale Request
+  const compileWrittenRationaleLetter = () => {
+    const variables = {
+      date: new Date().toLocaleDateString(),
+      userName: userName || '[VETERAN NAME]',
+      claimNumber: claimNumber || '[CLAIM NUMBER]',
+      dateOfConversation: dateOfConversation || '[DATE OF CONVERSATION/DECISION]',
+      whatVrcSaid: whatVrcSaid || '[COUNSELOR STATEMENTS]',
+      requestedRecords: requestedRecords || '[LIST OF REQUESTED RECORDS]'
+    };
+    return renderTemplate(writtenRationaleRequestTpl.body, variables);
   };
 
   const handleCopyText = (text) => {
@@ -395,6 +763,83 @@ function EntitlementWizardView({
     setCheckedEvidence(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Five Tracks scoring and results
+  const getTracksDiagnosticResult = () => {
+    let recommendedTrack = 'Track 1: Rapid Access to Employment';
+    let trackExplanation = 'Rapid employment services are recommended for veterans who already possess marketable skills and require only immediate job placement assistance.';
+    let trackCfr = '38 C.F.R. § 21.35';
+
+    if (tracksLimitation === 'severe' || tracksInterest === 'independent') {
+      recommendedTrack = 'Track 5: Independent Living Services';
+      trackExplanation = 'Independent Living services are indicated where severe limitations make achieving a vocational goal currently uncertain or not feasible, focusing on restoring independence in daily life.';
+      trackCfr = '38 C.F.R. § 21.76';
+    } else if (tracksInterest === 'self_emp') {
+      recommendedTrack = 'Track 4: Self-Employment';
+      trackExplanation = 'Self-employment is suitable for veterans with complex medical limitations that require a highly customizable schedule and workplace control, or who have strong business proposals.';
+      trackCfr = '38 C.F.R. § 21.257';
+    } else if (tracksInterest === 'education' || tracksMarketability === 'no') {
+      recommendedTrack = 'Track 3: Employment Through Long-Term Services';
+      trackExplanation = 'Long-term training or professional education (such as college or vocational certificates) is indicated to acquire the specialized skills required for a suitable, medically compatible career.';
+      trackCfr = '38 C.F.R. § 21.51';
+    } else if (tracksInterest === 'rapid' || tracksInterest === 'employment') {
+      recommendedTrack = 'Track 2: Reemployment';
+      trackExplanation = 'Reemployment services assist veterans in returning to their prior employer or field with appropriate adjustments and accommodations.';
+      trackCfr = '38 C.F.R. § 21.35';
+    }
+
+    return { recommendedTrack, trackExplanation, trackCfr };
+  };
+
+  const tracksResult = getTracksDiagnosticResult();
+
+  // Reset all states
+  const handleResetWizard = () => {
+    setRating(20);
+    setDischargeStatus('honorable');
+    setIsActiveDuty(false);
+    setCaseStage('evaluation');
+    setDischargeDate('');
+    setRatingDecisionDate('');
+    setScContributionPresent(true);
+    setCurrentEmploymentStatus('unemployed');
+    setJobSuitabilityCheckboxes({
+      aggravates_disability: false,
+      underemployed: false,
+      job_loss: false,
+      accommodations_needed: false
+    });
+    setHasProposedDenial(false);
+    setDenialReason('none');
+    setHasWrittenDecision(false);
+    setDateOfConversation('');
+    setWhatVrcSaid('');
+    setCheckedBarriers({});
+    setManualSehIndicators({});
+    setCheckedFeasibility({});
+    setCheckedEvidence({});
+    setUserName('');
+    setClaimNumber('');
+    setProgramName('');
+    setTracksInterest('rapid');
+    setTracksLimitation('moderate');
+    setTracksMarketability('yes');
+    setIlpChecklist({
+      no_vocational_goal: false,
+      severe_limitations: false,
+      needs_assistance: false,
+      cost_warning: false
+    });
+    setActiveTab('profile');
+  };
+
+  const getEvidenceRating = (score) => {
+    if (score >= 75) return { label: 'Optimized Evidence Base', color: 'text-emerald-400', progressColor: 'bg-emerald-500' };
+    if (score >= 45) return { label: 'Moderate Evidence Base', color: 'text-amber-400', progressColor: 'bg-amber-500' };
+    return { label: 'Weak Evidence Base', color: 'text-red-400', progressColor: 'bg-red-500' };
+  };
+
+  const evidenceRating = getEvidenceRating(adj.evidenceScore);
+
   return (
     <motion.div
       initial={reduceMotion ? {} : { opacity: 0, y: 15 }}
@@ -408,8 +853,8 @@ function EntitlementWizardView({
             <Award size={20} />
           </span>
           <div>
-            <h1 className="text-lg font-bold text-slate-100">Eligibility, Entitlement & Employment Handicap Builder</h1>
-            <p className="text-[11px] text-slate-400">Step-by-step statutory screening and claim package compilation tool for Chapter 31 VR&E benefits.</p>
+            <h1 className="text-lg font-bold text-slate-100">Eligibility & Entitlement Adjudication System</h1>
+            <p className="text-[11px] text-slate-400">Statutory adjudication prescreener, counselor simulator, and strategic document compiler.</p>
           </div>
         </div>
 
@@ -419,6 +864,7 @@ function EntitlementWizardView({
           <span className="text-[10px] font-semibold text-slate-350">Plain Language:</span>
           <button
             type="button"
+            id="plain-language-toggle"
             onClick={() => setPlainLanguageMode(!plainLanguageMode)}
             className={`text-[9px] font-bold px-2 py-0.5 rounded transition ${
               plainLanguageMode ? 'bg-indigo-650 text-white' : 'bg-slate-950/60 text-slate-450 border border-slate-855'
@@ -431,37 +877,63 @@ function EntitlementWizardView({
 
       <div className="doc-divider mb-6"></div>
 
+      {/* Preset Scenarios Panel */}
+      <div className="bg-slate-950/65 border border-slate-800/80 rounded-xl p-4 mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <ShieldCheck size={16} className="text-indigo-400" />
+          <span className="text-xs font-bold text-slate-200">Eligibility Test Lab: Load Preset Profiles</span>
+        </div>
+        <p className="text-[10.5px] text-slate-400 mb-3">Load a predefined profile to see the rules engine map it to the correct statutory pathway.</p>
+        <div className="flex flex-wrap gap-2">
+          {SCENARIOS.map(sc => (
+            <button
+              key={sc.id}
+              onClick={() => handleLoadScenario(sc.id)}
+              className="px-2.5 py-1 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10.5px] text-indigo-400 hover:text-indigo-300 rounded font-semibold transition"
+            >
+              {sc.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="tabs-header mb-6">
         <button 
           className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
-          1. Profile & Intake
+          1. Service Details
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'denial_posture' ? 'active' : ''}`}
+          onClick={() => setActiveTab('denial_posture')}
+        >
+          2. Case Stage & Denial
         </button>
         <button 
           className={`tab-btn ${activeTab === 'eh_builder' ? 'active' : ''}`}
           onClick={() => setActiveTab('eh_builder')}
         >
-          2. Occupational Barriers (EH)
+          3. Occupational Barriers
         </button>
         <button 
           className={`tab-btn ${activeTab === 'seh_builder' ? 'active' : ''}`}
           onClick={() => setActiveTab('seh_builder')}
         >
-          3. SEH Extension Indicators
+          4. SEH Extension Indicators
         </button>
         <button 
           className={`tab-btn ${activeTab === 'feasibility' ? 'active' : ''}`}
           onClick={() => setActiveTab('feasibility')}
         >
-          4. Feasibility Screening
+          5. Feasibility & Evidence
         </button>
         <button 
           className={`tab-btn ${activeTab === 'evidence_letters' ? 'active' : ''}`}
           onClick={() => setActiveTab('evidence_letters')}
         >
-          5. Evidence & Letter Builder
+          6. Document Builder
         </button>
       </div>
 
@@ -471,15 +943,16 @@ function EntitlementWizardView({
         {/* Left Side: Active Panel Controls */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* TAB 1: PROFILE & INTAKE */}
+          {/* TAB 1: SERVICE DETAILS */}
           {activeTab === 'profile' && (
             <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Intake Parameters</span>
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Service Details & Rating</span>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-slate-400 block mb-1">Disability Rating from VA</label>
                   <select 
+                    id="rating-select"
                     className="form-control bg-slate-950/80 border-slate-800 text-xs text-slate-100"
                     value={rating} 
                     onChange={(e) => setRating(Number(e.target.value))}
@@ -495,6 +968,7 @@ function EntitlementWizardView({
                 <div className="form-group">
                   <label className="text-[10px] font-bold text-slate-400 block mb-1">Discharge Characterization</label>
                   <select 
+                    id="discharge-select"
                     className="form-control bg-slate-950/80 border-slate-800 text-xs text-slate-100"
                     value={dischargeStatus} 
                     onChange={(e) => setDischargeStatus(e.target.value)}
@@ -511,6 +985,7 @@ function EntitlementWizardView({
                 <label className="flex items-start gap-3 cursor-pointer select-none">
                   <input 
                     type="checkbox"
+                    id="ides-toggle"
                     checked={isActiveDuty}
                     onChange={(e) => setIsActiveDuty(e.target.checked)}
                     className="mt-1 accent-indigo-500 cursor-pointer"
@@ -519,24 +994,28 @@ function EntitlementWizardView({
                   <div className="text-xs">
                     <span className="font-semibold text-slate-200 block">Active-duty / IDES (Integrated Disability Evaluation System) Pathway</span>
                     <span className="text-slate-400 text-[10px] block mt-0.5 leading-relaxed">
-                      Check if you are currently on active-duty undergoing IDES transition. Active-duty service members with a memorandum rating of 20% or more bypass standard veteran intake rules under 38 C.F.R. § 21.40.
+                      Check if you are currently on active-duty undergoing IDES transition. Active-duty service members undergoing IDES or holding a memorandum rating of 20% or more bypass standard veteran intake rules under 38 C.F.R. § 21.40.
                     </span>
                   </div>
                 </label>
               </div>
 
-              <div className="form-group">
-                <label className="text-[10px] font-bold text-slate-400 block mb-1">Select Current Case Stage</label>
-                <select 
-                  className="form-control bg-slate-950/80 border-slate-800 text-xs text-slate-100"
-                  value={caseStage} 
-                  onChange={(e) => setCaseStage(e.target.value)}
-                  aria-label="Select current case stage"
-                >
-                  {CASE_STAGES.map(stage => (
-                    <option key={stage.id} value={stage.id}>{stage.label}</option>
-                  ))}
-                </select>
+              <div className="border border-slate-800/80 rounded-xl p-4 bg-slate-950/40 space-y-3">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input 
+                    type="checkbox"
+                    checked={scContributionPresent}
+                    onChange={(e) => setScContributionPresent(e.target.checked)}
+                    className="mt-1 accent-indigo-500 cursor-pointer"
+                    aria-label="Service-connected contribution toggle"
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Service-Connected Contribution Check</span>
+                    <span className="text-slate-400 text-[10px] block mt-0.5 leading-relaxed">
+                      My rated service-connected conditions directly cause or contribute to my occupational limitations or vocational impairment. (Required under 38 C.F.R. § 21.51 / § 21.52).
+                    </span>
+                  </div>
+                </label>
               </div>
 
               <div className="border-t border-slate-850 pt-4 space-y-4">
@@ -549,7 +1028,7 @@ function EntitlementWizardView({
                 </div>
                 
                 <p className="text-[10px] text-slate-450 leading-relaxed">
-                  VR&E basic eligibility is generally open for 12 years from discharge or first rating notification, whichever is later. Exceeding this requires an SEH finding.
+                  VR&E basic eligibility is generally open for 12 years from discharge or first rating notification, whichever is later. Exceeding this requires an SEH finding under 38 C.F.R. § 21.44.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -589,7 +1068,7 @@ function EntitlementWizardView({
                         </p>
                         {delimitingStatus.isExpired && (
                           <div className="mt-2 text-[10px] text-amber-400 leading-relaxed bg-amber-950/20 p-2.5 border border-amber-900/30 rounded">
-                            <strong>Note:</strong> Under 38 C.F.R. § 21.44, you require an assessed Serious Employment Handicap (SEH) to bypass this expiration and access services.
+                            <strong>Serious Employment Handicap Required:</strong> Under 38 C.F.R. § 21.44, you require an assessed SEH to bypass this expiration and access services.
                           </div>
                         )}
                       </div>
@@ -599,6 +1078,123 @@ function EntitlementWizardView({
               </div>
 
               <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('denial_posture')}
+                  className="btn btn-primary inline-flex items-center gap-1.5"
+                >
+                  <span>Continue to Case Stage</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: CASE STAGE & DENIAL POSTURE */}
+          {activeTab === 'denial_posture' && (
+            <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
+              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Case Status & Denial Posture</span>
+              
+              <div className="form-group">
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">Select Current Case Stage</label>
+                <select 
+                  className="form-control bg-slate-950/80 border-slate-800 text-xs text-slate-100"
+                  value={caseStage} 
+                  onChange={(e) => setCaseStage(e.target.value)}
+                  aria-label="Select current case stage"
+                >
+                  {CASE_STAGES.map(stage => (
+                    <option key={stage.id} value={stage.id}>{stage.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="border border-slate-800/80 rounded-xl p-4 bg-slate-950/40 space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input 
+                    type="checkbox"
+                    checked={hasProposedDenial}
+                    onChange={(e) => setHasProposedDenial(e.target.checked)}
+                    className="mt-1 accent-indigo-500 cursor-pointer"
+                    aria-label="Proposed denial toggle"
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Counselor has proposed denial or verbally closed case</span>
+                    <span className="text-slate-400 text-[10px] block mt-0.5 leading-relaxed">
+                      Check this if a VRC stated verbally that you do not qualify, or if you received an intent to discontinue/deny.
+                    </span>
+                  </div>
+                </label>
+
+                {hasProposedDenial && (
+                  <div className="pl-6 space-y-4 border-l-2 border-indigo-500/20 pt-2">
+                    <div className="form-group">
+                      <label className="text-[10px] font-bold text-slate-400 block mb-1">Stated Reason for Denial / Decision</label>
+                      <select 
+                        className="form-control bg-slate-900 border-slate-800 text-xs text-slate-100"
+                        value={denialReason}
+                        onChange={(e) => setDenialReason(e.target.value)}
+                        aria-label="Denial reason"
+                      >
+                        <option value="none">-- Select VRC Reason --</option>
+                        <option value="not_eligible">"You only have a 10% rating, so you don't qualify"</option>
+                        <option value="suitable_employment">"Your current employment shows you have overcome your handicap"</option>
+                        <option value="no_eh">"You do not have a vocational/employment handicap"</option>
+                        <option value="no_seh">"You do not have a Serious Employment Handicap"</option>
+                        <option value="not_feasible">"Achieving a vocational goal is not currently feasible for you"</option>
+                      </select>
+                    </div>
+
+                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                      <input 
+                        type="checkbox"
+                        checked={hasWrittenDecision}
+                        onChange={(e) => setHasWrittenDecision(e.target.checked)}
+                        className="mt-1 accent-indigo-500 cursor-pointer"
+                        aria-label="Has written decision toggle"
+                      />
+                      <div className="text-xs">
+                        <span className="font-semibold text-slate-200 block">I have received the formal written Decision Notice letter</span>
+                        <span className="text-slate-400 text-[10px] block mt-0.5 leading-relaxed">
+                          Check only if you have a physical or digital copy of the VA Decision Notice outlining your appeal rights. (Required to file formal appeal lanes).
+                        </span>
+                      </div>
+                    </label>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="form-group">
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1">Date of Denial or VRC Conversation</label>
+                        <input 
+                          type="date"
+                          value={dateOfConversation}
+                          onChange={(e) => setDateOfConversation(e.target.value)}
+                          className="form-control bg-slate-900 border-slate-800 text-xs text-slate-100"
+                          aria-label="Denial date"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="text-[10px] font-bold text-slate-400 block mb-1">What did the counselor verbally tell you?</label>
+                      <textarea
+                        placeholder="e.g. Counselor said my BS degree is too long, or since I am working as an IT specialist I am suitable..."
+                        value={whatVrcSaid}
+                        onChange={(e) => setWhatVrcSaid(e.target.value)}
+                        className="w-full h-24 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center pt-4 border-t border-slate-850">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('profile')}
+                  className="btn btn-secondary text-xs"
+                >
+                  Back
+                </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('eh_builder')}
@@ -611,14 +1207,14 @@ function EntitlementWizardView({
             </div>
           )}
 
-          {/* TAB 2: OCCUPATIONAL BARRIERS (EH) */}
+          {/* TAB 3: OCCUPATIONAL BARRIERS (EH) */}
           {activeTab === 'eh_builder' && (
             <div className="space-y-4 bg-slate-900/30 border border-slate-800 rounded-xl p-5">
               <div>
-                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Employment Handicap Assessment</span>
-                <h2 className="text-xs font-bold text-slate-200 mt-0.5">Factual Occupational Barriers Checklist</h2>
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Vocational Impairment Checklist</span>
+                <h2 className="text-xs font-bold text-slate-200 mt-0.5">Factual Occupational Barriers</h2>
                 <p className="text-[10.5px] text-slate-400 leading-relaxed mt-1">
-                  An Employment Handicap requires a vocational impairment caused in substantial part by your service-connected disabilities. Select all active restrictions that interfere with your suitability for standard employment.
+                  Select all active physical or cognitive limitations that interfere with your suitability for standard employment.
                 </p>
               </div>
 
@@ -655,10 +1251,78 @@ function EntitlementWizardView({
                 })}
               </div>
 
+              <div className="border-t border-slate-850 pt-4 space-y-3">
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Employment Status & Job Suitability</span>
+                
+                <div className="form-group">
+                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Current Employment Status</label>
+                  <select 
+                    className="form-control bg-slate-950/80 border-slate-800 text-xs text-slate-100"
+                    value={currentEmploymentStatus} 
+                    onChange={(e) => setCurrentEmploymentStatus(e.target.value)}
+                    aria-label="Select employment status"
+                  >
+                    <option value="unemployed">Unemployed or unable to maintain stable work</option>
+                    <option value="employed">Employed (Full-time or Part-time)</option>
+                  </select>
+                </div>
+
+                {currentEmploymentStatus === 'employed' && (
+                  <div className="p-4 border border-slate-800/80 rounded-xl bg-slate-950/40 space-y-3">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Job Suitability Factors</span>
+                    <p className="text-[10px] text-slate-450 leading-relaxed">
+                      If you are employed, you must prove the current job is unsuitable under 38 C.F.R. § 21.51. Select all that apply:
+                    </p>
+
+                    <div className="space-y-2">
+                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input 
+                          type="checkbox"
+                          checked={jobSuitabilityCheckboxes.aggravates_disability}
+                          onChange={(e) => setJobSuitabilityCheckboxes(prev => ({ ...prev, aggravates_disability: e.target.checked }))}
+                          className="mt-0.5 accent-indigo-500"
+                        />
+                        <span className="text-[11px] text-slate-300">This job aggravates my rated service-connected conditions.</span>
+                      </label>
+                      
+                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input 
+                          type="checkbox"
+                          checked={jobSuitabilityCheckboxes.underemployed}
+                          onChange={(e) => setJobSuitabilityCheckboxes(prev => ({ ...prev, underemployed: e.target.checked }))}
+                          className="mt-0.5 accent-indigo-500"
+                        />
+                        <span className="text-[11px] text-slate-300">I am underemployed (working below my skill, education level, or potential).</span>
+                      </label>
+
+                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input 
+                          type="checkbox"
+                          checked={jobSuitabilityCheckboxes.job_loss}
+                          onChange={(e) => setJobSuitabilityCheckboxes(prev => ({ ...prev, job_loss: e.target.checked }))}
+                          className="mt-0.5 accent-indigo-500"
+                        />
+                        <span className="text-[11px] text-slate-300">I experience frequent absences or threat of job loss due to flare-ups.</span>
+                      </label>
+
+                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input 
+                          type="checkbox"
+                          checked={jobSuitabilityCheckboxes.accommodations_needed}
+                          onChange={(e) => setJobSuitabilityCheckboxes(prev => ({ ...prev, accommodations_needed: e.target.checked }))}
+                          className="mt-0.5 accent-indigo-500"
+                        />
+                        <span className="text-[11px] text-slate-300">I require significant workplace accommodations that are not fully provided.</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-between items-center pt-4 border-t border-slate-850">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('profile')}
+                  onClick={() => setActiveTab('denial_posture')}
                   className="btn btn-secondary text-xs"
                 >
                   Back
@@ -675,31 +1339,31 @@ function EntitlementWizardView({
             </div>
           )}
 
-          {/* TAB 3: SEH EXTENSION INDICATORS */}
+          {/* TAB 4: SEH EXTENSION INDICATORS */}
           {activeTab === 'seh_builder' && (
             <div className="space-y-4 bg-slate-900/30 border border-slate-800 rounded-xl p-5">
               <div>
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Serious Employment Handicap Assessment</span>
                 <h2 className="text-xs font-bold text-slate-200 mt-0.5">Serious Employment Handicap (SEH) Checklist</h2>
                 <p className="text-[10.5px] text-slate-400 leading-relaxed mt-1">
-                  An SEH requires finding a significant impairment of employability, which unlocks extensions beyond 12 years (basic eligibility) or 48 months (program duration), and is mandatory for 10% ratings. Select indicators present in your case.
+                  Under 38 C.F.R. § 21.52, an SEH is established if service-connected conditions produce significant vocational impairment. This bypasses the 12-year window and is mandatory for 10% ratings. Select indicators in your case:
                 </p>
               </div>
 
               <div className="grid grid-cols-1 gap-2.5 max-h-[350px] overflow-y-auto pr-1">
                 {SEH_INDICATORS.map(ind => {
                   const isAuto = ['ten_percent', 'oth_discharge', 'expired_12year'].includes(ind.id);
-                  const isChecked = !!activeSehIndicators[ind.id];
+                  const isChecked = !!activeSehIndicators[ind.id] || !!manualSehIndicators[ind.id];
                   return (
                     <div
                       key={ind.id}
                       onClick={() => toggleSehIndicator(ind.id)}
                       className={`border rounded-lg p-3 select-none flex items-start gap-3 transition ${
-                        isAuto ? 'opacity-85 cursor-not-allowed' : 'cursor-pointer'
+                        isAuto ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'
                       } ${
                         isChecked
                           ? 'bg-amber-500/5 border-amber-800/80'
-                          : 'bg-slate-950/20 border-slate-850 hover:border-slate-800'
+                          : 'bg-slate-950/20 border-slate-855 hover:border-slate-800'
                       }`}
                     >
                       <input 
@@ -712,7 +1376,7 @@ function EntitlementWizardView({
                       />
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-slate-350 leading-normal font-semibold">{ind.label}</span>
+                          <span className="text-[11px] text-slate-305 leading-normal font-semibold">{ind.label}</span>
                           {isAuto && (
                             <span className="text-[8px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1 py-0.2 rounded shrink-0 uppercase font-bold">Auto-derived</span>
                           )}
@@ -744,23 +1408,23 @@ function EntitlementWizardView({
             </div>
           )}
 
-          {/* TAB 4: FEASIBILITY SCREENING */}
+          {/* TAB 5: FEASIBILITY & EVIDENCE */}
           {activeTab === 'feasibility' && (
             <div className="space-y-4 bg-slate-900/30 border border-slate-800 rounded-xl p-5">
               <div>
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Vocational Feasibility Pre-screener</span>
                 <h2 className="text-xs font-bold text-slate-200 mt-0.5">Uncertain Feasibility & Extended Evaluation Checklist</h2>
                 <p className="text-[10.5px] text-slate-400 leading-relaxed mt-1">
-                  Under 38 C.F.R. § 21.57 / § 21.74, if the feasibility of achieving a vocational goal is uncertain due to health, treatment, or capacity, the counselor should authorize an Extended Evaluation plan (Track 5) to test capacity with support services, rather than denying entry. Check if any apply:
+                  Under 38 C.F.R. § 21.57 / § 21.74, if vocational feasibility is uncertain, the counselor should authorize an Extended Evaluation period (up to 12 months) to evaluate capacity rather than issuing an immediate denial. Check if any apply:
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 gap-2.5 mb-6">
                 {FEASIBILITY_CHECKLIST.map(item => (
                   <div
                     key={item.id}
                     onClick={() => toggleFeasibility(item.id)}
-                    className={`border rounded-lg p-3.5 cursor-pointer select-none flex items-start gap-3 transition ${
+                    className={`border rounded-lg p-3 cursor-pointer select-none flex items-start gap-3 transition ${
                       checkedFeasibility[item.id]
                         ? 'bg-red-500/5 border-red-800/80'
                         : 'bg-slate-950/20 border-slate-855 hover:border-slate-800'
@@ -778,43 +1442,8 @@ function EntitlementWizardView({
                 ))}
               </div>
 
-              <div className="p-4 border border-slate-800 bg-slate-950/40 rounded-xl space-y-2 mt-3">
-                <span className="text-[9px] font-bold text-red-400 uppercase tracking-wider block">Diagnostic Result</span>
-                <div className="space-y-1">
-                  <strong className="text-xs text-slate-200 block">{feasibilityStatus.status}</strong>
-                  <p className="text-[10.5px] text-slate-450 leading-relaxed">{feasibilityStatus.reason}</p>
-                </div>
-                <div className="p-2.5 bg-slate-900 border border-slate-850 text-[10.5px] text-red-300/90 leading-relaxed rounded mt-1">
-                  <strong>Recommended Action:</strong> {feasibilityStatus.action}
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center pt-4 border-t border-slate-850">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('seh_builder')}
-                  className="btn btn-secondary text-xs"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('evidence_letters')}
-                  className="btn btn-primary inline-flex items-center gap-1.5"
-                >
-                  <span>Continue to Letters</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: EVIDENCE & LETTER BUILDER */}
-          {activeTab === 'evidence_letters' && (
-            <div className="space-y-5 bg-slate-900/30 border border-slate-800 rounded-xl p-5">
-              
               {/* Evidence Strength Checklist */}
-              <div className="space-y-3">
+              <div className="space-y-3 border-t border-slate-850 pt-4">
                 <div>
                   <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Claim Preparation</span>
                   <h2 className="text-xs font-bold text-slate-200 mt-0.5">Evidence Checklist</h2>
@@ -848,6 +1477,79 @@ function EntitlementWizardView({
                 </div>
               </div>
 
+              {/* Independent Living (ILP) Pre-Screener */}
+              <div className="p-4 border border-slate-800 bg-slate-950/45 rounded-xl space-y-3 mt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold text-red-400 uppercase tracking-wider block">Independent Living (ILP) Pre-Screener</span>
+                  <span className="text-[9px] font-mono text-slate-550 font-bold px-1.5 py-0.5 bg-slate-950 rounded">38 U.S.C. § 3109</span>
+                </div>
+                <p className="text-[10px] text-slate-450 leading-relaxed">
+                  Screen for ILP feasibility when standard vocational goals are not viable due to rating limitations (38 C.F.R. § 21.76):
+                </p>
+
+                <div className="space-y-2">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input 
+                      type="checkbox"
+                      checked={ilpChecklist.no_vocational_goal}
+                      onChange={(e) => setIlpChecklist(prev => ({ ...prev, no_vocational_goal: e.target.checked }))}
+                      className="mt-0.5 accent-indigo-500"
+                    />
+                    <span className="text-[10.5px] text-slate-300">Achieving a vocational goal is currently not reasonably feasible for me.</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input 
+                      type="checkbox"
+                      checked={ilpChecklist.severe_limitations}
+                      onChange={(e) => setIlpChecklist(prev => ({ ...prev, severe_limitations: e.target.checked }))}
+                      className="mt-0.5 accent-indigo-500"
+                    />
+                    <span className="text-[10.5px] text-slate-300">I have severe limitations that interfere with independent living in my family/community.</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input 
+                      type="checkbox"
+                      checked={ilpChecklist.needs_assistance}
+                      onChange={(e) => setIlpChecklist(prev => ({ ...prev, needs_assistance: e.target.checked }))}
+                      className="mt-0.5 accent-indigo-500"
+                    />
+                    <span className="text-[10.5px] text-slate-300">I require specialized services (home/workspace modifications, assistive technology).</span>
+                  </label>
+
+                  {ilpChecklist.no_vocational_goal && ilpChecklist.severe_limitations && (
+                    <div className="p-2.5 bg-red-950/20 border border-red-900/30 text-[10px] text-red-300 rounded leading-relaxed">
+                      <strong>ILP Strategy:</strong> Request an Independent Living program. Note: VRCs require regional office supervisor approval for programs estimated to cost more than $25k, or VREO/higher approval for costs above $50k-$75k.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-4 border-t border-slate-850">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('seh_builder')}
+                  className="btn btn-secondary text-xs"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('evidence_letters')}
+                  className="btn btn-primary inline-flex items-center gap-1.5"
+                >
+                  <span>Continue to Letters</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: EVIDENCE & LETTER BUILDER */}
+          {activeTab === 'evidence_letters' && (
+            <div className="space-y-5 bg-slate-900/30 border border-slate-800 rounded-xl p-5">
+              
               {/* Facts Input Form for Letter Compiling */}
               <div className="border border-slate-800 bg-slate-950/40 p-4 rounded-xl space-y-3.5">
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Custom Fact Interpolation</span>
@@ -886,6 +1588,20 @@ function EntitlementWizardView({
                     />
                   </div>
                 </div>
+
+                {hasProposedDenial && activeLetterTab === 'written_rationale' && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Written Decision Request Details</span>
+                    <div className="form-group">
+                      <label className="text-[10px] font-bold text-slate-400 block mb-1">List Specific Records / Narratives Requested</label>
+                      <textarea
+                        value={requestedRecords}
+                        onChange={(e) => setRequestedRecords(e.target.value)}
+                        className="w-full h-20 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Compilation Tab Switcher */}
@@ -898,10 +1614,10 @@ function EntitlementWizardView({
                     1. Remarks Statement
                   </button>
                   <button 
-                    className={`tab-btn text-[10px] ${activeLetterTab === 'prep_sheet' ? 'active' : ''}`}
-                    onClick={() => setActiveLetterTab('prep_sheet')}
+                    className={`tab-btn text-[10px] ${activeLetterTab === 'seh_statement' ? 'active' : ''}`}
+                    onClick={() => setActiveLetterTab('seh_statement')}
                   >
-                    2. VRC Orientation Prep Sheet
+                    2. SEH Statement
                   </button>
                   <button 
                     className={`tab-btn text-[10px] ${activeLetterTab === 'seh_letter' ? 'active' : ''}`}
@@ -915,15 +1631,22 @@ function EntitlementWizardView({
                   >
                     4. Extended Eval Request
                   </button>
+                  <button 
+                    className={`tab-btn text-[10px] ${activeLetterTab === 'written_rationale' ? 'active' : ''}`}
+                    onClick={() => setActiveLetterTab('written_rationale')}
+                  >
+                    5. Written Rationale Request
+                  </button>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-mono text-slate-500 font-bold uppercase">
                       {activeLetterTab === 'remarks' && 'VA Form 28-1900 Section IV: Remarks'}
-                      {activeLetterTab === 'prep_sheet' && 'Personal Counseling Strategy Prep Sheet'}
+                      {activeLetterTab === 'seh_statement' && 'Serious Employment Handicap Statement (38 C.F.R. § 21.52)'}
                       {activeLetterTab === 'seh_letter' && 'Formal Written Request (38 C.F.R. § 21.52)'}
                       {activeLetterTab === 'ext_eval' && 'Formal Written Request (38 C.F.R. § 21.74)'}
+                      {activeLetterTab === 'written_rationale' && 'Written Rationale Request (38 C.F.R. § 21.50)'}
                     </span>
                     <div className="flex gap-2">
                       <button
@@ -931,9 +1654,10 @@ function EntitlementWizardView({
                         onClick={() => {
                           const text = 
                             activeLetterTab === 'remarks' ? compileRemarksText() :
-                            activeLetterTab === 'prep_sheet' ? `OCCUPATIONAL PREP SHEET\n\n${compileRemarksText()}` :
+                            activeLetterTab === 'seh_statement' ? compileSehRemarksText() :
                             activeLetterTab === 'seh_letter' ? compileSehLetter() :
-                            compileExtendedEvalLetter();
+                            activeLetterTab === 'ext_eval' ? compileExtendedEvalLetter() :
+                            compileWrittenRationaleLetter();
                           handleCopyText(text);
                         }}
                         className="px-2.5 py-1 bg-slate-900 border border-slate-800 text-[10px] text-indigo-400 hover:text-indigo-300 rounded font-semibold cursor-pointer transition flex items-center gap-1"
@@ -946,14 +1670,16 @@ function EntitlementWizardView({
                         onClick={() => {
                           const title = 
                             activeLetterTab === 'remarks' ? 'Remarks Narrative' :
-                            activeLetterTab === 'prep_sheet' ? 'Interview Prep Sheet' :
+                            activeLetterTab === 'seh_statement' ? 'SEH Remarks Statement' :
                             activeLetterTab === 'seh_letter' ? 'SEH Request Letter' :
-                            'Extended Evaluation Request';
+                            activeLetterTab === 'ext_eval' ? 'Extended Evaluation Request' :
+                            'Written Rationale Request';
                           const text = 
                             activeLetterTab === 'remarks' ? compileRemarksText() :
-                            activeLetterTab === 'prep_sheet' ? `OCCUPATIONAL PREP SHEET\n\n${compileRemarksText()}` :
+                            activeLetterTab === 'seh_statement' ? compileSehRemarksText() :
                             activeLetterTab === 'seh_letter' ? compileSehLetter() :
-                            compileExtendedEvalLetter();
+                            activeLetterTab === 'ext_eval' ? compileExtendedEvalLetter() :
+                            compileWrittenRationaleLetter();
                           handlePrintText(title, text);
                         }}
                         className="px-2.5 py-1 bg-slate-900 border border-slate-800 text-[10px] text-indigo-400 hover:text-indigo-300 rounded font-semibold cursor-pointer transition flex items-center gap-1"
@@ -969,12 +1695,71 @@ function EntitlementWizardView({
                     className="w-full h-56 bg-slate-950 border border-slate-800/80 rounded-xl p-4 text-[10.5px] font-mono text-slate-350 leading-relaxed select-all focus:outline-none focus:border-slate-700 resize-none"
                     value={
                       activeLetterTab === 'remarks' ? compileRemarksText() :
-                      activeLetterTab === 'prep_sheet' ? `OCCUPATIONAL PREP SHEET\n\n${compileRemarksText()}` :
+                      activeLetterTab === 'seh_statement' ? compileSehRemarksText() :
                       activeLetterTab === 'seh_letter' ? compileSehLetter() :
-                      compileExtendedEvalLetter()
+                      activeLetterTab === 'ext_eval' ? compileExtendedEvalLetter() :
+                      compileWrittenRationaleLetter()
                     }
                     aria-label="Generated letter text preview"
                   />
+                </div>
+              </div>
+
+              {/* Five Tracks Diagnostic Tool */}
+              <div className="border border-slate-800 bg-slate-950/40 p-4 rounded-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Five Tracks to Employment Diagnostic</span>
+                  <span className="text-[9px] font-mono text-slate-550 font-bold px-1.5 py-0.5 bg-slate-950 rounded">38 C.F.R. § 21.35</span>
+                </div>
+                <p className="text-[10px] text-slate-450 leading-relaxed">
+                  Briefly select parameters matching your career goals and limitation profiles to find your recommended counseling track:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="form-group">
+                    <label className="text-[9px] font-bold text-slate-450 block mb-1">Career Goal Focus</label>
+                    <select
+                      className="form-control bg-slate-900 border-slate-800 text-[10px] text-slate-200"
+                      value={tracksInterest}
+                      onChange={(e) => setTracksInterest(e.target.value)}
+                    >
+                      <option value="rapid">Immediate Employment (Same Field)</option>
+                      <option value="employment">Reemployment assistance</option>
+                      <option value="education">Acquiring New Degree / Credentials</option>
+                      <option value="self_emp">Self-Employment / Business Setup</option>
+                      <option value="independent">Restoring Daily Independence</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="text-[9px] font-bold text-slate-450 block mb-1">Rating Severity / Limits</label>
+                    <select
+                      className="form-control bg-slate-900 border-slate-800 text-[10px] text-slate-200"
+                      value={tracksLimitation}
+                      onChange={(e) => setTracksLimitation(e.target.value)}
+                    >
+                      <option value="mild">Mild limitations (no major physical blocks)</option>
+                      <option value="moderate">Moderate restrictions (some work blocks)</option>
+                      <option value="severe">Severe restrictions (unable to work standard jobs)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="text-[9px] font-bold text-slate-450 block mb-1">Possess Marketable Job Skills?</label>
+                    <select
+                      className="form-control bg-slate-900 border-slate-800 text-[10px] text-slate-200"
+                      value={tracksMarketability}
+                      onChange={(e) => setTracksMarketability(e.target.value)}
+                    >
+                      <option value="yes">Yes, in high-demand fields</option>
+                      <option value="no">No, requires retraining</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-indigo-950/20 border border-indigo-900/30 rounded-xl space-y-1">
+                  <strong className="text-[11px] text-indigo-300 block">{tracksResult.recommendedTrack}</strong>
+                  <p className="text-[10px] text-slate-400 leading-normal">{tracksResult.trackExplanation}</p>
                 </div>
               </div>
 
@@ -988,25 +1773,10 @@ function EntitlementWizardView({
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary text-xs"
-                  onClick={() => {
-                    setRating(20);
-                    setDischargeStatus('honorable');
-                    setIsActiveDuty(false);
-                    setCaseStage('evaluation');
-                    setDischargeDate('');
-                    setRatingDecisionDate('');
-                    setCheckedBarriers({});
-                    setManualSehIndicators({});
-                    setCheckedFeasibility({});
-                    setCheckedEvidence({});
-                    setUserName('');
-                    setClaimNumber('');
-                    setProgramName('');
-                    setActiveTab('profile');
-                  }}
+                  className="btn btn-secondary text-xs"
+                  onClick={handleResetWizard}
                 >
-                  Start Over
+                  Reset Wizard
                 </button>
               </div>
 
@@ -1015,105 +1785,174 @@ function EntitlementWizardView({
 
         </div>
 
-        {/* Right Side: Real-time Likelihood and Logic Auditor */}
-        <div className="lg:col-span-4 space-y-5 h-fit">
+        {/* Right Side: Real-time Adjudication Dashboard */}
+        <div className="lg:col-span-4 space-y-5 h-fit sticky top-6">
           
-          {/* Entitlement Rating Panel */}
+          {/* Adjudication Analysis Panel */}
           <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-4">
             <div className="space-y-0.5">
-              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Entitlement Probability</span>
-              <h3 className="text-xs font-bold text-slate-250">Softened Logic Auditor</h3>
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Adjudication Analysis Dashboard</span>
+              <h3 className="text-xs font-bold text-slate-250">Statutory Entitlement Assessment</h3>
             </div>
 
-            <div className={`p-4 border rounded-xl bg-slate-950/40 ${assessment.likelyEntitled ? 'border-emerald-500/30' : 'border-red-500/30'}`}>
-              <div className="flex items-center gap-1.5 mb-2">
-                {assessment.likelyEntitled ? (
-                  <CheckCircle size={16} className="text-emerald-400" />
+            {/* Pathway Status Card */}
+            <div className={`p-4 border rounded-xl bg-slate-950/40 ${
+              adj.pathCode.startsWith('LIKELY') 
+                ? 'border-emerald-500/30' 
+                : adj.pathCode === 'STATUTORY_BAR_ACTIVE'
+                ? 'border-red-500/30'
+                : 'border-amber-500/30'
+            }`}>
+              <div className="flex items-start gap-2 mb-2">
+                {adj.pathCode.startsWith('LIKELY') ? (
+                  <CheckCircle size={16} className="text-emerald-400 mt-0.5 shrink-0" />
+                ) : adj.pathCode === 'STATUTORY_BAR_ACTIVE' ? (
+                  <ShieldAlert size={16} className="text-red-400 mt-0.5 shrink-0" />
                 ) : (
-                  <ShieldAlert size={16} className="text-red-400" />
+                  <AlertTriangle size={16} className="text-amber-400 mt-0.5 shrink-0" />
                 )}
-                <span className={`text-[11px] font-bold ${assessment.likelyEntitled ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {assessment.status}
-                </span>
-              </div>
-              <p className="text-[10.5px] text-slate-350 leading-relaxed mb-3">
-                {plainLanguageMode ? assessment.plainReason : assessment.reason}
-              </p>
-              
-              <div className="bg-slate-900/50 p-2.5 border border-slate-850 rounded text-[9.5px] text-slate-400">
-                <strong className="text-indigo-400 block mb-0.5">Recommended Actions:</strong>
-                {assessment.guidance}
+                <div>
+                  <span className={`text-[11px] font-bold block ${
+                    adj.pathCode.startsWith('LIKELY') ? 'text-emerald-400' : adj.pathCode === 'STATUTORY_BAR_ACTIVE' ? 'text-red-400' : 'text-amber-400'
+                  }`}>
+                    {adj.pathTitle}
+                  </span>
+                  <span className="text-[8px] font-mono text-slate-500 block mt-0.5">Controlling Law: {adj.pathLaw}</span>
+                </div>
               </div>
 
-              {assessment.cfr && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cleanId = assessment.cfr.toLowerCase().replace(/[\s.§()]/g, '-').replace(/--/g, '-');
-                    setSelectedSection({ 
-                      type: cleanId.includes('cfr') ? 'cfr' : 'usc', 
-                      id: cleanId.includes('cfr') ? '38-cfr-21-35' : '38-usc-3102' 
-                    });
-                    setActiveView('authority_library');
-                  }}
-                  className="text-[9px] font-mono text-indigo-400 hover:text-indigo-300 font-bold block mt-3 cursor-pointer text-left"
-                >
-                  Source: {assessment.cfr} &rarr;
-                </button>
+              {/* Facts Assessment */}
+              <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-2.5">
+                {adj.factsSupport.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider block">Supporting Facts:</span>
+                    <ul className="list-none space-y-1 pl-0">
+                      {adj.factsSupport.map((f, idx) => (
+                        <li key={idx} className="text-[10px] text-slate-350 leading-relaxed flex items-start gap-1">
+                          <span className="text-emerald-500 font-bold shrink-0">&bull;</span>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {adj.factsHurt.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-bold text-red-400 uppercase tracking-wider block">Adverse Facts:</span>
+                    <ul className="list-none space-y-1 pl-0">
+                      {adj.factsHurt.map((f, idx) => (
+                        <li key={idx} className="text-[10px] text-slate-350 leading-relaxed flex items-start gap-1">
+                          <span className="text-red-500 font-bold shrink-0">&bull;</span>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Evidence Index */}
+              <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-1.5">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="font-mono text-slate-400">Evidence Index:</span>
+                  <span className={`font-bold ${evidenceRating.color}`}>{adj.evidenceScore} / 100</span>
+                </div>
+                <div className="w-full bg-slate-950 border border-slate-855 h-1.5 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-300 ${evidenceRating.progressColor}`}
+                    style={{ width: `${adj.evidenceScore}%` }}
+                  />
+                </div>
+                <span className="text-[8px] text-slate-500 block font-semibold text-center uppercase tracking-wider">{evidenceRating.label}</span>
+                
+                {adj.evidenceMissing.length > 0 && (
+                  <div className="pt-1.5">
+                    <span className="text-[9px] font-bold text-slate-500 uppercase block">Missing Verification Evidence:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {adj.evidenceMissing.map((m, idx) => (
+                        <span key={idx} className="text-[8.5px] bg-slate-950/60 border border-slate-850 px-1.5 py-0.5 rounded text-slate-400">
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Active Errors */}
+              {adj.activeErrors.length > 0 && (
+                <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-2">
+                  <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Procedural VA Errors Detected:</span>
+                  {adj.activeErrors.map((err, idx) => (
+                    <div key={idx} className="p-2 bg-amber-950/10 border border-amber-900/30 rounded text-[9.5px] space-y-1">
+                      <strong className="text-amber-400 block">{err.error}</strong>
+                      <p className="text-slate-400 leading-normal">{err.whyItMatters}</p>
+                      <div className="text-slate-450 leading-relaxed font-semibold">
+                        Corrective action: {err.bestMove}
+                      </div>
+                      <span className="text-[8px] font-mono text-amber-500/80 block">Authority: {err.authorities.join(', ')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Next Action Plan */}
+              <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-1.5">
+                <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider block">Recommended Strategy:</span>
+                <ul className="list-none space-y-1 pl-0">
+                  {adj.nextSteps.map((step, idx) => (
+                    <li key={idx} className="text-[10px] text-slate-350 leading-relaxed flex items-start gap-1">
+                      <span className="text-indigo-400 font-bold shrink-0">&rarr;</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Review-Lane Guardrails */}
+              <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-1">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Review-Lane Warning:</span>
+                <p className="text-[9.5px] text-slate-400 leading-relaxed bg-slate-900/60 p-2 border border-slate-850 rounded">
+                  {adj.reviewLaneWarning}
+                </p>
+              </div>
+
+              {/* Authorities Badge references */}
+              {adj.authorities.length > 0 && (
+                <div className="border-t border-slate-850 pt-2.5 mt-2.5 space-y-1.5">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Legal Authorities:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {adj.authorities.map((cite, idx) => {
+                      const cleanId = cite.toLowerCase().replace(/[\s.§()]/g, '-').replace(/--/g, '-');
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSection({ 
+                              type: cleanId.includes('cfr') ? 'cfr' : 'usc', 
+                              id: cleanId.includes('cfr') ? '38-cfr-21-35' : '38-usc-3102' 
+                            });
+                            setActiveView('authority_library');
+                          }}
+                          className="text-[9px] font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded hover:bg-indigo-500/20 transition cursor-pointer"
+                        >
+                          {cite}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Evidence Strength Meter */}
-            <div className="space-y-2 border-t border-slate-850 pt-3">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-mono text-slate-400">Evidence index:</span>
-                <span className={`font-bold ${evidenceRating.color}`}>{evidenceScore} / 100</span>
-              </div>
-              <div className="w-full bg-slate-950 border border-slate-855 h-2 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-300 ${evidenceRating.progressColor}`}
-                  style={{ width: `${evidenceScore}%` }}
-                />
-              </div>
-              <span className="text-[9px] text-slate-500 block font-semibold text-center">{evidenceRating.label}</span>
-            </div>
-          </div>
-
-          {/* VA Error Spotter (Counselor Level Common Violations) */}
-          <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-5 space-y-3.5">
-            <div>
-              <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Intake Error Spotter</span>
-              <h4 className="text-xs font-bold text-slate-200 mt-0.5">VA Procedural Mistakes</h4>
-            </div>
-
-            <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
-              <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-1.5">
-                <strong className="text-[10.5px] text-red-400 block font-semibold">Error: "You only have a 10% rating, so you don\'t qualify."</strong>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  VRCs occasionally tell 10% rated claimants they are barred from Chapter 31. Under <strong>38 C.F.R. § 21.40</strong>, a 10% rating is eligible to apply, requiring an SEH determination for entitlement.
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-1.5">
-                <strong className="text-[10.5px] text-red-400 block font-semibold">Error: "Your 12-year basic period is expired, you are barred."</strong>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  An expired delimiting date is not a bar. Under <strong>38 C.F.R. § 21.44</strong>, a finding of a Serious Employment Handicap (SEH) overrides the 12-year window.
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-1.5">
-                <strong className="text-[10.5px] text-red-400 block font-semibold">Error: "You have used 48 months of educational benefits, you cannot get more."</strong>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  Under <strong>38 C.F.R. § 21.78</strong>, a VRC has the authority to authorize training beyond the 48-month cap if the veteran is found to have an SEH.
-                </p>
-              </div>
-
-              <div className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-1.5">
-                <strong className="text-[10.5px] text-red-400 block font-semibold">Error: "A college degree is too complex/long for your health, so we are closing your case."</strong>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  If feasibility is uncertain, a VRC should not deny the case outright. <strong>38 C.F.R. § 21.74</strong> requires initiating an Extended Evaluation (up to 12 months) to test feasibility with support.
-                </p>
-              </div>
+            {/* Disclaimer */}
+            <div className="p-3 bg-slate-950/60 border border-slate-850 rounded-xl space-y-1 text-slate-450">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Information Purpose Only</span>
+              <p className="text-[9.5px] leading-relaxed">
+                This prescreener acts as an educational and planning aid for veterans. Actual determinations are made solely by VA counselors using clinical judgment under Title 38. The outcome does not guarantee approval.
+              </p>
             </div>
           </div>
 

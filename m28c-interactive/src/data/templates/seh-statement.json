@@ -1,0 +1,8 @@
+{
+  "templateId": "seh-statement",
+  "title": "Serious Employment Handicap (SEH) Statement",
+  "authorityIds": [
+    "38-cfr-21-52"
+  ],
+  "body": "STATEMENT IN SUPPORT OF SERIOUS EMPLOYMENT HANDICAP DETERMINATION (38 C.F.R. § 21.52)\n\nVeteran: {{userName}}\nClaim Number: {{claimNumber}}\nDate: {{date}}\n\n1. SERVICE-CONNECTED RATING PATHWAY\nMy service-connected disability rating is: {{ratingPercent}}%\n\n2. SIGNIFICANT VOCATIONAL IMPAIRMENT\nMy rated disabilities produce the following significant functional and occupational barriers: {{seriousVocationalBarriers}}\n\n3. EVIDENCE OF SEVERE FUNCTIONAL RESTRICTIONS\nMy history includes the following failed work or training attempts: {{failedWorkAttempts}}\nI require the following specialized services, accommodations, or training to overcome these restrictions: {{trainingNeeds}}\nMy functional restrictions are detailed as follows: {{functionalRestrictions}}\n\n4. NECESSITY OF SPECIALIZED OR EXTENSIVE SERVICES\nI require extensive or specialized VR&E services (including possible extensions beyond 48 months or independent living services) because: {{whyExtensiveServicesNeeded}}\n\n5. REQUESTED ACTION\n{{requestedAction}}"
+}
