@@ -298,6 +298,59 @@ function DisputeHubView({
     sessionStorage.setItem('m28c_contacts_log', JSON.stringify(updated));
   };
 
+  // Export Counselor Contact Timeline (local JSON file download)
+  const handleExportTimeline = () => {
+    try {
+      const blob = new Blob([JSON.stringify(contactsLog, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = `vre_contact_timeline_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      document.body.removeChild(downloadAnchor);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Error exporting timeline: " + err.message);
+    }
+  };
+
+  // Import Counselor Contact Timeline (local JSON file upload)
+  const handleImportTimeline = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!Array.isArray(parsed)) {
+          alert('Invalid file format. The imported timeline must be a JSON array.');
+          return;
+        }
+        const validated = parsed.filter(item => {
+          return item && typeof item === 'object' && 'date' in item && 'method' in item && 'request' in item;
+        }).map(item => ({
+          id: item.id || Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          date: item.date || '',
+          method: item.method || 'Email',
+          person: item.person || 'VRC Counselor',
+          request: item.request || '',
+          response: item.response || 'No response'
+        }));
+        if (validated.length === 0) {
+          alert('No valid contact log entries found in the file.');
+          return;
+        }
+        setContactsLog(validated);
+        sessionStorage.setItem('m28c_contacts_log', JSON.stringify(validated));
+      } catch (err) {
+        alert('Failed to parse timeline file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
+  };
+
   // Calculate Evidence Sufficiency Score
   const evidenceScore = selectedArea.evidenceChecklist.reduce((acc, item) => {
     return checkedEvidence[item.id] ? acc + item.weight : acc;
@@ -635,6 +688,41 @@ The Veteran formally requests:
             <p className="text-[10px] text-slate-400 leading-relaxed">
               If your VRC has delayed authorizing benefits, your contact timeline is key evidence of their failure. Enter your email, call, or appointment attempts below.
             </p>
+
+            <div className="flex flex-wrap gap-3 items-center justify-between bg-slate-950/40 p-4 border border-slate-850 rounded-xl">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-300 block">Backup Timeline Records</span>
+                <span className="text-[9px] text-slate-450 block">Save or restore your communication log history locally.</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="import-timeline-upload"
+                  accept=".json"
+                  onChange={handleImportTimeline}
+                  className="sr-only"
+                  aria-label="Upload contact timeline JSON backup file"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('import-timeline-upload').click()}
+                  className="btn btn-sm btn-secondary text-[11px] py-1.5 px-3 inline-flex items-center gap-1.5 h-8"
+                  aria-label="Import contact timeline from a local JSON file"
+                >
+                  <Plus size={12} />
+                  <span>Import JSON</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportTimeline}
+                  className="btn btn-sm btn-secondary text-[11px] py-1.5 px-3 inline-flex items-center gap-1.5 h-8"
+                  aria-label="Export contact timeline to a local JSON file"
+                >
+                  <FileText size={12} />
+                  <span>Export JSON</span>
+                </button>
+              </div>
+            </div>
 
             {/* Input fields */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end bg-slate-950/40 p-4 border border-slate-850 rounded-lg">

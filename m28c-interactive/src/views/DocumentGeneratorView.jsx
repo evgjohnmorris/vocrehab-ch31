@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { 
   Copy, Printer, RotateCcw, User, CreditCard, 
-  MapPin, Calendar, Check, AlertCircle, FilePlus
+  MapPin, Calendar, Check, AlertCircle, FilePlus,
+  Download
 } from 'lucide-react';
 import * as generators from '../utils/letterGenerators';
 
@@ -268,6 +269,56 @@ function DocumentGeneratorView() {
     printWindow.print();
   };
 
+  const handleDownloadTxt = () => {
+    try {
+      const blob = new Blob([editedText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      const templateName = LETTER_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'letter';
+      const safeName = templateName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      downloadAnchor.download = `vre_${safeName}_${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      document.body.removeChild(downloadAnchor);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Error downloading text file: " + err.message);
+    }
+  };
+
+  const handleDownloadDoc = () => {
+    try {
+      const htmlContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <title>VR&E Document</title>
+          <style>
+            body { font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+            p { margin: 0 0 10px 0; }
+          </style>
+        </head>
+        <body>
+          ${editedText.replace(/\n/g, '<br/>')}
+        </body>
+        </html>
+      `;
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      const templateName = LETTER_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'letter';
+      const safeName = templateName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      downloadAnchor.download = `vre_${safeName}_${new Date().toISOString().slice(0, 10)}.doc`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      document.body.removeChild(downloadAnchor);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Error downloading Word file: " + err.message);
+    }
+  };
+
   const handleReset = () => {
     setCommonFields({
       dateStr: new Date().toLocaleDateString(),
@@ -324,7 +375,7 @@ function DocumentGeneratorView() {
   return (
     <div className="flex flex-col xl:flex-row gap-6 w-full max-w-7xl mx-auto">
       {/* LEFT COLUMN: Controls & Form */}
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 space-y-6 no-print">
         {/* Navigation & Title Card */}
         <div className="doc-card p-6 mb-0">
           <span className="doc-tag bg-blue-500/20 text-blue-400 border border-blue-500/30">Veteran Advocacy Tool</span>
@@ -999,7 +1050,7 @@ function DocumentGeneratorView() {
           </div>
 
           {/* The physically styled paper sheet */}
-          <div className="flex-1 overflow-y-auto bg-slate-950/80 border border-slate-800/80 rounded-xl p-6 font-mono text-sm leading-relaxed text-slate-200 select-text relative group min-w-0">
+          <div className="flex-1 overflow-y-auto bg-slate-950/80 border border-slate-800/80 rounded-xl p-6 font-mono text-sm leading-relaxed text-slate-200 select-text relative group min-w-0 print-page-preview">
             {isEditing ? (
               <textarea
                 value={editedText}
@@ -1015,27 +1066,45 @@ function DocumentGeneratorView() {
           </div>
 
           {/* Document Actions */}
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="mt-4 flex flex-col md:flex-row gap-3">
             <button
               onClick={handleCopy}
-              className={`flex-1 flex items-center justify-center gap-2 font-bold px-4 h-11 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${copySuccess ? 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 focus:ring-emerald-500' : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-blue-500/10 focus:ring-blue-500'}`}
+              className={`flex-1 flex items-center justify-center gap-2 font-bold px-4 h-11 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${copySuccess ? 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 focus:ring-emerald-500' : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg focus:ring-blue-500'}`}
             >
               {copySuccess ? (
                 <>
                   <Check size={18} />
-                  <span>Copied to Clipboard!</span>
+                  <span>Copied!</span>
                 </>
               ) : (
                 <>
                   <Copy size={18} />
-                  <span>Copy to Clipboard</span>
+                  <span>Copy Text</span>
                 </>
               )}
             </button>
 
             <button
+              onClick={handleDownloadTxt}
+              className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold px-3 h-11 rounded-xl flex-1 flex items-center justify-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Download Document as TXT File"
+            >
+              <Download size={18} />
+              <span>Download TXT</span>
+            </button>
+
+            <button
+              onClick={handleDownloadDoc}
+              className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold px-3 h-11 rounded-xl flex-1 flex items-center justify-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Download Document as DOC File"
+            >
+              <Download size={18} />
+              <span>Download DOC</span>
+            </button>
+
+            <button
               onClick={handlePrint}
-              className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold px-4 h-11 rounded-xl flex items-center justify-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold px-3 h-11 rounded-xl flex items-center justify-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Print Document"
             >
               <Printer size={18} />

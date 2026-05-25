@@ -13,6 +13,163 @@ import {
   calculateRetirementResult 
 } from '../utils/disabilityMath';
 
+function BodyLimbSelector({ selectedLimbs = {}, onChange }) {
+  const toggleLimb = (limb) => {
+    const updated = {
+      leftArm: false,
+      rightArm: false,
+      leftLeg: false,
+      rightLeg: false,
+      ...selectedLimbs,
+      [limb]: !selectedLimbs[limb]
+    };
+    onChange(updated);
+  };
+
+  const getStroke = (isActive) => isActive ? '#818cf8' : '#475569';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'rgba(15, 23, 42, 0.3)', padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
+      <svg width="40" height="60" viewBox="0 0 60 90" style={{ userSelect: 'none' }}>
+        {/* Head */}
+        <circle cx="30" cy="12" r="6" fill="#475569" />
+        {/* Torso */}
+        <rect x="24" y="20" width="12" height="30" rx="3" fill="#475569" />
+        
+        {/* Left Arm */}
+        <path
+          d="M 22 22 L 12 45"
+          stroke={getStroke(selectedLimbs.leftArm)}
+          strokeWidth="6"
+          strokeLinecap="round"
+          style={{ cursor: 'pointer', transition: 'stroke 0.2s' }}
+          onClick={() => toggleLimb('leftArm')}
+          tabIndex={0}
+          aria-label="Left Arm"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLimb('leftArm'); } }}
+        />
+        {/* Right Arm */}
+        <path
+          d="M 38 22 L 48 45"
+          stroke={getStroke(selectedLimbs.rightArm)}
+          strokeWidth="6"
+          strokeLinecap="round"
+          style={{ cursor: 'pointer', transition: 'stroke 0.2s' }}
+          onClick={() => toggleLimb('rightArm')}
+          tabIndex={0}
+          aria-label="Right Arm"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLimb('rightArm'); } }}
+        />
+        {/* Left Leg */}
+        <path
+          d="M 26 52 L 20 80"
+          stroke={getStroke(selectedLimbs.leftLeg)}
+          strokeWidth="6"
+          strokeLinecap="round"
+          style={{ cursor: 'pointer', transition: 'stroke 0.2s' }}
+          onClick={() => toggleLimb('leftLeg')}
+          tabIndex={0}
+          aria-label="Left Leg"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLimb('leftLeg'); } }}
+        />
+        {/* Right Leg */}
+        <path
+          d="M 34 52 L 40 80"
+          stroke={getStroke(selectedLimbs.rightLeg)}
+          strokeWidth="6"
+          strokeLinecap="round"
+          style={{ cursor: 'pointer', transition: 'stroke 0.2s' }}
+          onClick={() => toggleLimb('rightLeg')}
+          tabIndex={0}
+          aria-label="Right Leg"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLimb('rightLeg'); } }}
+        />
+      </svg>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <span style={{ fontSize: '0.62rem', fontWeight: 'bold', color: 'var(--accent-color)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Limbs Affected</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={() => toggleLimb('leftArm')}
+            style={{
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              border: '1px solid',
+              cursor: 'pointer',
+              backgroundColor: selectedLimbs.leftArm ? 'rgba(99, 102, 241, 0.2)' : 'var(--glass-bg)',
+              borderColor: selectedLimbs.leftArm ? 'var(--accent-color)' : 'var(--card-border)',
+              color: selectedLimbs.leftArm ? 'var(--accent-color)' : 'var(--text-secondary)',
+              outline: 'none'
+            }}
+            aria-label="Left Arm extremity"
+          >
+            L Arm
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleLimb('rightArm')}
+            style={{
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              border: '1px solid',
+              cursor: 'pointer',
+              backgroundColor: selectedLimbs.rightArm ? 'rgba(99, 102, 241, 0.2)' : 'var(--glass-bg)',
+              borderColor: selectedLimbs.rightArm ? 'var(--accent-color)' : 'var(--card-border)',
+              color: selectedLimbs.rightArm ? 'var(--accent-color)' : 'var(--text-secondary)',
+              outline: 'none'
+            }}
+            aria-label="Right Arm extremity"
+          >
+            R Arm
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleLimb('leftLeg')}
+            style={{
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              border: '1px solid',
+              cursor: 'pointer',
+              backgroundColor: selectedLimbs.leftLeg ? 'rgba(99, 102, 241, 0.2)' : 'var(--glass-bg)',
+              borderColor: selectedLimbs.leftLeg ? 'var(--accent-color)' : 'var(--card-border)',
+              color: selectedLimbs.leftLeg ? 'var(--accent-color)' : 'var(--text-secondary)',
+              outline: 'none'
+            }}
+            aria-label="Left Leg extremity"
+          >
+            L Leg
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleLimb('rightLeg')}
+            style={{
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              border: '1px solid',
+              cursor: 'pointer',
+              backgroundColor: selectedLimbs.rightLeg ? 'rgba(99, 102, 241, 0.2)' : 'var(--glass-bg)',
+              borderColor: selectedLimbs.rightLeg ? 'var(--accent-color)' : 'var(--card-border)',
+              color: selectedLimbs.rightLeg ? 'var(--accent-color)' : 'var(--text-secondary)',
+              outline: 'none'
+            }}
+            aria-label="Right Leg extremity"
+          >
+            R Leg
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, reduceMotion }) {
   // Localized Disability Ratings States
   const [disabilityRatings, setDisabilityRatings] = useState([]);
@@ -114,7 +271,7 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
               type="button"
               className="btn btn-primary"
               style={{ height: '30px', fontSize: '0.75rem' }}
-              onClick={() => setDisabilityRatings([...disabilityRatings, { id: Date.now(), value: 10, bilateral: false }])}
+              onClick={() => setDisabilityRatings([...disabilityRatings, { id: Date.now(), value: 10, bilateral: false, affectedLimbs: { leftArm: false, rightArm: false, leftLeg: false, rightLeg: false } }])}
             >
               + Add Disability
             </button>
@@ -158,19 +315,16 @@ function DisabilityHubView({ onDisabilityPayChange, onCombinedRatingChange, redu
                   </select>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-primary)', margin: 0 }}>
-                    <input
-                      type="checkbox"
-                      checked={rating.bilateral}
-                      onChange={(e) => {
-                        const list = [...disabilityRatings];
-                        list[index].bilateral = e.target.checked;
-                        setDisabilityRatings(list);
-                      }}
-                    />
-                    Bilateral (Limb Extremity)
-                  </label>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <BodyLimbSelector
+                    selectedLimbs={rating.affectedLimbs || { leftArm: false, rightArm: false, leftLeg: false, rightLeg: false }}
+                    onChange={(updatedLimbs) => {
+                      const list = [...disabilityRatings];
+                      list[index].affectedLimbs = updatedLimbs;
+                      list[index].bilateral = Object.values(updatedLimbs).some(v => v === true);
+                      setDisabilityRatings(list);
+                    }}
+                  />
                 </div>
 
                 <button
