@@ -27,20 +27,8 @@ const DEFAULT_RATES = {
   version: "2026.2",
   lastUpdated: "2026-05-25",
   lastVerified: "2026-05-25",
-  ay2025: {
-    ch31_institutional_full: [776.74, 963.78, 1135.53, 82.90],
-    ch31_institutional_threeQuarters: [583.56, 723.28, 851.62, 62.18],
-    ch31_institutional_half: [390.38, 482.78, 568.72, 41.45],
-    ch31_ojt: [641.40, 775.66, 893.93, 58.13],
-    p911_online_rate: 1122.00,
-    p911_foreign_rate: 2244.00,
-    p911_private_tuition_cap: 28948.05,
-    p911_flight_cap: 15075.05,
-    p911_correspondence_cap: 13172.57,
-    p911_books_cap: 1000.00,
-    ch31_computer_package_value: 2000.00
-  },
-  ay2026: {
+  ay2025_2026: {
+    label: "Post-9/11 AY 2025–2026 / Chapter 31 FY 2026",
     ch31_institutional_full: [812.84, 1008.24, 1188.15, 86.58],
     ch31_institutional_threeQuarters: [610.76, 757.28, 888.32, 66.60],
     ch31_institutional_half: [408.66, 506.32, 595.16, 44.42],
@@ -48,8 +36,22 @@ const DEFAULT_RATES = {
     p911_online_rate: 1169.00,
     p911_foreign_rate: 2338.00,
     p911_private_tuition_cap: 29920.95,
-    p911_flight_cap: 15497.13,
-    p911_correspondence_cap: 13535.11,
+    p911_flight_cap: 17097.67,
+    p911_correspondence_cap: 14533.00,
+    p911_books_cap: 1000.00,
+    ch31_computer_package_value: 2000.00
+  },
+  ay2026_2027: {
+    label: "Post-9/11 AY 2026–2027 / Chapter 31 FY 2026 until FY27 is published",
+    ch31_institutional_full: [812.84, 1008.24, 1188.15, 86.58],
+    ch31_institutional_threeQuarters: [610.76, 757.28, 888.32, 66.60],
+    ch31_institutional_half: [408.66, 506.32, 595.16, 44.42],
+    ch31_ojt: [710.67, 859.43, 990.47, 64.41],
+    p911_online_rate: 1261.00,
+    p911_foreign_rate: 2522.00,
+    p911_private_tuition_cap: 30908.34,
+    p911_flight_cap: 17661.89,
+    p911_correspondence_cap: 15012.59,
     p911_books_cap: 1000.00,
     ch31_computer_package_value: 2000.00
   }
@@ -77,10 +79,10 @@ function App() {
     return saved ? JSON.parse(saved) : [{ type: 'usc', id: '3102' }];
   });
 
-  // Rate Year Selection State ('ay2025' | 'ay2026')
+  // Rate Year Selection State ('ay2025_2026' | 'ay2026_2027')
   const [selectedRateYear, setSelectedRateYear] = useState(() => {
     const saved = localStorage.getItem('m28c_selected_rate_year');
-    return saved || 'ay2026';
+    return (saved === 'ay2025' || saved === 'ay2026') ? 'ay2025_2026' : (saved || 'ay2025_2026');
   });
 
   // Calculator Rates
@@ -89,7 +91,7 @@ function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.ay2025 && parsed.ay2026) return parsed;
+        if (parsed.ay2025_2026 && parsed.ay2026_2027) return parsed;
       } catch (e) {
         console.error('Failed to parse saved rates, using defaults');
       }
@@ -154,10 +156,11 @@ function App() {
         const saved = localStorage.getItem('m28c_calculator_rates');
         const active = saved ? JSON.parse(saved) : DEFAULT_RATES;
         
-        // If version or lastUpdated from server is different, update
+        // If version, lastUpdated or lastVerified from server is different, update
         if (
           remoteData.version !== active.version ||
-          remoteData.lastUpdated !== active.lastUpdated
+          remoteData.lastUpdated !== active.lastUpdated ||
+          remoteData.lastVerified !== active.lastVerified
         ) {
           const updatedRates = {
             ...active,
@@ -282,7 +285,7 @@ function App() {
       case 'self_employment':
         return <SelfEmploymentView reduceMotion={reduceMotion} />;
       case 'special_programs':
-        return <SpecialProgramsView rates={rates[selectedRateYear] || rates.ay2026} reduceMotion={reduceMotion} />;
+        return <SpecialProgramsView rates={rates[selectedRateYear] || rates.ay2025_2026} reduceMotion={reduceMotion} />;
       case 'error_spotter':
         return (
           <VaErrorSpotterView 

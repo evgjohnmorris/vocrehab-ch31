@@ -12,7 +12,7 @@ function CalculatorView({
   reduceMotion 
 }) {
   // Resolve active rates target year
-  const activeRates = rates[selectedRateYear] || rates.ay2026 || rates;
+  const activeRates = rates[selectedRateYear] || rates.ay2025_2026 || rates;
 
   // Localized Calculator States
   const [calcTrainingType, setCalcTrainingType] = useState('institutional');
@@ -170,12 +170,12 @@ function CalculatorView({
             value={selectedRateYear}
             onChange={(e) => {
               setSelectedRateYear(e.target.value);
-              const active = rates[e.target.value] || rates.ay2026;
+              const active = rates[e.target.value] || rates.ay2025_2026;
               setCalcComputerCost(active.ch31_computer_package_value || 2000.00);
             }}
           >
-            <option value="ay2025">Post-9/11 AY 2024–2025 / Chapter 31 FY 2025</option>
-            <option value="ay2026">Post-9/11 AY 2025–2026 / Chapter 31 FY 2026</option>
+            <option value="ay2025_2026">Post-9/11 AY 2025–2026 / Chapter 31 FY 2026</option>
+            <option value="ay2026_2027">Post-9/11 AY 2026–2027 / Chapter 31 FY 2026 (until FY27 is published)</option>
           </select>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -1014,9 +1014,9 @@ function CalculatorView({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0 }}>Comparison Payouts</h4>
                   <span className="badge badge-info">
-                    {selectedRateYear === 'ay2026'
-                      ? 'Post-9/11 AY 2025–2026 / Chapter 31 FY 2026'
-                      : 'Post-9/11 AY 2024–2025 / Chapter 31 FY 2025'}
+                    {selectedRateYear === 'ay2026_2027'
+                      ? 'Post-9/11 AY 2026–2027 / Chapter 31 FY 2026 (until FY27 is published)'
+                      : 'Post-9/11 AY 2025–2026 / Chapter 31 FY 2026'}
                   </span>
                 </div>
 
