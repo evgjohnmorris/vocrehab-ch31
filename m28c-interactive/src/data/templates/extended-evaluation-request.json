@@ -1,0 +1,10 @@
+{
+  "templateId": "extended-evaluation-request",
+  "title": "Request for Extended Evaluation Period",
+  "authorityIds": [
+    "38-usc-3106",
+    "38-cfr-21-57",
+    "38-cfr-21-74"
+  ],
+  "body": "Date: {{date}}\n\nTo: Assigned Vocational Rehabilitation Counselor (VRC)\nVA Regional Office\n\nSubject: Request for Extended Evaluation Period (38 C.F.R. § 21.74)\nVeteran: [Your Name]\nVA Claim Number: [Your Claim Number]\n\nDear Counselor,\n\nI am writing to formally request the authorization of an Extended Evaluation period under 38 C.F.R. § 21.74.\n\nThis request is made because there is vocational or medical uncertainty regarding whether achieving a vocational goal is currently reasonably feasible for me due to the severity of my service-connected conditions.\n\nUnder 38 C.F.R. § 21.74, when the feasibility of achieving a vocational goal cannot be readily determined during the initial evaluation, the VA should authorize an Extended Evaluation period (up to 12 months, or longer if extended) to evaluate my capabilities through structured services, medical care, and counseling.\n\nFurthermore, 38 C.F.R. § 21.57 directs that all reasonable doubts regarding feasibility must be resolved in favor of the veteran. Rather than issuing a feasibility denial, the VA should utilize the Extended Evaluation process to test my capacity with appropriate accommodations.\n\nI request that we develop an Extended Evaluation plan to systematically evaluate my feasibility for vocational rehabilitation.\n\nSincerely,\n\n[Your Name]"
+}

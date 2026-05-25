@@ -46,13 +46,14 @@ export const AuthorityRecordSchema = z.object({
 
   status: z.enum([
     "current",
+    "full-text-loaded",
+    "summary-only",
     "reserved",
     "removed",
     "superseded",
     "not-public",
     "fetch-failed",
-    "needs-review",
-    "summary-only"
+    "needs-review"
   ]),
 
   fullTextStatus: z.string().optional(),

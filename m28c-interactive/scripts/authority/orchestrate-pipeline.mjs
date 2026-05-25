@@ -29,7 +29,8 @@ const VALIDATION_SCRIPTS = [
   { name: 'Schema Validation', path: 'scripts/legal/validate-authority-schema.mjs' },
   { name: 'Topic Coverage Check', path: 'scripts/legal/check-topic-coverage.mjs' },
   { name: 'Audit Citations', path: 'scripts/legal/audit-citations.mjs' },
-  { name: 'Audit Modal Verbs', path: 'scripts/legal/audit-modal-verbs.mjs' }
+  { name: 'Audit Modal Verbs', path: 'scripts/legal/audit-modal-verbs.mjs' },
+  { name: 'Audit Workflows', path: 'scripts/legal/audit-workflows.mjs' }
 ];
 
 function cleanCache() {

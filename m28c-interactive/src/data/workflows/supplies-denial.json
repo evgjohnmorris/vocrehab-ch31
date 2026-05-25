@@ -1,0 +1,61 @@
+{
+  "workflowId": "supplies-denial",
+  "title": "Supplies / Laptop Denial",
+  "desc": "VA counselor verbally denied a computer or claimed a flat annual spending cap.",
+  "riskLevel": "critical",
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training"
+  ],
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-210",
+    "38-cfr-21-212",
+    "38-cfr-21-220"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "programName",
+          "label": "Degree / Training Program Name",
+          "type": "text",
+          "placeholder": "e.g. BS in Computer Science"
+        },
+        {
+          "name": "schoolRequired",
+          "label": "Does the school require a computer for all students in this program?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        },
+        {
+          "name": "disabilityNeed",
+          "label": "Is a computer package necessary to accommodate your disability limitations?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        },
+        {
+          "name": "verbalDenialReason",
+          "label": "What reason did the counselor give for the verbal denial?",
+          "type": "text",
+          "placeholder": "e.g. Citing a standard $500 spending limit"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "VA counselor verbally denying necessary supplies instead of providing a written decision notice (VA Form 20-0998).",
+    "Citing Post-9/11 GI Bill cap rules ($1,000/yr) or a flat $500 VR&E limit — Chapter 31 supplies are not subject to the Chapter 33 book stipend cap, but still require VA authorization based on rehabilitation necessity under 38 C.F.R. § 21.212."
+  ],
+  "citations": [
+    "38-usc-3104",
+    "38-cfr-21-210",
+    "38-cfr-21-212",
+    "38-cfr-21-220"
+  ],
+  "templates": [
+    "supplies-request"
+  ],
+  "reviewLaneWarning": true
+}

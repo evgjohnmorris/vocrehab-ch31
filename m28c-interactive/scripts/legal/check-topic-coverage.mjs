@@ -78,10 +78,30 @@ function main() {
 
   // Generate public coverage report json
   const coverageReport = {
-    uscCoverage: `${uscFound}/${REQUIRED_USC_CH31.length}`,
-    cfrCoverage: `${cfrFound}/${REQUIRED_CFR.length}`,
-    uscPercentage: Math.round((uscFound / REQUIRED_USC_CH31.length) * 100),
-    cfrPercentage: Math.round((cfrFound / REQUIRED_CFR.length) * 100),
+    usc: {
+      coverage: `${uscFound}/${REQUIRED_USC_CH31.length}`,
+      status: uscFound === REQUIRED_USC_CH31.length ? "pass" : "fail",
+      fullText: true
+    },
+    cfr: {
+      coverage: `${cfrFound}/${REQUIRED_CFR.length}`,
+      status: cfrFound === REQUIRED_CFR.length ? "pass" : "fail",
+      fullText: true
+    },
+    m28c: {
+      coverage: "partial",
+      status: "warning",
+      fullText: false,
+      note: "M28C records are currently summary-only unless individually marked full-text-loaded."
+    },
+    publicLaw: {
+      coverage: "pending",
+      status: "warning"
+    },
+    federalRegister: {
+      coverage: "pending",
+      status: "warning"
+    },
     totalErrors: errors,
     status: errors === 0 ? "pass" : "fail",
     lastUpdated: new Date().toISOString().split('T')[0]
@@ -91,8 +111,9 @@ function main() {
   console.log(`[REPORT SAVED] -> ${path.join(PUBLIC_PATH, 'coverage-report.json')}`);
 
   console.log(`\nCoverage check complete:`);
-  console.log(`  - Statutes Coverage: ${coverageReport.uscCoverage} (${coverageReport.uscPercentage}%)`);
-  console.log(`  - Regulations Coverage: ${coverageReport.cfrCoverage} (${coverageReport.cfrPercentage}%)`);
+  console.log(`  - Statutes Coverage: ${coverageReport.usc.coverage}`);
+  console.log(`  - Regulations Coverage: ${coverageReport.cfr.coverage}`);
+  console.log(`  - Manuals (M28C) Coverage: ${coverageReport.m28c.coverage}`);
 
   if (errors > 0) {
     console.error(`\n[FAIL] Coverage checking failed with ${errors} missing required document(s).`);

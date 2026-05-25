@@ -1,0 +1,57 @@
+{
+  "workflowId": "tuition-unpaid",
+  "title": "Tuition or Books Not Paid",
+  "desc": "The school hasn't received payment, threatening late fees or registration holds.",
+  "riskLevel": "high",
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training"
+  ],
+  "authorityIds": [
+    "38-usc-3108",
+    "38-cfr-21-260"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "schoolName",
+          "label": "Name of Educational Institution",
+          "type": "text",
+          "placeholder": "e.g. State University"
+        },
+        {
+          "name": "termDates",
+          "label": "Term Dates (e.g. Fall 2026)",
+          "type": "text",
+          "placeholder": "e.g. Sept - Dec 2026"
+        },
+        {
+          "name": "daysDelayed",
+          "label": "Days Payment is Overdue",
+          "type": "number",
+          "placeholder": "e.g. 45"
+        },
+        {
+          "name": "hasHold",
+          "label": "Has the school threatened registration holds or late fees?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Allowing administrative delays to penalize the veteran's active enrollment.",
+    "Failing to coordinate with the School Certifying Official to resolve billing errors."
+  ],
+  "citations": [
+    "38-usc-3108",
+    "38-cfr-21-260"
+  ],
+  "templates": [
+    "tuition-delay-escalation"
+  ],
+  "reviewLaneWarning": false
+}

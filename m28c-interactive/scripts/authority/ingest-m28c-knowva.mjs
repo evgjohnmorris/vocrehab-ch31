@@ -31,7 +31,7 @@ const M28C_CHAPTERS = [
     articleId: "554400000144000",
     sourceUpdated: "2026-05-23",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `U.S. DEPARTMENT OF VETERANS AFFAIRS
 VETERAN READINESS & EMPLOYMENT
 Chapter 31 Policy and Procedures Manual
@@ -115,7 +115,7 @@ The selection of a rehabilitation track is a collaborative process. The VRC and 
     articleId: "554400000150222",
     sourceUpdated: "2025-01-30",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 2.01 Partnerships and Agreements Overview
 This chapter provides guidelines for establishing and managing partnerships, Memoranda of Understanding (MOUs), and Memoranda of Agreement (MOAs) between the VR&E service and other federal, state, and private entities to enhance claimant services.
 
@@ -143,7 +143,7 @@ The manual warns that employees cannot enter into agreements containing indemnif
     articleId: "554400000144225",
     sourceUpdated: "2024-08-14",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 4.01 Field Advisory Committee (FAC)
 The Field Advisory Committee serves as the primary mechanism for the Executive Director of VR&E Service to solicit input directly from local regional offices. The FAC focuses on identifying operational barriers and recommending policy changes to improve claimant experience.
 
@@ -167,7 +167,7 @@ Committee memberships are structured to leverage interagency expertise, incorpor
     articleId: "554400000150221",
     sourceUpdated: "2024-11-20",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 2.01 Eligibility and Entitlement Overview
 Eligibility and entitlement are distinct legal decisions. Under 38 U.S.C. 3102, a veteran is eligible to apply for Chapter 31 services if they have a service-connected disability rating of 10% or higher and a discharge character that is other than dishonorable. Entitlement, however, is a subsequent finding by a Vocational Rehabilitation Counselor (VRC) determining whether the veteran requires services to prepare for, obtain, or retain suitable employment due to an employment handicap.
 
@@ -195,7 +195,7 @@ The VRC is the sole primary authority for making entitlement and feasibility dec
     articleId: "554400000150222",
     sourceUpdated: "2024-11-20",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 1.01 Initial Evaluation Requirements
 Under 38 U.S.C. 3106 and 38 C.F.R. 21.50, every claimant who applies for Chapter 31 benefits and meets basic eligibility criteria must participate in a comprehensive initial evaluation. The evaluation is conducted by a Vocational Rehabilitation Counselor (VRC) to determine if the veteran is entitled to services.
 
@@ -224,7 +224,7 @@ A Serious Employment Handicap (SEH) is a significant impairment of a veteran's a
     articleId: "554400000150223",
     sourceUpdated: "2024-11-20",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 2.01 Definition and Purpose of Vocational Exploration
 Under M28C.IV.B.2.01, vocational exploration is used to assist the claimant in selecting a suitable vocational objective that is consistent with his/her abilities, aptitudes and interests, and does not aggravate his/her disability(ies). If the claimant has transferable skills and/or training or experience in a suitable occupation, the same or a similar occupation must be considered prior to exploration of occupations requiring additional training.
 
@@ -249,7 +249,7 @@ Counselors and veterans should leverage standard labor market tools including O*
     articleId: "554400000150224",
     sourceUpdated: "2024-11-20",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 3.01 Determining Feasibility Overview
 Under 38 U.S.C. 3106 and 38 C.F.R. 21.50, the VRC must make a determination of whether it is reasonably feasible for a veteran to achieve a vocational goal. Feasibility is defined as a reasonable likelihood that the veteran can prepare for, obtain, and maintain suitable employment.
 
@@ -277,7 +277,7 @@ If feasibility cannot be determined during the initial evaluation, the counselor
     articleId: "554400000150227",
     sourceUpdated: "2024-08-14",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 1.01 Course and Facility Selection Guidelines
 Under 38 C.F.R. 21.120 through 21.128, a veteran's rehabilitation plan may utilize various educational institutions, training facilities, on-the-job training (OJT) sites, or independent living service providers. The VRC and the veteran must collaborate to select facilities that are accredited, approved by the State Approving Agency (SAA), and capable of providing the necessary accommodations for the veteran's disabilities.
 
@@ -302,7 +302,7 @@ For veterans in the Independent Living track, service facilities include rehabil
     articleId: "554400000150225",
     sourceUpdated: "2024-08-14",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 4.01 Individualized Written Rehabilitation Plan (IWRP) Development
 An IWRP must be developed for every entitled veteran for whom a vocational goal is determined to be reasonably feasible. Under 38 C.F.R. 21.84, the IWRP is a formal agreement between the VA and the veteran outlining the specific vocational goal, the intermediate objectives, the services to be provided (including tuition, fees, books, and supplies), and the responsibilities of both parties.
 
@@ -328,7 +328,7 @@ Under 38 C.F.R. 21.94, a rehabilitation plan may be amended at any time if the v
     articleId: "554400000150226",
     sourceUpdated: "2025-02-15",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 6.01 Independent Living (IL) Overview
 Under 38 U.S.C. 3120, independent living services are designed for veterans whose service-connected disabilities are so severe that they cannot currently participate in a vocational program. The objective of an Individualized Independent Living Plan (IILP) is to enable the veteran to live and function more independently within their family and community with reduced dependency on the services of others.
 
@@ -358,7 +358,7 @@ To be entitled to an IILP:
     articleId: "554400000146298",
     sourceUpdated: "2025-12-01",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 3.01 Provision of Supplies and Equipment
 Under 38 C.F.R. 21.210 and 21.212, the VA is required to furnish all necessary books, supplies, tools, software, and equipment required for a veteran to participate in and complete their rehabilitation plan. Supplies are provided on a needs-based, individualized basis.
 
@@ -383,7 +383,7 @@ VRCs must utilize the appropriate procurement pathways (such as credit card purc
     articleId: "554400000146300",
     sourceUpdated: "2025-05-23",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 1.01 Program Costs Overview
 VR&E program costs consist of tuition, fees, books, and supplies paid directly through the rehabilitation plan. It does not include monthly subsistence allowance payments. All plans must be approved by VA personnel with appropriate delegatory authority based on annual program cost limits.
 
@@ -425,7 +425,7 @@ Approval levels are strictly designated based on estimated annual costs or speci
     articleId: "554400000146302",
     sourceUpdated: "2025-12-01",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 5.01 Cost Approval Thresholds
 VA personnel must adhere to strict cost approval thresholds for procurement of services, tuition, tools, and technology. 
 * **Vocational Rehabilitation Counselor (VRC) Authority**: VRCs have independent authority to approve standard educational services, tuition, fees, and supplies up to $35,000 per year, provided the services are included in an approved rehabilitation plan.
@@ -451,7 +451,7 @@ Under 38 C.F.R. 21.212 and 21.220, there is no flat statutory dollar cap on appr
     articleId: "554400000146303",
     sourceUpdated: "2025-10-15",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 6.01 Introduction to Retroactive Induction
 Under 38 C.F.R. 21.282, retroactive induction allows the VA to retroactively authorize Chapter 31 services and subsistence allowance for a period of training that a veteran completed prior to their formal application or entitlement determination. This effectively allows the VA to reimburse the veteran for tuition, fees, and supplies, and pay subsistence allowance for that past period, while restoring any other VA educational entitlement (such as Post-9/11 GI Bill) used during that time.
 
@@ -482,7 +482,7 @@ Under M28C.V.B.6.04, when a veteran previously completed a period of training us
     articleId: "554400000146304",
     sourceUpdated: "2026-02-06",
     lastChecked: new Date().toISOString().split('T')[0],
-    status: "current",
+    status: "summary-only",
     fullText: `### 7.01 Subsistence Allowance Eligibility
 A veteran participating in a program of vocational rehabilitation under Chapter 31 is entitled to a monthly subsistence allowance while pursuing training. Allowance payments are based on the rate of pursuit (full-time, 3/4-time, 1/2-time), the type of training program (institutional, cooperative, on-the-job training), and the number of dependents.
 
@@ -548,3 +548,4 @@ function main() {
 }
 
 main();
+

@@ -1,0 +1,53 @@
+{
+  "workflowId": "case-closed",
+  "title": "Interrupted / Discontinued Case",
+  "desc": "Your counselor paused (interrupted) or closed (discontinued) your case.",
+  "riskLevel": "high",
+  "caseStages": [
+    "Interrupted Status",
+    "Discontinued Status"
+  ],
+  "authorityIds": [
+    "38-cfr-21-197",
+    "38-cfr-21-198",
+    "38-cfr-21-362"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "reasonGiven",
+          "label": "Reason counselor gave for pause/closure",
+          "type": "text",
+          "placeholder": "e.g. Claimed lack of contact or no progress"
+        },
+        {
+          "name": "hadNotice",
+          "label": "Did you receive a written 10-day warning before closure?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        },
+        {
+          "name": "hadVaf200998",
+          "label": "Did you receive a formal written decision (VA Form 20-0998)?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Closing a case without sending a written 10-day notice of intent to discontinue.",
+    "Failing to issue a formal written decision notice (VA Form 20-0998) explaining appeal rights."
+  ],
+  "citations": [
+    "38-cfr-21-197",
+    "38-cfr-21-198",
+    "38-cfr-21-362"
+  ],
+  "templates": [
+    "discontinuance-rebuttal"
+  ],
+  "reviewLaneWarning": true
+}

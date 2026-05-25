@@ -95,8 +95,30 @@ function main() {
 
   // Generate public coverage report json
   const coverageReport = {
-    uscCoverage: `${REQUIRED_USC_CH31.length - uscErrors}/${REQUIRED_USC_CH31.length}`,
-    cfrCoverage: `${REQUIRED_CFR.length - cfrErrors}/${REQUIRED_CFR.length}`,
+    usc: {
+      coverage: `${REQUIRED_USC_CH31.length - uscErrors}/${REQUIRED_USC_CH31.length}`,
+      status: uscErrors === 0 ? "pass" : "fail",
+      fullText: true
+    },
+    cfr: {
+      coverage: `${REQUIRED_CFR.length - cfrErrors}/${REQUIRED_CFR.length}`,
+      status: cfrErrors === 0 ? "pass" : "fail",
+      fullText: true
+    },
+    m28c: {
+      coverage: "partial",
+      status: "warning",
+      fullText: false,
+      note: "M28C records are currently summary-only unless individually marked full-text-loaded."
+    },
+    publicLaw: {
+      coverage: "pending",
+      status: "warning"
+    },
+    federalRegister: {
+      coverage: "pending",
+      status: "warning"
+    },
     totalErrors: totalErrors,
     status: totalErrors === 0 ? "pass" : "fail",
     lastUpdated: new Date().toISOString().split('T')[0]

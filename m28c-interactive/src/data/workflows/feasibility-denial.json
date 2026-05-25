@@ -1,0 +1,54 @@
+{
+  "workflowId": "feasibility-denial",
+  "title": "Feasibility Denial",
+  "desc": "VRC claims training is not feasible because your disabilities are too severe.",
+  "riskLevel": "high",
+  "caseStages": [
+    "Evaluation Phase"
+  ],
+  "authorityIds": [
+    "38-usc-3106",
+    "38-cfr-21-53",
+    "38-cfr-21-57",
+    "38-cfr-21-74"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "ratingPercentage",
+          "label": "Disability Rating Percentage",
+          "type": "text",
+          "placeholder": "e.g. 70%"
+        },
+        {
+          "name": "hasDoctorLetter",
+          "label": "Do you have a letter from a physician supporting training?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        },
+        {
+          "name": "proposedGoal",
+          "label": "Proposed Vocational Goal",
+          "type": "text",
+          "placeholder": "e.g. Accountant"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failing to resolve reasonable doubt in favor of feasibility as mandated by 38 C.F.R. § 21.57.",
+    "Denying feasibility without offering an Extended Evaluation (38 C.F.R. § 21.74) to fully evaluate capabilities."
+  ],
+  "citations": [
+    "38-usc-3106",
+    "38-cfr-21-53",
+    "38-cfr-21-57",
+    "38-cfr-21-74"
+  ],
+  "templates": [
+    "feasibility-rebuttal"
+  ],
+  "reviewLaneWarning": true
+}

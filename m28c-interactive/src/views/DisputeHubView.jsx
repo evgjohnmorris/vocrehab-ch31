@@ -7,172 +7,9 @@ import {
 } from 'lucide-react';
 import AuthorityBadge from '../components/AuthorityBadge';
 
-const DISPUTE_AREAS = [
-  {
-    id: 'computer_denial',
-    name: 'Computer & Technology Supplies',
-    description: 'Counselor denied a laptop, printer, or software, claiming a local budget cap (e.g. $500) or that tech is not covered.',
-    vrcArguments: [
-      { id: 'flat_cap', label: 'VRC claims a flat $500 cap on computer purchases.', correction: 'VA regulations and M28C guidelines contain NO flat dollar cap for necessary supplies. Supplies are authorized based on individual rehabilitation necessity.' },
-      { id: 'no_need', label: 'VRC claims a laptop is not required because the school has a public computer lab.', correction: 'Under 38 C.F.R. § 21.220, if lack of a personal computer puts the veteran at a peer disadvantage or if disability limits computer lab use, a computer package must be provided.' },
-      { id: 'gi_bill_stipend', label: 'VRC states books/supplies are covered by a fixed stipend like the GI Bill.', correction: 'Chapter 31 is a rehabilitation program and covers 100% of all required books, tools, and supplies, unlike the fixed Chapter 33 book stipend.' }
-    ],
-    evidenceChecklist: [
-      { id: 'syllabus', text: 'Official course syllabus showing computer or software requirements', weight: 25 },
-      { id: 'school_policy', text: 'School policy letter stating a personal computer is required for all enrolled students', weight: 25 },
-      { id: 'personal_statement', text: 'Personal statement of necessity outlining why a personal computer is required due to disability or peer disadvantages', weight: 30 },
-      { id: 'medical_backing', text: 'Medical letter or OT recommendation outlining physical/cognitive need for adaptive technology', weight: 20 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 3104(a)(7)', level: 'binding-statute', relevance: 'Authorizes provision of necessary books, supplies, and equipment.' },
-      { citation: '38 C.F.R. § 21.212', level: 'binding-regulation', relevance: 'Establishes policy that VA will furnish necessary supplies for training.' },
-      { citation: '38 C.F.R. § 21.220', level: 'binding-regulation', relevance: 'Governs computer packages based on peer disadvantage or disability.' },
-      { citation: 'M28C.V.A.3', level: 'va-policy', relevance: 'Governs provision of services, supplies, and equipment, prohibiting flat spending caps.' }
-    ],
-    rebuttalPushback: 'VA often pushes back claiming that they have a standard package. Rebut by demanding an individualized analysis tied to your training syllabus and disability restrictions under 38 C.F.R. § 21.212.'
-  },
-  {
-    id: 'seh_extension',
-    name: '48-Month Entitlement Extension',
-    description: 'Counselor refused to extend training beyond 48 months or extend the 12-year period of eligibility.',
-    vrcArguments: [
-      { id: 'hard_48', label: 'VRC claims the 48-month limit is statutory and cannot be extended.', correction: '38 U.S.C. § 3105(c) and 38 C.F.R. § 21.78 explicitly authorize extensions beyond 48 months for veterans with a Serious Employment Handicap (SEH).' },
-      { id: 'no_seh_extension', label: 'VRC asserts your 12-year basic eligibility window is closed and cannot be bypassed.', correction: '38 C.F.R. § 21.44 mandates that the eligibility period must be extended if the veteran has an SEH and requires training to overcome it.' }
-    ],
-    evidenceChecklist: [
-      { id: 'seh_finding', text: 'Initial VRC evaluation document showing a Serious Employment Handicap (SEH) finding', weight: 30 },
-      { id: 'iwrp_copy', text: 'Copy of your current signed IWRP/IPE detailing the course of study', weight: 20 },
-      { id: 'transcript_incomplete', text: 'Official transcripts showing incomplete coursework and credits remaining', weight: 25 },
-      { id: 'lmi_proof', text: 'Labor market reports showing that the current target goal is the only viable path to suitable employment', weight: 25 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 3105(c)', level: 'binding-statute', relevance: 'Authorizes services beyond 48 months to overcome a Serious Employment Handicap.' },
-      { citation: '38 C.F.R. § 21.44', level: 'binding-regulation', relevance: 'Authorizes extension of the basic period of eligibility for veterans with an SEH.' },
-      { citation: '38 C.F.R. § 21.78', level: 'binding-regulation', relevance: 'Defines VREO/VRC authority to approve programs exceeding 48 months.' },
-      { citation: 'M28C.IV.A.2', level: 'va-policy', relevance: 'Outlines serious employment handicap (SEH) definitions and counselor decision boundaries.' }
-    ],
-    rebuttalPushback: 'VA will assert that the 48-month cap is strict. Rebut by proving that you have an SEH, meaning your disabilities are severe enough to create a significant barrier to employment, which triggers the mandatory extension rules.'
-  },
-  {
-    id: 'retroactive_induction',
-    name: 'Retroactive Induction / GI Bill Restore',
-    description: 'Counselor denied retroactive authorization for past training, claiming you cannot restore GI Bill months already used.',
-    vrcArguments: [
-      { id: 'pre_apply', label: 'VRC claims retroactive induction cannot cover periods prior to your formal application date.', correction: '38 C.F.R. § 21.282 and manual M28C.V.B.6 explicitly allow retroactive induction covering past periods of training prior to application.' },
-      { id: 'gi_bill_used', label: 'VRC asserts retroactive adjustments are barred if Chapter 33 Post-9/11 GI Bill was already utilized.', correction: 'VA policy commands that past GI Bill usage must be adjusted to Chapter 31, and all utilized GI Bill months restored to the veteran.' }
-    ],
-    evidenceChecklist: [
-      { id: 'rating_during_training', text: 'DD-214 and VA Rating Decisions proving you held a disability rating during the past training', weight: 30 },
-      { id: 'tuition_invoices', text: 'Itemized tuition invoices and receipts proving you paid for the school terms', weight: 25 },
-      { id: 'transcripts_grades', text: 'Official transcripts showing completed courses and passing grades during the retroactive terms', weight: 25 },
-      { id: 'iwrp_goal_match', text: 'Approved IWRP detailing a vocational goal directly matching the past program of study', weight: 20 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 3104(a)(1)', level: 'binding-statute', relevance: 'Authorizes retroactive adjustments and reimbursements for past training.' },
-      { citation: '38 C.F.R. § 21.282', level: 'binding-regulation', relevance: 'Defines rules for retroactive induction effective dates.' },
-      { citation: 'M28C.V.B.6', level: 'va-policy', relevance: 'Sets detailed operational procedures for VRCs to process retroactive adjustments and restore GI Bill months under sections 6.03 (self-pay) and 6.04 (Chapter 33).' }
-    ],
-    rebuttalPushback: 'VA often claims that retroactive induction is only for extreme cases. Point to M28C.V.B.6 which outlines clear conditions for self-pay and Chapter 33 transfers.'
-  },
-  {
-    id: 'feasibility_denial',
-    name: 'Vocational Feasibility Rebuttal',
-    description: 'Counselor declared you "not feasible" to achieve a vocational goal, attempting to close your case without services.',
-    vrcArguments: [
-      { id: 'checklist_close', label: 'VRC denied feasibility based on standard aptitude tests or a brief review rather than individualized evaluation.', correction: 'Feasibility decisions require a comprehensive, multidisciplinary assessment under 38 C.F.R. § 21.50.' },
-      { id: 'doubt_resolved', label: 'VRC resolved clinical or vocational ambiguities against the veteran.', correction: '38 C.F.R. § 21.57 commands that VRCs must resolve all reasonable doubt in favor of the veteran.' }
-    ],
-    evidenceChecklist: [
-      { id: 'medical_accommodations', text: 'Physician or therapist statement explaining how you can work with specific accommodations', weight: 35 },
-      { id: 'capacity_proof', text: 'Documentation of recent volunteer work, courses completed, or hobbies showing functional capacity', weight: 35 },
-      { id: 'vrc_eval_copy', text: 'Copy of the VRC assessment report detailing specific objections', weight: 30 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 3106(a)', level: 'binding-statute', relevance: 'Requires VA to conduct initial evaluations to determine vocational feasibility.' },
-      { citation: '38 C.F.R. § 21.57', level: 'binding-regulation', relevance: 'Commands VRCs to resolve all doubts in favor of the veteran.' },
-      { citation: '38 C.F.R. § 21.74', level: 'binding-regulation', relevance: 'Mandates Extended Evaluation (up to 12 months) when feasibility is uncertain.' },
-      { citation: 'M28C.IV.B.3', level: 'va-policy', relevance: 'Governs VRC feasibility determinations and guidelines for graduate education and advanced degree approvals.' }
-    ],
-    rebuttalPushback: 'Counselors use unfeasibility to exit veterans who are expensive to rehabilitate. Rebut by demanding an Extended Evaluation under 38 C.F.R. § 21.74 to test your capacity with support.'
-  },
-  {
-    id: 'counselor_delay',
-    name: 'Counselor Non-Response / Delay',
-    description: 'Your VRC has stopped responding to emails/calls, missed appointments, or delayed authorizing classes/vouchers.',
-    vrcArguments: [
-      { id: 'delay_unresponsive', label: 'Counselor does not respond or states that they have high caseloads and cannot follow up.', correction: 'M28C service standards require timely case management. Long communication gaps disrupt active training plans and violate the VA duty to assist.' }
-    ],
-    evidenceChecklist: [
-      { id: 'email_logs', text: 'Log of emails sent with read receipts or date stamps showing no reply', weight: 40 },
-      { id: 'call_timeline', text: 'Interactive contact timeline entered below outlining method and result', weight: 40 },
-      { id: 'school_delay_impact', text: 'Letter from school certifying official stating classes are at risk of drop due to lack of auth', weight: 20 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 5103A', level: 'binding-statute', relevance: 'Establishes the VA Duty to Assist claimants throughout the benefits process.' },
-      { citation: '38 C.F.R. § 21.362', level: 'binding-regulation', relevance: 'Governs case manager responsibilities to coordinate, schedule, and maintain participant progress.' },
-      { citation: 'M28C.IV.C.1', level: 'va-policy', relevance: 'Sets detailed casework procedures and timelines for counselor response and service provision.' }
-    ],
-    rebuttalPushback: 'VRCs may claim they never received your request. Protect yourself by uploading documentation through QuickSubmit so the date is legally stamped in your VA file.'
-  },
-  {
-    id: 'tuition_unpaid',
-    name: 'School Tuition / Books Unpaid',
-    description: 'School term starts soon or has started, but VA has not authorized tuition payments or book vouchers.',
-    vrcArguments: [
-      { id: 'auth_late', label: 'Counselor states the authorization (tungsten auth/VAF 28-1905) will be processed when workload allows.', correction: 'VA must authorize tuition and supplies prior to term start to prevent veterans from facing drop deadlines or book shortages.' }
-    ],
-    evidenceChecklist: [
-      { id: 'term_start_proof', text: 'Official term class schedule showing start date', weight: 30 },
-      { id: 'tuition_invoice', text: 'Unpaid school account statement or invoice showing billing deadline', weight: 30 },
-      { id: 'sco_statement', text: 'Email or statement from School Certifying Official indicating lack of active VA authorization', weight: 40 }
-    ],
-    citations: [
-      { citation: '38 C.F.R. § 21.262', level: 'binding-regulation', relevance: 'Dictates rules for payment of school tuition and fees directly by VA.' },
-      { citation: '38 C.F.R. § 21.212', level: 'binding-regulation', relevance: 'Mandates the provision of required books, tools, and supplies prior to the commencement of courses.' },
-      { citation: 'M28C.V.B.1', level: 'va-policy', relevance: 'Outlines standard business processes for generating authorizations in Tungsten portal.' }
-    ],
-    rebuttalPushback: 'VA may blame school billing systems. Check with your School Certifying Official (SCO) to confirm if the VA has submitted VAF 28-1905 in the portal first.'
-  },
-  {
-    id: 'case_closed',
-    name: 'Case Closed / Discontinued',
-    description: 'Your case was closed or placed in interrupted status due to supposed lack of cooperation or progress.',
-    vrcArguments: [
-      { id: 'cooperation_fail', label: 'VRC closed the case claiming you failed to cooperate or did not attend appointments.', correction: 'VA must issue a formal 30-day warning letter (VAF 28-0950 equivalent) outlining exact actions required to avoid closure, and must offer a supervisor conference.' },
-      { id: 'no_notice', label: 'VRC closed the case without issuing a formal written decision and statement of appeal rights.', correction: '38 U.S.C. § 5104 requires written decision notices with detailed rationales and appeal options for all benefits terminations.' }
-    ],
-    evidenceChecklist: [
-      { id: 'no_warning_letter', text: 'Lack of written 30-day intent to discontinue letter in your possession', weight: 35 },
-      { id: 'contact_proof_closure', text: 'Evidence of emails or letters sent to counselor during the closure period proving cooperation', weight: 35 },
-      { id: 'medical_excuse', text: 'Doctor note outlining medical emergency that prevented attendance at the missed appointment', weight: 30 }
-    ],
-    citations: [
-      { citation: '38 U.S.C. § 5104', level: 'binding-statute', relevance: 'Requires VA to provide written notice of decisions affecting benefits, including appeal rights.' },
-      { citation: '38 C.F.R. § 21.360', level: 'binding-regulation', relevance: 'Governs procedures for interrupting a veteran\'s program of rehabilitation.' },
-      { citation: '38 C.F.R. § 21.197', level: 'binding-regulation', relevance: 'Details standard procedures for case discontinuation and the required 30-day warning notice.' }
-    ],
-    rebuttalPushback: 'VRCs close cases to clean their logs. Rebut by proving that you did not receive the mandatory 30-day warning letter or that you responded within the window.'
-  },
-  {
-    id: 'grad_school',
-    name: 'Graduate School Denied',
-    description: 'Counselor denied graduate school or advanced degree training, claiming Chapter 31 only covers entry-level bachelor degrees.',
-    vrcArguments: [
-      { id: 'entry_only', label: 'VRC claims VR&E only rehabilitates to entry-level jobs and cannot pay for masters or professional degrees.', correction: 'VA manual rules and C.F.R. policies allow graduate training if it is required for entry into the target field or if severe disabilities restrict placement to fields requiring advanced degrees.' }
-    ],
-    evidenceChecklist: [
-      { id: 'onet_credentials', text: 'O*NET or BLS printout showing target job requires a graduate degree for entry', weight: 30 },
-      { id: 'job_listings_grad', text: '3 local entry-level job listings in the field showing a Master\'s/Juris Doctor is mandatory', weight: 30 },
-      { id: 'medical_sedentary_grad', text: 'Medical statement showing physical limits block all Bachelor-level roles but allow advanced roles', weight: 40 }
-    ],
-    citations: [
-      { citation: '38 C.F.R. § 21.80', level: 'binding-regulation', relevance: 'Dictates the selection and formulation of the vocational goal.' },
-      { citation: '38 C.F.R. § 21.50', level: 'binding-regulation', relevance: 'Requires that the rehabilitation plan enable the veteran to attain suitable employment.' },
-      { citation: 'M28C.IV.B.3', level: 'va-policy', relevance: 'Confirms advanced degrees may be approved if required to overcome employment barriers.' }
-    ],
-    rebuttalPushback: 'VA will push back saying that you can get a lower-level job. Rebut by showing that your service-connected disabilities rule out those lower-level jobs, making advanced education the only viable path to a suitable career.'
-  }
-];
+import DISPUTE_AREAS from '../data/dispute-areas.json';
+import { renderTemplate } from '../utils/templateRenderer.js';
+
 
 function DisputeHubView({ 
   reduceMotion,
@@ -400,6 +237,47 @@ function DisputeHubView({
 
   const reviewLane = getReviewLaneRecommendation();
 
+const BRIEF_TEMPLATE = `VETERAN READINESS AND EMPLOYMENT (VR&E) STRATEGIC DISPUTE BRIEF
+DISPUTE TYPE: {{disputeType}}
+DATE: {{date}}
+VETERAN: {{veteranName}}
+CLAIM NUMBER: {{claimNumber}}
+ACTIVE USER MODE: {{userMode}}
+
+============================================================
+1. STATEMENT OF FACTS & GOAL DETAILS
+The Veteran requested services or supplies regarding: {{schoolOrProgram}}.
+Active Case Stage: {{caseStage}}
+Counselor Argument / Reason Given: "{{counselorArgument}}"
+
+Veteran Rationale & Accommodation Statement:
+{{personalContext}}
+{{timelineText}}
+============================================================
+2. CORE REGULATORY DEFICIENCIES & ERRORS
+The VRC's argument is refuted by the following corrective authorities:
+* Error Assertion: {{errorAssertion}}
+  Legal Correction: {{legalCorrection}}
+
+============================================================
+3. BINDING LEGAL AUTHORITY
+The Veteran asserts the following regulations govern this dispute:
+{{citationsText}}
+
+============================================================
+4. EVIDENCE PACKET INCLUDED
+The following corroborating documentation is attached to support this dispute:
+{{evidenceText}}
+
+============================================================
+5. ACTION REQUESTED
+The Veteran formally requests:
+1. Immediate administrative review of the VRC's decision under 38 C.F.R. § 21.416 / § 21.94 guidelines.
+2. A formal written decision notice (VA Form 20-0998) detailing the specific regulatory citations utilized for the denial as required by 38 U.S.C. § 5104.
+3. Referral of this dispute package to the Regional VR&E Officer (VREO) for administrative correction.
+
+*** CONFIDENTIALITY NOTE: Private document compiled locally in session storage. Confirmed by claimant. ***`;
+
   // Compile Strategic Brief
   const compileBrief = () => {
     const activeCitations = selectedArea.citations.filter((_, idx) => selectedCitations[idx]);
@@ -412,47 +290,30 @@ function DisputeHubView({
         contactsLog.map(c => `* ${c.date} | Method: ${c.method} | To: ${c.person} | Topic: ${c.request} | Result: ${c.response}`).join('\n') + '\n';
     }
 
-    return `VETERAN READINESS AND EMPLOYMENT (VR&E) STRATEGIC DISPUTE BRIEF
-DISPUTE TYPE: ${selectedArea.name}
-DATE: ${new Date().toLocaleDateString()}
-VETERAN: ${userFacts.veteranName || '[VETERAN NAME]'}
-CLAIM NUMBER: ${userFacts.claimNumber || '[CLAIM NUMBER]'}
-ACTIVE USER MODE: ${userMode.toUpperCase()}
+    const citationsText = activeCitations.map(c => `* ${c.citation}: ${c.relevance}`).join('\n');
+    const evidenceText = [
+      ...activeEvidence.map(e => `[x] Attached: ${e.text}`),
+      ...selectedArea.evidenceChecklist.filter(e => !checkedEvidence[e.id]).map(e => `[ ] Pending: ${e.text}`)
+    ].join('\n');
 
-============================================================
-1. STATEMENT OF FACTS & GOAL DETAILS
-The Veteran requested services or supplies regarding: ${userFacts.schoolOrProgram || '[SCHOOL/PROGRAM/ITEMS REQUESTED]'}.
-Active Case Stage: ${currentCaseStage.toUpperCase().replace(/_/g, ' ')}
-Counselor Argument / Reason Given: "${userFacts.counselorArgument || selectedArg?.label || '[VRC STATE NOTICE]'}"
+    const variables = {
+      disputeType: selectedArea.name,
+      date: new Date().toLocaleDateString(),
+      veteranName: userFacts.veteranName || '[VETERAN NAME]',
+      claimNumber: userFacts.claimNumber || '[CLAIM NUMBER]',
+      userMode: userMode.toUpperCase(),
+      schoolOrProgram: userFacts.schoolOrProgram || '[SCHOOL/PROGRAM/ITEMS REQUESTED]',
+      caseStage: currentCaseStage.toUpperCase().replace(/_/g, ' '),
+      counselorArgument: userFacts.counselorArgument || selectedArg?.label || '[VRC STATE NOTICE]',
+      personalContext: userFacts.personalContext || '[EXPLAIN HOW DISABILITY RESTRICTS YOUR PROGRESS AND WHY THIS IS REQUIRED FOR THE IWRP OUTCOMES]',
+      timelineText,
+      errorAssertion: selectedArg?.label || '[VRC REASON]',
+      legalCorrection: selectedArg?.correction || '[REGULATORY CORRECTION]',
+      citationsText,
+      evidenceText
+    };
 
-Veteran Rationale & Accommodation Statement:
-${userFacts.personalContext || '[EXPLAIN HOW DISABILITY RESTRICTS YOUR PROGRESS AND WHY THIS IS REQUIRED FOR THE IWRP OUTCOMES]'}
-${timelineText}
-============================================================
-2. CORE REGULATORY DEFICIENCIES & ERRORS
-The VRC's argument is refuted by the following corrective authorities:
-* Error Assertion: ${selectedArg?.label || '[VRC REASON]'}
-  Legal Correction: ${selectedArg?.correction || '[REGULATORY CORRECTION]'}
-
-============================================================
-3. BINDING LEGAL AUTHORITY
-The Veteran asserts the following regulations govern this dispute:
-${activeCitations.map(c => `* ${c.citation}: ${c.relevance}`).join('\n')}
-
-============================================================
-4. EVIDENCE PACKET INCLUDED
-The following corroborating documentation is attached to support this dispute:
-${activeEvidence.map(e => `[x] Attached: ${e.text}`).join('\n')}
-${selectedArea.evidenceChecklist.filter(e => !checkedEvidence[e.id]).map(e => `[ ] Pending: ${e.text}`).join('\n')}
-
-============================================================
-5. ACTION REQUESTED
-The Veteran formally requests:
-1. Immediate administrative review of the VRC's decision under 38 C.F.R. § 21.416 / § 21.94 guidelines.
-2. A formal written decision notice (VA Form 20-0998) detailing the specific regulatory citations utilized for the denial as required by 38 U.S.C. § 5104.
-3. Referral of this dispute package to the Regional VR&E Officer (VREO) for administrative correction.
-
-*** CONFIDENTIALITY NOTE: Private document compiled locally in session storage. Confirmed by claimant. ***`;
+    return renderTemplate(BRIEF_TEMPLATE, variables);
   };
 
   const handleCopy = () => {

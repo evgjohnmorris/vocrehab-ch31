@@ -1,0 +1,51 @@
+{
+  "workflowId": "ipe-change",
+  "title": "IPE Amendment / Goal Change",
+  "desc": "You want to change your training goal, but your VRC refuses to update the plan.",
+  "riskLevel": "medium",
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training"
+  ],
+  "authorityIds": [
+    "38-cfr-21-80",
+    "38-cfr-21-94"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "currentGoal",
+          "label": "Current Approved Goal in IPE",
+          "type": "text",
+          "placeholder": "e.g. Sales Manager"
+        },
+        {
+          "name": "newGoal",
+          "label": "Proposed New Goal",
+          "type": "text",
+          "placeholder": "e.g. Software Engineer"
+        },
+        {
+          "name": "changeReason",
+          "label": "Reason for the change (e.g. condition worsened)",
+          "type": "text",
+          "placeholder": "e.g. Physical standing requirements aggravate back condition"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Arbitrarily denying plan changes when medical condition or limitations have changed.",
+    "Refusing to issue a written decision notice when IPE amendment request is denied."
+  ],
+  "citations": [
+    "38-cfr-21-80",
+    "38-cfr-21-94"
+  ],
+  "templates": [
+    "ipe-change-letter"
+  ],
+  "reviewLaneWarning": false
+}

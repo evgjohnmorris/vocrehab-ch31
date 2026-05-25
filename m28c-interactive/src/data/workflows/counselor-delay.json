@@ -1,0 +1,66 @@
+{
+  "workflowId": "counselor-delay",
+  "title": "Counselor Nonresponse",
+  "desc": "Your VRC hasn't answered your email, eVA, or phone calls for weeks.",
+  "riskLevel": "medium",
+  "caseStages": [
+    "Applied, Waiting Appointment",
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed",
+    "In School / Training",
+    "Employment Services"
+  ],
+  "authorityIds": [
+    "38-usc-3115",
+    "38-cfr-21-33"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "vrcName",
+          "label": "Counselor's Name",
+          "type": "text",
+          "placeholder": "e.g. John Doe"
+        },
+        {
+          "name": "lastContactDate",
+          "label": "Date of Last Response",
+          "type": "text",
+          "placeholder": "e.g. April 12, 2026"
+        },
+        {
+          "name": "followUpCount",
+          "label": "Number of Follow-up Attempts",
+          "type": "number",
+          "placeholder": "e.g. 3"
+        },
+        {
+          "name": "contactMethod",
+          "label": "Primary Contact Method Used",
+          "type": "select",
+          "options": [
+            "eVA Portal",
+            "Email",
+            "Phone Call",
+            "Certified Mail"
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failure to maintain contact constitutes a violation of the VA's Duty to Assist under 38 C.F.R. § 21.33.",
+    "M28C policy guidelines require timely counselor action on veteran inquiries (typically 5 business days)."
+  ],
+  "citations": [
+    "38-usc-3115",
+    "38-cfr-21-33"
+  ],
+  "templates": [
+    "counselor-escalation"
+  ],
+  "reviewLaneWarning": false
+}

@@ -1,0 +1,53 @@
+{
+  "workflowId": "seh-extension",
+  "title": "48-Month Extension / SEH",
+  "desc": "You are approaching 48 months of benefits and need an extension to graduate.",
+  "riskLevel": "critical",
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training"
+  ],
+  "authorityIds": [
+    "38-usc-3105",
+    "38-cfr-21-44",
+    "38-cfr-21-78"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "monthsUsed",
+          "label": "Months of Entitlement Used So Far",
+          "type": "number",
+          "placeholder": "e.g. 44"
+        },
+        {
+          "name": "hasSeh",
+          "label": "Has the VRC declared you have a Serious Employment Handicap (SEH)?",
+          "type": "select",
+          "options": ["Yes", "No"]
+        },
+        {
+          "name": "extensionReason",
+          "label": "Reason extension is needed to complete plan",
+          "type": "text",
+          "placeholder": "e.g. Double major required to secure suitable entry-level placement"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Asserting that the 48-month limit is a hard statutory cap that can never be extended.",
+    "Claiming VREO signature is always required when extension concurrence was legally delegated under the 2024 final rule."
+  ],
+  "citations": [
+    "38-usc-3105",
+    "38-cfr-21-44",
+    "38-cfr-21-78"
+  ],
+  "templates": [
+    "seh-extension-letter"
+  ],
+  "reviewLaneWarning": true
+}
