@@ -773,8 +773,8 @@ function CalculatorView({
                 max={6000}
               />
               <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                {calcVenue === 'online' ? `Note: Since you selected Online training, the calculator will use the fixed Online MHA Rate ($${rates.p911_online_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
-                 calcVenue === 'foreign' ? `Note: Since you selected Foreign training, the calculator will use the fixed Foreign MHA Rate ($${rates.p911_foreign_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
+                {calcVenue === 'online' ? `Note: Since you selected Online training, the calculator will use the fixed Online MHA Rate ($${activeRates.p911_online_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
+                 calcVenue === 'foreign' ? `Note: Since you selected Foreign training, the calculator will use the fixed Foreign MHA Rate ($${activeRates.p911_foreign_rate.toFixed(2)}/mo) for calculations instead of the local BAH rate shown above.` :
                  "Find local BAH rate automatically by using the school search bar above, or enter manually."}
               </p>
             </div>
@@ -1008,7 +1008,7 @@ function CalculatorView({
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h4 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0 }}>Comparison Payouts</h4>
-                  <span className="badge badge-info">FY 2026 RATES</span>
+                  <span className="badge badge-info">{selectedRateYear === 'ay2026' ? 'AY 2026–2027 / FY 2026 Rate Set' : 'AY 2025–2026 / FY 2025 Rate Set'}</span>
                 </div>
 
                 {/* WARNING BADGES */}
@@ -1114,13 +1114,13 @@ function CalculatorView({
                         <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>100% (${calculatorResults.tuitionCh31Covered.toFixed(2)})</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                        <span>Books & Supplies Covered (Uncapped):</span>
+                        <span>Books & Supplies (Approved necessary):</span>
                         <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>100%</span>
                       </div>
                       {calcIncludeComputer && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                          <span>Laptop/Tech Package (100% Covered):</span>
-                          <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>100% (${calculatorResults.computerCh31Covered.toFixed(2)})</span>
+                          <span>Laptop/Tech Package (Approved necessary):</span>
+                          <span style={{ fontWeight: '600', color: 'var(--success-color)' }}>Potentially Covered (${calculatorResults.computerCh31Covered.toFixed(2)})</span>
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginTop: '6px', borderTop: '1px dashed var(--card-border)', paddingTop: '6px', fontWeight: '700' }}>
@@ -1182,19 +1182,19 @@ function CalculatorView({
                       </div>
                     </div>
 
-                    {calcSchoolType === 'private' && calcTuition > rates.p911_private_tuition_cap && (
+                    {calcSchoolType === 'private' && calcTuition > activeRates.p911_private_tuition_cap && (
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits private/foreign school tuition payments to ${rates.p911_private_tuition_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
+                        *Post-9/11 limits private/foreign school tuition payments to ${activeRates.p911_private_tuition_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
                       </p>
                     )}
-                    {calcSchoolType === 'flight' && calcTuition > rates.p911_flight_cap && (
+                    {calcSchoolType === 'flight' && calcTuition > activeRates.p911_flight_cap && (
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits vocational flight school tuition payments to ${rates.p911_flight_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
+                        *Post-9/11 limits vocational flight school tuition payments to ${activeRates.p911_flight_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
                       </p>
                     )}
-                    {calcSchoolType === 'correspondence' && calcTuition > rates.p911_correspondence_cap && (
+                    {calcSchoolType === 'correspondence' && calcTuition > activeRates.p911_correspondence_cap && (
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-                        *Post-9/11 limits correspondence school tuition payments to ${rates.p911_correspondence_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
+                        *Post-9/11 limits correspondence school tuition payments to ${activeRates.p911_correspondence_cap.toLocaleString()} per academic year. VR&E has no tuition cap.
                       </p>
                     )}
                     {(calcSchoolType === 'flight' || calcSchoolType === 'correspondence') && (
@@ -1204,7 +1204,7 @@ function CalculatorView({
                     )}
                     {calcIncludeComputer && (
                       <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                        *Post-9/11 Chapter 33 does not cover required computer packages; veterans must pay out of pocket. Chapter 31 fully funds required technology packages (e.g. laptop, printer, and specific software).
+                        *Post-9/11 Chapter 33 does not cover computer packages. Under Chapter 31, VA may cover 100% of approved, necessary books, supplies, equipment, and technology required for the rehabilitation plan. A computer package is potentially covered under 38 C.F.R. § 21.212 when required by the program, disability-related, or necessary to avoid a distinct disadvantage.
                       </p>
                     )}
                   </div>

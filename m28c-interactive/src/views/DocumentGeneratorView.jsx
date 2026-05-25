@@ -266,7 +266,7 @@ function DocumentGeneratorView({ reduceMotion, plainLanguageMode }) {
             Document Generator
           </h2>
           <p className="text-slate-400 mt-2 text-sm leading-relaxed">
-            Quickly draft formal correspondence, program changes, technology supplies requests, or higher-level review briefs to send to your counselor. All letters include mandatory legal citations under 38 CFR Part 21.
+            Quickly draft formal correspondence, program changes, technology supplies requests, or higher-level review briefs to send to your counselor. All templates include relevant legal authorities and advocacy language for editing.
           </p>
         </div>
 
@@ -285,6 +285,15 @@ function DocumentGeneratorView({ reduceMotion, plainLanguageMode }) {
               ))}
             </select>
           </div>
+
+          {(selectedTemplate === 'hlr_brief' || selectedTemplate === 'supplemental_claim') && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-xs text-amber-400 flex gap-2">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div>
+                <strong>Appeal/Review Lane Warning:</strong> Confirm the review lane and form listed in your VA decision notice before filing. Some VR&E disputes may require a specific review option, Board appeal form, or local administrative review first.
+              </div>
+            </div>
+          )}
 
           <hr className="border-slate-800" />
 

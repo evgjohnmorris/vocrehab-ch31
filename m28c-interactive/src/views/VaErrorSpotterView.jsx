@@ -53,11 +53,11 @@ const ERROR_ITEMS = [
     plainTitle: 'Counselor Denies Computer or Supplies Without Checking Needs',
     citation: '38 CFR § 21.210, 38 CFR § 21.212, M28C.V.A.3',
     explanation: 'The counselor applies a blanket rule denying a laptop package, high-performance computer, or specialized software, stating that "VR&E does not buy computers" or asserting an arbitrary spending limit. Under 38 CFR § 21.212, supplies must be provided based on the specific academic or vocational requirements of your program.',
-    plainExplanation: 'If your school course requires a computer or specific tools, the VA must buy them for you. A counselor cannot say "we do not buy laptops" or set a low budget limit. They must look at what your courses actually require.',
+    plainExplanation: 'If your school course requires a computer or specific tools, VA should authorize them unless the counselor provides a lawful, individualized reason for denial under 38 C.F.R. §§ 21.210–21.212. A counselor cannot apply blanket rules like "we do not buy laptops" or set arbitrary budget limits.',
     advocacySteps: [
       'Secure a copy of your school\'s computer hardware/software requirements or department syllabus.',
       'Get a letter from your professor or advisor stating that a computer with specific technical specs is necessary for the coursework.',
-      'Cite 38 CFR § 21.212, highlighting that the VA must supply tools required of all students in the program.',
+      'Cite 38 CFR § 21.212, highlighting that the VA should supply tools required of all students in the program to avoid placing you at a distinct disadvantage.',
       'Submit a formal Computer/Supplies Request letter with syllabus attachments.'
     ],
     letterType: 'computer_request'
@@ -68,7 +68,7 @@ const ERROR_ITEMS = [
     plainTitle: 'Counselor Refuses to Approve a Master\'s or Doctorate Degree',
     citation: '38 CFR § 21.52, 38 CFR § 21.72, M28C.IV.B.3',
     explanation: 'The counselor tells you that VR&E only pays for Bachelor\'s degrees or trade schools, and refuses to approve a graduate degree (Master\'s, J.D., M.D., Ph.D.) required for entry into your chosen vocational field. Under 38 CFR § 21.72, the education level approved is determined by what is needed to overcome your employment handicap.',
-    plainExplanation: 'If your career goal (like counselor, lawyer, doctor, or therapist) requires a Master\'s or higher degree to get licensed and work, the VA must fund it. Counselors cannot limit you to a Bachelor\'s degree if that degree does not make you employable.',
+    plainExplanation: 'If your selected career goal (such as a counselor, lawyer, or therapist) requires a graduate degree for entry-level licensing and employment, the VA should approve graduate-level training. The counselor cannot arbitrarily cap services at a Bachelor\'s degree if that degree is insufficient for you to become employable.',
     advocacySteps: [
       'Provide local job postings showing that a graduate degree is the standard entry-level requirement for the target occupation.',
       'Provide state licensing board regulations stating a graduate degree is mandatory for licensure.',

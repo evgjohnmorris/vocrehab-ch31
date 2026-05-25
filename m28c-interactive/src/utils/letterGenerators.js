@@ -352,6 +352,8 @@ Contact: ${emailPhone}
 
 Subject: Higher-Level Review Argument Brief (38 U.S.C. § 5104B / 38 CFR § 21.412)
 
+[*** ADVOCACY NOTICE: Confirm the review lane and form listed in your VA decision notice before filing. Some VR&E disputes may require a specific review option, Board appeal form, or local administrative review first. ***]
+
 Dear Higher-Level Reviewer,
 
 This brief is submitted in support of my request for a Higher-Level Review (VA Form 20-0996) concerning the VR&E decision dated ${decisionDate} which denied:
@@ -401,6 +403,8 @@ Address: ${address}
 Contact: ${emailPhone}
 
 Subject: Submission of Supplemental Claim with New & Relevant Evidence (38 U.S.C. § 5108)
+
+[*** ADVOCACY NOTICE: Confirm the review lane and form listed in your VA decision notice before filing. Some VR&E disputes may require a specific review option, Board appeal form, or local administrative review first. ***]
 
 Dear VR&E Staff,
 
