@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, BookMarked, Settings, Sun, Moon, Eye, EyeOff } from 'lucide-react';
+import { Search, BookMarked, Settings, Sun, Moon, Eye, EyeOff, Menu, X } from 'lucide-react';
 import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from '../data/data';
 
 function Header({
@@ -13,20 +13,26 @@ function Header({
   setReduceMotion,
   rates,
   setRates,
+  selectedRateYear,
+  setSelectedRateYear,
   syncStatus,
   DEFAULT_RATES,
   isSettingsOpen,
-  setIsSettingsOpen
+  setIsSettingsOpen,
+  isSidebarOpen,
+  setIsSidebarOpen
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [settingsForm, setSettingsForm] = useState(rates);
+  
+  // Bind settingsForm to the active rates year subset
+  const [settingsForm, setSettingsForm] = useState(rates[selectedRateYear] || rates.ay2026);
 
-  // Sync settings form with rates when rates change
+  // Sync settings form with rates when rates or selected rate year change
   useEffect(() => {
-    setSettingsForm(rates);
-  }, [rates]);
+    setSettingsForm(rates[selectedRateYear] || rates.ay2026);
+  }, [rates, selectedRateYear]);
 
   // Real-time Search Logic
   useEffect(() => {
@@ -91,6 +97,14 @@ function Header({
   return (
     <>
       <header className="header">
+        <button 
+          className="mobile-menu-toggle"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          aria-label="Toggle Navigation Sidebar"
+          aria-expanded={isSidebarOpen}
+        >
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
         <div className="search-container">
           <div className="search-input-wrapper">
             <Search size={18} className="search-input-icon" />
@@ -224,6 +238,22 @@ function Header({
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 Manage allowance rates manually to align with the latest VA updates. Changes save to your browser's local storage.
               </p>
+
+              <div className="form-group" style={{ marginBottom: '24px', borderBottom: '1px solid var(--card-border)', paddingBottom: '16px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--accent-color)' }}>Select Target Academic Year to Edit</label>
+                <select 
+                  className="form-control"
+                  style={{ marginTop: '6px' }}
+                  value={selectedRateYear}
+                  onChange={(e) => setSelectedRateYear(e.target.value)}
+                >
+                  <option value="ay2025">AY 2025 - 2026 (Effective Oct 1, 2024 / Aug 1, 2025)</option>
+                  <option value="ay2026">AY 2026 - 2027 (Effective Oct 1, 2025 / Aug 1, 2026) [Future/Current]</option>
+                </select>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
+                  Post-9/11 rates update on August 1st. Chapter 31 subsistence rates update on October 1st.
+                </span>
+              </div>
               
               <div className="settings-section">
                 <h3>Chapter 31 Standard Subsistence Rates</h3>
@@ -231,7 +261,7 @@ function Header({
                   <div className="form-group">
                     <label>Inst. Full Time (0 / 1 / 2 / Add'l Dep)</label>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      {settingsForm.ch31_institutional_full.map((val, idx) => (
+                      {settingsForm.ch31_institutional_full && settingsForm.ch31_institutional_full.map((val, idx) => (
                         <input 
                           key={idx}
                           type="number" 
@@ -250,7 +280,7 @@ function Header({
                   <div className="form-group">
                     <label>Inst. 3/4 Time (0 / 1 / 2 / Add'l Dep)</label>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      {settingsForm.ch31_institutional_threeQuarters.map((val, idx) => (
+                      {settingsForm.ch31_institutional_threeQuarters && settingsForm.ch31_institutional_threeQuarters.map((val, idx) => (
                         <input 
                           key={idx}
                           type="number" 
@@ -269,7 +299,7 @@ function Header({
                   <div className="form-group">
                     <label>Inst. 1/2 Time (0 / 1 / 2 / Add'l Dep)</label>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      {settingsForm.ch31_institutional_half.map((val, idx) => (
+                      {settingsForm.ch31_institutional_half && settingsForm.ch31_institutional_half.map((val, idx) => (
                         <input 
                           key={idx}
                           type="number" 
@@ -288,7 +318,7 @@ function Header({
                   <div className="form-group">
                     <label>Apprentice/OJT (0 / 1 / 2 / Add'l Dep)</label>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      {settingsForm.ch31_ojt.map((val, idx) => (
+                      {settingsForm.ch31_ojt && settingsForm.ch31_ojt.map((val, idx) => (
                         <input 
                           key={idx}
                           type="number" 
@@ -315,7 +345,7 @@ function Header({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={settingsForm.p911_online_rate}
+                      value={settingsForm.p911_online_rate || 0}
                       onChange={(e) => setSettingsForm({ ...settingsForm, p911_online_rate: Number(e.target.value) })}
                     />
                   </div>
@@ -324,7 +354,7 @@ function Header({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={settingsForm.p911_foreign_rate}
+                      value={settingsForm.p911_foreign_rate || 0}
                       onChange={(e) => setSettingsForm({ ...settingsForm, p911_foreign_rate: Number(e.target.value) })}
                     />
                   </div>
@@ -333,7 +363,7 @@ function Header({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={settingsForm.p911_private_tuition_cap}
+                      value={settingsForm.p911_private_tuition_cap || 0}
                       onChange={(e) => setSettingsForm({ ...settingsForm, p911_private_tuition_cap: Number(e.target.value) })}
                     />
                   </div>
@@ -342,7 +372,7 @@ function Header({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={settingsForm.p911_books_cap}
+                      value={settingsForm.p911_books_cap || 0}
                       onChange={(e) => setSettingsForm({ ...settingsForm, p911_books_cap: Number(e.target.value) })}
                     />
                   </div>
@@ -351,7 +381,7 @@ function Header({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={settingsForm.ch31_computer_package_value}
+                      value={settingsForm.ch31_computer_package_value || 0}
                       onChange={(e) => setSettingsForm({ ...settingsForm, ch31_computer_package_value: Number(e.target.value) })}
                     />
                   </div>
@@ -363,9 +393,13 @@ function Header({
                 className="btn" 
                 style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)' }}
                 onClick={() => {
-                  setSettingsForm(DEFAULT_RATES);
-                  setRates(DEFAULT_RATES);
-                  localStorage.setItem('m28c_calculator_rates', JSON.stringify(DEFAULT_RATES));
+                  const resetRates = {
+                    ...rates,
+                    [selectedRateYear]: DEFAULT_RATES[selectedRateYear]
+                  };
+                  setRates(resetRates);
+                  localStorage.setItem('m28c_calculator_rates', JSON.stringify(resetRates));
+                  setSettingsForm(DEFAULT_RATES[selectedRateYear]);
                   setIsSettingsOpen(false);
                 }}
               >
@@ -376,8 +410,12 @@ function Header({
                 <button 
                   className="btn btn-primary"
                   onClick={() => {
-                    setRates(settingsForm);
-                    localStorage.setItem('m28c_calculator_rates', JSON.stringify(settingsForm));
+                    const updatedRates = {
+                      ...rates,
+                      [selectedRateYear]: settingsForm
+                    };
+                    setRates(updatedRates);
+                    localStorage.setItem('m28c_calculator_rates', JSON.stringify(updatedRates));
                     setIsSettingsOpen(false);
                   }}
                 >

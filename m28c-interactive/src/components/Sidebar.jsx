@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   ShieldCheck, BookOpen, Award, Calculator, Scale, 
   DollarSign, Compass, Briefcase, GraduationCap, Users, 
-  FileText, ExternalLink, ChevronRight 
+  FileText, ExternalLink, ChevronRight, AlertTriangle, FileEdit 
 } from 'lucide-react';
 import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from '../data/data';
 
@@ -16,10 +16,25 @@ function Sidebar({
   togglePart,
   setWizardResult,
   setSelfGeneratedLetter,
-  setDirQuery
+  setDirQuery,
+  isSidebarOpen,
+  setIsSidebarOpen
 }) {
+  
+  const handleNavClick = (view) => {
+    setActiveView(view);
+    setIsSidebarOpen(false);
+  };
+
+  const handleKeyDown = (e, action) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''}`} aria-label="Main Navigation">
       <div className="branding">
         <div className="branding-logo">
           <ShieldCheck size={22} />
@@ -31,82 +46,166 @@ function Sidebar({
       </div>
 
       <div className="nav-section">
-        {/* Main Views */}
+        {/* VR&E Core Modules */}
         <div className="nav-category">
-          <div className="nav-title">App Modules</div>
+          <div className="nav-title">VR&E Core Modules</div>
+          
           <div 
             className={`nav-item ${activeView === 'reference' ? 'active' : ''}`}
-            onClick={() => setActiveView('reference')}
+            onClick={() => handleNavClick('reference')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('reference'))}
+            aria-current={activeView === 'reference' ? 'page' : undefined}
           >
             <BookOpen size={18} />
             <span>Manual Reference</span>
           </div>
+
           <div 
             className={`nav-item ${activeView === 'wizard' ? 'active' : ''}`}
-            onClick={() => { setActiveView('wizard'); if (setWizardResult) setWizardResult(null); }}
+            onClick={() => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); })}
+            aria-current={activeView === 'wizard' ? 'page' : undefined}
           >
             <Award size={18} />
             <span>Entitlement Wizard</span>
           </div>
+
           <div 
             className={`nav-item ${activeView === 'calculator' ? 'active' : ''}`}
-            onClick={() => setActiveView('calculator')}
+            onClick={() => handleNavClick('calculator')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('calculator'))}
+            aria-current={activeView === 'calculator' ? 'page' : undefined}
           >
             <Calculator size={18} />
             <span>Subsistence Calc</span>
           </div>
+
           <div 
-            className={`nav-item ${activeView === 'disability_hub' ? 'active' : ''}`}
-            onClick={() => setActiveView('disability_hub')}
+            className={`nav-item ${activeView === 'error_spotter' ? 'active' : ''}`}
+            onClick={() => handleNavClick('error_spotter')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('error_spotter'))}
+            aria-current={activeView === 'error_spotter' ? 'page' : undefined}
           >
-            <Scale size={18} />
-            <span>Disability & SMC</span>
+            <AlertTriangle size={18} />
+            <span>VA Error Spotter</span>
           </div>
+
           <div 
-            className={`nav-item ${activeView === 'financial_planner' ? 'active' : ''}`}
-            onClick={() => setActiveView('financial_planner')}
+            className={`nav-item ${activeView === 'document_generator' ? 'active' : ''}`}
+            onClick={() => handleNavClick('document_generator')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('document_generator'))}
+            aria-current={activeView === 'document_generator' ? 'page' : undefined}
           >
-            <DollarSign size={18} />
-            <span>Financial Planner</span>
+            <FileEdit size={18} />
+            <span>Document Generator</span>
           </div>
-          <div 
-            className={`nav-item ${activeView === 'planning' ? 'active' : ''}`}
-            onClick={() => setActiveView('planning')}
-          >
-            <Compass size={18} />
-            <span>Career Plan and Strategy</span>
-          </div>
+
           <div 
             className={`nav-item ${activeView === 'self_employment' ? 'active' : ''}`}
-            onClick={() => { setActiveView('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); }}
+            onClick={() => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('self_employment'); if (setSelfGeneratedLetter) setSelfGeneratedLetter(''); })}
+            aria-current={activeView === 'self_employment' ? 'page' : undefined}
           >
             <Briefcase size={18} />
             <span>Self-Employment Track</span>
           </div>
+
           <div 
             className={`nav-item ${activeView === 'special_programs' ? 'active' : ''}`}
-            onClick={() => setActiveView('special_programs')}
+            onClick={() => handleNavClick('special_programs')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('special_programs'))}
+            aria-current={activeView === 'special_programs' ? 'page' : undefined}
           >
             <GraduationCap size={18} />
-            <span>Special Retraining Programs</span>
+            <span>Special Retraining</span>
           </div>
+
           <div 
             className={`nav-item ${activeView === 'directory' ? 'active' : ''}`}
-            onClick={() => { setActiveView('directory'); if (setDirQuery) setDirQuery(''); }}
+            onClick={() => { handleNavClick('directory'); if (setDirQuery) setDirQuery(''); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => { handleNavClick('directory'); if (setDirQuery) setDirQuery(''); })}
+            aria-current={activeView === 'directory' ? 'page' : undefined}
           >
             <Users size={18} />
             <span>Counselor Directory</span>
           </div>
+
           <div 
             className={`nav-item ${activeView === 'glossary' ? 'active' : ''}`}
-            onClick={() => setActiveView('glossary')}
+            onClick={() => handleNavClick('glossary')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('glossary'))}
+            aria-current={activeView === 'glossary' ? 'page' : undefined}
           >
             <FileText size={18} />
             <span>Glossary of Terms</span>
           </div>
+        </div>
+
+        {/* Related VA Benefits / Planning Tools */}
+        <div className="nav-category" style={{ marginTop: '16px' }}>
+          <div className="nav-title">Related Benefits / Planning</div>
+          
+          <div 
+            className={`nav-item ${activeView === 'disability_hub' ? 'active' : ''}`}
+            onClick={() => handleNavClick('disability_hub')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('disability_hub'))}
+            aria-current={activeView === 'disability_hub' ? 'page' : undefined}
+          >
+            <Scale size={18} />
+            <span>Disability & SMC</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'financial_planner' ? 'active' : ''}`}
+            onClick={() => handleNavClick('financial_planner')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('financial_planner'))}
+            aria-current={activeView === 'financial_planner' ? 'page' : undefined}
+          >
+            <DollarSign size={18} />
+            <span>Financial Planner</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'planning' ? 'active' : ''}`}
+            onClick={() => handleNavClick('planning')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('planning'))}
+            aria-current={activeView === 'planning' ? 'page' : undefined}
+          >
+            <Compass size={18} />
+            <span>Career Plan & Strategy</span>
+          </div>
+
           <div 
             className={`nav-item ${activeView === 'resources' ? 'active' : ''}`}
-            onClick={() => setActiveView('resources')}
+            onClick={() => handleNavClick('resources')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('resources'))}
+            aria-current={activeView === 'resources' ? 'page' : undefined}
           >
             <ExternalLink size={18} />
             <span>Resource Center</span>
@@ -120,7 +219,14 @@ function Sidebar({
             
             {/* U.S. Code Accordion */}
             <div>
-              <div className="collapsible-header" onClick={() => toggleCategory('usc')}>
+              <div 
+                className="collapsible-header" 
+                onClick={() => toggleCategory('usc')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('usc'))}
+                aria-expanded={expandedCategories.usc}
+              >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Scale size={16} />
                   38 U.S.C. Chapter 31
@@ -129,12 +235,15 @@ function Sidebar({
               </div>
               
               {expandedCategories.usc && (
-                <div>
+                <div role="group">
                   {US_CODE_SECTIONS.map(sec => (
                     <div 
                       key={sec.id}
                       className={`nav-item sub-item ${selectedSection.type === 'usc' && selectedSection.id === sec.id ? 'active' : ''}`}
-                      onClick={() => setSelectedSection({ type: 'usc', id: sec.id })}
+                      onClick={() => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); })}
                     >
                       {sec.id}: {sec.title.split('. ')[1]}
                     </div>
@@ -145,7 +254,14 @@ function Sidebar({
 
             {/* 38 CFR Accordion */}
             <div style={{ marginTop: '8px' }}>
-              <div className="collapsible-header" onClick={() => toggleCategory('cfr')}>
+              <div 
+                className="collapsible-header" 
+                onClick={() => toggleCategory('cfr')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('cfr'))}
+                aria-expanded={expandedCategories.cfr}
+              >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ShieldCheck size={16} />
                   38 CFR Part 21
@@ -154,12 +270,15 @@ function Sidebar({
               </div>
               
               {expandedCategories.cfr && (
-                <div>
+                <div role="group">
                   {CFR_REGULATIONS.map(reg => (
                     <div 
                       key={reg.id}
                       className={`nav-item sub-item ${selectedSection.type === 'cfr' && selectedSection.id === reg.id ? 'active' : ''}`}
-                      onClick={() => setSelectedSection({ type: 'cfr', id: reg.id })}
+                      onClick={() => { setSelectedSection({ type: 'cfr', id: reg.id }); setIsSidebarOpen(false); }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'cfr', id: reg.id }); setIsSidebarOpen(false); })}
                     >
                       {reg.id}: {reg.title.split('. ')[1]}
                     </div>
@@ -170,7 +289,14 @@ function Sidebar({
 
             {/* M28C Accordion */}
             <div style={{ marginTop: '8px' }}>
-              <div className="collapsible-header" onClick={() => toggleCategory('m28c')}>
+              <div 
+                className="collapsible-header" 
+                onClick={() => toggleCategory('m28c')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('m28c'))}
+                aria-expanded={expandedCategories.m28c}
+              >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <FileText size={16} />
                   M28C Chapters
@@ -179,26 +305,33 @@ function Sidebar({
               </div>
 
               {expandedCategories.m28c && (
-                <div>
+                <div role="group">
                   {M28C_PARTS.map(part => (
                     <div key={part.id}>
                       <div 
                         className="nav-item sub-item" 
                         style={{ fontWeight: '600', color: 'var(--text-primary)' }}
                         onClick={() => togglePart(part.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => handleKeyDown(e, () => togglePart(part.id))}
+                        aria-expanded={expandedCategories.m28cParts[part.id]}
                       >
                         <ChevronRight size={12} className={`collapsible-icon ${expandedCategories.m28cParts[part.id] ? 'expanded' : ''}`} />
                         <span style={{ marginLeft: '4px' }}>{part.title.split('. ')[0]}</span>
                       </div>
                       
                       {expandedCategories.m28cParts[part.id] && (
-                        <div>
+                        <div role="group">
                           {part.chapters.map(ch => (
                             <div 
                               key={ch.id}
                               className={`nav-item sub-item ${selectedSection.type === 'm28c' && selectedSection.id === ch.id ? 'active' : ''}`}
-                              onClick={() => setSelectedSection({ type: 'm28c', id: ch.id })}
+                              onClick={() => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); }}
                               style={{ paddingLeft: '48px', fontSize: '0.8rem' }}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); })}
                             >
                               {ch.title.split(': ')[0]}
                             </div>

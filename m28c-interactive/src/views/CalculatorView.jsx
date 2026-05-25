@@ -3,7 +3,17 @@ import { Search, Info, Settings, HelpCircle, ShieldCheck, AlertTriangle, CheckCi
 import { SCHOOLS_DATABASE } from '../data/school_data';
 import { calculateAllowance } from '../utils/ch31Calculations';
 
-function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
+function CalculatorView({ 
+  rates, 
+  selectedRateYear, 
+  setSelectedRateYear, 
+  openSettings, 
+  onMhaChange, 
+  reduceMotion 
+}) {
+  // Resolve active rates target year
+  const activeRates = rates[selectedRateYear] || rates.ay2026 || rates;
+
   // Localized Calculator States
   const [calcTrainingType, setCalcTrainingType] = useState('institutional');
   const [calcTime, setCalcTime] = useState('full');
@@ -28,7 +38,7 @@ function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
   const [calcKicker, setCalcKicker] = useState(0);
   const [calcScholarships, setCalcScholarships] = useState(0);
   const [calcIncludeComputer, setCalcIncludeComputer] = useState(false);
-  const [calcComputerCost, setCalcComputerCost] = useState(rates.ch31_computer_package_value || 2000.00);
+  const [calcComputerCost, setCalcComputerCost] = useState(activeRates.ch31_computer_package_value || 2000.00);
   const [calcOjtTrainingWage, setCalcOjtTrainingWage] = useState(0);
   const [calcOjtJourneymanWage, setCalcOjtJourneymanWage] = useState(0);
   const [calcCalculatorTab, setCalcCalculatorTab] = useState('monthly'); // 'monthly' | 'tuition' | 'ojt'
@@ -39,7 +49,7 @@ function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
 
   // Fetch complete GI Bill colleges database on load locally
   useEffect(() => {
-    fetch('/schools.json')
+    fetch(`${import.meta.env.BASE_URL}schools.json`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to load schools database');
         return res.json();
@@ -88,7 +98,7 @@ function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
 
   // Run allowance calculation on the fly
   const calculatorResults = calculateAllowance({
-    rates,
+    rates: activeRates,
     calcTrainingType,
     calcTime,
     calcDependents,
@@ -122,6 +132,11 @@ function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
     onMhaChange(budgetMhaAmount);
   }, [budgetMhaAmount, onMhaChange]);
 
+  // Reset default computer package cost when rate year updates
+  useEffect(() => {
+    setCalcComputerCost(activeRates.ch31_computer_package_value || 2000.00);
+  }, [selectedRateYear, activeRates.ch31_computer_package_value]);
+
   return (
     <div className="doc-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -144,6 +159,30 @@ function CalculatorView({ rates, openSettings, onMhaChange, reduceMotion }) {
       </div>
       <h1 className="doc-title">Subsistence Allowance & Housing Calculator</h1>
       <p className="doc-subtitle">Compare regular Chapter 31 rates side-by-side with Post-9/11 housing options, including tuition offsets, books stipends, and OJT schedules.</p>
+      
+      {/* Rate Year Selector & Verification Indicator */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '12px 16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', marginBottom: '24px', marginTop: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Academic Year Rates:</span>
+          <select
+            className="form-control"
+            style={{ width: 'auto', height: '32px', padding: '0 8px', fontSize: '0.8rem', minWidth: '150px' }}
+            value={selectedRateYear}
+            onChange={(e) => {
+              setSelectedRateYear(e.target.value);
+              const active = rates[e.target.value] || rates.ay2026;
+              setCalcComputerCost(active.ch31_computer_package_value || 2000.00);
+            }}
+          >
+            <option value="ay2025">AY 2025 - 2026</option>
+            <option value="ay2026">AY 2026 - 2027 (Future/Current)</option>
+          </select>
+        </div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <span>Rates Last Verified: <strong>{rates.lastVerified || "2026-05-23"}</strong></span>
+        </div>
+      </div>
+
       <div className="doc-divider"></div>
 
       {/* Sub-Tabs for Calculator Outputs */}

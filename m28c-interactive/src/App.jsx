@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { US_CODE_SECTIONS, CFR_REGULATIONS, M28C_PARTS } from './data/data';
 import CustomCursor from './CustomCursor';
+import { BookOpen, Award, Calculator, AlertTriangle, FileEdit } from 'lucide-react';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -19,20 +20,38 @@ import SpecialProgramsView from './views/SpecialProgramsView';
 import CounselorDirectoryView from './views/CounselorDirectoryView';
 import ResourceCenterView from './views/ResourceCenterView';
 import GlossaryView from './views/GlossaryView';
+import VaErrorSpotterView from './views/VaErrorSpotterView';
+import DocumentGeneratorView from './views/DocumentGeneratorView';
 
 const DEFAULT_RATES = {
   version: "2026.1",
-  ch31_institutional_full: [861.10, 1067.81, 1258.13, 91.85],
-  ch31_institutional_threeQuarters: [646.71, 801.49, 943.40, 68.77],
-  ch31_institutional_half: [432.31, 534.86, 629.57, 45.92],
-  ch31_ojt: [710.67, 859.43, 990.47, 64.41],
-  p911_online_rate: 1169.00,
-  p911_foreign_rate: 2338.00,
-  p911_private_tuition_cap: 29920.95,
-  p911_flight_cap: 15497.13,
-  p911_correspondence_cap: 13535.11,
-  p911_books_cap: 1000.00,
-  ch31_computer_package_value: 2000.00
+  lastVerified: "2026-05-23",
+  ay2025: {
+    ch31_institutional_full: [776.74, 963.78, 1135.53, 82.90],
+    ch31_institutional_threeQuarters: [583.56, 723.28, 851.62, 62.18],
+    ch31_institutional_half: [390.38, 482.78, 568.72, 41.45],
+    ch31_ojt: [641.40, 775.66, 893.93, 58.13],
+    p911_online_rate: 1122.00,
+    p911_foreign_rate: 2244.00,
+    p911_private_tuition_cap: 28948.05,
+    p911_flight_cap: 15075.05,
+    p911_correspondence_cap: 13172.57,
+    p911_books_cap: 1000.00,
+    ch31_computer_package_value: 2000.00
+  },
+  ay2026: {
+    ch31_institutional_full: [861.10, 1067.81, 1258.13, 91.85],
+    ch31_institutional_threeQuarters: [646.71, 801.49, 943.40, 68.77],
+    ch31_institutional_half: [432.31, 534.86, 629.57, 45.92],
+    ch31_ojt: [710.67, 859.43, 990.47, 64.41],
+    p911_online_rate: 1169.00,
+    p911_foreign_rate: 2338.00,
+    p911_private_tuition_cap: 29920.95,
+    p911_flight_cap: 15497.13,
+    p911_correspondence_cap: 13535.11,
+    p911_books_cap: 1000.00,
+    ch31_computer_package_value: 2000.00
+  }
 };
 
 function App() {
@@ -57,10 +76,24 @@ function App() {
     return saved ? JSON.parse(saved) : [{ type: 'usc', id: '3102' }];
   });
 
+  // Rate Year Selection State ('ay2025' | 'ay2026')
+  const [selectedRateYear, setSelectedRateYear] = useState(() => {
+    const saved = localStorage.getItem('m28c_selected_rate_year');
+    return saved || 'ay2026';
+  });
+
   // Calculator Rates
   const [rates, setRates] = useState(() => {
     const saved = localStorage.getItem('m28c_calculator_rates');
-    return saved ? JSON.parse(saved) : DEFAULT_RATES;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.ay2025 && parsed.ay2026) return parsed;
+      } catch (e) {
+        console.error('Failed to parse saved rates, using defaults');
+      }
+    }
+    return DEFAULT_RATES;
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -77,6 +110,12 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
 
+  // Plain-Language Mode State for Legal Jargon
+  const [plainLanguageMode, setPlainLanguageMode] = useState(false);
+
+  // Sidebar Collapsed/Drawer State for mobile viewports
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Toggle Theme effect
   useEffect(() => {
     const body = document.body;
@@ -92,6 +131,11 @@ function App() {
     localStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
 
+  // Sync Selected Rate Year to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('m28c_selected_rate_year', selectedRateYear);
+  }, [selectedRateYear]);
+
   // Sync Reduce Motion to LocalStorage
   useEffect(() => {
     localStorage.setItem('m28c_reduce_motion', JSON.stringify(reduceMotion));
@@ -100,7 +144,7 @@ function App() {
   // Fetch rates.json on load for automatic VA calculator synchronization
   useEffect(() => {
     setSyncStatus('syncing');
-    fetch('/rates.json')
+    fetch(`${import.meta.env.BASE_URL}rates.json`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch remote rates');
         return res.json();
@@ -192,11 +236,21 @@ function App() {
           />
         );
       case 'wizard':
-        return <EntitlementWizardView reduceMotion={reduceMotion} />;
+        return (
+          <EntitlementWizardView 
+            reduceMotion={reduceMotion} 
+            setSelectedSection={setSelectedSection} 
+            setActiveView={setActiveView}
+            plainLanguageMode={plainLanguageMode}
+            setPlainLanguageMode={setPlainLanguageMode}
+          />
+        );
       case 'calculator':
         return (
           <CalculatorView
             rates={rates}
+            selectedRateYear={selectedRateYear}
+            setSelectedRateYear={setSelectedRateYear}
             openSettings={() => setIsSettingsOpen(true)}
             onMhaChange={setBudgetMhaAmount}
             reduceMotion={reduceMotion}
@@ -224,7 +278,23 @@ function App() {
       case 'self_employment':
         return <SelfEmploymentView reduceMotion={reduceMotion} />;
       case 'special_programs':
-        return <SpecialProgramsView rates={rates} reduceMotion={reduceMotion} />;
+        return <SpecialProgramsView rates={rates[selectedRateYear] || rates.ay2026} reduceMotion={reduceMotion} />;
+      case 'error_spotter':
+        return (
+          <VaErrorSpotterView 
+            reduceMotion={reduceMotion} 
+            setActiveView={setActiveView}
+            plainLanguageMode={plainLanguageMode}
+            setPlainLanguageMode={setPlainLanguageMode}
+          />
+        );
+      case 'document_generator':
+        return (
+          <DocumentGeneratorView 
+            reduceMotion={reduceMotion} 
+            plainLanguageMode={plainLanguageMode}
+          />
+        );
       case 'directory':
         return <CounselorDirectoryView reduceMotion={reduceMotion} />;
       case 'resources':
@@ -243,6 +313,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <a href="#main-content" className="skip-link">Skip to Main Content</a>
       <CustomCursor reduceMotion={reduceMotion} />
       
       {/* SIDEBAR NAVIGATION */}
@@ -254,10 +325,12 @@ function App() {
         expandedCategories={expandedCategories}
         toggleCategory={toggleCategory}
         togglePart={togglePart}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
       />
 
       {/* MAIN VIEWPORT LAYOUT */}
-      <main className="main-layout">
+      <main className="main-layout" id="main-content" tabIndex="-1">
         {/* HEADER BAR */}
         <Header
           activeView={activeView}
@@ -270,10 +343,14 @@ function App() {
           setReduceMotion={setReduceMotion}
           rates={rates}
           setRates={setRates}
+          selectedRateYear={selectedRateYear}
+          setSelectedRateYear={setSelectedRateYear}
           syncStatus={syncStatus}
           DEFAULT_RATES={DEFAULT_RATES}
           isSettingsOpen={isSettingsOpen}
           setIsSettingsOpen={setIsSettingsOpen}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
         />
 
         {/* MAIN BODY CONTENT */}
@@ -290,6 +367,45 @@ function App() {
             toggleBookmark={toggleBookmark}
           />
         </div>
+
+        {/* MOBILE BOTTOM NAVIGATION BAR */}
+        <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
+          <button 
+            className={`mobile-nav-tab ${activeView === 'reference' ? 'active' : ''}`}
+            onClick={() => setActiveView('reference')}
+          >
+            <BookOpen size={20} />
+            <span>Reference</span>
+          </button>
+          <button 
+            className={`mobile-nav-tab ${activeView === 'wizard' ? 'active' : ''}`}
+            onClick={() => setActiveView('wizard')}
+          >
+            <Award size={20} />
+            <span>Wizard</span>
+          </button>
+          <button 
+            className={`mobile-nav-tab ${activeView === 'calculator' ? 'active' : ''}`}
+            onClick={() => setActiveView('calculator')}
+          >
+            <Calculator size={20} />
+            <span>Calc</span>
+          </button>
+          <button 
+            className={`mobile-nav-tab ${activeView === 'error_spotter' ? 'active' : ''}`}
+            onClick={() => setActiveView('error_spotter')}
+          >
+            <AlertTriangle size={20} />
+            <span>Errors</span>
+          </button>
+          <button 
+            className={`mobile-nav-tab ${activeView === 'document_generator' ? 'active' : ''}`}
+            onClick={() => setActiveView('document_generator')}
+          >
+            <FileEdit size={20} />
+            <span>Docs</span>
+          </button>
+        </nav>
       </main>
     </div>
   );

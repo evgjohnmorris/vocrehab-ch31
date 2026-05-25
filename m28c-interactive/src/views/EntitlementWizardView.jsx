@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { Award, Info, Settings, CheckCircle } from 'lucide-react';
+import { Award, Info, Settings, CheckCircle, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion }) {
+function EntitlementWizardView({ 
+  setSelectedSection, 
+  setActiveView, 
+  reduceMotion, 
+  plainLanguageMode, 
+  setPlainLanguageMode 
+}) {
   // Localized Wizard States
   const [rating, setRating] = useState(20);
   const [dischargeStatus, setDischargeStatus] = useState('other-than-dishonorable');
@@ -22,12 +28,15 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
         eligible: false,
         entitled: false,
         status: 'Not Entitled',
+        plainStatus: 'Not Eligible for VR&E',
         reason: "Discharge character of 'Dishonorable' is a statutory bar to Chapter 31 benefits under 38 U.S.C. § 5303.",
+        plainReason: "Because your military discharge is listed as 'Dishonorable', federal law does not allow the VA to grant you vocational rehabilitation benefits.",
         recommendedAction: "You may apply to the VA Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR) for a discharge upgrade.",
         keyRegs: [
           { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
           { type: 'cfr', id: '21.42', label: '38 CFR § 21.42' }
-        ]
+        ],
+        whyExplanation: "Under 38 U.S.C. § 5303, a discharge characterization of dishonorable acts as an absolute legal bar to most VA benefits. To become eligible to apply, you must seek a formal upgrade from your branch's Discharge Review Board."
       });
       return;
     }
@@ -37,12 +46,15 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
         eligible: false,
         entitled: false,
         status: 'Not Entitled',
+        plainStatus: 'Not Eligible (Rating too low)',
         reason: "You must have a service-connected disability rating of at least 10% from the VA to apply for Chapter 31 VR&E.",
+        plainReason: "To apply for this program, the VA must have awarded you a service-connected disability rating of at least 10% first.",
         recommendedAction: "If your service-connected conditions have worsened, you can file a claim for an increased rating via VA.gov.",
         keyRegs: [
           { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
           { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' }
-        ]
+        ],
+        whyExplanation: "38 C.F.R. § 21.40 establishes the basic rating threshold. A veteran must have a rating of 10% or more to be legally eligible to apply for Chapter 31. Having a 0% rating or no rated disabilities prevents application processing."
       });
       return;
     }
@@ -53,27 +65,33 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
           eligible: true,
           entitled: true,
           status: "Entitled (10% Rating + Serious Employment Handicap)",
+          plainStatus: "Entitled to Services (10% Rating + SEH)",
           reason: "Veterans with a 10% rating are entitled to VR&E services if they are determined by a VRC to have a Serious Employment Handicap (SEH).",
+          plainReason: "With a 10% rating, you are approved for services because your counselor determined that your disabilities cause significant barriers to finding or keeping a job.",
           recommendedAction: "Submit VA Form 28-1900. Your evaluation will focus on establishing how your disability severely limits your employability.",
           tracks: ["Reemployment", "Rapid Access", "Self-Employment", "Long-Term Services", "Independent Living"],
           keyRegs: [
             { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
             { type: 'cfr', id: '21.35', label: '38 CFR § 21.35' },
             { type: 'cfr', id: '21.52', label: '38 CFR § 21.52' }
-          ]
+          ],
+          whyExplanation: "Under 38 C.F.R. § 21.40, a 10% rating only makes you 'eligible to apply'. To establish 'entitlement' to receive services, the VRC must find a Serious Employment Handicap (SEH) under 38 C.F.R. § 21.52, showing that your disability imposes significant limitations."
         });
       } else {
         setWizardResult({
           eligible: true,
           entitled: false,
           status: "Eligible but Not Entitled (10% Rating, No Serious Employment Handicap)",
+          plainStatus: "Eligible to Apply, but Denied Entitlement",
           reason: "Veterans with a 10% rating require a finding of a Serious Employment Handicap (SEH) to establish entitlement. Since no SEH was determined, entitlement cannot be granted.",
+          plainReason: "You meet the basic requirements to apply, but the VA cannot give you services unless a counselor determines that your disability creates significant employment barriers (SEH).",
           recommendedAction: "You may appeal the VRC's determination or provide additional medical evidence showing the severity of your employment limitations.",
           keyRegs: [
             { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
             { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
             { type: 'cfr', id: '21.52', label: '38 CFR § 21.52' }
-          ]
+          ],
+          whyExplanation: "Federal regulations at 38 C.F.R. § 21.52 mandate that a 10% rated veteran must have an SEH to qualify. An SEH requires finding that a veteran has significant barriers to preparing for, getting, or keeping a job. If your VRC determines you have no SEH, you are denied entitlement."
         });
       }
       return;
@@ -85,27 +103,33 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
         eligible: true,
         entitled: true,
         status: "Entitled (20%+ Rating + Employment Handicap)",
+        plainStatus: "Entitled to Services (20% Rating + EH)",
         reason: "Veterans with a rating of 20% or higher are entitled to VR&E benefits if they have an Employment Handicap (EH) resulting in part from their service-connected condition.",
+        plainReason: "With a 20% or higher rating, you are approved for services because your service-connected disability contributes to difficulties in preparing for, getting, or keeping a job.",
         recommendedAction: "Submit VA Form 28-1900. You will collaborate with a VRC to complete an initial assessment and select one of the five tracks.",
         tracks: ["Reemployment", "Rapid Access", "Self-Employment", "Long-Term Services"],
         keyRegs: [
           { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
           { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
           { type: 'cfr', id: '21.51', label: '38 CFR § 21.51' }
-        ]
+        ],
+        whyExplanation: "Under 38 C.F.R. § 21.51, a veteran with a rating of 20% or more must establish an 'Employment Handicap' (EH). An EH exists if there is a vocational impairment (difficulty obtaining/maintaining a job) to which a service-connected disability contributes in substantial part."
       });
     } else {
       setWizardResult({
         eligible: true,
         entitled: false,
         status: "Eligible but Not Entitled (20%+ Rating, No Employment Handicap)",
+        plainStatus: "Eligible to Apply, but Denied Entitlement",
         reason: "While you meet the basic disability rating requirement, your counselor determined that your disability does not cause a current handicap in preparing for, obtaining, or retaining suitable employment.",
+        plainReason: "You have a high enough rating to apply, but the counselor determined your disability does not currently block your ability to hold a suitable job.",
         recommendedAction: "Request a review of the decision if you believe your counselor overlooked critical barriers to employment caused by your service-connected conditions.",
         keyRegs: [
           { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
           { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
           { type: 'cfr', id: '21.51', label: '38 CFR § 21.51' }
-        ]
+        ],
+        whyExplanation: "A 20% rating does not yield automatic services. 38 C.F.R. § 21.51 states that if a veteran has already overcome the effects of their vocational impairment (e.g. is currently suitable employed or has transferable skills), no EH is found, and they are not entitled."
       });
     }
   };
@@ -121,9 +145,47 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
       <span className="doc-tag">Interactive Tools</span>
       <h1 className="doc-title">Entitlement & Eligibility Wizard</h1>
       <p className="doc-subtitle">Evaluate vocational rehabilitation and serious employment handicap criteria side-by-side.</p>
+      
+      {/* Permanent Legal Disclaimer */}
+      <div className="bg-slate-900/60 border border-amber-500/20 rounded-xl p-5 mb-6 text-xs leading-relaxed text-slate-300">
+        <div className="flex items-start gap-3">
+          <Info className="text-amber-500 mt-0.5 flex-shrink-0" size={16} />
+          <div>
+            <strong className="text-amber-400 block mb-1">Legal Distinction: Eligible to Apply vs. Entitled to Services</strong>
+            <p className="mb-2">
+              VA regulations distinguish between being <span className="text-slate-100 font-semibold">eligible to apply</span> and being <span className="text-slate-100 font-semibold">entitled to services</span>:
+            </p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-400">
+              <li><strong>Eligible to Apply:</strong> Requires an other-than-dishonorable discharge and a service-connected rating of at least 10% (under 38 U.S.C. § 3102 & 38 CFR § 21.40).</li>
+              <li><strong>Entitled to Services:</strong> Requires a Vocational Rehabilitation Counselor (VRC) to determine you have an <span className="text-slate-200">Employment Handicap</span> (for ratings &ge; 20%) or a <span className="text-slate-200">Serious Employment Handicap</span> (for a 10% rating).</li>
+            </ul>
+            <p className="mt-2 text-slate-500 italic">
+              Disclaimer: This wizard is a case strategy planning tool and does not constitute a formal VA decision.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Plain Language Switcher */}
+      <div className="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800 rounded-lg mb-6">
+        <div className="flex items-center gap-2">
+          <HelpCircle size={16} className="text-cyan-400" />
+          <span className="text-xs font-semibold text-slate-300">Plain-Language Mode</span>
+        </div>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input 
+            type="checkbox" 
+            className="sr-only peer"
+            checked={plainLanguageMode}
+            onChange={(e) => setPlainLanguageMode(e.target.checked)}
+          />
+          <div className="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-color peer-checked:after:bg-accent-color"></div>
+        </label>
+      </div>
+
       <div className="doc-divider"></div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }} className="grid-mobile-1col">
         <div>
           <div className="form-group">
             <label>Disability Rating from VA</label>
@@ -217,10 +279,25 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
           {wizardResult ? (
             <div className="result-box" style={{ borderLeft: `4px solid ${wizardResult.entitled ? 'var(--success-color)' : 'var(--danger-color)'}` }}>
               <h4 style={{ color: wizardResult.entitled ? 'var(--success-color)' : 'var(--danger-color)', marginBottom: '10px' }}>
-                {wizardResult.entitled ? 'Entitled to Benefits' : 'Not Entitled'}
+                {plainLanguageMode ? wizardResult.plainStatus : wizardResult.status}
               </h4>
-              <p style={{ fontWeight: '600', marginBottom: '8px', fontSize: '0.9rem' }}>{wizardResult.status}</p>
-              <p style={{ marginBottom: '12px', fontSize: '0.85rem' }}>{wizardResult.reason}</p>
+              <p style={{ fontWeight: '600', marginBottom: '8px', fontSize: '0.9rem' }}>
+                {wizardResult.entitled ? 'Approved Criteria Met' : 'Entitlement Denied'}
+              </p>
+              <p style={{ marginBottom: '12px', fontSize: '0.85rem' }}>
+                {plainLanguageMode ? wizardResult.plainReason : wizardResult.reason}
+              </p>
+              
+              {/* Collapsible Legal Citation 'Why?' */}
+              <details style={{ marginTop: '8px', marginBottom: '12px' }} className="group">
+                <summary style={{ fontSize: '0.75rem', cursor: 'pointer', color: 'var(--accent-color)', fontWeight: '600', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>Why? (View Legal Authority)</span>
+                  <span className="transition-transform duration-200 group-open:rotate-90">&rtrif;</span>
+                </summary>
+                <div className="mt-2 p-3 bg-slate-950/60 border border-slate-800 rounded-lg text-xs leading-relaxed text-slate-400">
+                  {wizardResult.whyExplanation}
+                </div>
+              </details>
               
               <div className="doc-divider" style={{ margin: '12px 0' }}></div>
               
@@ -284,7 +361,7 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
           <div className="relative z-10">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                <Settings className="text-amber-500 animate-pulse" size={20} />
+                <Settings className="text-amber-500" size={20} />
                 VR&E Entitlement Extensions Pre-Screener
               </h3>
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20">
@@ -293,7 +370,7 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
             </div>
             
             <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-              Find out how having a Serious Employment Handicap (SEH) allows you to extend services past 48 months or bypass the 12-year basic eligibility window.
+              Find out how having a Serious Employment Handicap (SEH) allows you to request extensions of services past 48 months or bypass the basic 12-year eligibility window.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -345,9 +422,9 @@ function EntitlementWizardView({ setSelectedSection, setActiveView, reduceMotion
                     <div className="flex items-start gap-3">
                       <CheckCircle size={22} className="text-emerald-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <strong className="text-sm font-semibold text-emerald-300 block mb-1">Pre-screen Recommendation Approved</strong>
+                        <strong className="text-sm font-semibold text-emerald-300 block mb-1">Pre-screen Recommendation</strong>
                         <p className="text-xs text-emerald-400/90 leading-relaxed">
-                          Under statutory rules 38 CFR § 21.44 (bypassing 12-year basic period) and 38 CFR § 21.78 (extending past 48 months), you meet the criteria for a VRC extension grant. Inform your counselor to classify your case as an SEH to unlock these extensions.
+                          You may have a strong basis to request an SEH finding and extension review. Ask the VRC for a written determination under 38 C.F.R. §§ 21.44 and 21.78.
                         </p>
                       </div>
                     </div>
