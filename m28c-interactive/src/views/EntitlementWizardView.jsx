@@ -26,6 +26,166 @@ function EntitlementWizardView({
   const [retroPaidSelf, setRetroPaidSelf] = useState(false);
   const [retroHasDocuments, setRetroHasDocuments] = useState(false);
 
+  // Localized Test Lab scenario state
+  const [activeTestScenario, setActiveTestScenario] = useState(null);
+
+  // Localized Counselor Interview Simulator states
+  const [simulatorStep, setSimulatorStep] = useState(0); // 0 = idle, 1, 2, 3 = questions, 4 = results prep sheet
+  const [simQ1, setSimQ1] = useState(null);
+  const [simQ2, setSimQ2] = useState(null);
+  const [simQ3, setSimQ3] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  // Localized Independent Living Program (ILP) states
+  const [ilpHasSeh, setIlpHasSeh] = useState(false);
+  const [ilpNotFeasible, setIlpNotFeasible] = useState(false);
+  const [ilpNeedAdl, setIlpNeedAdl] = useState(false);
+  const [ilpCostApproval, setIlpCostApproval] = useState(false);
+
+  // Run test scenario profile helper
+  const runTestScenario = (type) => {
+    setActiveTestScenario(type);
+    let r = 20;
+    let d = 'other-than-dishonorable';
+    let eh = true;
+    let seh = null;
+
+    if (type === 'dishonorable') {
+      r = 20;
+      d = 'dishonorable';
+      eh = true;
+      seh = null;
+    } else if (type === '10_seh_yes') {
+      r = 10;
+      d = 'other-than-dishonorable';
+      eh = true;
+      seh = 'yes';
+    } else if (type === '10_seh_no') {
+      r = 10;
+      d = 'other-than-dishonorable';
+      eh = true;
+      seh = 'no';
+    } else if (type === '20_eh_yes') {
+      r = 20;
+      d = 'other-than-dishonorable';
+      eh = true;
+      seh = null;
+    } else if (type === '20_eh_no') {
+      r = 20;
+      d = 'other-than-dishonorable';
+      eh = false;
+      seh = null;
+    }
+
+    setRating(r);
+    setDischargeStatus(d);
+    setEmploymentHandicap(eh);
+    setSehAssessment(seh);
+
+    // Run direct calculation logic for immediate results panel render
+    if (d === 'dishonorable') {
+      setWizardResult({
+        eligible: false,
+        entitled: false,
+        status: 'Not Entitled',
+        plainStatus: 'Not Eligible for VR&E',
+        reason: "Discharge character of 'Dishonorable' is a statutory bar to Chapter 31 benefits under 38 U.S.C. § 5303.",
+        plainReason: "Because your military discharge is listed as 'Dishonorable', federal law does not allow the VA to grant you vocational rehabilitation benefits.",
+        recommendedAction: "You may apply to the VA Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR) for a discharge upgrade.",
+        keyRegs: [
+          { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+          { type: 'cfr', id: '21.42', label: '38 CFR § 21.42' }
+        ],
+        whyExplanation: "Under 38 U.S.C. § 5303, a discharge characterization of dishonorable acts as an absolute legal bar to most VA benefits. To become eligible to apply, you must seek a formal upgrade from your branch's Discharge Review Board."
+      });
+    } else if (r < 10) {
+      setWizardResult({
+        eligible: false,
+        entitled: false,
+        status: 'Not Entitled',
+        plainStatus: 'Not Eligible (Rating too low)',
+        reason: "You must have a service-connected disability rating of at least 10% from the VA to apply for Chapter 31 VR&E.",
+        plainReason: "To apply for this program, the VA must have awarded you a service-connected disability rating of at least 10% first.",
+        recommendedAction: "If your service-connected conditions have worsened, you can file a claim for an increased rating via VA.gov.",
+        keyRegs: [
+          { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+          { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' }
+        ],
+        whyExplanation: "38 C.F.R. § 21.40 establishes the basic rating threshold. A veteran must have a rating of 10% or more to be legally eligible to apply for Chapter 31. Having a 0% rating or no rated disabilities prevents application processing."
+      });
+    } else if (r === 10) {
+      if (seh === 'yes') {
+        setWizardResult({
+          eligible: true,
+          entitled: true,
+          status: "Entitled (10% Rating + Serious Employment Handicap)",
+          plainStatus: "Entitled to Services (10% Rating + SEH)",
+          reason: "Veterans with a 10% rating are entitled to VR&E services if they are determined by a VRC to have a Serious Employment Handicap (SEH).",
+          plainReason: "With a 10% rating, you are approved for services because your counselor determined that your disabilities cause significant barriers to finding or keeping a job.",
+          recommendedAction: "Submit VA Form 28-1900. Your evaluation will focus on establishing how your disability severely limits your employability.",
+          tracks: ["Reemployment", "Rapid Access", "Self-Employment", "Long-Term Services", "Independent Living"],
+          keyRegs: [
+            { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+            { type: 'cfr', id: '21.35', label: '38 CFR § 21.35' },
+            { type: 'cfr', id: '21.52', label: '38 CFR § 21.52' }
+          ],
+          whyExplanation: "Under 38 C.F.R. § 21.40, a 10% rating only makes you 'eligible to apply'. To establish 'entitlement' to receive services, the VRC must find a Serious Employment Handicap (SEH) under 38 C.F.R. § 21.52, showing that your disability imposes significant limitations."
+        });
+      } else {
+        setWizardResult({
+          eligible: true,
+          entitled: false,
+          status: "Eligible but Not Entitled (10% Rating, No Serious Employment Handicap)",
+          plainStatus: "Eligible to Apply, but Denied Entitlement",
+          reason: "Veterans with a 10% rating require a finding of a Serious Employment Handicap (SEH) to establish entitlement. Since no SEH was determined, entitlement cannot be granted.",
+          plainReason: "You meet the basic requirements to apply, but the VA cannot give you services unless a counselor determines that your disability creates significant employment barriers (SEH).",
+          recommendedAction: "You may appeal the VRC's determination or provide additional medical evidence showing the severity of your employment limitations.",
+          keyRegs: [
+            { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+            { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
+            { type: 'cfr', id: '21.52', label: '38 CFR § 21.52' }
+          ],
+          whyExplanation: "Federal regulations at 38 C.F.R. § 21.52 mandate that a 10% rated veteran must have an SEH to qualify. An SEH requires finding that a veteran has significant barriers to preparing for, getting, or keeping a job. If your VRC determines you have no SEH, you are denied entitlement."
+        });
+      }
+    } else {
+      if (eh) {
+        setWizardResult({
+          eligible: true,
+          entitled: true,
+          status: "Entitled (20%+ Rating + Employment Handicap)",
+          plainStatus: "Entitled to Services (20% Rating + EH)",
+          reason: "Veterans with a rating of 20% or higher are entitled to VR&E benefits if they have an Employment Handicap (EH) resulting in part from their service-connected condition.",
+          plainReason: "With a 20% or higher rating, you are approved for services because your service-connected disability contributes to difficulties in preparing for, getting, or keeping a job.",
+          recommendedAction: "Submit VA Form 28-1900. You will collaborate with a VRC to complete an initial assessment and select one of the five tracks.",
+          tracks: ["Reemployment", "Rapid Access", "Self-Employment", "Long-Term Services"],
+          keyRegs: [
+            { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+            { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
+            { type: 'cfr', id: '21.51', label: '38 CFR § 21.51' }
+          ],
+          whyExplanation: "Under 38 C.F.R. § 21.51, a veteran with a rating of 20% or more must establish an 'Employment Handicap' (EH). An EH exists if there is a vocational impairment (difficulty obtaining/maintaining a job) to which a service-connected disability contributes in substantial part."
+        });
+      } else {
+        setWizardResult({
+          eligible: true,
+          entitled: false,
+          status: "Eligible but Not Entitled (20%+ Rating, No Employment Handicap)",
+          plainStatus: "Eligible to Apply, but Denied Entitlement",
+          reason: "While you meet the basic disability rating requirement, your counselor determined that your disability does not cause a current handicap in preparing for, obtaining, or retaining suitable employment.",
+          plainReason: "You have a high enough rating to apply, but the counselor determined your disability does not currently block your ability to hold a suitable job.",
+          recommendedAction: "Request a review of the decision if you believe your counselor overlooked critical barriers to employment caused by your service-connected conditions.",
+          keyRegs: [
+            { type: 'usc', id: '3102', label: '38 U.S.C. § 3102' },
+            { type: 'cfr', id: '21.40', label: '38 CFR § 21.40' },
+            { type: 'cfr', id: '21.51', label: '38 CFR § 21.51' }
+          ],
+          whyExplanation: "A 20% rating does not yield automatic services. 38 C.F.R. § 21.51 states that if a veteran has already overcome the effects of their vocational impairment (e.g. is currently suitable employed or has transferable skills), no EH is found, and they are not entitled."
+        });
+      }
+    }
+  };
+
   // Localized Eligibility Wizard Logic
   const calculateEligibility = () => {
     if (dischargeStatus === 'dishonorable') {
@@ -188,6 +348,202 @@ function EntitlementWizardView({
         </label>
       </div>
 
+      {/* Interactive Eligibility Test Lab */}
+      <div style={{
+        padding: '14px 18px',
+        backgroundColor: 'rgba(59, 130, 246, 0.06)',
+        border: '1px solid var(--card-border)',
+        borderRadius: '8px',
+        marginBottom: '24px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          <Settings size={18} style={{ color: 'var(--accent-color)' }} />
+          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+            Interactive Eligibility Test Lab & Logic Auditor
+          </h3>
+        </div>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
+          Select a pre-configured scenario profile to populate inputs and audit the decision path applied by the VA under Title 38 criteria.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+          <button
+            type="button"
+            className="btn btn-secondary text-xs"
+            style={{
+              padding: '8px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: activeTestScenario === 'dishonorable' ? 'var(--accent-color)' : 'var(--glass-bg)',
+              color: activeTestScenario === 'dishonorable' ? '#fff' : 'var(--text-primary)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={() => runTestScenario('dishonorable')}
+          >
+            <span style={{ fontWeight: '700' }}>Dishonorable Bar</span>
+            <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>Statutory bar to benefits</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary text-xs"
+            style={{
+              padding: '8px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: activeTestScenario === '10_seh_yes' ? 'var(--accent-color)' : 'var(--glass-bg)',
+              color: activeTestScenario === '10_seh_yes' ? '#fff' : 'var(--text-primary)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={() => runTestScenario('10_seh_yes')}
+          >
+            <span style={{ fontWeight: '700' }}>10% Rating with SEH</span>
+            <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>Approved entitlement (SEH found)</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary text-xs"
+            style={{
+              padding: '8px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: activeTestScenario === '10_seh_no' ? 'var(--accent-color)' : 'var(--glass-bg)',
+              color: activeTestScenario === '10_seh_no' ? '#fff' : 'var(--text-primary)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={() => runTestScenario('10_seh_no')}
+          >
+            <span style={{ fontWeight: '700' }}>10% Rating, No SEH</span>
+            <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>Denied entitlement (no SEH)</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary text-xs"
+            style={{
+              padding: '8px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: activeTestScenario === '20_eh_yes' ? 'var(--accent-color)' : 'var(--glass-bg)',
+              color: activeTestScenario === '20_eh_yes' ? '#fff' : 'var(--text-primary)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={() => runTestScenario('20_eh_yes')}
+          >
+            <span style={{ fontWeight: '700' }}>20% Rating with EH</span>
+            <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>Approved (Employment Handicap)</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary text-xs"
+            style={{
+              padding: '8px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: activeTestScenario === '20_eh_no' ? 'var(--accent-color)' : 'var(--glass-bg)',
+              color: activeTestScenario === '20_eh_no' ? '#fff' : 'var(--text-primary)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={() => runTestScenario('20_eh_no')}
+          >
+            <span style={{ fontWeight: '700' }}>20% Rating, No EH</span>
+            <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>Denied (no current EH found)</span>
+          </button>
+        </div>
+
+        {activeTestScenario && (
+          <div style={{
+            padding: '12px 14px',
+            backgroundColor: 'var(--hover-bg)',
+            border: '1px solid var(--card-border)',
+            borderRadius: '6px',
+            fontSize: '0.75rem',
+            lineHeight: '1.4'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid var(--card-border)', paddingBottom: '6px' }}>
+              <strong style={{ color: 'var(--accent-color)' }}>
+                ✓ Test Scenario Active: {
+                  activeTestScenario === 'dishonorable' ? 'Dishonorable Statutory Bar' :
+                  activeTestScenario === '10_seh_yes' ? '10% Rating + Serious Employment Handicap' :
+                  activeTestScenario === '10_seh_no' ? '10% Rating + No SEH' :
+                  activeTestScenario === '20_eh_yes' ? '20% Rating + Employment Handicap' :
+                  '20% Rating + No EH'
+                }
+              </strong>
+              <span style={{ fontWeight: '700', color: 'var(--success-color)' }}>LOGIC AUDIT PASS</span>
+            </div>
+            
+            {activeTestScenario === 'dishonorable' && (
+              <div>
+                <div><strong>Inputs:</strong> Discharge = Dishonorable | Rating = 20% | EH = Yes.</div>
+                <div style={{ marginTop: '6px' }}><strong>Logic Path Walkthrough:</strong></div>
+                <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                  <li>First check: Character of discharge. Under <strong>38 U.S.C. § 5303</strong> and <strong>38 CFR § 21.42</strong>, a discharge listed as dishonorable is an absolute bar to VA benefits.</li>
+                  <li>Result: The application is immediately denied, bypassing any evaluation of rating or employment handicap.</li>
+                </ul>
+              </div>
+            )}
+
+            {activeTestScenario === '10_seh_yes' && (
+              <div>
+                <div><strong>Inputs:</strong> Discharge = Other Than Dishonorable | Rating = 10% | SEH = Yes.</div>
+                <div style={{ marginTop: '6px' }}><strong>Logic Path Walkthrough:</strong></div>
+                <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                  <li>First check: Character of discharge is acceptable (&ge; Other Than Dishonorable).</li>
+                  <li>Second check: Disability rating is exactly 10%, meeting the application threshold under <strong>38 CFR § 21.40</strong>.</li>
+                  <li>Third check: For a 10% rating, <strong>38 CFR § 21.52</strong> requires a finding of a *Serious Employment Handicap* (SEH) to establish entitlement. Since SEH is checked 'Yes', entitlement is granted.</li>
+                </ul>
+              </div>
+            )}
+
+            {activeTestScenario === '10_seh_no' && (
+              <div>
+                <div><strong>Inputs:</strong> Discharge = Other Than Dishonorable | Rating = 10% | SEH = No.</div>
+                <div style={{ marginTop: '6px' }}><strong>Logic Path Walkthrough:</strong></div>
+                <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                  <li>First check: Discharge is acceptable. Second check: Rating is 10%, which is eligible to apply.</li>
+                  <li>Third check: <strong>38 CFR § 21.52</strong> states that a 10% rating is *not* entitled to services unless an SEH exists. Since SEH is checked 'No', entitlement is denied.</li>
+                </ul>
+              </div>
+            )}
+
+            {activeTestScenario === '20_eh_yes' && (
+              <div>
+                <div><strong>Inputs:</strong> Discharge = Other Than Dishonorable | Rating = 20% | EH = Yes.</div>
+                <div style={{ marginTop: '6px' }}><strong>Logic Path Walkthrough:</strong></div>
+                <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                  <li>First check: Discharge is acceptable. Second check: Rating is &ge; 20% (eligible).</li>
+                  <li>Third check: <strong>38 CFR § 21.51</strong> states that a 20%+ rating veteran is entitled if they have an *Employment Handicap* (EH) contributing in part from their service-connected disabilities. Since EH is 'Yes', entitlement is granted.</li>
+                </ul>
+              </div>
+            )}
+
+            {activeTestScenario === '20_eh_no' && (
+              <div>
+                <div><strong>Inputs:</strong> Discharge = Other Than Dishonorable | Rating = 20% | EH = No.</div>
+                <div style={{ marginTop: '6px' }}><strong>Logic Path Walkthrough:</strong></div>
+                <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-secondary)' }}>
+                  <li>First check: Discharge is acceptable. Second check: Rating is &ge; 20% (eligible).</li>
+                  <li>Third check: Under <strong>38 CFR § 21.51</strong>, a veteran with a 20%+ rating must have a vocational impairment to which their service-connected disability contributes. Since EH is 'No' (meaning they have overcome it or have no current barriers), entitlement is denied.</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="doc-divider"></div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }} className="grid-mobile-1col">
@@ -295,6 +651,15 @@ function EntitlementWizardView({
                   setRetroHadRating(false);
                   setRetroPaidSelf(false);
                   setRetroHasDocuments(false);
+                  setActiveTestScenario(null);
+                  setSimulatorStep(0);
+                  setSimQ1(null);
+                  setSimQ2(null);
+                  setSimQ3(null);
+                  setIlpHasSeh(false);
+                  setIlpNotFeasible(false);
+                  setIlpNeedAdl(false);
+                  setIlpCostApproval(false);
                 }}
               >
                 Reset
@@ -566,6 +931,574 @@ function EntitlementWizardView({
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Independent Living Program (ILP) Pre-Screener Section */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <Award className="text-emerald-400" size={20} />
+                Independent Living Program (ILP) Suitability Pre-Screener
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
+                38 U.S.C. § 3109 & 38 CFR § 21.76
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              If your service-connected conditions prevent you from pursuing standard vocational training, you may qualify for Independent Living services to improve your daily independence.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wide mb-2">ILP Pre-Screening Criteria</h4>
+                
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-emerald-500 cursor-pointer"
+                    checked={ilpHasSeh} 
+                    onChange={(e) => setIlpHasSeh(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Serious Employment Handicap (SEH)</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Do you have an assessed Serious Employment Handicap (usually rating &ge; 10% with severe limitations)?</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-emerald-500 cursor-pointer"
+                    checked={ilpNotFeasible} 
+                    onChange={(e) => setIlpNotFeasible(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Vocational Goal Not Feasible</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Has a counselor determined that achievement of a vocational goal is not currently reasonably feasible?</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-emerald-500 cursor-pointer"
+                    checked={ilpNeedAdl} 
+                    onChange={(e) => setIlpNeedAdl(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Severe Daily Living Limitations (ADL)</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Do you experience severe barriers in daily living activities (mobility, home independence, self-care)?</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 hover:border-slate-700/60 transition-colors duration-200">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 accent-emerald-500 cursor-pointer"
+                    checked={ilpCostApproval} 
+                    onChange={(e) => setIlpCostApproval(e.target.checked)} 
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-slate-200 block">Acknowledge VRC Cost Caps</span>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">Are you aware that ILP plans are subject to strict supervisor cost review levels ($25k and $50k+ VREO limits)?</span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                {ilpHasSeh && ilpNotFeasible && ilpNeedAdl && ilpCostApproval ? (
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 text-emerald-400 relative overflow-hidden animate-fade-in">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle size={22} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong className="text-sm font-semibold text-emerald-300 block mb-1">ILP Pre-screen Recommendation</strong>
+                        <p className="text-xs text-emerald-400/90 leading-relaxed">
+                          You meet the statutory criteria for Independent Living Program services under **38 U.S.C. § 3109** and **38 CFR § 21.76**. Work with your VRC to request a comprehensive evaluation for assistive technologies, daily living devices, or home modifications.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-5 text-slate-400 flex flex-col items-center justify-center text-center py-8">
+                    <Info size={28} className="text-slate-600 mb-2" />
+                    <p className="text-[11px] max-w-xs leading-relaxed">
+                      Toggle all four criteria checkboxes on the left to verify if you qualify for Independent Living Program pre-screening.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* VRC Counselor Interview Simulator Section */}
+      <div className="mt-8 pt-8 border-t border-slate-800">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl p-6 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+          <div className="absolute -inset-px bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <HelpCircle className="text-cyan-400" size={20} />
+                VRC Counselor Interview Simulator & Coach
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20">
+                Practice Session
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+              Prepare for your initial VRC counselor evaluation. Practice articulating your disability employment barriers and receive live feedback based on official VA decision criteria.
+            </p>
+
+            {simulatorStep === 0 && (
+              <div className="text-center py-6 bg-slate-950/30 border border-slate-850 rounded-xl">
+                <Award size={32} className="text-cyan-500 mx-auto mb-3" />
+                <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2">Ready to Start Practice Session?</h4>
+                <p className="text-[11px] text-slate-400 max-w-md mx-auto mb-4 leading-relaxed">
+                  Learn to connect your service-connected conditions directly to vocational limitations so you can clearly demonstrate your Employment Handicap.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSimulatorStep(1);
+                    setSimQ1(null);
+                    setSimQ2(null);
+                    setSimQ3(null);
+                  }}
+                  className="btn btn-primary text-xs px-6 cursor-pointer"
+                >
+                  Start Simulator
+                </button>
+              </div>
+            )}
+
+            {simulatorStep === 1 && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <span>Question 1 of 3: Occupational Barriers</span>
+                  <span>Step 1/3</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-200 leading-relaxed">
+                  How do your service-connected disabilities affect your ability to perform your occupational duties?
+                </h4>
+                
+                <div className="flex flex-col gap-2.5">
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq1" 
+                      className="mt-1" 
+                      checked={simQ1 === 'severe'} 
+                      onChange={() => setSimQ1('severe')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Severe Daily Limitations</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"My conditions cause constant pain or severe restrictions, making it impossible to perform key tasks of my trade."</span>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq1" 
+                      className="mt-1" 
+                      checked={simQ1 === 'moderate'} 
+                      onChange={() => setSimQ1('moderate')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Moderate/Partial Limitations</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"I can perform my duties, but it requires substantial effort, medication, pain, or frequent rests."</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq1" 
+                      className="mt-1" 
+                      checked={simQ1 === 'none'} 
+                      onChange={() => setSimQ1('none')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">No Limitations</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"My disabilities are managed and do not impact my occupational duties."</span>
+                    </div>
+                  </label>
+                </div>
+
+                {simQ1 && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-400 leading-relaxed">
+                    <strong>VRC Coaching Tip:</strong> {
+                      simQ1 === 'none' 
+                        ? 'Warning: If you tell your counselor you have no daily limitations, they will find you have NO Employment Handicap under 38 CFR § 21.51, resulting in denial. Articulate physical or cognitive strain that makes your current work unsuitable.' 
+                        : 'Excellent: Clearly linking your disability to specific occupational obstacles helps establish a vocational impairment and confirms your Employment Handicap.'
+                    }
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setSimulatorStep(0)} 
+                    className="btn btn-secondary text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    disabled={!simQ1} 
+                    onClick={() => setSimulatorStep(2)} 
+                    className="btn btn-primary text-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next Question
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {simulatorStep === 2 && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <span>Question 2 of 3: Suitability of Current Job</span>
+                  <span>Step 2/3</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-200 leading-relaxed">
+                  Are you currently employed, and does your job accommodate your disabilities?
+                </h4>
+                
+                <div className="flex flex-col gap-2.5">
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq2" 
+                      className="mt-1" 
+                      checked={simQ2 === 'unemployed'} 
+                      onChange={() => setSimQ2('unemployed')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Currently Unemployed</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"I am currently out of work because of my service-connected conditions."</span>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq2" 
+                      className="mt-1" 
+                      checked={simQ2 === 'unaccommodated'} 
+                      onChange={() => setSimQ2('unaccommodated')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Employed (Unaccommodated/Unsuitable)</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"I have a job, but it does not accommodate my disabilities, resulting in daily physical strain."</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq2" 
+                      className="mt-1" 
+                      checked={simQ2 === 'accommodated'} 
+                      onChange={() => setSimQ2('accommodated')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Employed (Suitable/Accommodated)</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"My job fully accommodates my conditions with minimal physical or cognitive strain."</span>
+                    </div>
+                  </label>
+                </div>
+
+                {simQ2 && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-400 leading-relaxed">
+                    <strong>VRC Coaching Tip:</strong> {
+                      simQ2 === 'accommodated' 
+                        ? 'Warning: If you are already in a fully suitable, accommodated job, the VRC may conclude you have "overcome" your handicap. Be prepared to explain why this job limits long-term growth or if it causes underlying issues.' 
+                        : 'Correct: Pointing out that you are unemployed due to disability, or that your current employment is physically unsuitable/painful, demonstrates that a vocational handicap remains active.'
+                    }
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setSimulatorStep(1)} 
+                    className="btn btn-secondary text-xs cursor-pointer"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    type="button" 
+                    disabled={!simQ2} 
+                    onClick={() => setSimulatorStep(3)} 
+                    className="btn btn-primary text-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next Question
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {simulatorStep === 3 && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <span>Question 3 of 3: Vocational Feasibility</span>
+                  <span>Step 3/3</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-200 leading-relaxed">
+                  What is your desired vocational goal, and how does it bypass your disability limitations?
+                </h4>
+                
+                <div className="flex flex-col gap-2.5">
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq3" 
+                      className="mt-1" 
+                      checked={simQ3 === 'compatible'} 
+                      onChange={() => setSimQ3('compatible')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Medically Compatible Goal</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"I chose a desk-based, cognitively focused role that completely avoids heavy physical labor or standing."</span>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq3" 
+                      className="mt-1" 
+                      checked={simQ3 === 'incompatible'} 
+                      onChange={() => setSimQ3('incompatible')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Physically Active Goal</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"My goal involves physical tasks, lifting, or field work that may trigger my disability ratings."</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer p-3 bg-slate-950/40 border border-slate-800/80 rounded-lg hover:bg-slate-950/80 transition-colors">
+                    <input 
+                      type="radio" 
+                      name="simq3" 
+                      className="mt-1" 
+                      checked={simQ3 === 'undecided'} 
+                      onChange={() => setSimQ3('undecided')} 
+                    />
+                    <div className="text-xs">
+                      <span className="font-semibold text-slate-200 block">Undecided / Open</span>
+                      <span className="text-slate-400 text-[11px] block mt-0.5">"I do not have a specific goal yet and want to explore options with my counselor."</span>
+                    </div>
+                  </label>
+                </div>
+
+                {simQ3 && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-400 leading-relaxed">
+                    <strong>VRC Coaching Tip:</strong> {
+                      simQ3 === 'incompatible' 
+                        ? 'Warning: If your training goal directly conflicts with your physical or mental limitations (e.g., wanting to be a mechanic with severe back and knee ratings), the counselor will deny feasibility. Focus on goals compatible with your profile.' 
+                        : simQ3 === 'undecided'
+                        ? 'Note: It is perfectly acceptable to be undecided. Your VRC can guide you through vocational testing, but having a general idea of compatible fields shows preparation.'
+                        : 'Correct: Choosing a goal that accommodates your disabilities demonstrates that the rehabilitation program is medically feasible.'
+                    }
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setSimulatorStep(2)} 
+                    className="btn btn-secondary text-xs cursor-pointer"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    type="button" 
+                    disabled={!simQ3} 
+                    onClick={() => setSimulatorStep(4)} 
+                    className="btn btn-primary text-xs cursor-pointer"
+                  >
+                    Complete Practice Session
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {simulatorStep === 4 && (
+              <div className="space-y-5 animate-fadeIn">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-emerald-400 text-xs flex gap-2">
+                  <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                  <div>
+                    <strong>Orientation Practice Completed:</strong> You have completed the practice VRC counselor interview. Review your case preparation summary sheet below.
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-5 space-y-4 text-xs">
+                  <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide border-b border-slate-800 pb-2">
+                    VRC Counselor Interview Preparation Sheet
+                  </h4>
+
+                  <div className="space-y-3.5">
+                    <div>
+                      <strong className="text-slate-350 block mb-1">1. Articulating Occupational Obstacles (38 CFR § 21.51 / § 21.52):</strong>
+                      <p className="text-slate-400 leading-relaxed italic pl-3 border-l border-slate-800">
+                        {simQ1 === 'severe' && '"My disabilities cause severe pain or limitations, making it impossible to perform key duties of my trade."'}
+                        {simQ1 === 'moderate' && '"I can perform my duties, but it requires substantial effort, pain, or frequent breaks."'}
+                        {simQ1 === 'none' && '"My disabilities do not affect my daily work duties."'}
+                      </p>
+                      <span className="text-[10px] text-cyan-400 mt-1 block">
+                        Coaching Note: Be ready to list specific physical tasks (e.g. lifting, typing, sitting) that provoke pain or anxiety.
+                      </span>
+                    </div>
+
+                    <div>
+                      <strong className="text-slate-350 block mb-1">2. Current Job Suitability & Accommodation (38 CFR § 21.51):</strong>
+                      <p className="text-slate-400 leading-relaxed italic pl-3 border-l border-slate-800">
+                        {simQ2 === 'unemployed' && '"I am currently unemployed because of my disabilities."'}
+                        {simQ2 === 'unaccommodated' && '"I have a job, but it does not accommodate my disabilities, resulting in daily physical strain."'}
+                        {simQ2 === 'accommodated' && '"My job fully accommodates my conditions with minimal strain."'}
+                      </p>
+                      <span className="text-[10px] text-cyan-400 mt-1 block">
+                        Coaching Note: If employed, explain why your work environment triggers symptoms, proving you have not "overcome" your impairment.
+                      </span>
+                    </div>
+
+                    <div>
+                      <strong className="text-slate-350 block mb-1">3. Feasibility of Vocational Goal (38 CFR § 21.35 / § 21.50):</strong>
+                      <p className="text-slate-400 leading-relaxed italic pl-3 border-l border-slate-800">
+                        {simQ3 === 'compatible' && '"I have selected a desk-based/flexible goal that is medically compatible with my conditions."'}
+                        {simQ3 === 'incompatible' && '"My goal involves physical tasks that might conflict with my disability ratings."'}
+                        {simQ3 === 'undecided' && '"I do not have a specific goal yet and need assistance from a counselor."'}
+                      </p>
+                      <span className="text-[10px] text-cyan-400 mt-1 block">
+                        Coaching Note: Always argue that your desired training goal is physically feasible and safe to pursue long-term.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-slate-500 italic pt-2 border-t border-slate-850">
+                    Prepared on {new Date().toLocaleDateString()} • Case planning tool under Chapter 31.
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = `VRC COUNSELOR INTERVIEW PREPARATION SHEET\n\n` +
+                        `1. OCCUPATIONAL OBSTACLES (38 CFR § 21.51 / § 21.52):\n` +
+                        `Response: ${
+                          simQ1 === 'severe' ? 'Severe limitations performing key trade duties.' :
+                          simQ1 === 'moderate' ? 'Moderate limitations, requires substantial effort/pain.' :
+                          'No daily limitations reported.'
+                        }\n\n` +
+                        `2. SUITABILITY OF CURRENT JOB (38 CFR § 21.51):\n` +
+                        `Response: ${
+                          simQ2 === 'unemployed' ? 'Currently unemployed due to disabilities.' :
+                          simQ2 === 'unaccommodated' ? 'Employed but unsuitable, causes physical strain.' :
+                          'Employed in a fully accommodated, suitable role.'
+                        }\n\n` +
+                        `3. GOAL FEASIBILITY (38 CFR § 21.35 / § 21.50):\n` +
+                        `Response: ${
+                          simQ3 === 'compatible' ? 'Medically compatible desk-based/flexible goal.' :
+                          simQ3 === 'incompatible' ? 'Physically active goal that may conflict with ratings.' :
+                          'Undecided, seeking vocational counseling guidance.'
+                        }\n\n` +
+                        `*** Prepared via Chapter 31 case strategy portal. ***`;
+                      navigator.clipboard.writeText(text);
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 2000);
+                    }}
+                    className="btn btn-secondary text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{copySuccess ? '✓ Copied!' : 'Copy Prep Sheet'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const printWindow = window.open('', '_blank');
+                      printWindow.document.write(`
+                        <html>
+                          <head>
+                            <title>VRC Counselor Interview Preparation Sheet</title>
+                            <style>
+                              body { font-family: sans-serif; padding: 40px; color: #111; line-height: 1.6; }
+                              h1 { font-size: 1.4rem; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 20px; }
+                              h2 { font-size: 1.1rem; color: #222; margin-top: 20px; }
+                              p { font-size: 0.95rem; margin-bottom: 12px; }
+                              .coaching { font-size: 0.85rem; color: #555; background-color: #f5f5f5; padding: 10px; border-left: 3px solid #888; margin-top: 4px; }
+                              .footer { margin-top: 40px; font-size: 0.8rem; color: #777; border-top: 1px solid #ddd; padding-top: 10px; }
+                            </style>
+                          </head>
+                          <body>
+                            <h1>VRC Counselor Interview Preparation Sheet</h1>
+                            <p>Use this reference sheet to prepare for your initial evaluation and orientation interview with your Vocational Rehabilitation Counselor (VRC).</p>
+                            
+                            <h2>1. Occupational Obstacles (38 CFR &sect; 21.51 / &sect; 21.52)</h2>
+                            <p><strong>Response:</strong> ${
+                              simQ1 === 'severe' ? 'My conditions cause constant pain or severe restrictions, making it impossible to perform key tasks of my trade.' :
+                              simQ1 === 'moderate' ? 'I can perform my duties, but it requires substantial effort, medication, pain, or frequent rests.' :
+                              'My disabilities are managed and do not impact my occupational duties.'
+                            }</p>
+                            <div class="coaching"><strong>VRC Interview Tip:</strong> Focus on listing specific work tasks (sitting, lifting, writing) that cause physical or mental pain.</div>
+                            
+                            <h2>2. Current Job Suitability & Accommodation (38 CFR &sect; 21.51)</h2>
+                            <p><strong>Response:</strong> ${
+                              simQ2 === 'unemployed' ? 'I am currently out of work because of my service-connected conditions.' :
+                              simQ2 === 'unaccommodated' ? 'I have a job, but it does not accommodate my disabilities, resulting in daily physical strain.' :
+                              'My job fully accommodates my conditions with minimal physical or cognitive strain.'
+                            }</p>
+                            <div class="coaching"><strong>VRC Interview Tip:</strong> If you are working but in pain, make it clear that the job is unsuitable and is not a viable long-term solution.</div>
+                            
+                            <h2>3. Feasibility of Vocational Goal (38 CFR &sect; 21.35 / &sect; 21.50)</h2>
+                            <p><strong>Response:</strong> ${
+                              simQ3 === 'compatible' ? 'I chose a desk-based, cognitively focused role that completely avoids heavy physical labor or standing.' :
+                              simQ3 === 'incompatible' ? 'My goal involves physical tasks, lifting, or field work that may trigger my disability ratings.' :
+                              'I do not have a specific goal yet and want to explore options with my counselor.'
+                            }</p>
+                            <div class="coaching"><strong>VRC Interview Tip:</strong> Emphasize that your target training goal fits within your medical limitations and is safe to execute.</div>
+                            
+                            <div class="footer">
+                              Prepared via Interactive VR&E Portal on ${new Date().toLocaleDateString()}
+                            </div>
+                            <script>window.print();</script>
+                          </body>
+                        </html>
+                      `);
+                      printWindow.document.close();
+                    }}
+                    className="btn btn-secondary text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Print Prep Sheet</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSimulatorStep(0);
+                      setSimQ1(null);
+                      setSimQ2(null);
+                      setSimQ3(null);
+                    }}
+                    className="btn btn-primary text-xs cursor-pointer ml-auto"
+                  >
+                    Restart Simulator
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
