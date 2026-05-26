@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { 
   Compass, Calendar, Clipboard, Check, FileText, 
   ExternalLink, ShieldCheck, Award, Printer, Search, 
-  Heart, Users, HelpCircle, GraduationCap, Briefcase, 
-  Flame, MapPin, Tag, RefreshCw, Info, AlertTriangle, PhoneCall
+  Heart, Users, HelpCircle, GraduationCap, 
+  Flame, MapPin, RefreshCw, Info, AlertTriangle, PhoneCall
 } from 'lucide-react';
 
 import { TAPS_BRANCHES, TAPS_TIMELINE_CHECKPOINTS, TAPS_MOC_CROSSWALK, TAPS_ITP_TEMPLATES } from '../data/taps-data.js';
 import { TAP_ECOSYSTEM, TAPS_ECOSYSTEM, TAPS_MEMORIAL_ECOSYSTEM, ALL_RESOURCES } from '../data/tap-taps-index/index.js';
 import { renderTemplate } from '../utils/templateRenderer.js';
 
+// eslint-disable-next-line no-unused-vars
 function TapsModuleView({ reduceMotion }) {
   // Main Tab Navigation
   const [activeTab, setActiveTab] = useState('tap'); // 'tap' | 'taps' | 'memorial'
@@ -77,6 +77,94 @@ function TapsModuleView({ reduceMotion }) {
   const [selectedCourseArea, setSelectedCourseArea] = useState('tap'); // 'tap' | 'yyrp' | 'esgr' | 'skillbridge'
   const [vreHasRating, setVreHasRating] = useState(null); // null | 'yes_20' | 'yes_10' | 'no'
   const [vreHasBarrier, setVreHasBarrier] = useState(null); // null | 'yes' | 'no'
+
+  // PhD-Level Advanced States
+  const [wantsSkillBridge, setWantsSkillBridge] = useState(false);
+  const [wantsVre, setWantsVre] = useState(false);
+  const [wantsGiBill, setWantsGiBill] = useState(false);
+  
+  const [belongingScore, setBelongingScore] = useState(3);
+  const [purposeScore, setPurposeScore] = useState(3);
+  const [securityScore, setSecurityScore] = useState(3);
+  const [readinessScore, setReadinessScore] = useState(3);
+  const [diagnosticDone, setDiagnosticDone] = useState(false);
+
+  const getStackingStrategy = () => {
+    if (!wantsSkillBridge && !wantsVre && !wantsGiBill) return null;
+    
+    let path = [];
+    let advice;
+
+    if (wantsSkillBridge) {
+      path.push({
+        title: 'Phase 1: DoD SkillBridge (Active Duty)',
+        duration: 'Last 180 days of service',
+        desc: 'Work in a civilian internship while retaining active duty pay and allowances. Zero entitlement months consumed.', // @cite 10 U.S.C. 1144
+        action: 'Find providers at skillbridge.mil'
+      });
+    }
+
+    if (wantsVre) {
+      const stepNum = path.length + 1;
+      path.push({
+        title: `Phase ${stepNum}: VA Chapter 31 VR&E (Vocational Rehabilitation)`,
+        duration: 'Up to 48 months of services',
+        desc: 'Use Chapter 31 first for training and employment assistance. Under current VA policy, VR&E does not burn your 36 months of Post-9/11 GI Bill if approved correctly.', // @cite 38 U.S.C. 3102
+        action: 'Apply for VR&E on VA.gov'
+      });
+    }
+
+    if (wantsGiBill) {
+      const stepNum = path.length + 1;
+      path.push({
+        title: `Phase ${stepNum}: VA Post-9/11 GI Bill (Chapter 33)`,
+        duration: '36 months of academic study',
+        desc: 'Stack your GI Bill after VR&E to pursue higher academic degrees (e.g. Master\'s, PhD) or specialized credentials.', // @cite 38 U.S.C. 3311
+        action: 'Check school coverage on VA.gov'
+      });
+    }
+
+    if (wantsVre && wantsGiBill) {
+      advice = '💡 Strategy Notice: Stacking VR&E BEFORE your GI Bill is the optimal policy path. If you utilize GI Bill first, you may still qualify for VR&E later, but you burn your primary academic entitlement months prematurely. // @cite 38 U.S.C. 3102';
+    } else if (wantsSkillBridge && wantsVre) {
+      advice = '💡 Strategy Notice: Leverage your SkillBridge internship as a direct bridge into your VR&E Chapter 31 plan, converting active duty OJT into permanent rehabilitation. // @cite 10 U.S.C. 1144';
+    } else {
+      advice = '💡 Strategy Notice: Ensure all applications are filed at least 90-120 days in advance of the phase start to prevent gap periods in subsistence payments.';
+    }
+
+    return { path, advice };
+  };
+
+  const getReadinessReport = () => {
+    const avgScore = (belongingScore + purposeScore + securityScore + readinessScore) / 4;
+    
+    let findings = [];
+    let recommendations = [];
+
+    if (belongingScore <= 2) {
+      findings.push('Loss of community structure and peer belonging');
+      recommendations.push('Consider connecting with TAPS Peer Mentoring networks or local Marine For Life chapters for veteran social reintegration.');
+    }
+    if (purposeScore <= 2) {
+      findings.push('Ambiguity in career mission and civilian purpose');
+      recommendations.push('Request one-on-one employment guidance from DOL ENPP Navigators to translate MOC skills to a clear career pathway.');
+    }
+    if (securityScore <= 2) {
+      findings.push('Short financial runway and budget stressors');
+      recommendations.push('Utilize the SBA district offices for business counseling or VA benefits briefing to check for disability compensations.');
+    }
+    if (readinessScore <= 2) {
+      findings.push('Physical or mental health friction and claims gaps');
+      recommendations.push('File a VA Benefits Delivery at Discharge (BDD) disability claim (90-180 days out) and enroll in VA health care.');
+    }
+
+    if (findings.length === 0) {
+      findings.push('Strong transitional readiness indicators across all dimensions.');
+      recommendations.push('Maintain active connection with transition offices and serve as a civilian mentor for future separating members.');
+    }
+
+    return { avgScore, findings, recommendations };
+  };
 
   // Base constants
   const activeBranch = TAPS_BRANCHES[selectedBranch] || TAPS_BRANCHES.army;
@@ -1130,6 +1218,206 @@ function TapsModuleView({ reduceMotion }) {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* PhD-Level Advanced Modules */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            
+            {/* Entitlement Stacking Strategy Advisor */}
+            <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-5 space-y-4">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <GraduationCap size={18} className="text-indigo-400" />
+                <span>Entitlement Stacking Strategy Advisor</span>
+              </h2>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Check the benefits you are planning to use to calculate the optimal stacking and sequencing plan:
+              </p>
+
+              {/* Checkboxes */}
+              <div className="grid grid-cols-3 gap-3 bg-slate-950/40 p-4 border border-slate-850 rounded-xl text-[10px]">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  onClick={() => setWantsSkillBridge(!wantsSkillBridge)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={wantsSkillBridge}
+                    readOnly
+                    className="rounded border-slate-800 bg-slate-900 text-indigo-500 focus:ring-0 cursor-pointer"
+                  />
+                  <span className="font-semibold text-slate-350">DoD SkillBridge</span>
+                </div>
+                <div 
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  onClick={() => setWantsVre(!wantsVre)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={wantsVre}
+                    readOnly
+                    className="rounded border-slate-800 bg-slate-900 text-indigo-500 focus:ring-0 cursor-pointer"
+                  />
+                  <span className="font-semibold text-slate-355">VA Chapter 31 VR&E</span>
+                </div>
+                <div 
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  onClick={() => setWantsGiBill(!wantsGiBill)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={wantsGiBill}
+                    readOnly
+                    className="rounded border-slate-800 bg-slate-900 text-indigo-500 focus:ring-0 cursor-pointer"
+                  />
+                  <span className="font-semibold text-slate-355">Post-9/11 GI Bill</span>
+                </div>
+              </div>
+
+              {/* Output Stacking Strategy */}
+              {(() => {
+                const strategy = getStackingStrategy();
+                if (!strategy) {
+                  return (
+                    <div className="p-4 text-center bg-slate-950/20 border border-slate-900 rounded-xl text-[10px] text-slate-500">
+                      Check one or more benefits above to generate your optimal timeline sequence.
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider block">Recommended Timeline Sequence</span>
+                    <div className="space-y-2 relative pl-3 border-l border-slate-800">
+                      {strategy.path.map((phase, idx) => (
+                        <div key={idx} className="relative pb-3 last:pb-0">
+                          <span className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-indigo-500 border border-slate-900"></span>
+                          <div className="bg-slate-950/40 border border-slate-900 rounded-xl p-3 text-[10px] space-y-1">
+                            <div className="flex items-center justify-between gap-1 font-bold text-slate-200">
+                              <span>{phase.title}</span>
+                              <span className="text-[8px] font-mono text-indigo-400">{phase.duration}</span>
+                            </div>
+                            <p className="text-[9.5px] text-slate-400 leading-normal">{phase.desc}</p>
+                            <span className="text-[8px] text-indigo-400 font-medium block pt-0.5">➔ {phase.action}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="p-3 bg-indigo-955/10 border border-indigo-900/30 rounded-lg text-[9px] text-indigo-350 leading-relaxed">
+                      {strategy.advice}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Transition Readjustment & Social Connection Diagnostic */}
+            <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-5 space-y-4">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <Users size={18} className="text-indigo-400" />
+                <span>Transition Stress & Readjustment Diagnostic</span>
+              </h2>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Rate your transition state across these structural dimensions (1 = High Stress, 5 = Ready/Stable):
+              </p>
+
+              <div className="space-y-3 bg-slate-950/40 p-4 border border-slate-850 rounded-xl text-[10px]">
+                {/* Belonging */}
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-300">Belonging & Connection (Loss of military community/structure)</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setBelongingScore(n); setDiagnosticDone(true); }}
+                        className={`w-6 h-6 rounded text-[9.5px] font-bold cursor-pointer transition ${belongingScore === n ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:bg-slate-800'}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Purpose */}
+                <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-slate-900/60">
+                  <span className="text-slate-300">Purpose & Career Identity (Civilian career clarity)</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setPurposeScore(n); setDiagnosticDone(true); }}
+                        className={`w-6 h-6 rounded text-[9.5px] font-bold cursor-pointer transition ${purposeScore === n ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:bg-slate-800'}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Security */}
+                <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-slate-900/60">
+                  <span className="text-slate-300">Financial Security (Transition budget/runway)</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setSecurityScore(n); setDiagnosticDone(true); }}
+                        className={`w-6 h-6 rounded text-[9.5px] font-bold cursor-pointer transition ${securityScore === n ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:bg-slate-800'}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Readiness */}
+                <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-slate-900/60">
+                  <span className="text-slate-300">Physical/Mental Health Readiness (VA claims process)</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => { setReadinessScore(n); setDiagnosticDone(true); }}
+                        className={`w-6 h-6 rounded text-[9.5px] font-bold cursor-pointer transition ${readinessScore === n ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:bg-slate-800'}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Diagnostic Output */}
+                {diagnosticDone && (() => {
+                  const report = getReadinessReport();
+                  return (
+                    <div className="mt-3 p-3 bg-slate-900 border border-slate-850 rounded-lg space-y-2.5 text-[9.5px] leading-relaxed">
+                      <div className="flex justify-between items-center border-b border-slate-800 pb-1.5 font-bold">
+                        <span className="text-slate-200">Readiness Score Index</span>
+                        <span className={`text-[10px] ${report.avgScore <= 2.5 ? 'text-rose-450' : report.avgScore <= 3.8 ? 'text-amber-450' : 'text-emerald-450'}`}>
+                          {report.avgScore.toFixed(1)} / 5.0
+                        </span>
+                      </div>
+                      
+                      {report.findings.length > 0 && (
+                        <div>
+                          <span className="block text-[8px] font-bold text-slate-500 uppercase">Friction Areas Detected</span>
+                          <ul className="list-disc pl-3 text-slate-350 space-y-0.5 mt-0.5">
+                            {report.findings.map((f, idx) => <li key={idx}>{f}</li>)}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div>
+                        <span className="block text-[8px] font-bold text-slate-500 uppercase">Recommended Actions</span>
+                        <ul className="list-decimal pl-3 text-indigo-350 space-y-1 mt-0.5 font-semibold">
+                          {report.recommendations.map((r, idx) => <li key={idx}>{r}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
           </div>
         </div>
       )}
