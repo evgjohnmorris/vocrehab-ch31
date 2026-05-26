@@ -30,19 +30,19 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: m28c-interactive/package-lock.json
+          cache-dependency-path: client/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: m28c-interactive
+        working-directory: client
 
       - name: Security Audit
         run: npm run security:audit || true
-        working-directory: m28c-interactive
+        working-directory: client
 
       - name: Build
         run: npm run build
-        working-directory: m28c-interactive
+        working-directory: client
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -50,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: m28c-interactive/dist
+          path: client/dist
 
       - name: Deploy to GitHub Pages
         id: deployment

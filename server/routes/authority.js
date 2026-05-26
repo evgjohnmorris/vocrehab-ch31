@@ -52,7 +52,7 @@ router.get('/manifest', (req, res) => {
 // Get crosswalk
 router.get('/crosswalk', (req, res) => {
   try {
-    const crosswalkPath = path.resolve(__dirname, '../../m28c-interactive/src/data/authority/topic-crosswalk.json');
+    const crosswalkPath = path.resolve(__dirname, '../../client/src/data/authority/topic-crosswalk.json');
     const raw = fs.readFileSync(crosswalkPath, 'utf8');
     res.json(JSON.parse(raw));
   } catch (err) {
@@ -63,7 +63,7 @@ router.get('/crosswalk', (req, res) => {
 // Get coverage report
 router.get('/coverage', (req, res) => {
   try {
-    const coveragePath = path.resolve(__dirname, '../../m28c-interactive/public/authority/coverage-report.json');
+    const coveragePath = path.resolve(__dirname, '../../client/public/authority/coverage-report.json');
     const raw = fs.readFileSync(coveragePath, 'utf8');
     res.json(JSON.parse(raw));
   } catch (err) {

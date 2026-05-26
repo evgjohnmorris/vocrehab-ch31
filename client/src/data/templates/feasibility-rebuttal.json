@@ -1,0 +1,11 @@
+{
+  "templateId": "feasibility-rebuttal",
+  "title": "Request for Extended Evaluation / Rebuttal of Feasibility Denial",
+  "authorityIds": [
+    "38-usc-3106",
+    "38-cfr-21-53",
+    "38-cfr-21-57",
+    "38-cfr-21-74"
+  ],
+  "body": "Date: {{date}}\n\nTo: Assigned Vocational Rehabilitation Counselor (VRC)\nVA Regional Office\n\nSubject: Request for Extended Evaluation / Rebuttal of Feasibility Denial (38 C.F.R. § 21.57)\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nDear Counselor,\n\nI am writing to formally rebut the determination that achieving a vocational goal is not reasonably feasible for me under Chapter 31 due to the severity of my service-connected disabilities.\n\nI hold a disability rating of {{ratingPercentage}}. My proposed vocational objective is {{proposedGoal}}.\n\nUnder 38 C.F.R. § 21.57, the counselor should resolve reasonable doubts in favor of the veteran's feasibility. If there is uncertainty regarding feasibility, the VA should authorize an Extended Evaluation under 38 C.F.R. § 21.74 to assess capabilities rather than issuing an immediate feasibility denial (Resolved Doubt: {{resolvedDoubt}}, Extended Evaluation Offered: {{extendedEvalOffered}}).\n\nAdditionally, I submit the following facts supporting feasibility:\n- Medical support: Doctor Letter Available: {{hasDoctorLetter}}.\n- Personal Remarks: {{personalFeasibilityRemarks}}.\n\nI request that my file be placed in Extended Evaluation status to formally evaluate my rehabilitation capacity over a structured period, or that my proposed plan be authorized.\n\nSincerely,\n\n[Your Name]"
+}

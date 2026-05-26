@@ -1,0 +1,92 @@
+[
+  {
+    "id": "applicant",
+    "name": "Applicant Status",
+    "description": "The veteran has applied for VR&E benefits (via VA Form 28-1900) but has not yet attended the initial orientation or entitlement determination.",
+    "regulation": "38 C.F.R. § 21.190",
+    "details": "A veteran is placed in applicant status upon receipt of a completed application. The VA is required to schedule an initial orientation and entitlement assessment under the duty to assist.",
+    "risks": "Failure to attend scheduled orientation or initial counseling sessions will result in the case being discontinued before entitlement is evaluated.",
+    "advocacy": "Ensure all medical records and rating decisions are submitted. Request a character of discharge review if your discharge is other than honorable."
+  },
+  {
+    "id": "evaluation_planning",
+    "name": "Evaluation and Planning Status",
+    "description": "The veteran has been found entitled to VR&E services, and is actively working with a counselor to select a vocational goal and design the rehabilitation plan (IPE).",
+    "regulation": "38 C.F.R. § 21.192",
+    "details": "This status covers the period where vocational assessments, aptitude testing, LMI research, and suitability evaluations are conducted to select a vocational goal.",
+    "risks": "Counselor delay in approving goals or pushing the veteran into entry-level goals that aggravate service-connected conditions.",
+    "advocacy": "Conduct independent O*NET and labor market research. Prepare justification letters if pursuing graduate school or specialized training fields."
+  },
+  {
+    "id": "extended_evaluation",
+    "name": "Extended Evaluation Status",
+    "description": "The veteran's feasibility to achieve a vocational goal is uncertain due to severe disabilities, and a structured test period (up to 12 months) is established.",
+    "regulation": "38 C.F.R. § 21.194",
+    "details": "An Extended Evaluation plan is utilized to provide therapy, accommodations, or trial coursework to test if the veteran can feasibly enter training.",
+    "risks": "Counselors failing to utilize this when feasibility is uncertain, choosing instead to issue a flat unfeasibility denial.",
+    "advocacy": "Request an Extended Evaluation under 38 C.F.R. § 21.74 if the counselor claims you are not feasible to train due to severe disabilities."
+  },
+  {
+    "id": "rehabilitation_employability",
+    "name": "Rehabilitation to Employability (RTE) Status",
+    "description": "The veteran is actively pursuing the approved rehabilitation plan (training, university courses, or OJT) to obtain the skills needed for their goal.",
+    "regulation": "38 C.F.R. § 21.196",
+    "details": "This is the active training phase. VA pays tuition, fees, subsistence allowance, and authorized supplies.",
+    "risks": "Unpaid tuition delays, denied supply requests (laptops), or counselor non-response leading to class drop deadlines.",
+    "advocacy": "Verify SCO certification. Maintain contact logs, and submit all required book and supplies requests prior to term starts."
+  },
+  {
+    "id": "independent_living",
+    "name": "Independent Living Status",
+    "description": "A program of services (up to 24-30 months) designed to enable severely disabled veterans to function independently in their home or community.",
+    "regulation": "38 C.F.R. § 21.160",
+    "details": "For veterans where a vocational goal is currently unfeasible. Services include assistive technology, home modifications, and mobility aids.",
+    "risks": "VRCs asserting that any minor work potential bars IL, or claiming local office budget caps on home adaptations.",
+    "advocacy": "Complete detailed Activities of Daily Living (ADL) checklists. Rebut denials by asserting safety and community integration needs."
+  },
+  {
+    "id": "employment_services",
+    "name": "Employment Services Status",
+    "description": "The veteran has completed their training and is actively searching for suitable employment, receiving job search assistance, resume prep, and interview coaching.",
+    "regulation": "38 C.F.R. § 21.196(b)",
+    "details": "Covers active job search assistance. Veterans are eligible for up to two months of Employment Adjustment Allowance (EAA) payments.",
+    "risks": "VRC closing the case into a job that is not suitable or aggravates disabilities.",
+    "advocacy": "Do not accept placement in roles that violate physical or mental restrictions. Ensure any job offer satisfies suitability guidelines."
+  },
+  {
+    "id": "interrupted",
+    "name": "Interrupted Status",
+    "description": "Rehabilitation services are temporarily suspended due to medical issues, personal emergencies, or communication gaps.",
+    "regulation": "38 C.F.R. § 21.197",
+    "details": "Used to pause a case before making a final decision on closure. VRC must attempt to resolve the issue before discontinuing the program.",
+    "risks": "Case managers immediately placing active cases in interrupted status without warning, stopping subsistence pay.",
+    "advocacy": "Provide medical documentation for any class withdrawals. Respond to interruption notices within 30 days to protect your case."
+  },
+  {
+    "id": "discontinued",
+    "name": "Discontinued Status",
+    "description": "The veteran's case is closed and services are terminated prior to completing the rehabilitation goal.",
+    "regulation": "38 C.F.R. § 21.198",
+    "details": "Termination of benefits. Prior written warning notice (intent to discontinue) and formal statement of appeal rights are required.",
+    "risks": "Closing cases without warning letters or omitting the mandatory VREO review for veterans rated 50% or more disabling.",
+    "advocacy": "Verify if a 30-day warning was sent. Request a supervisor conference and demand a formal written Decision Notice (Form 20-0998)."
+  },
+  {
+    "id": "rehabilitated",
+    "name": "Rehabilitated Status",
+    "description": "The veteran has successfully achieved their vocational goal and maintained suitable employment for at least 60 days, or achieved independence in daily living.",
+    "regulation": "38 C.F.R. § 21.283",
+    "details": "The successful closure of a VR&E program. Indicates the veteran has overcome their employment barrier.",
+    "risks": "Closing cases as rehabilitated into temporary or unsuitable jobs.",
+    "advocacy": "Confirm that you have maintained the job for 60+ days and that it is fully suitable under 38 C.F.R. § 21.283 guidelines."
+  },
+  {
+    "id": "reentrance",
+    "name": "Reentrance After Rehabilitation",
+    "description": "The veteran seeks to re-enter a VR&E program after previously being declared rehabilitated.",
+    "regulation": "38 C.F.R. § 21.284",
+    "details": "Re-entry is permitted if the veteran's service-connected conditions have worsened, creating a new employment barrier, or if the original job is no longer viable.",
+    "risks": "VRC denying intake claiming that since you were once rehabilitated, you can never get services again.",
+    "advocacy": "Obtain medical records showing worsening conditions. Prove that the previous job has become medically unsuitable."
+  }
+]

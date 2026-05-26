@@ -1,0 +1,86 @@
+[
+  {
+    "id": "va-benefits-services-briefing",
+    "type": "resource",
+    "name": "VA Benefits and Services Briefing",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Overview of VA health care, compensation, housing, and educational benefits available to separating, demobilizing, or retiring service members.",
+    "sourceUrl": "https://tapevents.mil/courses/405",
+    "relatedTools": ["va-tap-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-benefits-101",
+    "type": "resource",
+    "name": "VA Benefits 101 Overview",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "TAPevents course detailing VA education, home loans, life insurance, and memorial benefits.",
+    "sourceUrl": "https://tapevents.mil/courses",
+    "relatedTools": ["va-benefits-intro"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-home-loans",
+    "type": "resource",
+    "name": "VA Home Loan Guaranty Program",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Helps veterans, service members, and eligible surviving spouses become homeowners by guaranteeing a portion of the loan.",
+    "sourceUrl": "https://www.va.gov/housing-assistance/home-loans/",
+    "relatedTools": ["home-loan-transition-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-health-care-enrollment",
+    "type": "resource",
+    "name": "VA Health Care Enrollment",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Planning and application portal for medical care, prescription coverage, mental health services, and specialty care post-transition.",
+    "sourceUrl": "https://www.va.gov/health-care/",
+    "relatedTools": ["health-care-transition-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-disability-benefits",
+    "type": "resource",
+    "name": "VA Disability Compensation (BDD)",
+    "audience": ["transitioning"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Filing claims for service-connected conditions under Benefits Delivery at Discharge (BDD) between 180 to 90 days before separating.",
+    "sourceUrl": "https://www.va.gov/disability/",
+    "relatedTools": ["disability-claim-transition-tool"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-vre-chapter-31",
+    "type": "resource",
+    "name": "Vocational Rehabilitation & Employment (VR&E / Chapter 31)",
+    "audience": ["transitioning", "education-career"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Employment training, accommodations, resumes, and job-seeking skills for veterans with service-connected disabilities and employment barriers.",
+    "sourceUrl": "https://www.va.gov/careers-employment/vocational-rehabilitation/",
+    "relatedTools": ["tap-to-vre-bridge", "tap-to-vre-application-guide"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "va-gi-bill-education",
+    "type": "resource",
+    "name": "GI Bill & Education Benefits",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "VA Transition Benefits",
+    "whatItProvides": "Funding program for college degrees, vocational certificates, apprenticeships, flight training, and licensing exams.",
+    "sourceUrl": "https://www.va.gov/education/",
+    "relatedTools": ["tap-to-gi-bill-bridge", "gi-bill-school-training-planner"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

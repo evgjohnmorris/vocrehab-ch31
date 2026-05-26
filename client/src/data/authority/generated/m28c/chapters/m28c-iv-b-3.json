@@ -1,0 +1,33 @@
+{
+  "id": "m28c-iv-b-3",
+  "canonicalCitation": "M28C.IV.B.3",
+  "title": "Feasibility of Achieving a Vocational Goal",
+  "authorityLevel": "va-policy",
+  "sourceType": "m28c",
+  "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150224/M28CIVB3-Feasibility-of-Achieving-a-Vocational-Goal",
+  "officialStatus": "va-public",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2024-11-20",
+  "status": "summary-only",
+  "fullTextStatus": "consolidated-reference",
+  "displayWarning": "This section is consolidated on KnowVA. Detailed reference guidelines are provided here for cross-reference.",
+  "articleId": "554400000150224",
+  "fullText": "### 3.01 Determining Feasibility Overview\nUnder 38 U.S.C. 3106 and 38 C.F.R. 21.50, the VRC must make a determination of whether it is reasonably feasible for a veteran to achieve a vocational goal. Feasibility is defined as a reasonable likelihood that the veteran can prepare for, obtain, and maintain suitable employment.\n\n### 3.02 Resolution of Reasonable Doubt\nUnder 38 C.F.R. 21.57, in any determination of feasibility, all reasonable doubt must be resolved in favor of the veteran. The VRC cannot deny feasibility based on standard checklist scores or assumptions about the severity of a disability without a comprehensive evaluation.\n\n### 3.03 Extended Evaluation\nIf feasibility cannot be determined during the initial evaluation, the counselor must authorize an Extended Evaluation under 38 C.F.R. 21.74. This allows the veteran to receive services and training (for up to 12 months, and in some cases longer) to determine if they can achieve a vocational goal.\n\n### 3.04 Education Levels and Advanced Degree Approvals\n* **Undergraduate vs. Graduate Training**: The counselor may approve graduate or advanced degree programs (e.g., Master's, J.D., M.D., Ph.D.) under 38 C.F.R. 21.72 if required for entry-level licensing or employment in the selected vocational goal.\n* **Denial of Educational Goals**: Denials of a higher education goal must be accompanied by a detailed written assessment showing that a lower-level degree is sufficient to achieve suitable employment in that field.",
+  "plainEnglish": "Guidelines explaining how counselors determine if you are capable of working (feasibility) and what educational levels (like Master's or graduate school) can be approved.",
+  "veteranUse": "If your VRC tries to deny your graduate school request, cite 38 C.F.R. 21.72 and M28C.IV.B.3. Remind them that if the target occupation requires a graduate degree for entry-level employment, it must be approved under your rehabilitation plan.",
+  "topics": [
+    "feasibility",
+    "graduate-school",
+    "education-levels"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3106",
+    "38-cfr-21-57",
+    "38-cfr-21-72"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "578989cf952507cf088f8875a52283d594cfe0a853dfa4c497098cfe0ff7a839",
+  "previousHash": "d4b421779ca70363779ce5de2f47a4113e314b73744be706f834dff6a36714cf"
+}

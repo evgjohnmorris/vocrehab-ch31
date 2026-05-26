@@ -1,0 +1,116 @@
+{
+  "workflowId": "tuition-unpaid",
+  "title": "Tuition or Books Not Paid",
+  "desc": "The school hasn't received payment, threatening late fees or registration holds.",
+  "riskLevel": "high",
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training"
+  ],
+  "authorityIds": [
+    "38-usc-3108",
+    "38-cfr-21-260"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "schoolName",
+          "label": "Name of Educational Institution",
+          "type": "text",
+          "placeholder": "e.g. State University"
+        },
+        {
+          "name": "termDates",
+          "label": "Term Dates (e.g. Fall 2026)",
+          "type": "text",
+          "placeholder": "e.g. Sept - Dec 2026"
+        },
+        {
+          "name": "daysDelayed",
+          "label": "Days Payment is Overdue",
+          "type": "number",
+          "placeholder": "e.g. 45"
+        },
+        {
+          "name": "hasHold",
+          "label": "Has the school threatened registration holds or late fees?",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Allowing administrative delays to penalize the veteran's active enrollment.",
+    "Failing to coordinate with the School Certifying Official to resolve billing errors."
+  ],
+  "citations": [
+    "38-usc-3108",
+    "38-cfr-21-260"
+  ],
+  "templates": [
+    "tuition-delay-escalation"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "term_schedule",
+      "text": "Current class schedule showing enrollment dates",
+      "weight": 30
+    },
+    {
+      "id": "unpaid_statement",
+      "text": "School account statement showing tuition invoice and billing deadlines",
+      "weight": 30
+    },
+    {
+      "id": "sco_delay_confirm",
+      "text": "Email or statement from School Certifying Official confirming lack of auth",
+      "weight": 40
+    }
+  ],
+  "evidenceScoring": {
+    "thresholds": {
+      "strong": 70,
+      "borderline": 30
+    },
+    "maxScore": 100
+  },
+  "bestNextActionRules": [
+    {
+      "criteria": "Tuition unpaid 14 days after term start",
+      "action": "Submit urgent tuition escalation notice citing 38 C.F.R. § 21.262 to force Tungsten authorization.",
+      "reference": "38-cfr-21-262"
+    }
+  ],
+  "vaErrorTriggers": [
+    "authorization_delay",
+    "school_threatens_disenrollment"
+  ],
+  "reviewLaneQuestions": [
+    {
+      "id": "term_started",
+      "question": "Has the school term already started?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "id": "sco_notified",
+      "question": "Have you confirmed with the School Certifying Official that your enrollment is certified?",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "outputPacket": [
+    "tuition-delay-escalation"
+  ]
+}

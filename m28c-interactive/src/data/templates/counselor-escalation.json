@@ -1,9 +1,0 @@
-{
-  "templateId": "counselor-escalation",
-  "title": "Request for Administrative Intervention - Counselor Nonresponse",
-  "authorityIds": [
-    "38-usc-3115",
-    "38-cfr-21-33"
-  ],
-  "body": "Date: {{date}}\n\nTo: Vocational Rehabilitation and Employment Officer (VREO)\nVA Regional Office\n\nSubject: Request for Administrative Intervention – Counselor Nonresponse\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nDear Vocational Rehabilitation and Employment Officer,\n\nI am writing to request administrative intervention regarding my Chapter 31 Vocational Rehabilitation case. My assigned Vocational Rehabilitation Counselor (VRC), {{vrcName}}, has not responded to my repeated inquiries for an extended period.\n\nMy last successful contact with my counselor was on {{lastContactDate}}. Since that date, I have attempted to follow up {{followUpCount}} times via {{contactMethod}}, with no response.\n\nUnder M28C guidelines and the VA's duty to assist (38 U.S.C. § 5103A and 38 C.F.R. § 21.33), the VA coordinates active services and assists veterans in executing their rehabilitation plans. The lack of response has caused administrative delays in my program.\n\nPlease contact me at your earliest convenience to assist in resolving this communication block, or assign an alternate counselor to my file to ensure program continuity.\n\nSincerely,\n\n[Your Name]\n[Your Contact Information]"
-}

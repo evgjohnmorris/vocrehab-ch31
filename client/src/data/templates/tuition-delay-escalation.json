@@ -1,0 +1,9 @@
+{
+  "templateId": "tuition-delay-escalation",
+  "title": "Escalation Request for Overdue Tuition / Fee Payment",
+  "authorityIds": [
+    "38-usc-3108",
+    "38-cfr-21-260"
+  ],
+  "body": "Date: {{date}}\n\nTo: Vocational Rehabilitation and Employment Officer (VREO)\nVA Regional Office\n\nSubject: URGENT: Overdue Tuition / Fee Payment to {{schoolName}}\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nDear Vocational Rehabilitation and Employment Officer,\n\nI am writing to bring an urgent payment delay to your attention. My tuition and fees for the term {{termDates}} at {{schoolName}} remain unpaid. This payment is currently {{daysDelayed}} days overdue.\n\nDue to this delay, the institution has threatened administrative holds or late fees (Hold Status: {{hasHold}}). \n\nUnder 38 C.F.R. § 21.262, Chapter 31 services are direct-payment authorizations, meaning the VA coordinates payment for approved courses under an active plan. Furthermore, VA billing guidelines protect veterans from registration holds or penalties due to VA billing delays.\n\nI request that my case file be reviewed and the overdue payment authorization be transmitted via Tungsten/VA channels to prevent enrollment cancellation.\n\nSincerely,\n\n[Your Name]"
+}

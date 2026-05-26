@@ -1,0 +1,37 @@
+{
+  "id": "pl-107-103",
+  "canonicalCitation": "Pub. L. 107-103",
+  "title": "Pub. L. 107-103 Amendment Act",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://uscode.house.gov/statviewer.htm?volume=115&page=979",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "summary-only",
+  "fullText": "Pub. L. 107-103 Amendment Act (Pub. L. 107-103).\nAn Act to amend title 38, United States Code, and for other purposes.\n\nThis Public Law amended Chapter 31 of Title 38, United States Code. It was enacted on the date listed and affects section(s): 3103, 3105, 3120.",
+  "plainEnglish": "This amendment modified statutory requirements under Title 38 Chapter 31 sections: 3103, 3105, 3120.",
+  "veteranUse": "Use this public law reference to trace the legislative history and Congressional intent behind Title 38 Chapter 31.",
+  "topics": [
+    "history",
+    "amendments"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3103",
+    "38-usc-3105",
+    "38-usc-3120"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "publicLaw": "107-103",
+      "note": "Enacted provisions affecting 38 USC 3103, 38 USC 3105, 38 USC 3120."
+    }
+  ],
+  "hash": "0ddd22feb28b11343fca1109d24ee03044fbec34802553d6c5c5c559cdf05397",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "0ddd22feb28b11343fca1109d24ee03044fbec34802553d6c5c5c559cdf05397",
+  "changedSinceLastSnapshot": false
+}

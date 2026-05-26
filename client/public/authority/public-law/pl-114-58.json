@@ -1,0 +1,35 @@
+{
+  "id": "pl-114-58",
+  "canonicalCitation": "Pub. L. 114-58",
+  "title": "Pub. L. 114-58 Amendment Act",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://uscode.house.gov/statviewer.htm?volume=129&page=539",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "summary-only",
+  "fullText": "Pub. L. 114-58 Amendment Act (Pub. L. 114-58).\nAn Act to amend title 38, United States Code, and for other purposes.\n\nThis Public Law amended Chapter 31 of Title 38, United States Code. It was enacted on the date listed and affects section(s): 3108.",
+  "plainEnglish": "This amendment modified statutory requirements under Title 38 Chapter 31 sections: 3108.",
+  "veteranUse": "Use this public law reference to trace the legislative history and Congressional intent behind Title 38 Chapter 31.",
+  "topics": [
+    "history",
+    "amendments"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3108"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "publicLaw": "114-58",
+      "note": "Enacted provisions affecting 38 USC 3108."
+    }
+  ],
+  "hash": "ef4a323af4cb1146cfa5decf395ba0077415d8fc4090bd9bf9a972f8ef56480c",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "ef4a323af4cb1146cfa5decf395ba0077415d8fc4090bd9bf9a972f8ef56480c",
+  "changedSinceLastSnapshot": false
+}

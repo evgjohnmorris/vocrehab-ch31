@@ -1,0 +1,70 @@
+[
+  {
+    "id": "10-percent-categorical-denial",
+    "trigger": {
+      "ratingMin": 10,
+      "ratingMax": 19,
+      "denialReason": "not_eligible"
+    },
+    "error": "VA may have treated a 10% Veteran as categorically ineligible.",
+    "whyItMatters": "A 10% rating may support entitlement if VA finds serious employment handicap.",
+    "authorities": ["38-usc-3102", "38-cfr-21-40", "38-cfr-21-52"],
+    "bestMove": "Request a SEH determination and submit SEH evidence."
+  },
+  {
+    "id": "current-employment-improper-denial",
+    "trigger": {
+      "currentEmploymentStatus": "employed",
+      "denialReason": "suitable_employment"
+    },
+    "error": "VA may have treated employment as categorically overcoming impairment.",
+    "whyItMatters": "The analysis should address suitability, stability, and whether impairment has actually been overcome.",
+    "authorities": ["38-cfr-21-51"],
+    "bestMove": "Submit evidence that the job is unsuitable, unstable, aggravates disability, or is inconsistent with abilities, aptitudes, and interests."
+  },
+  {
+    "id": "no-sc-contribution-analysis",
+    "trigger": {
+      "denialReason": "no_eh",
+      "scContributionPresent": true
+    },
+    "error": "VA may have failed to analyze service-connected disability contribution.",
+    "whyItMatters": "Employment handicap requires analysis of whether service-connected disability contributes to vocational impairment.",
+    "authorities": ["38-cfr-21-51"],
+    "bestMove": "Submit a service-connected contribution statement and functional evidence."
+  },
+  {
+    "id": "seh-not-separately-analyzed",
+    "trigger": {
+      "ratingMin": 10,
+      "sehFactorsPresent": true,
+      "denialReason": "no_eh"
+    },
+    "error": "VA may have failed to make a separate SEH determination.",
+    "whyItMatters": "SEH requires separate CP/VRC determination where employment handicap is found.",
+    "authorities": ["38-cfr-21-52"],
+    "bestMove": "Request a written SEH determination."
+  },
+  {
+    "id": "unsupported-infeasibility",
+    "trigger": {
+      "denialReason": "not_feasible",
+      "canParticipateWithSupports": true
+    },
+    "error": "VA may have made an unsupported infeasibility determination.",
+    "whyItMatters": "Feasibility should consider supports, accommodations, and extended evaluation when appropriate.",
+    "authorities": ["38-cfr-21-53", "38-cfr-21-57"],
+    "bestMove": "Request extended evaluation or submit feasibility evidence."
+  },
+  {
+    "id": "no-written-rationale",
+    "trigger": {
+      "hasWrittenDecision": false,
+      "caseStage": ["vrc_said_no_employment_handicap", "vrc_said_no_serious_employment_handicap", "vrc_said_not_feasible"]
+    },
+    "error": "No written rationale identified.",
+    "whyItMatters": "The Veteran needs the decision, reasons, and evidence relied upon to choose the correct response.",
+    "authorities": ["38-cfr-21-50"],
+    "bestMove": "Request the written decision and counseling narrative."
+  }
+]

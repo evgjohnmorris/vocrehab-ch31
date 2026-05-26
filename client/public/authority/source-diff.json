@@ -1,0 +1,191 @@
+{
+  "timestamp": "2026-05-26T04:25:43.083Z",
+  "differencesCount": 16,
+  "differences": [
+    {
+      "id": "38-cfr-21-330",
+      "title": "Apportionment.",
+      "type": "cfr",
+      "hash": "94158ab73bd901d7783a4da76240c79f5adcaa453a04e0ec48d7d4be8536c1a8",
+      "previousHash": "917020704bc0ccd7011808786b6f45539bb605b31b92acdacef18cc328ce9469",
+      "affectedTopics": [],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-i-a-1",
+      "title": "Overview of VR&E Services",
+      "type": "m28c",
+      "hash": "e173f58441c393a0be2ebcd86be4f8d55676e26a38030f803cc69ac68f478180",
+      "previousHash": "55fad8c315dd2c3e63542e5017a77d711b6c33e514ec52b275adf745c9e40ed0",
+      "affectedTopics": [
+        "eligibility-and-entitlement",
+        "48-month-entitlement-extension"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-i-a-2",
+      "title": "Partnerships and Memoranda of Agreement or Understanding",
+      "type": "m28c",
+      "hash": "ce07394e0d384edfb5bdc1d465415e59f4741a9d36745f4e4b2336ac33fa01ea",
+      "previousHash": "b38d39905869293b276cbe272a4f493acc81f2cb65e112d00ba3a6f9577a43af",
+      "affectedTopics": [],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-ii-a-4",
+      "title": "Advisory Committees",
+      "type": "m28c",
+      "hash": "cd45e959215f53c35e6f6583573578a0c7a8ec991e4de1ff6b7f1c07b3cd081d",
+      "previousHash": "d24aff3eb48f7cd4f4dbe5eceaf3ddbb929e035a80c90c7ed09f92d57780b6f2",
+      "affectedTopics": [],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-a-2",
+      "title": "Eligibility and Entitlement",
+      "type": "m28c",
+      "hash": "4e3a33a20f3ab719aa050d18a575b3059d92f2c86baffbfb1f4126d64d85d88c",
+      "previousHash": "379eb8c0bb3ad4e3c5629cd82dd0f70387828ea52f444c4b47d0d3ba38f0fab1",
+      "affectedTopics": [
+        "eligibility-and-entitlement",
+        "48-month-entitlement-extension"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-b-1",
+      "title": "Evaluation Process",
+      "type": "m28c",
+      "hash": "ab6043a6f549e9a16b5bc467508e83101574adbd7a73d5cd253c63e8b6eab7a5",
+      "previousHash": "d9488690a56baec6f5b72e0ee28c135857b16ceb121faeeb91d9b4e6ede37437",
+      "affectedTopics": [
+        "eligibility-and-entitlement"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-b-2",
+      "title": "Vocational Exploration",
+      "type": "m28c",
+      "hash": "ad4ed2448342c7e764979b56927c1485473764327db45c73b1fff55292c159a1",
+      "previousHash": "a5fdc63f868d72545c24e42903250c108ddd5733116fa41233058752f97a92a5",
+      "affectedTopics": [
+        "feasibility-and-evaluation"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-b-3",
+      "title": "Feasibility of Achieving a Vocational Goal",
+      "type": "m28c",
+      "hash": "578989cf952507cf088f8875a52283d594cfe0a853dfa4c497098cfe0ff7a839",
+      "previousHash": "d4b421779ca70363779ce5de2f47a4113e314b73744be706f834dff6a36714cf",
+      "affectedTopics": [
+        "feasibility-and-evaluation"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-c-1",
+      "title": "Courses of Education or Training and Facilities",
+      "type": "m28c",
+      "hash": "a913ac935bfe1620da9fa914631dd5469a90014ff66d8c9d8c8d092dc55adb22",
+      "previousHash": "932f4eb0a0a883d05decd18a0a44025696e5f78bd63e9cd08ae1e84109a33eaa",
+      "affectedTopics": [],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-c-4",
+      "title": "Rehabilitation Plans to Employability",
+      "type": "m28c",
+      "hash": "7310639d4cbb6ee36962d69b0c8c0c5e275f0fa28eb947c2b4e25ac1c3a03988",
+      "previousHash": "c4ca9dfead50a0a7645f9f928b35c134c9afe4460346cc711c19db86f4aee282",
+      "affectedTopics": [
+        "feasibility-and-evaluation"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-iv-c-6",
+      "title": "Independent Living Plan",
+      "type": "m28c",
+      "hash": "7d2989f929db8e6951c3a1a140e1c5c08e2cacf845457714cbfa9ccda21dc46a",
+      "previousHash": "c48eed924eb2b9ce4bae887be4710f32973be427305045607e2b597d8552c03e",
+      "affectedTopics": [
+        "independent-living-program"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-v-a-3",
+      "title": "Services, Supplies, and Equipment",
+      "type": "m28c",
+      "hash": "9311b45bf15a47bdaa914a5f807eafb8dcf39d1225000ba393e9069177600210",
+      "previousHash": "203ed044932d9ad7c5cb49d42f89c954485cb242c357ee0ac46b6b4a58246d6d",
+      "affectedTopics": [
+        "computer-technology-supplies"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-v-b-1",
+      "title": "Program Costs and Approval Levels",
+      "type": "m28c",
+      "hash": "1ee99bf981aed572b2de3263549e7ecc6580b3f2da61762d57b169dc0c82ea29",
+      "previousHash": "69bd69a8d8933d9193e1276b75ceec44aa0036c0fc7995df01ca7cc40d7a8bea",
+      "affectedTopics": [
+        "computer-technology-supplies",
+        "independent-living-program"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-v-b-5-01",
+      "title": "Cost Approval Thresholds and Procurement",
+      "type": "m28c",
+      "hash": "26c37246cea15948458aa2b884f36800a23fea151db8e312fefcd7a9e9869d1f",
+      "previousHash": "c00d419b71ceaae1f6cad6b16422ec9a0e67f8a127e7abaf14ec2a1d223bfeac",
+      "affectedTopics": [
+        "computer-technology-supplies"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-v-b-6",
+      "title": "Retroactive Induction Guidelines",
+      "type": "m28c",
+      "hash": "008acd7be8797589274be26bfd785754aaf919694c8d3c320c108474cdecce44",
+      "previousHash": "63a2fa39a1d031d97ea32aa1f64cd7344ddcbb27144c1c4fe0e14bcd654da566",
+      "affectedTopics": [
+        "retroactive-induction"
+      ],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    },
+    {
+      "id": "m28c-v-b-7",
+      "title": "Subsistence Allowance Administration",
+      "type": "m28c",
+      "hash": "518b4304d723c74c5e01657141a4d421e2baa4ff9ed3854658a662188e8ead78",
+      "previousHash": "6e943bfbe13aa928b5e8668467e7730d0261c0afa90aa518b6a17fc50d512ce7",
+      "affectedTopics": [],
+      "affectedWorkflows": [],
+      "affectedTemplates": []
+    }
+  ]
+}

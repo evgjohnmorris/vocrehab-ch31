@@ -1,26 +1,19 @@
 # Dependencies
-m28c-interactive/node_modules/
-m28c-interactive/dist/
-m28c-interactive/dist-ssr/
+node_modules/
+/client/node_modules/
+/server/node_modules/
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Production builds
+/client/dist/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Local databases & secrets
+/server/*.db
+/server/.env
+.env
+.env.local
+
+# IDEs & System files
+.vscode/
 .idea/
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.tmp/
-m28c-interactive/scratch/
+Thumbs.db

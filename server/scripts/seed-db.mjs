@@ -6,7 +6,7 @@ import db from '../db.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const GENERATED_DIR = path.resolve(__dirname, '../../m28c-interactive/src/data/authority/generated');
+const GENERATED_DIR = path.resolve(__dirname, '../../client/src/data/authority/generated');
 
 async function seed() {
   console.log('Starting SQLite database seeding...');

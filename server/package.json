@@ -1,5 +1,5 @@
 {
-  "name": "vre-backend",
+  "name": "server",
   "version": "1.0.0",
   "description": "Backend API server and SQLite database engine for VR&E Interactive Portal",
   "main": "server.js",

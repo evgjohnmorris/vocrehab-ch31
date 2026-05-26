@@ -1,0 +1,8 @@
+{
+  "templateId": "employment-handicap-statement",
+  "title": "Employment Handicap Statement",
+  "authorityIds": [
+    "38-cfr-21-51"
+  ],
+  "body": "STATEMENT IN SUPPORT OF APPLICATION FOR VOCATIONAL REHABILITATION (38 C.F.R. § 21.51)\n\nVeteran: {{userName}}\nClaim Number: {{claimNumber}}\nDate: {{date}}\n\n1. CURRENT STATUS & OBJECTIVES\nCurrent Employment Status: {{currentEmploymentStatus}}\nTarget Occupational Goal: {{programName}}\n\n2. SERVICE-CONNECTED CONDITIONS & LIMITATIONS\nMy rated service-connected conditions are: {{serviceConnectedConditions}}\nThese conditions produce the following occupational and functional limitations: {{workLimitations}}\n\n3. VOCATIONAL IMPAIRMENT DETAILS\nDue to these limitations, my employment history has been impacted as follows: {{workHistoryProblems}}\n\n4. SUITABILITY OF CURRENT OR RECENT EMPLOYMENT\nMy current or recent employment is not suitable or stable because: {{whyCurrentEmploymentNotSuitable}}\n\n5. REQUESTED ACTION\n{{requestedAction}}"
+}

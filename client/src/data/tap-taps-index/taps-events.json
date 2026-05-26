@@ -1,0 +1,120 @@
+{
+  "filters": {
+    "eventType": [
+      "Survivor Programs",
+      "In Your Community",
+      "Online Groups",
+      "Workshops",
+      "Fundraisers"
+    ],
+    "region": [
+      "Northeast",
+      "South",
+      "Midwest",
+      "West",
+      "Online",
+      "Outside U.S."
+    ],
+    "lossType": [
+      "Accident",
+      "Combat",
+      "Homicide",
+      "Illness",
+      "Overdose",
+      "Suicide"
+    ],
+    "relationship": [
+      "Adult child",
+      "Friend/Battle buddy",
+      "Parent",
+      "Grandparent",
+      "Sibling",
+      "Spouse/Partner/Fiancé/Significant other"
+    ],
+    "programType": [
+      "Family camps",
+      "Retreats",
+      "Seminars",
+      "Spanish-speaking survivor",
+      "TAPS Outdoors",
+      "Youth",
+      "LGBTQ community",
+      "Health/Wellness",
+      "Webinars"
+    ]
+  },
+  "mockEvents": [
+    {
+      "id": "event-1",
+      "name": "National Military Survivor Seminar & Good Grief Camp",
+      "eventType": "Survivor Programs",
+      "region": "Northeast",
+      "lossType": "Combat",
+      "relationship": "Spouse/Partner/Fiancé/Significant other",
+      "programType": "Seminars",
+      "date": "2026-05-28",
+      "location": "Arlington, VA",
+      "description": "Our premier national gathering connecting survivors with workshops, peer sharing, and specialized youth grief counseling camps."
+    },
+    {
+      "id": "event-2",
+      "name": "Midwest Suicide Loss Survivor Retreat",
+      "eventType": "Survivor Programs",
+      "region": "Midwest",
+      "lossType": "Suicide",
+      "relationship": "Parent",
+      "programType": "Retreats",
+      "date": "2026-06-12",
+      "location": "Chicago, IL",
+      "description": "A healing weekend designed for suicide loss survivors to share support, learn coping tools, and find community."
+    },
+    {
+      "id": "event-3",
+      "name": "LGBTQ+ Survivor Grief Connection Group",
+      "eventType": "Online Groups",
+      "region": "Online",
+      "lossType": "Illness",
+      "relationship": "Spouse/Partner/Fiancé/Significant other",
+      "programType": "LGBTQ community",
+      "date": "2026-06-15",
+      "location": "Zoom Video",
+      "description": "Weekly online support group sharing experiences of military loss within the LGBTQ+ survivor family."
+    },
+    {
+      "id": "event-4",
+      "name": "TAPS Outdoors - Rockies Alpine Backpacking Trek",
+      "eventType": "In Your Community",
+      "region": "West",
+      "lossType": "Accident",
+      "relationship": "Sibling",
+      "programType": "TAPS Outdoors",
+      "date": "2026-07-04",
+      "location": "Estes Park, CO",
+      "description": "Honoring our loved ones in nature. A challenging backcountry hike designed for adult siblings and children."
+    },
+    {
+      "id": "event-5",
+      "name": "Overdose Loss Spanish-Speaking Survivor Webinar",
+      "eventType": "Workshops",
+      "region": "Online",
+      "lossType": "Overdose",
+      "relationship": "Parent",
+      "programType": "Spanish-speaking survivor",
+      "date": "2026-07-20",
+      "location": "Webinar",
+      "description": "Un seminario web interactivo sobre el duelo y la curación después de una pérdida por sobredosis."
+    },
+    {
+      "id": "event-6",
+      "name": "Southern Friends & Battle Buddy Care Gathering",
+      "eventType": "In Your Community",
+      "region": "South",
+      "lossType": "Combat",
+      "relationship": "Friend/Battle buddy",
+      "programType": "Health/Wellness",
+      "date": "2026-08-01",
+      "location": "Atlanta, GA",
+      "description": "A local casual gathering for battle buddies and friends grieving the death of a service member."
+    }
+  ]
+}

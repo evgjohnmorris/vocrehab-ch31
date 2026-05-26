@@ -1,0 +1,35 @@
+{
+  "id": "pl-100-323",
+  "canonicalCitation": "Pub. L. 100-323",
+  "title": "Pub. L. 100-323 Amendment Act",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://uscode.house.gov/statviewer.htm?volume=102&page=568",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "summary-only",
+  "fullText": "Pub. L. 100-323 Amendment Act (Pub. L. 100-323).\nAn Act to amend title 38, United States Code, and for other purposes.\n\nThis Public Law amended Chapter 31 of Title 38, United States Code. It was enacted on the date listed and affects section(s): 3104.",
+  "plainEnglish": "This amendment modified statutory requirements under Title 38 Chapter 31 sections: 3104.",
+  "veteranUse": "Use this public law reference to trace the legislative history and Congressional intent behind Title 38 Chapter 31.",
+  "topics": [
+    "history",
+    "amendments"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3104"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "publicLaw": "100-323",
+      "note": "Enacted provisions affecting 38 USC 3104."
+    }
+  ],
+  "hash": "b408cdcdbc2172b8a9742c1bf68a84a6a5dd1be0123219f2e0f0e626273dfa13",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "b408cdcdbc2172b8a9742c1bf68a84a6a5dd1be0123219f2e0f0e626273dfa13",
+  "changedSinceLastSnapshot": false
+}

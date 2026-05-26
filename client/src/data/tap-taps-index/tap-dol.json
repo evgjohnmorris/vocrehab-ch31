@@ -1,0 +1,110 @@
+[
+  {
+    "id": "dol-vets-tap-hub",
+    "type": "resource",
+    "name": "DOL VETS TAP Hub",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "Employment-focused transition resources, workshops, and career training opportunities for separating service members and military spouses.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["resume-interview-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-efct",
+    "type": "resource",
+    "name": "Employment Fundamentals of Career Transition (EFCT)",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "A one-day foundational course covering job search basics, career assessment, civilian labor market introduction, and transition pathways.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["employment-basics-course"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-dolew",
+    "type": "resource",
+    "name": "DOL Employment Workshop (DOLEW)",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "A multi-day intensive workshop covering resume construction, interview techniques, networking, salary negotiation, and job search strategies.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["employment-workshop-tracker", "resume-interview-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-c2e",
+    "type": "resource",
+    "name": "Career and Credential Exploration (C2E)",
+    "audience": ["transitioning", "education-career"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "A two-day vocational track focusing on identifying credentials, certifications, licenses, and apprenticeships aligned with post-transition goals.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["credential-planning-tool", "credential-comparison-tool"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-enpp",
+    "type": "resource",
+    "name": "Employment Navigator and Partnership Program (ENPP)",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "One-on-one individualized career counseling, resume reviews, placement assistance, and connection to employment partners.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["career-navigator-referral"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-teams",
+    "type": "resource",
+    "name": "Transition Employment Assistance for Military Spouses (TEAMS)",
+    "audience": ["spouse-caregiver", "education-career"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "Specialized workshops tailored to the unique employment challenges faced by military spouses and caregivers.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["spouse-employment-support", "spouse-employment-workshop-finder"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-wwcew",
+    "type": "resource",
+    "name": "Wounded Warrior and Caregiver Employment Workshop (WWCEW)",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "Customized job search and transition counseling tailored for wounded, ill, or injured service members, particularly those in the IDES process.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["ides-wounded-warrior-employment-tool"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-vets-resource-guide",
+    "type": "resource",
+    "name": "DOL VETS Resource Guide",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "An online index of all employment tools, directories, and web portals used throughout the DOL TAP workshops.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["tap-resource-directory"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dol-vets-catalog",
+    "type": "resource",
+    "name": "DOL VETS Curriculum Catalog",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "DOL Employment Services",
+    "whatItProvides": "Course outlines, runtime durations, delivery methods, and lesson plans for all DOL-offered transition courses.",
+    "sourceUrl": "https://www.dol.gov/agencies/vets/programs/tap",
+    "relatedTools": ["tap-curriculum-catalog"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

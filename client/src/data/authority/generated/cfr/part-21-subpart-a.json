@@ -1,0 +1,1231 @@
+{
+  "title": "38 C.F.R. Part 21 Subpart A - Veteran Readiness and Employment",
+  "version": "2025-07-01",
+  "lastChecked": "2026-05-26",
+  "sections": [
+    {
+      "id": "38-cfr-21-1",
+      "section": "21.1",
+      "citation": "38 C.F.R. § 21.1",
+      "title": "Training and rehabilitation for veterans with service-connected disabilities.",
+      "status": "current",
+      "hash": "ddd5c82b779ff898e21d3c733bd084f0472ee9343eba77409920c819f2344513"
+    },
+    {
+      "id": "38-cfr-21-21",
+      "section": "21.21",
+      "citation": "38 C.F.R. § 21.21",
+      "title": "Election of benefits under education programs administered by the Department of Veterans Affairs.",
+      "status": "current",
+      "hash": "3a95ced6160da23d3298c96e83a7f69f8cc7bb014c051948ed552e4557b6cd08"
+    },
+    {
+      "id": "38-cfr-21-22",
+      "section": "21.22",
+      "citation": "38 C.F.R. § 21.22",
+      "title": "Nonduplication—Federal programs.",
+      "status": "current",
+      "hash": "00cc319ebd5ffe7dae8e4c4bdcddbb52d6ff29be6073f98b7eaff8663eac0bd5"
+    },
+    {
+      "id": "38-cfr-21-30",
+      "section": "21.30",
+      "citation": "38 C.F.R. § 21.30",
+      "title": "Claims.",
+      "status": "current",
+      "hash": "d5ad2b1c719d413655a82b1f416c700c1cc4e306fc11b3a83fc401fbd2ee9e6d"
+    },
+    {
+      "id": "38-cfr-21-31",
+      "section": "21.31",
+      "citation": "38 C.F.R. § 21.31",
+      "title": "Informal claim.",
+      "status": "current",
+      "hash": "89f7e4999ef4cc0b909d5e11174ae767bab7aa14150a84a00488e5cf938a34e9"
+    },
+    {
+      "id": "38-cfr-21-32",
+      "section": "21.32",
+      "citation": "38 C.F.R. § 21.32",
+      "title": "Notification by VA of necessary information or evidence when a claim is filed; time for claimant response and VA action.",
+      "status": "current",
+      "hash": "4dba465992f3ed7dd1a4cc235975f8d49af6c35a08aa01d308d7c5f5d8717c55"
+    },
+    {
+      "id": "38-cfr-21-33",
+      "section": "21.33",
+      "citation": "38 C.F.R. § 21.33",
+      "title": "VA has a duty to assist claimants in obtaining evidence.",
+      "status": "current",
+      "hash": "fcb5ac9dec0f0c3833515b7fb5d2c5a5730cbe6bf92adb5f098a4a0936b32770"
+    },
+    {
+      "id": "38-cfr-21-35",
+      "section": "21.35",
+      "citation": "38 C.F.R. § 21.35",
+      "title": "Definitions.",
+      "status": "current",
+      "hash": "91c44626837e358e4445f5468913caf35922d21da116294aebff8dcb6a1f758b"
+    },
+    {
+      "id": "38-cfr-21-40",
+      "section": "21.40",
+      "citation": "38 C.F.R. § 21.40",
+      "title": "Basic entitlement to vocational rehabilitation benefits and services.",
+      "status": "current",
+      "hash": "d772d9e140a4e02ccb5efbac46fe0cec32ae34c1e92325df56b317c6aba54ba5"
+    },
+    {
+      "id": "38-cfr-21-41",
+      "section": "21.41",
+      "citation": "38 C.F.R. § 21.41",
+      "title": "Basic period of eligibility.",
+      "status": "current",
+      "hash": "ab9e09265651b343f25a65f1e677097c15a1d576e3ecbbec96d636a2a73bcc80"
+    },
+    {
+      "id": "38-cfr-21-42",
+      "section": "21.42",
+      "citation": "38 C.F.R. § 21.42",
+      "title": "Deferral or extension of the basic period of eligibility.",
+      "status": "current",
+      "hash": "553c9963c371daea7bab8bcec1f9fadac2f37452b0379abde30223f873017f52"
+    },
+    {
+      "id": "38-cfr-21-44",
+      "section": "21.44",
+      "citation": "38 C.F.R. § 21.44",
+      "title": "Extension of the basic period of eligibility for a veteran with a serious employment handicap.",
+      "status": "current",
+      "hash": "a6f3a4370f8aaac807736bb3df42b29725c0dc11efc90d07fb7704ff3511e5f0"
+    },
+    {
+      "id": "38-cfr-21-45",
+      "section": "21.45",
+      "citation": "38 C.F.R. § 21.45",
+      "title": "Extending the period of eligibility for a program of independent living beyond basic period of eligibility.",
+      "status": "current",
+      "hash": "b87473a8207b85fffdbf2338e2de9e584fcf979a72c76a7748932845ed5fce54"
+    },
+    {
+      "id": "38-cfr-21-46",
+      "section": "21.46",
+      "citation": "38 C.F.R. § 21.46",
+      "title": "Veteran ordered to active duty; extension of basic period of eligibility.",
+      "status": "current",
+      "hash": "0de51ee690ce0750d65baac98ad6233faf4008aeaf606f732783343d7cf1ae1a"
+    },
+    {
+      "id": "38-cfr-21-47",
+      "section": "21.47",
+      "citation": "38 C.F.R. § 21.47",
+      "title": "Eligibility for employment assistance.",
+      "status": "current",
+      "hash": "11360b121446ac865adc00d613f4f24d49f99b8b554ead9e8973ceb5c9199eb9"
+    },
+    {
+      "id": "38-cfr-21-48",
+      "section": "21.48",
+      "citation": "38 C.F.R. § 21.48",
+      "title": "Severance of service-connection—reduction to noncompensable degree.",
+      "status": "current",
+      "hash": "927c711f5e611d22c6d5cd50b8569b94cd54604d44ed655aa9972c18de33bd3b"
+    },
+    {
+      "id": "38-cfr-21-50",
+      "section": "21.50",
+      "citation": "38 C.F.R. § 21.50",
+      "title": "Initial evaluation.",
+      "status": "current",
+      "hash": "4e302eaf3efa799b2f73a156f740293717d496d75ee0d9e3656dbd0a0d202938"
+    },
+    {
+      "id": "38-cfr-21-51",
+      "section": "21.51",
+      "citation": "38 C.F.R. § 21.51",
+      "title": "Determining employment handicap.",
+      "status": "current",
+      "hash": "cd9184b517dc83f28f491a341fed525b4e63af1b52c245bbebe54f3f49c75eff"
+    },
+    {
+      "id": "38-cfr-21-52",
+      "section": "21.52",
+      "citation": "38 C.F.R. § 21.52",
+      "title": "Determining serious employment handicap.",
+      "status": "current",
+      "hash": "01e1e85c24b7dc14ea72a519bb8b37e2712c7c1df7bc178bcbcdd052e6e196c5"
+    },
+    {
+      "id": "38-cfr-21-53",
+      "section": "21.53",
+      "citation": "38 C.F.R. § 21.53",
+      "title": "Reasonable feasibility of achieving a vocational goal.",
+      "status": "current",
+      "hash": "3ef1ec54777cf52847b4a7a6bc02a64bfa14404556602a4409232dee7b79b8e0"
+    },
+    {
+      "id": "38-cfr-21-57",
+      "section": "21.57",
+      "citation": "38 C.F.R. § 21.57",
+      "title": "Extended evaluation.",
+      "status": "current",
+      "hash": "aa662e417904a93c6f545a99566a209ab6e1a2dc78c39875b2826b85fd54d4b4"
+    },
+    {
+      "id": "38-cfr-21-58",
+      "section": "21.58",
+      "citation": "38 C.F.R. § 21.58",
+      "title": "Redetermination of employment handicap and serious employment handicap.",
+      "status": "current",
+      "hash": "483ef943901ffbdc68c738199cfab6fef15b6416f8a612a92d513e5c9b77b3c8"
+    },
+    {
+      "id": "38-cfr-21-60",
+      "section": "21.60",
+      "citation": "38 C.F.R. § 21.60",
+      "title": "Vocational Rehabilitation Panel.",
+      "status": "current",
+      "hash": "e0e467f5f4be6dfdfdd5c4871275adddcbd17bf2f59a982532b1a6ea84eff5b0"
+    },
+    {
+      "id": "38-cfr-21-62",
+      "section": "21.62",
+      "citation": "38 C.F.R. § 21.62",
+      "title": "Duties of the Vocational Rehabilitation Panel.",
+      "status": "current",
+      "hash": "16085fb27ed10ba8e8cafc56ee0fba1f8b5909de3c2f972188f483b41006a66f"
+    },
+    {
+      "id": "38-cfr-21-70",
+      "section": "21.70",
+      "citation": "38 C.F.R. § 21.70",
+      "title": "Vocational rehabilitation.",
+      "status": "current",
+      "hash": "71f8d775b8281c7a79c0ee475d7bc83884d2ffaeb0bd4aaf019466a4f3a1c2e8"
+    },
+    {
+      "id": "38-cfr-21-72",
+      "section": "21.72",
+      "citation": "38 C.F.R. § 21.72",
+      "title": "Rehabilitation to the point of employability.",
+      "status": "current",
+      "hash": "40dfc0990cbf76f87ea3b689961cc1c4d0acbc99ae71042fe7179c2a7b06bc20"
+    },
+    {
+      "id": "38-cfr-21-73",
+      "section": "21.73",
+      "citation": "38 C.F.R. § 21.73",
+      "title": "Duration of employment assistance programs.",
+      "status": "current",
+      "hash": "555fe89086aa716e4200f034171e6d9fd761afaf6a4e8f50d150e2b96a3e5651"
+    },
+    {
+      "id": "38-cfr-21-74",
+      "section": "21.74",
+      "citation": "38 C.F.R. § 21.74",
+      "title": "Extended evaluation.",
+      "status": "current",
+      "hash": "c6580e597fbdd61c1d117fdd4bf40300f82f6b2a5f1c38c3f677df17f81e4244"
+    },
+    {
+      "id": "38-cfr-21-76",
+      "section": "21.76",
+      "citation": "38 C.F.R. § 21.76",
+      "title": "Independent living.",
+      "status": "current",
+      "hash": "83a9e6af34cef1ed6350280b5a6d492d134c99097b902ac6ed3e6fc377858706"
+    },
+    {
+      "id": "38-cfr-21-78",
+      "section": "21.78",
+      "citation": "38 C.F.R. § 21.78",
+      "title": "Approving more than 48 months of rehabilitation.",
+      "status": "current",
+      "hash": "5df3370a42e6d6c22f37f5a866b992dc8261792dfcb54de88531da32691b4eb0"
+    },
+    {
+      "id": "38-cfr-21-79",
+      "section": "21.79",
+      "citation": "38 C.F.R. § 21.79",
+      "title": "Determining entitlement usage under Chapter 31.",
+      "status": "current",
+      "hash": "8053819c75f07801dbd99863fc577b07934b53055ea0ac441a46bead43203da0"
+    },
+    {
+      "id": "38-cfr-21-80",
+      "section": "21.80",
+      "citation": "38 C.F.R. § 21.80",
+      "title": "Requirement for a rehabilitation plan.",
+      "status": "current",
+      "hash": "d5b5e73dcae6c25be9e1e38a819a95b491224da750ac40b3be179003c9407cd5"
+    },
+    {
+      "id": "38-cfr-21-82",
+      "section": "21.82",
+      "citation": "38 C.F.R. § 21.82",
+      "title": "Completing the plan under Chapter 31.",
+      "status": "current",
+      "hash": "ac0e73336eecb55bea3c592e4a44d4d6dea8fd96980b2fff09b6f5d004735940"
+    },
+    {
+      "id": "38-cfr-21-84",
+      "section": "21.84",
+      "citation": "38 C.F.R. § 21.84",
+      "title": "Individualized written rehabilitation plan.",
+      "status": "current",
+      "hash": "235dca6fbba5a40441aa3569c1d4a42353a74d5888bad459d8f30af24f7d4606"
+    },
+    {
+      "id": "38-cfr-21-86",
+      "section": "21.86",
+      "citation": "38 C.F.R. § 21.86",
+      "title": "Individualized extended evaluation plan.",
+      "status": "current",
+      "hash": "53536d0c20024a7e568835d497d11d66351097e04359570dec17a925680d7be1"
+    },
+    {
+      "id": "38-cfr-21-88",
+      "section": "21.88",
+      "citation": "38 C.F.R. § 21.88",
+      "title": "Individualized employment assistance plan.",
+      "status": "current",
+      "hash": "86d81ed37c31367366f1f86956a672147bbc868e447646727605f93cbbec3e8a"
+    },
+    {
+      "id": "38-cfr-21-90",
+      "section": "21.90",
+      "citation": "38 C.F.R. § 21.90",
+      "title": "Individualized independent living plan.",
+      "status": "current",
+      "hash": "61d927ba599bbde31544e5f156a6104d971216f2ecf511d5559d243bb99e545c"
+    },
+    {
+      "id": "38-cfr-21-92",
+      "section": "21.92",
+      "citation": "38 C.F.R. § 21.92",
+      "title": "Preparation of the plan.",
+      "status": "current",
+      "hash": "6166f56e17441a028e8b85a08a09107f105b0a55b207479cbad1991051f27a3b"
+    },
+    {
+      "id": "38-cfr-21-94",
+      "section": "21.94",
+      "citation": "38 C.F.R. § 21.94",
+      "title": "Changing the plan.",
+      "status": "current",
+      "hash": "1592ad65a774844c5489c3d4f8355a2778ce99147e8605216e0e3890084b1fda"
+    },
+    {
+      "id": "38-cfr-21-96",
+      "section": "21.96",
+      "citation": "38 C.F.R. § 21.96",
+      "title": "Review of the plan.",
+      "status": "current",
+      "hash": "ee94c2a35c35300fae828a8ac45f3f8b2b6248a3d53d295b94be4d42c026c160"
+    },
+    {
+      "id": "38-cfr-21-100",
+      "section": "21.100",
+      "citation": "38 C.F.R. § 21.100",
+      "title": "Counseling.",
+      "status": "current",
+      "hash": "a241f3708d3185bd1fde9474b3d9904d726f80fa6babaf0bcf85357be2b34916"
+    },
+    {
+      "id": "38-cfr-21-120",
+      "section": "21.120",
+      "citation": "38 C.F.R. § 21.120",
+      "title": "Educational and vocational training services.",
+      "status": "current",
+      "hash": "01b84cba655211003f9b9d962f4a19506a9e83804e21b38e0e0c92b50554dbae"
+    },
+    {
+      "id": "38-cfr-21-122",
+      "section": "21.122",
+      "citation": "38 C.F.R. § 21.122",
+      "title": "School course.",
+      "status": "current",
+      "hash": "96f2755283ac00cf48e63715b50886f19b0305303e7aa5f2727cd7e53166b867"
+    },
+    {
+      "id": "38-cfr-21-123",
+      "section": "21.123",
+      "citation": "38 C.F.R. § 21.123",
+      "title": "On-job course.",
+      "status": "current",
+      "hash": "a73f83dc4d6350267deec8ff8a3f0a51d61a7420bdb26802fbf13ff700900dcf"
+    },
+    {
+      "id": "38-cfr-21-124",
+      "section": "21.124",
+      "citation": "38 C.F.R. § 21.124",
+      "title": "Combination course.",
+      "status": "current",
+      "hash": "a1bacc8ba42e72ba32390bd50890594f2a2b13d0c06e11b53560f312302c80b3"
+    },
+    {
+      "id": "38-cfr-21-126",
+      "section": "21.126",
+      "citation": "38 C.F.R. § 21.126",
+      "title": "Farm cooperative course.",
+      "status": "current",
+      "hash": "ca703dadfa782050b52aa871d373338db96db280e3876646a615f8ea59466034"
+    },
+    {
+      "id": "38-cfr-21-128",
+      "section": "21.128",
+      "citation": "38 C.F.R. § 21.128",
+      "title": "Independent study course.",
+      "status": "current",
+      "hash": "ce73cae3661c7c4ef400568ab6662c40f5e2ec991a344ee453b0df5bf3acc958"
+    },
+    {
+      "id": "38-cfr-21-129",
+      "section": "21.129",
+      "citation": "38 C.F.R. § 21.129",
+      "title": "Home study course.",
+      "status": "current",
+      "hash": "ec3d22155e97b3bade4e9baf1bb26c93fa2e07c13ad6036be8ca209b71525d5a"
+    },
+    {
+      "id": "38-cfr-21-130",
+      "section": "21.130",
+      "citation": "38 C.F.R. § 21.130",
+      "title": "Educational and vocational courses outside the United States.",
+      "status": "current",
+      "hash": "ad4596e9622f394cb12b852179336b5216aacb8aad06aa572b76309f56aa8dea"
+    },
+    {
+      "id": "38-cfr-21-132",
+      "section": "21.132",
+      "citation": "38 C.F.R. § 21.132",
+      "title": "Repetition of the course.",
+      "status": "current",
+      "hash": "b379433b830d2308d63c93f86e058fc0e12e6ab6eea1b775d930367c7cf7096f"
+    },
+    {
+      "id": "38-cfr-21-134",
+      "section": "21.134",
+      "citation": "38 C.F.R. § 21.134",
+      "title": "Limitation on flight training.",
+      "status": "current",
+      "hash": "fd5751bfe98831dbfe4653489be98bd0681dc8e8114faf69070b929405bf5b8b"
+    },
+    {
+      "id": "38-cfr-21-140",
+      "section": "21.140",
+      "citation": "38 C.F.R. § 21.140",
+      "title": "Evaluation and improvement of rehabilitation potential.",
+      "status": "current",
+      "hash": "44569298e5c3618012902e0a8b1d5eaaca17db069b139f11c168f88717543d39"
+    },
+    {
+      "id": "38-cfr-21-142",
+      "section": "21.142",
+      "citation": "38 C.F.R. § 21.142",
+      "title": "Adult basic education.",
+      "status": "current",
+      "hash": "d760e91e6a47cc7822574edfd8ff9bfc0cbddb0703aba198a389bfff841e6d8f"
+    },
+    {
+      "id": "38-cfr-21-144",
+      "section": "21.144",
+      "citation": "38 C.F.R. § 21.144",
+      "title": "Vocational course in a sheltered workshop or rehabilitation facility.",
+      "status": "current",
+      "hash": "e7d16e8df1c14a6450d0c734f26fcace6000fb5e7dcea8e3e35a03765ae8ed17"
+    },
+    {
+      "id": "38-cfr-21-146",
+      "section": "21.146",
+      "citation": "38 C.F.R. § 21.146",
+      "title": "Independent instructor course.",
+      "status": "current",
+      "hash": "449ddbbfbb681c851e3e2fb0666b6082c1ba9a92061433841a2c0adfcb4d2b02"
+    },
+    {
+      "id": "38-cfr-21-148",
+      "section": "21.148",
+      "citation": "38 C.F.R. § 21.148",
+      "title": "Tutorial assistance.",
+      "status": "current",
+      "hash": "c63db43a82ab6b399040b2ebc25ae23d82032e8125bf6b1a4c1374d09f62e013"
+    },
+    {
+      "id": "38-cfr-21-150",
+      "section": "21.150",
+      "citation": "38 C.F.R. § 21.150",
+      "title": "Reader service.",
+      "status": "current",
+      "hash": "c257aec4328a3fb84ac0723d7f5bdc96d5bf40d5549a4f56fb78a8f46bf06697"
+    },
+    {
+      "id": "38-cfr-21-152",
+      "section": "21.152",
+      "citation": "38 C.F.R. § 21.152",
+      "title": "Interpreter service for the hearing impaired.",
+      "status": "current",
+      "hash": "7144d81eab87e04724bc2df8109096c461984f224555018a4be508c0d0929304"
+    },
+    {
+      "id": "38-cfr-21-154",
+      "section": "21.154",
+      "citation": "38 C.F.R. § 21.154",
+      "title": "Special transportation assistance.",
+      "status": "current",
+      "hash": "fb5859ab85ecb678c28697618931111ab19f13b98dfa527599b4f93347949933"
+    },
+    {
+      "id": "38-cfr-21-155",
+      "section": "21.155",
+      "citation": "38 C.F.R. § 21.155",
+      "title": "Services to a veteran's family.",
+      "status": "current",
+      "hash": "21d12c1a507272a0fa39f3b1d54cfdb99f6905b9794024d04689daccd1cbccac"
+    },
+    {
+      "id": "38-cfr-21-156",
+      "section": "21.156",
+      "citation": "38 C.F.R. § 21.156",
+      "title": "Other incidental goods and services.",
+      "status": "current",
+      "hash": "b7e9a66613119b583ee966b60a33779e65a35ca2429ae37f6e0210e8f5dd0058"
+    },
+    {
+      "id": "38-cfr-21-160",
+      "section": "21.160",
+      "citation": "38 C.F.R. § 21.160",
+      "title": "Independent living services.",
+      "status": "current",
+      "hash": "24dde6d479ac1a908e5884b3a8a0205b39cd518318e04f48db958739706915e2"
+    },
+    {
+      "id": "38-cfr-21-162",
+      "section": "21.162",
+      "citation": "38 C.F.R. § 21.162",
+      "title": "Participation in a program of independent living services.",
+      "status": "current",
+      "hash": "e4d75958f543985045cce29bf4c3dd5c31c81ce9341413b338780394d0f8ce4f"
+    },
+    {
+      "id": "38-cfr-21-180",
+      "section": "21.180",
+      "citation": "38 C.F.R. § 21.180",
+      "title": "Case status system.",
+      "status": "current",
+      "hash": "454d1eeedc9fa1c622cc195a2e3a985b7757c28b03c8eaeb6ef16fbc5d51a9c8"
+    },
+    {
+      "id": "38-cfr-21-182",
+      "section": "21.182",
+      "citation": "38 C.F.R. § 21.182",
+      "title": "“Applicant” status.",
+      "status": "current",
+      "hash": "c26b4639fc999ac3be532039f3da423fd922fa4e4f98f7c7fc461c384926c014"
+    },
+    {
+      "id": "38-cfr-21-184",
+      "section": "21.184",
+      "citation": "38 C.F.R. § 21.184",
+      "title": "“Evaluation and planning” status.",
+      "status": "current",
+      "hash": "f65472f6e4199d958183beff8d2ed5268dec9073d8a2fab218490270d3864164"
+    },
+    {
+      "id": "38-cfr-21-186",
+      "section": "21.186",
+      "citation": "38 C.F.R. § 21.186",
+      "title": "“Ineligible” status.",
+      "status": "current",
+      "hash": "9f03a07e010f6ff7c0411b0000ff7e587ded95d8637940e7da22039278bf4917"
+    },
+    {
+      "id": "38-cfr-21-188",
+      "section": "21.188",
+      "citation": "38 C.F.R. § 21.188",
+      "title": "“Extended evaluation” status.",
+      "status": "current",
+      "hash": "358d72d73252e3341cae037cfb403077c8a802d00157c2af775cffca4257157d"
+    },
+    {
+      "id": "38-cfr-21-190",
+      "section": "21.190",
+      "citation": "38 C.F.R. § 21.190",
+      "title": "“Rehabilitation to the point of employability” status.",
+      "status": "current",
+      "hash": "b394efcc73fff1c75986f8c3058bf4029fea7f81d9ef27964d700d4bac920b39"
+    },
+    {
+      "id": "38-cfr-21-192",
+      "section": "21.192",
+      "citation": "38 C.F.R. § 21.192",
+      "title": "“Independent living program” status.",
+      "status": "current",
+      "hash": "894a04fc944c2b8c6fd30f8d3574f5c53a01c845aaf8a0a3cd23c2c1068eabd3"
+    },
+    {
+      "id": "38-cfr-21-194",
+      "section": "21.194",
+      "citation": "38 C.F.R. § 21.194",
+      "title": "“Employment services” status.",
+      "status": "current",
+      "hash": "164c739911ddd891f426d837921a5970b5ccc84501359dcaaa362e42b7cee41c"
+    },
+    {
+      "id": "38-cfr-21-196",
+      "section": "21.196",
+      "citation": "38 C.F.R. § 21.196",
+      "title": "“Rehabilitated” status.",
+      "status": "current",
+      "hash": "abe68bf187b0ee762e6dbcdf14a046871aabd3d67d3f030c2776e9f2c82aaa12"
+    },
+    {
+      "id": "38-cfr-21-197",
+      "section": "21.197",
+      "citation": "38 C.F.R. § 21.197",
+      "title": "“Interrupted” status.",
+      "status": "current",
+      "hash": "dc0c8c5f3b573ed2db5f8777e7383a96c9918275c48caf9af42cb250cf36a065"
+    },
+    {
+      "id": "38-cfr-21-198",
+      "section": "21.198",
+      "citation": "38 C.F.R. § 21.198",
+      "title": "“Discontinued” status.",
+      "status": "current",
+      "hash": "26b420da8dd48962398b89afc98f137e0e7f5e21741878578afb4fdc2fc82ad8"
+    },
+    {
+      "id": "38-cfr-21-210",
+      "section": "21.210",
+      "citation": "38 C.F.R. § 21.210",
+      "title": "Supplies.",
+      "status": "current",
+      "hash": "21a575b755488a7dd7bad7b34bde13e5b2b736bddc9c80e2d8ced2b12938417a"
+    },
+    {
+      "id": "38-cfr-21-212",
+      "section": "21.212",
+      "citation": "38 C.F.R. § 21.212",
+      "title": "General policy in furnishing supplies during periods of rehabilitation.",
+      "status": "current",
+      "hash": "d5d0a0e4d6de1f56ced73cbe5a3be4d3a5a9b928a7e2c8aa75bb39ef8c3608d4"
+    },
+    {
+      "id": "38-cfr-21-214",
+      "section": "21.214",
+      "citation": "38 C.F.R. § 21.214",
+      "title": "Furnishing supplies for special programs.",
+      "status": "current",
+      "hash": "586d68626c5fdd9c9a95ad2e8a3f240a297d5232d7258cfc5fd38ddaeffdfc55"
+    },
+    {
+      "id": "38-cfr-21-216",
+      "section": "21.216",
+      "citation": "38 C.F.R. § 21.216",
+      "title": "Special equipment.",
+      "status": "current",
+      "hash": "01be79e482047f62fda4af82c97b1c1253a040b6869ee4a828d4b891b94ff4cc"
+    },
+    {
+      "id": "38-cfr-21-218",
+      "section": "21.218",
+      "citation": "38 C.F.R. § 21.218",
+      "title": "Methods of furnishing supplies.",
+      "status": "current",
+      "hash": "57a09e96858c01ee245058d7d77a3f589e40de661839d2c5221d37ae4820c59c"
+    },
+    {
+      "id": "38-cfr-21-219",
+      "section": "21.219",
+      "citation": "38 C.F.R. § 21.219",
+      "title": "Supplies consisting of clothing, magazines and periodicals, and items which may be personally used by the veteran.",
+      "status": "current",
+      "hash": "9eab3abbbb443f0df7cd5b2955bdcdf892f7a5eb68699a6de6e9886f52951bc5"
+    },
+    {
+      "id": "38-cfr-21-220",
+      "section": "21.220",
+      "citation": "38 C.F.R. § 21.220",
+      "title": "Replacement of supplies.",
+      "status": "current",
+      "hash": "b109d33d1101332cda593ded3ca73bfb56845be4fc725788e744d82a71e96cb6"
+    },
+    {
+      "id": "38-cfr-21-224",
+      "section": "21.224",
+      "citation": "38 C.F.R. § 21.224",
+      "title": "Prevention of abuse.",
+      "status": "current",
+      "hash": "48799e1aa6044abed38edccebd0f7b486303470cd4bb9e1dc9a540850fd125d9"
+    },
+    {
+      "id": "38-cfr-21-240",
+      "section": "21.240",
+      "citation": "38 C.F.R. § 21.240",
+      "title": "Medical treatment, care and services.",
+      "status": "current",
+      "hash": "96f0cfd8d4ce7b290d1049a6a25e7bb55a732d9b11469ba5e438fc15edb64325"
+    },
+    {
+      "id": "38-cfr-21-242",
+      "section": "21.242",
+      "citation": "38 C.F.R. § 21.242",
+      "title": "Resources for provision of treatment, care and services.",
+      "status": "current",
+      "hash": "daca286ce9127ebb773f2cd678ffe85760643ed60f1585da450cf2e4f762715a"
+    },
+    {
+      "id": "38-cfr-21-250",
+      "section": "21.250",
+      "citation": "38 C.F.R. § 21.250",
+      "title": "Overview of employment services.",
+      "status": "current",
+      "hash": "07455e38f411edbc74c92b47d37c5da0c9cfba8af92a06a3f4c1719fe57d0594"
+    },
+    {
+      "id": "38-cfr-21-252",
+      "section": "21.252",
+      "citation": "38 C.F.R. § 21.252",
+      "title": "Job development and placement services.",
+      "status": "current",
+      "hash": "4243e52ecab2d2ee0576ae16e91b105cdd9154846904346e697f8544d26e5ba2"
+    },
+    {
+      "id": "38-cfr-21-254",
+      "section": "21.254",
+      "citation": "38 C.F.R. § 21.254",
+      "title": "Supportive services.",
+      "status": "current",
+      "hash": "5fba15aceef673833157ccabf9af264bca4eb981b20fdf8e908731da4630879f"
+    },
+    {
+      "id": "38-cfr-21-256",
+      "section": "21.256",
+      "citation": "38 C.F.R. § 21.256",
+      "title": "Incentives for employers.",
+      "status": "current",
+      "hash": "41f263f1b769fea3fc9fd68edc9c9928f70765a08f6583f0c8b04648493ca52a"
+    },
+    {
+      "id": "38-cfr-21-257",
+      "section": "21.257",
+      "citation": "38 C.F.R. § 21.257",
+      "title": "Self-employment.",
+      "status": "current",
+      "hash": "1f6a6d5fae8c5dcd38380d19efd487ced8542fcad9b0fc6a4da6c8586ff6b4ef"
+    },
+    {
+      "id": "38-cfr-21-258",
+      "section": "21.258",
+      "citation": "38 C.F.R. § 21.258",
+      "title": "Cost limitations on approval of self-employment plans.",
+      "status": "current",
+      "hash": "b2073f27014337c6a193bb126fa5ad3b2fef89d0c080e03ac3bb0053713f44b2"
+    },
+    {
+      "id": "38-cfr-21-260",
+      "section": "21.260",
+      "citation": "38 C.F.R. § 21.260",
+      "title": "Subsistence allowance.",
+      "status": "current",
+      "hash": "1bb2f354468078b4f0cc467a8b3ad1a7aed0b69aa281a4edb8bdea43615b9fde"
+    },
+    {
+      "id": "38-cfr-21-262",
+      "section": "21.262",
+      "citation": "38 C.F.R. § 21.262",
+      "title": "Procurement and reimbursement of cost for training and rehabilitation services, supplies, or facilities.",
+      "status": "current",
+      "hash": "f495213aba119c81ad1c641a44d1658729989f26a2fb1bbf4d3cea38570e4cc2"
+    },
+    {
+      "id": "38-cfr-21-264",
+      "section": "21.264",
+      "citation": "38 C.F.R. § 21.264",
+      "title": "Election of payment at the 38 U.S.C. chapter 30 educational assistance rate or election of payment of Post-9/11 subsistence allowance.",
+      "status": "current",
+      "hash": "2fcb7038a9a05708e6722bf64fcd47cdc0b592249c07c67d03e3c2dba7e2e83e"
+    },
+    {
+      "id": "38-cfr-21-266",
+      "section": "21.266",
+      "citation": "38 C.F.R. § 21.266",
+      "title": "Payment of subsistence allowance under special conditions.",
+      "status": "current",
+      "hash": "16b4288ce385047027569c8862b7695f476b2fb59b1b1b69b96a1e894e579920"
+    },
+    {
+      "id": "38-cfr-21-268",
+      "section": "21.268",
+      "citation": "38 C.F.R. § 21.268",
+      "title": "Employment adjustment allowance.",
+      "status": "current",
+      "hash": "73af693db708b11352626fe0f20fc18087c590466136538e273ef33098f85a4b"
+    },
+    {
+      "id": "38-cfr-21-270",
+      "section": "21.270",
+      "citation": "38 C.F.R. § 21.270",
+      "title": "Payment of subsistence allowance during leave and other periods.",
+      "status": "current",
+      "hash": "ea8ce609ce646f3fb6729da88d765ff48bb349dbc33a9fdd8b80578894dc69f5"
+    },
+    {
+      "id": "38-cfr-21-272",
+      "section": "21.272",
+      "citation": "38 C.F.R. § 21.272",
+      "title": "Veteran-student services.",
+      "status": "current",
+      "hash": "1702a246050945d248215c8674eb6194897916e374c4c26c83f2c3f15f07efa1"
+    },
+    {
+      "id": "38-cfr-21-274",
+      "section": "21.274",
+      "citation": "38 C.F.R. § 21.274",
+      "title": "Revolving fund loan.",
+      "status": "current",
+      "hash": "e2c21e84210dc7499c20820e951c293ff24eea9702613861c3f19e9fd23dc688"
+    },
+    {
+      "id": "38-cfr-21-276",
+      "section": "21.276",
+      "citation": "38 C.F.R. § 21.276",
+      "title": "Incarcerated veterans.",
+      "status": "current",
+      "hash": "6c5b3963af803f73164da71f076cbf53cb162fefea505706eacf54f9122fa19a"
+    },
+    {
+      "id": "38-cfr-21-282",
+      "section": "21.282",
+      "citation": "38 C.F.R. § 21.282",
+      "title": "Effective date of induction into a rehabilitation program; retroactive induction.",
+      "status": "current",
+      "hash": "d5da6f93cacebc7a838cb8ea4ea3602326da427c7e24bb7c24f48a7b4a5e93cf"
+    },
+    {
+      "id": "38-cfr-21-283",
+      "section": "21.283",
+      "citation": "38 C.F.R. § 21.283",
+      "title": "Rehabilitated.",
+      "status": "current",
+      "hash": "2823db7091c684136593b4ffea98c29eb43431344cb43ce1216ebedf3e9ac469"
+    },
+    {
+      "id": "38-cfr-21-284",
+      "section": "21.284",
+      "citation": "38 C.F.R. § 21.284",
+      "title": "Reentrance into a rehabilitation program.",
+      "status": "current",
+      "hash": "5f89762f4e1c0dafac24ab39fbbbca23336561d0bd7bb991894cbcfffed00177"
+    },
+    {
+      "id": "38-cfr-21-290",
+      "section": "21.290",
+      "citation": "38 C.F.R. § 21.290",
+      "title": "Training and rehabilitation resources.",
+      "status": "current",
+      "hash": "9afa31f41f76ff2eb7e0237a26700ba46015cd2ea77db077c048b54212005c81"
+    },
+    {
+      "id": "38-cfr-21-292",
+      "section": "21.292",
+      "citation": "38 C.F.R. § 21.292",
+      "title": "Course approvals.",
+      "status": "current",
+      "hash": "12d899fd11e01f212561f611f0374c4d6b14eef5f14e1d6eef9c7fb19dae5d3a"
+    },
+    {
+      "id": "38-cfr-21-294",
+      "section": "21.294",
+      "citation": "38 C.F.R. § 21.294",
+      "title": "Selecting the training or rehabilitation facility.",
+      "status": "current",
+      "hash": "b73d8a8628635d905a61a68ce770a397d348dfa50c240498f48411d71ea4eda6"
+    },
+    {
+      "id": "38-cfr-21-296",
+      "section": "21.296",
+      "citation": "38 C.F.R. § 21.296",
+      "title": "Selecting a training establishment for on-job training.",
+      "status": "current",
+      "hash": "debe54684dbaecb373f8d9db76b12cc3f8913a95764464af888c2ff0be0eb934"
+    },
+    {
+      "id": "38-cfr-21-298",
+      "section": "21.298",
+      "citation": "38 C.F.R. § 21.298",
+      "title": "Selecting a farm.",
+      "status": "current",
+      "hash": "9ee64ff4e5083d040366c69c5fdc097675eb015c8e0b2042d06c9e37760ffcc2"
+    },
+    {
+      "id": "38-cfr-21-299",
+      "section": "21.299",
+      "citation": "38 C.F.R. § 21.299",
+      "title": "Use of Government facilities for on-job training or work experience at no or nominal pay.",
+      "status": "current",
+      "hash": "2ae83d4791518f0845b33f19c602b159a47bb991aec11d2dd5f3769061bfef53"
+    },
+    {
+      "id": "38-cfr-21-310",
+      "section": "21.310",
+      "citation": "38 C.F.R. § 21.310",
+      "title": "Rate of pursuit of a rehabilitation program.",
+      "status": "current",
+      "hash": "9995cb3d0d6d8edd3e9b6ab09725c193f5a6c4b2c5a48b2dac067118eebe55ec"
+    },
+    {
+      "id": "38-cfr-21-312",
+      "section": "21.312",
+      "citation": "38 C.F.R. § 21.312",
+      "title": "Reduced work tolerance.",
+      "status": "current",
+      "hash": "25b2d41544398bc716736425a55c823ee9adca0f303dc4ff0e7f7f6b411513a6"
+    },
+    {
+      "id": "38-cfr-21-314",
+      "section": "21.314",
+      "citation": "38 C.F.R. § 21.314",
+      "title": "Pursuit of training under special conditions.",
+      "status": "current",
+      "hash": "6c8768022292df40c3d6e731ff7eab8d9d069579c23f95ea5b6d15ab6def837f"
+    },
+    {
+      "id": "38-cfr-21-320",
+      "section": "21.320",
+      "citation": "38 C.F.R. § 21.320",
+      "title": "Awards for subsistence allowance and authorization of rehabilitation services.",
+      "status": "current",
+      "hash": "748ef236b7678bd15ebbee6c941659d77b42b0c23c156dc455976644ca8aede4"
+    },
+    {
+      "id": "38-cfr-21-322",
+      "section": "21.322",
+      "citation": "38 C.F.R. § 21.322",
+      "title": "Commencing dates of subsistence allowance.",
+      "status": "current",
+      "hash": "b6d83aa7be32249f8f183969cf89fb796bf5b44ff2721c691af76dce9ec4af96"
+    },
+    {
+      "id": "38-cfr-21-324",
+      "section": "21.324",
+      "citation": "38 C.F.R. § 21.324",
+      "title": "Reduction or termination dates of subsistence allowance.",
+      "status": "current",
+      "hash": "e2daf02fb4b5e0efd081e1ab87e8ebd54e13d1a3e82087d2c190b216c121a645"
+    },
+    {
+      "id": "38-cfr-21-326",
+      "section": "21.326",
+      "citation": "38 C.F.R. § 21.326",
+      "title": "Authorization of employment services.",
+      "status": "current",
+      "hash": "ba5e683411a6ed4c2dfe0ee020fb80478f2d7836d3eb6e179bcafc64b0ca78a3"
+    },
+    {
+      "id": "38-cfr-21-328",
+      "section": "21.328",
+      "citation": "38 C.F.R. § 21.328",
+      "title": "Two veteran cases—dependents.",
+      "status": "current",
+      "hash": "4951125470f81c1dc95c70204d3edc4771cfe6e58fb4878aa49f0d641b5a0e6a"
+    },
+    {
+      "id": "38-cfr-21-330",
+      "section": "21.330",
+      "citation": "38 C.F.R. § 21.330",
+      "title": "Apportionment.",
+      "status": "current",
+      "hash": "94158ab73bd901d7783a4da76240c79f5adcaa453a04e0ec48d7d4be8536c1a8"
+    },
+    {
+      "id": "38-cfr-21-332",
+      "section": "21.332",
+      "citation": "38 C.F.R. § 21.332",
+      "title": "Payments of subsistence allowance.",
+      "status": "current",
+      "hash": "d9eccdf8241346e24e00918c0866919d260556b95d790094d0369e9b43ff2aa7"
+    },
+    {
+      "id": "38-cfr-21-334",
+      "section": "21.334",
+      "citation": "38 C.F.R. § 21.334",
+      "title": "Election of payment at the Chapter 30 rate.",
+      "status": "current",
+      "hash": "0498876465a8795a168a9e826bc061cd5107402551073e2afc854835c18f3c26"
+    },
+    {
+      "id": "38-cfr-21-340",
+      "section": "21.340",
+      "citation": "38 C.F.R. § 21.340",
+      "title": "Introduction.",
+      "status": "current",
+      "hash": "d22a8012cf7a8ee65df58075e3d9868780aba59d5f570ea2e463bb18b9411ceb"
+    },
+    {
+      "id": "38-cfr-21-342",
+      "section": "21.342",
+      "citation": "38 C.F.R. § 21.342",
+      "title": "Leave accounting policy.",
+      "status": "current",
+      "hash": "d5af20c61dfefff788751674b9494a7fec6689917cd3b964f0d248bbfff83cac"
+    },
+    {
+      "id": "38-cfr-21-344",
+      "section": "21.344",
+      "citation": "38 C.F.R. § 21.344",
+      "title": "Facility offering training or rehabilitation services.",
+      "status": "current",
+      "hash": "db500d01637d983048663760dac8832ec5b83fbad5a4d8e1217ef21936d6eeae"
+    },
+    {
+      "id": "38-cfr-21-346",
+      "section": "21.346",
+      "citation": "38 C.F.R. § 21.346",
+      "title": "Facility temporarily not offering training or rehabilitation services.",
+      "status": "current",
+      "hash": "1ac37acf3e8d52057b0d0ad6c29aab6f09998cd30621891c7dbe98c6e85242fc"
+    },
+    {
+      "id": "38-cfr-21-348",
+      "section": "21.348",
+      "citation": "38 C.F.R. § 21.348",
+      "title": "Leave following completion of a period of training or rehabilitation services.",
+      "status": "current",
+      "hash": "a4b072e2420d8f7bb4d4a52f2be25c4a6c94ba2bf76b68fc47c6ebfc38d74e01"
+    },
+    {
+      "id": "38-cfr-21-350",
+      "section": "21.350",
+      "citation": "38 C.F.R. § 21.350",
+      "title": "Unauthorized absences.",
+      "status": "current",
+      "hash": "962e9e6a6f272a98216a8dabfe1bfac87ef0f36b86b7f6434d0303f8eeab45fe"
+    },
+    {
+      "id": "38-cfr-21-362",
+      "section": "21.362",
+      "citation": "38 C.F.R. § 21.362",
+      "title": "Satisfactory conduct and cooperation.",
+      "status": "current",
+      "hash": "745ab6ff9c1cdb1ead5904b025ac2f1a8fba3e161701ce91dbfe56992a691321"
+    },
+    {
+      "id": "38-cfr-21-364",
+      "section": "21.364",
+      "citation": "38 C.F.R. § 21.364",
+      "title": "Unsatisfactory conduct and cooperation.",
+      "status": "current",
+      "hash": "8a6a232b2381b6abfa4144344c5a0bc0e350370dffcedbc974a14e48c06887ae"
+    },
+    {
+      "id": "38-cfr-21-370",
+      "section": "21.370",
+      "citation": "38 C.F.R. § 21.370",
+      "title": "Intraregional travel at government expense.",
+      "status": "current",
+      "hash": "19631db02830a3f95dca32ca0df99b6ac2a5627ca9f03edd3b1926c6d71e0e7e"
+    },
+    {
+      "id": "38-cfr-21-372",
+      "section": "21.372",
+      "citation": "38 C.F.R. § 21.372",
+      "title": "Interregional transfer at government expense.",
+      "status": "current",
+      "hash": "c142240f3cb171568eb0592163863fd3351cba8cad9aa34623c8faa7e9286f94"
+    },
+    {
+      "id": "38-cfr-21-374",
+      "section": "21.374",
+      "citation": "38 C.F.R. § 21.374",
+      "title": "Authorization for travel of attendants.",
+      "status": "current",
+      "hash": "4d284c651c7cab4019af40f85aac0557f06baf5cbf6a49bb6b3c0ad9d5a89c9e"
+    },
+    {
+      "id": "38-cfr-21-376",
+      "section": "21.376",
+      "citation": "38 C.F.R. § 21.376",
+      "title": "Travel expenses for initial evaluation and counseling.",
+      "status": "current",
+      "hash": "0b493efe7dc2ba590d366367899b2d8aa2acc399a01202fb0fd9c8a3b7c1b0d8"
+    },
+    {
+      "id": "38-cfr-21-380",
+      "section": "21.380",
+      "citation": "38 C.F.R. § 21.380",
+      "title": "Establishment of qualifications for personnel providing assistance under Chapter 31.",
+      "status": "current",
+      "hash": "daa0f7bdaf1caf3575f86e3209c04688b19e1c20ad80ac0c58d1425d329d482a"
+    },
+    {
+      "id": "38-cfr-21-382",
+      "section": "21.382",
+      "citation": "38 C.F.R. § 21.382",
+      "title": "Training and staff development for personnel providing assistance under Chapter 31.",
+      "status": "current",
+      "hash": "c4a2fc2f6d1472db9c8edb786e99d89b77c053a9de77f7dabc0f91e29ce4858d"
+    },
+    {
+      "id": "38-cfr-21-390",
+      "section": "21.390",
+      "citation": "38 C.F.R. § 21.390",
+      "title": "Rehabilitation research and special projects.",
+      "status": "current",
+      "hash": "45d5aa670080a799f6831fb24c479221ba1ed17ead1fed575e9c3ff6db1ed274"
+    },
+    {
+      "id": "38-cfr-21-400",
+      "section": "21.400",
+      "citation": "38 C.F.R. § 21.400",
+      "title": "Veterans' Advisory Committee on Rehabilitation.",
+      "status": "current",
+      "hash": "21deabb1de80b4b2cfe82ece171f3c71608b4774ac596cc33621aa17ea56d369"
+    },
+    {
+      "id": "38-cfr-21-402",
+      "section": "21.402",
+      "citation": "38 C.F.R. § 21.402",
+      "title": "Responsibilities of the Veterans' Advisory Committee on Rehabilitation.",
+      "status": "current",
+      "hash": "f630088038f68015e761ed58eafedf8e6ffc08e6936b8ab376eb745ff3a77ddf"
+    },
+    {
+      "id": "38-cfr-21-410",
+      "section": "21.410",
+      "citation": "38 C.F.R. § 21.410",
+      "title": "Delegation of authority.",
+      "status": "current",
+      "hash": "df9cde52952f00141f3a7d4cd5eb1a0cfa5cbfe6667610585c3ec4c10ded2f53"
+    },
+    {
+      "id": "38-cfr-21-412",
+      "section": "21.412",
+      "citation": "38 C.F.R. § 21.412",
+      "title": "Finality of decisions.",
+      "status": "current",
+      "hash": "548572d541c1f466f8dd7eb4ea3d62041fdde3df52e4a8d89ba54356997438dd"
+    },
+    {
+      "id": "38-cfr-21-414",
+      "section": "21.414",
+      "citation": "38 C.F.R. § 21.414",
+      "title": "Revision of decision.",
+      "status": "current",
+      "hash": "dce20d4fc38109ffe2cebea12a0914294db56278764887d11940892890a2c3e8"
+    },
+    {
+      "id": "38-cfr-21-416",
+      "section": "21.416",
+      "citation": "38 C.F.R. § 21.416",
+      "title": "Review of decisions.",
+      "status": "current",
+      "hash": "6c872103db9f8f5a07f26f8d47ea1181f65f01c22d1c0103a0ace17cbbad2c36"
+    },
+    {
+      "id": "38-cfr-21-420",
+      "section": "21.420",
+      "citation": "38 C.F.R. § 21.420",
+      "title": "Informing the veteran.",
+      "status": "current",
+      "hash": "ae4f8981a2b2610264ca027a213c521fa8996ef79c4c0cde601c6d5613a9f07f"
+    },
+    {
+      "id": "38-cfr-21-422",
+      "section": "21.422",
+      "citation": "38 C.F.R. § 21.422",
+      "title": "Reduction in subsistence allowance following the loss of a dependent.",
+      "status": "current",
+      "hash": "96b441054af705c43e70dd2c8913cd8fa8c4fe260ce96c4ceae3130ddb3f9813"
+    },
+    {
+      "id": "38-cfr-21-430",
+      "section": "21.430",
+      "citation": "38 C.F.R. § 21.430",
+      "title": "Accountability for authorization and payment of training and rehabilitation services.",
+      "status": "current",
+      "hash": "a305cc7d7cf2339f35018641dc0e8e36a968aaabc111beebf7430477fb9e4368"
+    },
+    {
+      "id": "38-cfr-21-440",
+      "section": "21.440",
+      "citation": "38 C.F.R. § 21.440",
+      "title": "Purpose and scope.",
+      "status": "current",
+      "hash": "ad884214444ed4a3278ff638e396e1bf7ec7b9acd98a1db0cffe147d71db3797"
+    },
+    {
+      "id": "38-cfr-21-441",
+      "section": "21.441",
+      "citation": "38 C.F.R. § 21.441",
+      "title": "Definitions.",
+      "status": "current",
+      "hash": "822d84e75c228c4379b4e2db1c93fc6de1bad7400e6bb4bd2be4e99bb0f7b571"
+    },
+    {
+      "id": "38-cfr-21-442",
+      "section": "21.442",
+      "citation": "38 C.F.R. § 21.442",
+      "title": "VEPFS grants—general.",
+      "status": "current",
+      "hash": "2530a31df2e3f310cb3666924939b97b0e40dc54103e9471fe7ebb50dd4635b0"
+    },
+    {
+      "id": "38-cfr-21-443",
+      "section": "21.443",
+      "citation": "38 C.F.R. § 21.443",
+      "title": "Permissible uses of VEPFS grant funds.",
+      "status": "current",
+      "hash": "1bb0219aac2c08d2026ae57f9d21cc431973d470c88f6e68e5c87d27f15ef8a0"
+    },
+    {
+      "id": "38-cfr-21-444",
+      "section": "21.444",
+      "citation": "38 C.F.R. § 21.444",
+      "title": "Notice of funding availability.",
+      "status": "current",
+      "hash": "3a76d719bbcaae4628ab5228ac9bfa4e7b0739d362f3d22b893233126cb1ff06"
+    },
+    {
+      "id": "38-cfr-21-445",
+      "section": "21.445",
+      "citation": "38 C.F.R. § 21.445",
+      "title": "Application.",
+      "status": "current",
+      "hash": "cee8c4ffe109a90f02c1ca1cbba901d21086af3adb4d74bcbe49c5e7052ba3d2"
+    },
+    {
+      "id": "38-cfr-21-446",
+      "section": "21.446",
+      "citation": "38 C.F.R. § 21.446",
+      "title": "Scoring and selection.",
+      "status": "current",
+      "hash": "25c0b09e6401c90172e3b961cb6650911de6c4cb20a7fd1c0b21d4df287fc3dd"
+    },
+    {
+      "id": "38-cfr-21-447",
+      "section": "21.447",
+      "citation": "38 C.F.R. § 21.447",
+      "title": "VEPFS grant agreement.",
+      "status": "current",
+      "hash": "ee79b14697b298dfb390f7fd171834069499503b4e2c4bae48d1b73f58e7c042"
+    },
+    {
+      "id": "38-cfr-21-448",
+      "section": "21.448",
+      "citation": "38 C.F.R. § 21.448",
+      "title": "Recipient reporting requirements.",
+      "status": "current",
+      "hash": "4d470a222386ec1d2592db30c527ace4a7ebefac7e5f16b45afd04f3be55a986"
+    },
+    {
+      "id": "38-cfr-21-449",
+      "section": "21.449",
+      "citation": "38 C.F.R. § 21.449",
+      "title": "Recovery of funds.",
+      "status": "current",
+      "hash": "b91582c011a663da1a8bdb20720b093dcb2054b8475907ef64a447cb48bf64b1"
+    }
+  ]
+}

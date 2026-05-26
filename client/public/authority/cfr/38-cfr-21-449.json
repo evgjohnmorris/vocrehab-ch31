@@ -1,0 +1,29 @@
+{
+  "id": "38-cfr-21-449",
+  "canonicalCitation": "38 C.F.R. § 21.449",
+  "title": "Recovery of funds.",
+  "authorityLevel": "binding-regulation",
+  "sourceType": "cfr",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
+  "officialStatus": "current-unofficial",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
+  "effectiveDate": null,
+  "status": "current",
+  "fullText": "If a recipient fails to comply with any Federal statutes or regulations or the terms and conditions of an award made under §§ 21.440 through 21.449, VA may impose additional conditions as specified in 2 CFR 200.207 or, if non-compliance cannot be remedied, take any appropriate actions specified in 2 CFR part 200 as remedies for non-compliance.\n\n(Authority: 38 U.S.C. 501(d), 3119, 2 CFR 200.338 through 200.342)\n\n{\"origins\":[{\"level\":\"subpart\",\"identifier\":\"A\",\"label_level\":\"Subpart A\",\"hierarchy\":{\"title\":\"38\",\"chapter\":\"I\",\"part\":\"21\",\"subpart\":\"A\"},\"current\":true,\"authority\":[\"\\u003ca href=\\\"https://www.govinfo.gov/link/uscode/38/501\\\" class=\\\"usc external\\\" target=\\\"_blank\\\" rel=\\\"noopener noreferrer\\\"\\u003e38 U.S.C. 501(a)\\u003c/a\\u003e, chs. 18, 31, and as noted in specific sections.\\n\"],\"source\":[\"\\u003ca href=\\\"https://www.federalregister.gov/citation/49-FR-40814\\\" class=\\\"fr-reference\\\" data-reference=\\\"49 FR 40814\\\"\\u003e49 FR 40814\\u003c/a\\u003e, Oct. 18, 1984, unless otherwise noted.\\n\"],\"link\":\"/current/title-38/part-21/subpart-A\",\"title\":\"Subpart A of Part 21\"}]}",
+  "plainEnglish": "Explanatory guidance for 38 C.F.R. § 21.449.",
+  "veteranUse": "Cite this regulation in your claim to establish counselor duty under § 21.449.",
+  "topics": [
+    "chapter-31",
+    "regulation"
+  ],
+  "relatedAuthorities": [],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [],
+  "hash": "b91582c011a663da1a8bdb20720b093dcb2054b8475907ef64a447cb48bf64b1",
+  "previousHash": "b91582c011a663da1a8bdb20720b093dcb2054b8475907ef64a447cb48bf64b1",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "changedSinceLastSnapshot": false
+}
