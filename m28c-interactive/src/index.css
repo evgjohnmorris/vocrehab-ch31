@@ -42,6 +42,77 @@
   --primary-glow: rgba(0, 60, 113, 0.08);
 }
 
+.rounders-theme {
+  --bg-top: #f6f0e6;
+  --bg-bottom: #e7ede5;
+  --bg-color: #f6f0e6;
+  --card-bg: rgba(255, 252, 246, 0.9);
+  --card-border: rgba(28, 38, 33, 0.1);
+  --text-primary: #1c2621;
+  --text-secondary: #344138;
+  --text-muted: #68736b;
+  --sidebar-bg: rgba(255, 252, 246, 0.9);
+  --sidebar-border: rgba(28, 38, 33, 0.1);
+  --hover-bg: #efe0d2;
+  --active-bg: #26483f;
+  --primary-color: #26483f;
+  --accent-color: #ac5a39;
+  --primary-glow: rgba(38, 72, 63, 0.15);
+  --accent-glow: rgba(172, 90, 57, 0.2);
+  --glass-bg: rgba(255, 252, 246, 0.8);
+  --success-color: #26483f;
+  --warning-color: #ac5a39;
+  
+  font-family: "Manrope", "Trebuchet MS", Verdana, sans-serif;
+  background: linear-gradient(180deg, #f6f0e6 0%, #e7ede5 100%) !important;
+}
+
+.rounders-theme::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(172, 90, 57, 0.14), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(38, 72, 63, 0.12), transparent 26%),
+    radial-gradient(circle at 52% 100%, rgba(216, 198, 169, 0.2), transparent 34%);
+  pointer-events: none;
+  z-index: -2;
+}
+
+.rounders-theme::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.rounders-theme h1,
+.rounders-theme h2,
+.rounders-theme h3,
+.rounders-theme h4,
+.rounders-theme h5,
+.rounders-theme h6 {
+  font-family: "Fraunces", Georgia, serif !important;
+}
+
+.rounders-theme a:link,
+.rounders-theme a:visited {
+  color: #26483f;
+  text-decoration-color: rgba(172, 90, 57, 0.42);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

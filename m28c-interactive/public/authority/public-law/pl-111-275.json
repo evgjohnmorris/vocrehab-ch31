@@ -1,0 +1,35 @@
+{
+  "id": "pl-111-275",
+  "canonicalCitation": "Pub. L. 111-275",
+  "title": "Pub. L. 111-275 Amendment Act",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://uscode.house.gov/statviewer.htm?volume=124&page=2888",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "summary-only",
+  "fullText": "Pub. L. 111-275 Amendment Act (Pub. L. 111-275).\nAn Act to amend title 38, United States Code, and for other purposes.\n\nThis Public Law amended Chapter 31 of Title 38, United States Code. It was enacted on the date listed and affects section(s): 3120.",
+  "plainEnglish": "This amendment modified statutory requirements under Title 38 Chapter 31 sections: 3120.",
+  "veteranUse": "Use this public law reference to trace the legislative history and Congressional intent behind Title 38 Chapter 31.",
+  "topics": [
+    "history",
+    "amendments"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3120"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "publicLaw": "111-275",
+      "note": "Enacted provisions affecting 38 USC 3120."
+    }
+  ],
+  "hash": "9c10f58ed2739f6b040a72d4f25105c16f7681db73ec88289511fe5446f8f7e0",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "9c10f58ed2739f6b040a72d4f25105c16f7681db73ec88289511fe5446f8f7e0",
+  "changedSinceLastSnapshot": false
+}

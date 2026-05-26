@@ -87,11 +87,29 @@ async function ingestSection(sec) {
 
   // Extract statutory notes
   const amendmentNotes = [];
+  const plRefs = [];
+  const plRegex = /Pub\.\s*L\.\s*(\d+)[\u2013-–](\d+)/g;
+  let plMatch;
   if (rawNotes) {
     const cleanNotes = cleanHtml(rawNotes);
     amendmentNotes.push({
       note: cleanNotes
     });
+    while ((plMatch = plRegex.exec(cleanNotes)) !== null) {
+      const plId = `pl-${plMatch[1]}-${plMatch[2]}`;
+      if (!plRefs.includes(plId)) {
+        plRefs.push(plId);
+      }
+    }
+  }
+  if (fullText) {
+    plRegex.lastIndex = 0;
+    while ((plMatch = plRegex.exec(fullText)) !== null) {
+      const plId = `pl-${plMatch[1]}-${plMatch[2]}`;
+      if (!plRefs.includes(plId)) {
+        plRefs.push(plId);
+      }
+    }
   }
 
   const record = {
@@ -111,7 +129,7 @@ async function ingestSection(sec) {
     veteranUse: `Cite this section in your appeal to bind the VA to statutory Chapter 31 rules.`,
     topics: ["chapter-31", "statute"],
     relatedAuthorities: [],
-    publicLawRefs: [],
+    publicLawRefs: plRefs,
     federalRegisterRefs: [],
     amendmentNotes,
     hash: textHash

@@ -1491,10 +1491,318 @@
   ],
   "publicLaws": [
     {
+      "id": "pl-100-323",
+      "citation": "Pub. L. 100-323",
+      "title": "Pub. L. 100-323 Amendment Act",
+      "hash": "b408cdcdbc2172b8a9742c1bf68a84a6a5dd1be0123219f2e0f0e626273dfa13",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-100-689",
+      "citation": "Pub. L. 100-689",
+      "title": "Pub. L. 100-689 Amendment Act",
+      "hash": "452c8a7dee0490620c7b12dcf13b1c75cada8e04227c8a24213bcf9991edc2e3",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-101-237",
+      "citation": "Pub. L. 101-237",
+      "title": "Pub. L. 101-237 Amendment Act",
+      "hash": "1fb95ac304fab1ac8606e5c3a14d818fc30644f86ded841fe4959c3e8825dc88",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-101-508",
+      "citation": "Pub. L. 101-508",
+      "title": "Pub. L. 101-508 Amendment Act",
+      "hash": "0d844c4842f33c0eb90eb4d360f649282b4a8ba518d5a0c92e1dd54674e5f583",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-102-16",
+      "citation": "Pub. L. 102-16",
+      "title": "Pub. L. 102-16 Amendment Act",
+      "hash": "fe46dcab4a2b6cb78429ac856dbdbc36aadb59126a3df1054af42d01eba5112b",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-102-40",
+      "citation": "Pub. L. 102-40",
+      "title": "Pub. L. 102-40 Amendment Act",
+      "hash": "2475eab58ae6f8ffd95d11704ef7b17f076be97f43096770bc62fff18508450b",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-102-54",
+      "citation": "Pub. L. 102-54",
+      "title": "Pub. L. 102-54 Amendment Act",
+      "hash": "de7e9c6bc3e80e11da7e54934e370a039fbe32bf0f1dbc7501d2c17a440a089f",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-102-568",
+      "citation": "Pub. L. 102-568",
+      "title": "Pub. L. 102-568 Amendment Act",
+      "hash": "1b4645980784ba0e2f62445918b1bab88d4550f81b4eb777f2e1930f0310c663",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-102-83",
+      "citation": "Pub. L. 102-83",
+      "title": "Pub. L. 102-83 Amendment Act",
+      "hash": "14b7961bef4fc12a437bacc9919d1f2bdb2de702c339878fda0db666d0c7ca58",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-103-446",
+      "citation": "Pub. L. 103-446",
+      "title": "Pub. L. 103-446 Amendment Act",
+      "hash": "3c1dacf68118ee4d526694ce83df0d4191052b14b57df11fd052126684af1016",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-104-275",
+      "citation": "Pub. L. 104-275",
+      "title": "Pub. L. 104-275 Amendment Act",
+      "hash": "0102c0fc63cfb40eb1d206e7d26bacda13ee8c4a147f501e52f2775558391e34",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-107-103",
+      "citation": "Pub. L. 107-103",
+      "title": "Pub. L. 107-103 Amendment Act",
+      "hash": "0ddd22feb28b11343fca1109d24ee03044fbec34802553d6c5c5c559cdf05397",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-107-288",
+      "citation": "Pub. L. 107-288",
+      "title": "Pub. L. 107-288 Amendment Act",
+      "hash": "95ce1d39d2d99b44ea01e4a45aa315054d869975fa8442ae82d8ccb4002ab374",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-107-330",
+      "citation": "Pub. L. 107-330",
+      "title": "Pub. L. 107-330 Amendment Act",
+      "hash": "b02a59c12010303cf003c4d941070e41b3a461f3290ce0bf28e428c5c6985a2a",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-109-233",
+      "citation": "Pub. L. 109-233",
+      "title": "Pub. L. 109-233 Amendment Act",
+      "hash": "58d2d70ed3043991a3408ef9ce84201701985427b54a45eddd48158c7fae365d",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-109-461",
+      "citation": "Pub. L. 109-461",
+      "title": "Pub. L. 109-461 Amendment Act",
+      "hash": "2f0c901041935f01de39f4aa283f74b79a69d99432646674078b0e92ab0ba187",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-110-389",
+      "citation": "Pub. L. 110-389",
+      "title": "Pub. L. 110-389 Amendment Act",
+      "hash": "7cc5009a3041807307f61a30c6eeda39b704991dd0f1f2094847d7d90ddbcf87",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-111-275",
+      "citation": "Pub. L. 111-275",
+      "title": "Pub. L. 111-275 Amendment Act",
+      "hash": "9c10f58ed2739f6b040a72d4f25105c16f7681db73ec88289511fe5446f8f7e0",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-111-377",
+      "citation": "Pub. L. 111-377",
+      "title": "Pub. L. 111-377 Amendment Act",
+      "hash": "cdba2f58605de74c0b18aa67d2f78ae08b17185a982072f2624176eb1a100bd3",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-112-154",
+      "citation": "Pub. L. 112-154",
+      "title": "Pub. L. 112-154 Amendment Act",
+      "hash": "3e19ab45e1cd14984a9edfa70111713d1b829054d551ff496d14015237b75092",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-112-56",
+      "citation": "Pub. L. 112-56",
+      "title": "VOW to Hire Heroes Act of 2011",
+      "hash": "312b040356e3923b6bf0f110db775afdade68d800fd7e928f9f10ed1eda3c85b",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-114-315",
+      "citation": "Pub. L. 114-315",
+      "title": "Pub. L. 114-315 Amendment Act",
+      "hash": "73afceabecd0fc25acc0275b8709e741b5572934fafbab54da57b72261d2cbc0",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-114-58",
+      "citation": "Pub. L. 114-58",
+      "title": "Pub. L. 114-58 Amendment Act",
+      "hash": "ef4a323af4cb1146cfa5decf395ba0077415d8fc4090bd9bf9a972f8ef56480c",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-115-177",
+      "citation": "Pub. L. 115-177",
+      "title": "Housing Adaptations for Disabled Veterans Act of 2018",
+      "hash": "eb7f8fc25367063875a184c8bb2ee768566aa009940555a25874e953cea3c9ab",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-115-407",
+      "citation": "Pub. L. 115-407",
+      "title": "Pub. L. 115-407 Amendment Act",
+      "hash": "501da21fdc0d1b0caef18085945b3cbddf78322a83452a3edb73be02d138aefa",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-115-48",
+      "citation": "Pub. L. 115-48",
+      "title": "Harry W. Colmery Veterans Educational Assistance Act of 2017 (Forever GI Bill)",
+      "hash": "3f605e1bdc1799c58744531b01962c76aa08340d9c9e536c719f8a352d6abbb3",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-116-140",
+      "citation": "Pub. L. 116-140",
+      "title": "Pub. L. 116-140 Amendment Act",
+      "hash": "08f02d639dee608c1013e7f9e802d5c88490ed895724b966fbc368b2484cd201",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-116-283",
+      "citation": "Pub. L. 116-283",
+      "title": "William M. (Mac) Thornberry National Defense Authorization Act for Fiscal Year 2021",
+      "hash": "86f33757a5c3849e5d3a1244c824226eafb63bb688e29c8f852802d05eb00694",
+      "lastChecked": "2026-05-25"
+    },
+    {
       "id": "pl-116-315",
       "citation": "Pub. L. 116-315",
       "title": "Johnny Isakson and David P. Roe, M.D. Veterans Health Care and Benefits Improvement Act of 2020",
       "hash": "d4282e9fb14664a67ff4b2aa45358a5d108d98e39f55aa1dd0d5bc0f3e5e7ced",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-117-328",
+      "citation": "Pub. L. 117-328",
+      "title": "Consolidated Appropriations Act, 2023",
+      "hash": "d98f7f8718ee3b3880687e37c225444603af256a14a54fc798eba14cc31b2340",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-117-333",
+      "citation": "Pub. L. 117-333",
+      "title": "Veterans Auto and Education Improvement Act of 2022",
+      "hash": "5d5a7cf650b3cad6d88680ba19d4bc43cd1ab83a57271ce43b2254276656d2d3",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-117-76",
+      "citation": "Pub. L. 117-76",
+      "title": "COVID-19 Veterans Assistance Act of 2021",
+      "hash": "ecef610013c9768a446cde7266833a53c1c70a94ebc06bb4119e9b6d1fe6f15c",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-119-72",
+      "citation": "Pub. L. 119-72",
+      "title": "Pub. L. 119-72 Amendment Act",
+      "hash": "3fe7a24897dc108acd54c7d9ed2c4e4db7f780f0a25fcb12e6132c55a5f45ce6",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-85-507",
+      "citation": "Pub. L. 85-507",
+      "title": "Pub. L. 85-507 Amendment Act",
+      "hash": "9d1bf03553ab7a8221c7ef2501c79e4bc7fa9e0ef1fbc02c938d535bb580bd8e",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-85-857",
+      "citation": "Pub. L. 85-857",
+      "title": "Pub. L. 85-857 Amendment Act",
+      "hash": "f6cacdbe52a76749269dc3f052c06150e899120d496930c01371330273905c24",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-91-373",
+      "citation": "Pub. L. 91-373",
+      "title": "Pub. L. 91-373 Amendment Act",
+      "hash": "a2023e53a76770e349be52db213e233082e107dcb69cc580bd3f2e7c931c7592",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-92-203",
+      "citation": "Pub. L. 92-203",
+      "title": "Pub. L. 92-203 Amendment Act",
+      "hash": "0817d581b205accee694c52ce4f33cba664984867a302872b630f85399d9495f",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-93-112",
+      "citation": "Pub. L. 93-112",
+      "title": "Pub. L. 93-112 Amendment Act",
+      "hash": "8ea2c7404d1a2f0f6219972db0ed59acba8a8e77346d6c8b69c279b131c931b0",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-96-466",
+      "citation": "Pub. L. 96-466",
+      "title": "Veterans' Rehabilitation and Education Amendments of 1980",
+      "hash": "79870c41a50cc5bb97f8d7b1ccb9fb9dc7ebb078d398e9b667328ee62dea5008",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-97-306",
+      "citation": "Pub. L. 97-306",
+      "title": "Pub. L. 97-306 Amendment Act",
+      "hash": "b7b3901b23e4dfde12b66c6564443f3f96af17abeb21cbd402733e9de2e63ade",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-97-72",
+      "citation": "Pub. L. 97-72",
+      "title": "Pub. L. 97-72 Amendment Act",
+      "hash": "c32a2c37daf3ec70394db7f2a3e93149a440ff1c39dd66496c609b3619bf79d9",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-98-525",
+      "citation": "Pub. L. 98-525",
+      "title": "Pub. L. 98-525 Amendment Act",
+      "hash": "002bf5009b60b631d5255bcf2c8dcab72ebabea577648cad9f9ad607f9a011ff",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-98-543",
+      "citation": "Pub. L. 98-543",
+      "title": "Pub. L. 98-543 Amendment Act",
+      "hash": "34425332be8a9784ae92f9aba0795bb39a4ca7d4e7d46e7b2bed57d72e792b4f",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-99-238",
+      "citation": "Pub. L. 99-238",
+      "title": "Pub. L. 99-238 Amendment Act",
+      "hash": "bb0baa86fa8c0ec9e297ff27217595ffe19738a94e7bd0a8da42a7d21cb9eca3",
+      "lastChecked": "2026-05-25"
+    },
+    {
+      "id": "pl-99-576",
+      "citation": "Pub. L. 99-576",
+      "title": "Pub. L. 99-576 Amendment Act",
+      "hash": "d043218d51100e0554f688db666a12c8295fa38c3639a33aada185ba07c1a3a5",
       "lastChecked": "2026-05-25"
     }
   ],

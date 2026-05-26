@@ -1,0 +1,40 @@
+{
+  "id": "pl-99-576",
+  "canonicalCitation": "Pub. L. 99-576",
+  "title": "Pub. L. 99-576 Amendment Act",
+  "authorityLevel": "public-law",
+  "sourceType": "public-law",
+  "sourceUrl": "https://uscode.house.gov/statviewer.htm?volume=100&page=3279",
+  "officialStatus": "official",
+  "lastChecked": "2026-05-25",
+  "retrievedAt": "2026-05-25T12:00:00Z",
+  "status": "summary-only",
+  "fullText": "Pub. L. 99-576 Amendment Act (Pub. L. 99-576).\nAn Act to amend title 38, United States Code, and for other purposes.\n\nThis Public Law amended Chapter 31 of Title 38, United States Code. It was enacted on the date listed and affects section(s): 3101, 3103, 3105, 3106, 3109, 3120.",
+  "plainEnglish": "This amendment modified statutory requirements under Title 38 Chapter 31 sections: 3101, 3103, 3105, 3106, 3109, 3120.",
+  "veteranUse": "Use this public law reference to trace the legislative history and Congressional intent behind Title 38 Chapter 31.",
+  "topics": [
+    "history",
+    "amendments"
+  ],
+  "relatedAuthorities": [
+    "38-usc-3101",
+    "38-usc-3103",
+    "38-usc-3105",
+    "38-usc-3106",
+    "38-usc-3109",
+    "38-usc-3120"
+  ],
+  "publicLawRefs": [],
+  "federalRegisterRefs": [],
+  "amendmentNotes": [
+    {
+      "publicLaw": "99-576",
+      "note": "Enacted provisions affecting 38 USC 3101, 38 USC 3103, 38 USC 3105, 38 USC 3106, 38 USC 3109, 38 USC 3120."
+    }
+  ],
+  "hash": "d043218d51100e0554f688db666a12c8295fa38c3639a33aada185ba07c1a3a5",
+  "snapshotDate": "2026-05-25",
+  "sourceLastChecked": "2026-05-25",
+  "previousHash": "d043218d51100e0554f688db666a12c8295fa38c3639a33aada185ba07c1a3a5",
+  "changedSinceLastSnapshot": false
+}

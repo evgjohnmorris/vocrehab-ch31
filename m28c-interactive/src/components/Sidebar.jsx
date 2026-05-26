@@ -2,7 +2,7 @@ import {
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
   FileText, FileEdit,
-  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity
+  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Newspaper
 } from 'lucide-react';
 
 function Sidebar({ 
@@ -53,6 +53,19 @@ function Sidebar({
           >
             <Home size={18} />
             <span>Get Help Now (Dashboard)</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'blog' ? 'active' : ''}`}
+            onClick={() => handleNavClick('blog')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('blog'))}
+            aria-current={activeView === 'blog' ? 'page' : undefined}
+            style={{ fontWeight: 'bold' }}
+          >
+            <Newspaper size={18} />
+            <span>VR&E Advisory Blog</span>
           </div>
         </div>
 

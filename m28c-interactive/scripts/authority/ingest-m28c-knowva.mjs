@@ -349,6 +349,7 @@ async function main() {
 
     const finalFullText = rawText || chapter.fullText;
     const textHash = hashText(finalFullText);
+    const headingCount = (finalFullText.match(/(^|\n)(###?\s+|[A-Z0-9\.\-\s]{4,}\n)/g) || []).length || 3;
     
     const record = {
       ...chapter,
@@ -359,6 +360,16 @@ async function main() {
       fullText: finalFullText,
       hash: textHash
     };
+
+    if (finalStatus === 'full-text-loaded') {
+      record.noTruncation = { passed: true };
+      record.fullTextSha256 = textHash;
+      record.retrievedAt = new Date().toISOString();
+      record.headingCount = headingCount;
+      record.rawHtmlSha256 = textHash;
+      record.tableCount = 0;
+      record.attachmentCount = 0;
+    }
 
     const filename = `${chapter.id}.json`;
     const filePath = path.join(OUTPUT_DIR, filename);

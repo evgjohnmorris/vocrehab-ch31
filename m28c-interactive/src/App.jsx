@@ -31,6 +31,7 @@ import IndependentLivingBuilderView from './views/IndependentLivingBuilderView';
 import SchoolPaymentTrackerView from './views/SchoolPaymentTrackerView';
 import FormsCenterView from './views/FormsCenterView';
 import CasePacketBuilderView from './views/CasePacketBuilderView';
+import AdvisoryBlogView from './views/AdvisoryBlogView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -68,7 +69,7 @@ const DEFAULT_RATES = {
 
 function App() {
   // Theme State
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [theme, setTheme] = useState(() => localStorage.getItem('m28c_theme') || 'dark');
 
   // Navigation State
   const [activeView, setActiveView] = useState('home'); // 'home' | 'reference' | 'wizard' | 'calculator' ...
@@ -256,6 +257,7 @@ function App() {
       setHighContrastMode(false);
       setDyslexiaSpacing(false);
       setPlainLanguageMode(false);
+      setTheme('dark');
       sessionStorage.setItem('m28c_privacy_mode', 'true');
     }
   };
@@ -263,12 +265,14 @@ function App() {
   // Toggle Theme effect
   useEffect(() => {
     const body = document.body;
-    if (isDarkMode) {
-      body.classList.remove('light-mode');
-    } else {
+    body.classList.remove('light-mode', 'rounders-theme');
+    if (theme === 'light') {
       body.classList.add('light-mode');
+    } else if (theme === 'rounders') {
+      body.classList.add('rounders-theme');
     }
-  }, [isDarkMode]);
+    localStorage.setItem('m28c_theme', theme);
+  }, [theme]);
 
   // Sync Privacy Mode transitions
   useEffect(() => {
@@ -591,6 +595,15 @@ function App() {
             setUserMode={setUserMode} 
           />
         );
+      case 'blog':
+        return (
+          <AdvisoryBlogView 
+            reduceMotion={reduceMotion} 
+            privacyMode={privacyMode} 
+            setActiveView={setActiveView}
+            setSelectedSection={setSelectedSection}
+          />
+        );
       default:
         return (
           <div className="doc-card text-center p-8 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl">
@@ -627,8 +640,8 @@ function App() {
           setActiveView={setActiveView}
           setSelectedSection={setSelectedSection}
           bookmarks={bookmarks}
-          isDarkMode={isDarkMode}
-          setIsDarkMode={setIsDarkMode}
+          theme={theme}
+          setTheme={setTheme}
           reduceMotion={reduceMotion}
           setReduceMotion={setReduceMotion}
           rates={rates}

@@ -6,8 +6,8 @@ function Header({
   setActiveView,
   setSelectedSection,
   bookmarks,
-  isDarkMode,
-  setIsDarkMode,
+  theme,
+  setTheme,
   reduceMotion,
   setReduceMotion,
   rates,
@@ -441,13 +441,20 @@ function Header({
             </select>
           </div>
 
-          {/* Dark/Light mode toggle */}
+          {/* Theme cycle toggle */}
           <button 
             className="action-btn"
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            title="Toggle Theme"
+            onClick={() => {
+              if (theme === 'dark') setTheme('light');
+              else if (theme === 'light') setTheme('rounders');
+              else setTheme('dark');
+            }}
+            title={`Active Theme: ${theme.toUpperCase()}. Click to cycle (Dark -> Light -> Rounders Cream).`}
+            aria-label={`Cycle theme. Current theme is ${theme}`}
           >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' && <Moon size={18} />}
+            {theme === 'light' && <Sun size={18} />}
+            {theme === 'rounders' && <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: '800', color: '#ac5a39', fontSize: '15px' }}>R</span>}
           </button>
 
           {/* Accessibility Settings toggle */}
@@ -708,6 +715,21 @@ function Header({
               </p>
 
               <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
+                  <label htmlFor="accessibility-theme" className="text-xs font-semibold text-slate-200">Active Theme Color Palette</label>
+                  <select
+                    id="accessibility-theme"
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                    className="bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded p-1 font-semibold cursor-pointer outline-none"
+                    style={{ backgroundColor: '#0b0f19' }}
+                  >
+                    <option value="dark">Charcoal Dark Mode</option>
+                    <option value="light">Steel Light Mode</option>
+                    <option value="rounders">Rounders Magazine Cream</option>
+                  </select>
+                </div>
+
                 <div className="flex items-center justify-between p-2 hover:bg-slate-900/60 rounded">
                   <label htmlFor="accessibility-plain" className="text-xs font-semibold text-slate-200">Plain Language Mode (Translate Jargon)</label>
                   <input

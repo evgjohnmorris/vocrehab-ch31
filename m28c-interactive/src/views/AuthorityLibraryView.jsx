@@ -28,7 +28,13 @@ function AuthorityLibraryView({
     } else {
       setActiveTab('browse');
       const type = selectedSection.type;
-      setBrowseSourceTab(type === 'usc' ? 'statutes' : type === 'cfr' ? 'regulations' : 'm28c');
+      setBrowseSourceTab(
+        type === 'usc' ? 'statutes' : 
+        type === 'cfr' ? 'regulations' : 
+        type === 'public-law' ? 'public-laws' : 
+        type === 'federal-register' ? 'federal-registers' : 
+        'm28c'
+      );
     }
   }
   
@@ -752,6 +758,68 @@ function AuthorityLibraryView({
                       <div className="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap select-text">
                         {activeDoc.text}
                       </div>
+
+                      {/* Bidirectional Authority Links */}
+                      {selectedItemType === 'usc' && activeDoc.publicLawRefs && activeDoc.publicLawRefs.length > 0 && (
+                        <div className="mt-6 pt-5 border-t border-slate-800/40">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <Scale size={11} className="text-amber-500" />
+                            <span>Amending Public Laws</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {activeDoc.publicLawRefs.map(plId => {
+                              const citation = plId.replace('pl-', 'Pub. L. ');
+                              return (
+                                <button
+                                  key={plId}
+                                  onClick={() => {
+                                    setSelectedSection({ type: 'public-law', id: plId });
+                                  }}
+                                  className="text-[10px] bg-slate-950/40 hover:bg-slate-950 border border-slate-800/80 hover:border-slate-700 text-slate-400 hover:text-slate-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1 transition cursor-pointer"
+                                >
+                                  <span>{citation}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedItemType === 'public-law' && activeDoc.relatedAuthorities && activeDoc.relatedAuthorities.length > 0 && (
+                        <div className="mt-6 pt-5 border-t border-slate-800/40">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <Scale size={11} className="text-emerald-500" />
+                            <span>Affected Statutory & Regulatory Sections</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {activeDoc.relatedAuthorities.map(authId => {
+                              let display = authId;
+                              let type = 'usc';
+                              if (authId.startsWith('38-usc-')) {
+                                display = `38 U.S.C. § ${authId.replace('38-usc-', '')}`;
+                                type = 'usc';
+                              } else if (authId.startsWith('38-cfr-')) {
+                                display = `38 C.F.R. § ${authId.replace('38-cfr-21-', '21.').replace('38-cfr-', '').replace('-', '.')}`;
+                                type = 'cfr';
+                              } else if (authId.startsWith('m28c-')) {
+                                display = authId.toUpperCase().replace(/-/g, '.');
+                                type = 'm28c';
+                              }
+                              return (
+                                <button
+                                  key={authId}
+                                  onClick={() => {
+                                    setSelectedSection({ type, id: authId });
+                                  }}
+                                  className="text-[10px] bg-slate-950/40 hover:bg-slate-950 border border-slate-800/80 hover:border-slate-700 text-slate-400 hover:text-slate-200 px-2.5 py-1 rounded-md inline-flex items-center gap-1 transition cursor-pointer"
+                                >
+                                  <span>{display}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Footer metadata */}
