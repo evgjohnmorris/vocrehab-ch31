@@ -72,6 +72,12 @@ function TapsModuleView({ reduceMotion }) {
   // Memorial Audio Mock State
   const [playingAudio, setPlayingAudio] = useState(false);
 
+  // TAP Directory and Tool States
+  const [activeDirectoryTab, setActiveDirectoryTab] = useState('national'); // 'national' | 'dol' | 'va' | 'sba'
+  const [selectedCourseArea, setSelectedCourseArea] = useState('tap'); // 'tap' | 'yyrp' | 'esgr' | 'skillbridge'
+  const [vreHasRating, setVreHasRating] = useState(null); // null | 'yes_20' | 'yes_10' | 'no'
+  const [vreHasBarrier, setVreHasBarrier] = useState(null); // null | 'yes' | 'no'
+
   // Base constants
   const activeBranch = TAPS_BRANCHES[selectedBranch] || TAPS_BRANCHES.army;
   const today = new Date();
@@ -684,6 +690,276 @@ function TapsModuleView({ reduceMotion }) {
               </div>
 
             </div>
+          </div>
+
+          {/* New Section: TAP Directories Explorer */}
+          <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-850 pb-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <Compass size={18} className="text-indigo-400" />
+                  <span>TAP Resources Directories</span>
+                </h2>
+                <p className="text-[10px] text-slate-400 mt-0.5">Explore the statutory national, employment, benefits, and entrepreneurship databases within the TAP ecosystem.</p>
+              </div>
+              
+              {/* Directory inner tabs */}
+              <div className="flex bg-slate-950/40 p-1 border border-slate-850 rounded-lg text-[10px] self-start sm:self-auto">
+                <button
+                  onClick={() => setActiveDirectoryTab('national')}
+                  className={`px-2.5 py-1 rounded transition cursor-pointer font-semibold ${activeDirectoryTab === 'national' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  DoD National
+                </button>
+                <button
+                  onClick={() => setActiveDirectoryTab('dol')}
+                  className={`px-2.5 py-1 rounded transition cursor-pointer font-semibold ${activeDirectoryTab === 'dol' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  DOL Employment
+                </button>
+                <button
+                  onClick={() => setActiveDirectoryTab('va')}
+                  className={`px-2.5 py-1 rounded transition cursor-pointer font-semibold ${activeDirectoryTab === 'va' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  VA Benefits
+                </button>
+                <button
+                  onClick={() => setActiveDirectoryTab('sba')}
+                  className={`px-2.5 py-1 rounded transition cursor-pointer font-semibold ${activeDirectoryTab === 'sba' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-450 hover:text-slate-200'}`}
+                >
+                  SBA Business
+                </button>
+              </div>
+            </div>
+
+            {/* List directory items */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[300px] overflow-y-auto pr-1 pt-1">
+              {(TAP_ECOSYSTEM[activeDirectoryTab] || []).filter(item => !personaFilter || item.audience.includes(personaFilter)).length > 0 ? (
+                (TAP_ECOSYSTEM[activeDirectoryTab] || []).filter(item => !personaFilter || item.audience.includes(personaFilter)).map((item) => (
+                  <div key={item.id} className="bg-slate-950/30 border border-slate-900 rounded-xl p-3.5 flex flex-col justify-between gap-3 hover:border-slate-800 transition">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-900 pb-1.5">
+                        <h3 className="text-xs font-bold text-slate-200">{item.name}</h3>
+                        <span className="text-[7.5px] font-semibold text-slate-500 uppercase tracking-wider">{item.category || activeDirectoryTab}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal mt-2">{item.whatItProvides}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-900/60">
+                      <div className="flex gap-1">
+                        {item.audience.map(aud => (
+                          <span key={aud} className="text-[7.5px] font-mono bg-slate-900 text-slate-500 border border-slate-850 px-1 rounded">
+                            {aud}
+                          </span>
+                        ))}
+                      </div>
+                      <a
+                        href={item.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+                      >
+                        <span>Official Page</span>
+                        <ExternalLink size={9} />
+                      </a>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-2 p-6 text-center bg-slate-950/20 border border-slate-900 rounded-xl">
+                  <span className="text-[10px] text-slate-500 block">No directory items match your active profile filter. Try resetting filters.</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* New Segment: Interactive Course Finder & VR&E Diagnostic */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Left Box: TAP Course Finder Shortcut */}
+            <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-5 space-y-4">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <Compass size={18} className="text-indigo-400" />
+                <span>TAP Course Finder Shortcut</span>
+              </h2>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Shortcut filters to locate and read specific transition course information:
+              </p>
+
+              {/* Course selector tabs */}
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { id: 'tap', name: 'TAP Courses', use: 'Core Curriculum', desc: 'Mandatory transition tracks covering DoD Transition Day, VA Benefits and Services, and DOL employment workshops.', url: 'https://tapevents.mil/courses' },
+                  { id: 'yyrp', name: 'YRRP Courses', use: 'Yellow Ribbon Reintegration', desc: 'Yellow Ribbon Reintegration Program events designed to support National Guard and Reserve members and their families.', url: 'https://tapevents.mil/courses' },
+                  { id: 'esgr', name: 'ESGR Courses', use: 'Employer Support of Guard/Reserve', desc: 'Employer Support of the Guard and Reserve resources. Advises Guard/Reserve members and civilian employers on employment rights.', url: 'https://tapevents.mil/courses' },
+                  { id: 'skillbridge', name: 'SkillBridge Courses', use: 'SkillBridge/CSP Program Info', desc: 'SkillBridge-specific course/training details and application guidelines for active-duty transition pathways.', url: 'https://tapevents.mil/courses' }
+                ].map((value) => {
+                  const isSelected = selectedCourseArea === value.id;
+                  return (
+                    <button
+                      key={value.id}
+                      onClick={() => setSelectedCourseArea(value.id)}
+                      className={`p-2 rounded-lg border text-center text-[9px] font-bold transition truncate cursor-pointer ${
+                        isSelected
+                          ? 'bg-indigo-500/5 border-indigo-800 text-indigo-400'
+                          : 'bg-slate-950/20 border-slate-900 text-slate-400 hover:border-slate-800'
+                      }`}
+                    >
+                      {value.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Course detail card */}
+              {(() => {
+                const list = [
+                  { id: 'tap', name: 'TAP Courses', use: 'Core Curriculum', desc: 'Mandatory transition tracks covering DoD Transition Day, VA Benefits and Services, and DOL employment workshops.', url: 'https://tapevents.mil/courses' },
+                  { id: 'yyrp', name: 'YRRP Courses', use: 'Yellow Ribbon Reintegration', desc: 'Yellow Ribbon Reintegration Program events designed to support National Guard and Reserve members and their families.', url: 'https://tapevents.mil/courses' },
+                  { id: 'esgr', name: 'ESGR Courses', use: 'Employer Support of Guard/Reserve', desc: 'Employer Support of the Guard and Reserve resources. Advises Guard/Reserve members and civilian employers on employment rights.', url: 'https://tapevents.mil/courses' },
+                  { id: 'skillbridge', name: 'SkillBridge Courses', use: 'SkillBridge/CSP Program Info', desc: 'SkillBridge-specific course/training details and application guidelines for active-duty transition pathways.', url: 'https://tapevents.mil/courses' }
+                ];
+                const area = list.find(l => l.id === selectedCourseArea) || list[0];
+                return (
+                  <div className="bg-slate-950/40 p-4 border border-slate-850 rounded-xl text-[10px] space-y-2.5">
+                    <div>
+                      <span className="block text-[8px] font-bold text-slate-500 uppercase">Usage</span>
+                      <div className="text-slate-200 font-bold mt-0.5">{area.use}</div>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] font-bold text-slate-500 uppercase">Description</span>
+                      <div className="text-slate-355 mt-0.5 leading-relaxed">{area.desc}</div>
+                    </div>
+                    <div className="pt-2 border-t border-slate-900 flex justify-end">
+                      <a
+                        href={area.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5"
+                      >
+                        <span>Schedule on TAPevents.mil</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Right Box: TAP-to-VR&E Bridge Diagnostic */}
+            <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-5 space-y-4">
+              <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <ShieldCheck size={18} className="text-indigo-400" />
+                <span>TAP-to-VR&E Bridge Diagnostic</span>
+              </h2>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Answer these diagnostic questions to check eligibility for Chapter 31 VR&E services:
+              </p>
+
+              <div className="space-y-3 bg-slate-950/40 p-4 border border-slate-850 rounded-xl text-[10px]">
+                {/* Q1 */}
+                <div className="space-y-1.5">
+                  <span className="text-slate-300 block">1. Do you have (or expect to receive) a VA service-connected disability rating?</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setVreHasRating('yes_20')}
+                      className={`px-3 py-1 rounded border text-[9px] font-bold cursor-pointer transition ${vreHasRating === 'yes_20' ? 'bg-indigo-600 border-indigo-650 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                    >
+                      Yes, 20% or more
+                    </button>
+                    <button
+                      onClick={() => setVreHasRating('yes_10')}
+                      className={`px-3 py-1 rounded border text-[9px] font-bold cursor-pointer transition ${vreHasRating === 'yes_10' ? 'bg-indigo-600 border-indigo-650 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                    >
+                      Yes, 10%
+                    </button>
+                    <button
+                      onClick={() => { setVreHasRating('no'); setVreHasBarrier(null); }}
+                      className={`px-3 py-1 rounded border text-[9px] font-bold cursor-pointer transition ${vreHasRating === 'no' ? 'bg-indigo-600 border-indigo-650 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+
+                {/* Q2 */}
+                {vreHasRating && vreHasRating !== 'no' && (
+                  <div className="space-y-1.5 pt-2 border-t border-slate-900/60">
+                    <span className="text-slate-300 block">2. Does this service-connected condition make it hard to get or keep a job?</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setVreHasBarrier('yes')}
+                        className={`px-3 py-1 rounded border text-[9px] font-bold cursor-pointer transition ${vreHasBarrier === 'yes' ? 'bg-indigo-600 border-indigo-650 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setVreHasBarrier('no')}
+                        className={`px-3 py-1 rounded border text-[9px] font-bold cursor-pointer transition ${vreHasBarrier === 'no' ? 'bg-indigo-600 border-indigo-650 text-white' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Diagnostic Advice Output */}
+                {(() => {
+                  let advice = null;
+                  if (vreHasRating === 'no') {
+                    // @cite 38 U.S.C. 3102
+                    advice = {
+                      type: 'ineligible',
+                      text: 'VA VR&E (Chapter 31) requires a service-connected disability rating of 10% or higher. Since you do not have or expect a rating, consider utilizing the Post-9/11 GI Bill or other standard educational tracks.',
+                      actionLabel: 'Explore GI Bill Options',
+                      actionUrl: 'https://www.va.gov/education/'
+                    };
+                  } else if (vreHasRating && vreHasBarrier === 'no') {
+                    // @cite 38 U.S.C. 3102
+                    advice = {
+                      type: 'conditional',
+                      text: 'You have a qualifying disability rating, but VR&E requires an "employment barrier" to qualify. If your service-connected conditions limit your ability to find or keep a job in your trained field, you should document this barrier and apply.',
+                      actionLabel: 'Apply on VA.gov',
+                      actionUrl: 'https://www.va.gov/careers-employment/vocational-rehabilitation/how-to-apply/'
+                    };
+                  } else if ((vreHasRating === 'yes_20' || vreHasRating === 'yes_10') && vreHasBarrier === 'yes') {
+                    const seriousness = vreHasRating === 'yes_10' ? 'serious employment handicap' : 'employment handicap';
+                    // @cite 38 U.S.C. 3102
+                    advice = {
+                      type: 'eligible',
+                      text: `You meet the primary criteria for Chapter 31. Your rating and employment barrier indicate a qualifying ${seriousness}. You should apply early during your transition window (up to 12 months before separation) or as soon as your rating is issued.`,
+                      actionLabel: 'Apply on VA.gov',
+                      actionUrl: 'https://www.va.gov/careers-employment/vocational-rehabilitation/how-to-apply/'
+                    };
+                  }
+
+                  if (!advice) return null;
+                  return (
+                    <div className={`mt-3 p-3 rounded-lg border text-[9px] leading-relaxed space-y-2 ${
+                      advice.type === 'eligible' 
+                        ? 'bg-emerald-950/10 border-emerald-900/30 text-emerald-350'
+                        : advice.type === 'conditional'
+                          ? 'bg-amber-950/10 border-amber-900/30 text-amber-350'
+                          : 'bg-rose-950/10 border-rose-900/30 text-rose-350'
+                    }`}>
+                      <p>{advice.text}</p>
+                      <div className="flex justify-end pt-1">
+                        <a
+                          href={advice.actionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[9.5px] font-bold underline flex items-center gap-1.5"
+                        >
+                          <span>{advice.actionLabel}</span>
+                          <ExternalLink size={9.5} />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
           </div>
 
           {/* TAP Opportunity Cards segment */}
