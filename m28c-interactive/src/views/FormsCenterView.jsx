@@ -48,6 +48,41 @@ const OFFICIAL_FORMS = [
     url: 'https://www.va.gov/find-forms/about-form-28-8872/'
   },
   {
+    id: 'vaf_28_8872a',
+    number: 'VA Form 28-8872a',
+    name: 'Travel Voucher for Vocational Rehabilitation - Continuation Sheet',
+    purpose: 'Continuation page used when itemizing multiple travel routes, tolls, parking, or mileage logs for VR&E travel reimbursement.',
+    url: 'https://www.va.gov/find-forms/about-form-28-8872a/'
+  },
+  {
+    id: 'vaf_28_1905c',
+    number: 'VA Form 28-1905c',
+    name: 'Certification of Training Hours, Wages, and Progress',
+    purpose: 'Used to certify attendance, clock hours, wages, and training establishment progress for veterans in OJT, apprenticeships, or specialized programs.',
+    url: 'https://www.va.gov/find-forms/about-form-28-1905c/'
+  },
+  {
+    id: 'vaf_28_1905d',
+    number: 'VA Form 28-1905d',
+    name: 'Special Report of Training',
+    purpose: 'An official administrative report used to document specific changes in program status, counselor updates, or special training milestones.',
+    url: 'https://www.va.gov/find-forms/about-form-28-1905d/'
+  },
+  {
+    id: 'vaf_28_1905m',
+    number: 'VA Form 28-1905m',
+    name: 'Request and Authorization for Supplies and Direct Reimbursement',
+    purpose: 'Submit this form to formally request computers, books, assistive devices, tools, and supplies, or to get directly reimbursed for self-paid program items.',
+    url: 'https://www.va.gov/find-forms/about-form-28-1905m/'
+  },
+  {
+    id: 'vaf_28_0800',
+    number: 'VA Form 28-0800',
+    name: 'Longitudinal Study of VR&E Program Questionnaire',
+    purpose: 'The questionnaire used for the VA\'s congressionally mandated longitudinal study tracking veteran employment outcomes over a 20-year period.',
+    url: 'https://www.va.gov/find-forms/about-form-28-0800/'
+  },
+  {
     id: 'vaf_20_0998',
     number: 'VA Form 20-0998',
     name: 'Your Rights to Seek Further Review of our Decision',
