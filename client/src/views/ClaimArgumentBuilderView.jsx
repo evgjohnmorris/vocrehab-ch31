@@ -1,7 +1,9 @@
+// @allow-modal
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ChevronRight, Compass
+  ChevronRight, Compass, Plus, Trash2, Printer, Copy, Info, CheckCircle2, Scale,
+  FileText, Sparkles, DollarSign, MapPin, Check
 } from 'lucide-react';
 
 const DISPUTE_AREAS = [
@@ -49,6 +51,44 @@ const DISPUTE_AREAS = [
   }
 ];
 
+const TRACK_DETAILS = [
+  {
+    id: 'reemployment',
+    name: 'Reemployment Track',
+    statute: '38 U.S.C. § 3105 / 38 C.F.R. § 21.48',
+    description: 'For veterans returning to their pre-service employer. Focuses on workplace adjustments and job retention.',
+    colorClass: 'border-blue-500/30 text-blue-400 bg-blue-500/10'
+  },
+  {
+    id: 'rapid_employment',
+    name: 'Rapid Employment Services',
+    statute: '38 U.S.C. § 3105 / 38 C.F.R. § 21.49',
+    description: 'For veterans who already possess the skills to secure employment. Focuses on immediate job search and resume coaching.',
+    colorClass: 'border-amber-500/30 text-amber-400 bg-amber-500/10'
+  },
+  {
+    id: 'self_employment',
+    name: 'Self-Employment Track',
+    statute: '38 U.S.C. § 3117 / 38 C.F.R. § 21.50',
+    description: 'For veterans with Serious Employment Handicaps requiring business start-up services, licensing, and supply coordination.',
+    colorClass: 'border-purple-500/30 text-purple-400 bg-purple-500/10'
+  },
+  {
+    id: 'long_term',
+    name: 'Long-Term Services',
+    statute: '38 U.S.C. § 3105 / 38 C.F.R. § 21.51',
+    description: 'For veterans requiring college degrees, technical certifications, or extended vocational training to overcome limitations.',
+    colorClass: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
+  },
+  {
+    id: 'independent_living',
+    name: 'Independent Living',
+    statute: '38 U.S.C. § 3120 / 38 C.F.R. § 21.53',
+    description: 'For veterans unable to pursue immediate employment. Focuses on gaining independence in daily activities.',
+    colorClass: 'border-rose-500/30 text-rose-400 bg-rose-500/10'
+  }
+];
+
 function ClaimArgumentBuilderView({ reduceMotion }) {
   const [activeTab, setActiveTab] = useState('plan_builder'); // 'plan_builder' | 'brief_builder'
   
@@ -56,22 +96,85 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
   const [vocGoal, setVocGoal] = useState('');
   const [onetCode, setOnetCode] = useState('');
   const [riasecCode, setRiasecCode] = useState('Realistic');
+  const [selectedTrack, setSelectedTrack] = useState('long_term');
   const [trainingObjectives, setTrainingObjectives] = useState('');
-  const requiredServices = {
-    books: true,
-    tuition: true,
-    placement: false,
-    dental: false,
-    tutoring: false
-  };
-  const [accommodations, setAccommodations] = useState({
-    ergoChair: false,
-    textToSpeech: false,
-    extraTime: false,
-    dyslexiaFont: false
-  });
+  const [zipCode, setZipCode] = useState('');
+  const [estimatedMha, setEstimatedMha] = useState('');
   const [subsistenceElection, setSubsistenceElection] = useState('ch31'); // 'ch31' | 'ch33'
   const [copyPlanSuccess, setCopyPlanSuccess] = useState(false);
+
+  // Intermediate Objectives array
+  const [objectives, setObjectives] = useState([
+    { id: '1', desc: 'Complete academic training requirements for the target vocational goal', targetDate: 'Year 3', measure: 'Maintain GPA >= 2.0 and submit term transcripts' },
+    { id: '2', desc: 'Acquire required industry certifications or complete capstone/internship', targetDate: 'Year 3', measure: 'Provide passing scores / supervisor evaluation' },
+    { id: '3', desc: 'Transition to IEAP (Employment Plan) and secure suitable direct placement', targetDate: 'Year 4', measure: '60 days continuous employment in target field' }
+  ]);
+
+  // Services checklist
+  const [requiredServices, setRequiredServices] = useState({
+    tuition: true,
+    books: true,
+    laptop: true,
+    ergoChair: false,
+    dental: false,
+    tutoring: false,
+    placement: true,
+    clothing: false,
+    certs: true
+  });
+
+  const handleAddObjective = () => {
+    const newId = (objectives.length > 0 ? Math.max(...objectives.map(o => parseInt(o.id) || 0)) + 1 : 1).toString();
+    setObjectives([
+      ...objectives,
+      { id: newId, desc: '', targetDate: '', measure: '' }
+    ]);
+  };
+
+  const handleRemoveObjective = (id) => {
+    setObjectives(objectives.filter(o => o.id !== id));
+  };
+
+  const handleObjectiveChange = (id, field, value) => {
+    setObjectives(objectives.map(o => o.id === id ? { ...o, [field]: value } : o));
+  };
+
+  const handleSuggestObjectives = () => {
+    const goal = vocGoal || 'Target Career';
+    let suggested = [];
+    if (selectedTrack === 'long_term') {
+      suggested = [
+        { id: '1', desc: `Complete official academic coursework or degree program required for ${goal}`, targetDate: 'Graduation Term', measure: 'Maintain a cumulative GPA of 2.0 or higher' },
+        { id: '2', desc: `Acquire required professional licenses or complete practical internship for ${goal}`, targetDate: 'Academic Term 6', measure: 'Provide official credential certifications' },
+        { id: '3', desc: `Transition to IEAP employment assistance and secure suitable placement in target field`, targetDate: 'Post-Graduation', measure: 'Successful employment retention for 60 consecutive days' }
+      ];
+    } else if (selectedTrack === 'rapid_employment') {
+      suggested = [
+        { id: '1', desc: `Optimize professional resume, LinkedIn, and vocational portfolio for ${goal}`, targetDate: 'Month 2', measure: 'VRC counselor formal review and approval' },
+        { id: '2', desc: `Complete specialized short-term bootcamps or vocational certificates`, targetDate: 'Month 4', measure: 'Provide certificate of completion' },
+        { id: '3', desc: `Actively apply to job vacancies and participate in interviews as documented in job logs`, targetDate: 'Month 6', measure: 'Secure placement matching physical tolerances' }
+      ];
+    } else if (selectedTrack === 'self_employment') {
+      suggested = [
+        { id: '1', desc: `Formulate a comprehensive business plan and conduct local market feasibility study`, targetDate: 'Month 4', measure: 'Concurrence and approval by VRC and VREO' },
+        { id: '2', desc: `Obtain official business licensing, tax registration, and secure commercial/office space`, targetDate: 'Month 8', measure: 'Provide copy of business license and lease' },
+        { id: '3', desc: `Procure initial inventory/supplies and launch marketing campaigns`, targetDate: 'Month 12', measure: 'Document first sales and operational records' }
+      ];
+    } else if (selectedTrack === 'reemployment') {
+      suggested = [
+        { id: '1', desc: `Conduct job site accommodation analysis with current employer and VRC`, targetDate: 'Month 2', measure: 'Provide completed safety/accommodation report' },
+        { id: '2', desc: `Procure and install necessary ergonomic equipment and adaptive workstation software`, targetDate: 'Month 4', measure: 'VRC verification of equipment installation' },
+        { id: '3', desc: `Complete workplace adjustment period to ensure stable job retention`, targetDate: 'Month 6', measure: 'Employer letter confirming satisfactory performance' }
+      ];
+    } else if (selectedTrack === 'independent_living') {
+      suggested = [
+        { id: '1', desc: `Complete comprehensive medical, cognitive, and daily living safety assessments`, targetDate: 'Month 2', measure: 'Provide physician and specialist evaluations' },
+        { id: '2', desc: `Implement home adjustments and procure daily living assistive equipment`, targetDate: 'Month 8', measure: 'VRC verification of home inspection and receipt of daily living aids' },
+        { id: '3', desc: `Achieve personal independence in activities of daily living (ADLs) without assistance`, targetDate: 'Month 12', measure: 'Final case worker evaluation and closure report' }
+      ];
+    }
+    setObjectives(suggested);
+  };
 
   // Tab 2: Brief Builder State
   const [step, setStep] = useState(1);
@@ -103,42 +206,80 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
     setUserFacts(prev => ({ ...prev, [field]: value }));
   };
 
-
   // Compile Plan Summary Letter
   const compilePlanLetter = () => {
-    return `VR&E CAREER GOAL & PLAN AMENDMENT JUSTIFICATION
-DATE: ${new Date().toLocaleDateString()}
-VOCATIONAL GOAL: ${vocGoal || '[GOAL TITLE]'}
-O*NET CODE: ${onetCode || '[O*NET CODE]'}
-RIASEC CLASSIFICATION: ${riasecCode}
+    const goalText = vocGoal || '[GOAL TITLE]';
+    const onetText = onetCode || '[O*NET CODE]';
+    
+    // Map tracks to full names
+    const trackNames = {
+      reemployment: 'Reemployment Track (38 U.S.C. § 3105 / 38 C.F.R. § 21.48)',
+      rapid_employment: 'Rapid Employment Services Track (38 U.S.C. § 3105 / 38 C.F.R. § 21.49)',
+      self_employment: 'Self-Employment Track (38 U.S.C. § 3117 / 38 C.F.R. § 21.50)',
+      long_term: 'Employment through Long-Term Services Track (38 U.S.C. § 3105 / 38 C.F.R. § 21.51)',
+      independent_living: 'Independent Living Services Track (38 U.S.C. § 3120 / 38 C.F.R. § 21.53)'
+    };
+    const trackName = trackNames[selectedTrack];
 
-============================================================
-1. REHABILITATION GOAL DETAILS
-The Veteran requested plan update or formulation for: ${vocGoal || '[GOAL]'}.
-O*NET code research indicates that entry into this field requires the specified coursework 
-and certifications. Labor market statistics support viability in the target area.
+    // Format objectives
+    const objectivesText = objectives.map((o, idx) => 
+      `${idx + 1}. OBJECTIVE: ${o.desc || '[Enter objective description]'}
+   TARGET COMPLETION: ${o.targetDate || '[Target date]'}
+   MEASURE OF PROGRESS: ${o.measure || '[Progress metric]'}`
+    ).join('\n\n');
 
-2. MANDATORY ACCOMMODATIONS & EQUIPMENT (38 C.F.R. § 21.212)
-The following accommodations are requested as necessary additions to the IPE:
-${Object.entries(accommodations).filter(([, val]) => val).map(([key]) => {
-  if (key === 'ergoChair') return '* Ergonomic orthopedic desk/chair package';
-  if (key === 'textToSpeech') return '* Screen reader / text-to-speech software';
-  if (key === 'extraTime') return '* Extended testing times / class breaks';
-  return '* OpenDyslexic / clean accessibility font configurations';
-}).join('\n') || '* No accommodations selected'}
+    // Format services
+    const servicesList = [];
+    if (requiredServices.tuition) servicesList.push('* Tuition and Mandatory Fees (100% uncapped - 38 C.F.R. § 21.212)');
+    if (requiredServices.books) servicesList.push('* Required Textbooks, Supplies, and Tools (38 C.F.R. § 21.212)');
+    if (requiredServices.laptop) servicesList.push('* High-Performance Computer & Software package (38 C.F.R. § 21.220)');
+    if (requiredServices.ergoChair) servicesList.push('* Ergonomic desk, chair, and adaptive workstation equipment');
+    if (requiredServices.dental) servicesList.push('* VA Dental Referral and Treatment (under 38 U.S.C. § 3117 to prevent training interruption)');
+    if (requiredServices.tutoring) servicesList.push('* Individualized Tutoring support services');
+    if (requiredServices.placement) servicesList.push('* Job placement assistance and employment services (IEAP under 38 C.F.R. § 21.88)');
+    if (requiredServices.clothing) servicesList.push('* Initial professional work clothing allowance');
+    if (requiredServices.certs) servicesList.push('* Professional licensing and certification exam fees');
 
-3. REHABILITATION SERVICES REQUESTED
-* Tuition Payments: ${requiredServices.tuition ? 'REQUESTED' : 'NO'}
-* Book Vouchers: ${requiredServices.books ? 'REQUESTED' : 'NO'}
-* Job Placement Assistance: ${requiredServices.placement ? 'REQUIRED' : 'NO'}
-* Dental Treatment Access: ${requiredServices.dental ? 'REQUIRED' : 'NO'}
-* Tutoring Services: ${requiredServices.tutoring ? 'REQUIRED' : 'NO'}
+    const servicesText = servicesList.length > 0 ? servicesList.join('\n') : '* No specific services selected';
 
-4. SUBSISTENCE ALLOWANCE ELECTION
-Veteran elects: ${subsistenceElection === 'ch31' ? 'Chapter 31 standard rate scale' : 'Post-9/11 GI Bill rate (Chapter 33 election)'}
+    // Format MHA details
+    const mhaText = subsistenceElection === 'ch31'
+      ? 'Chapter 31 Standard Institutional Subsistence Rate scale (38 U.S.C. § 3108)'
+      : `Post-9/11 MHA Election Rate based on school ZIP ${zipCode || '[ZIP]'} (Estimated MHA: $${estimatedMha || '[BAH Rate]'} / Mo - 38 U.S.C. § 3108(f))`;
 
-Plan Modification Rationale:
-${trainingObjectives || '[ENTER COMPREHENSIVE CAREER AMENDMENT RATIONALE]'}`;
+    return `MEMORANDUM FOR RECORD
+DATE: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+TO: Vocational Rehabilitation & Employment Division (VR&E)
+SUBJECT: Request for Initial IPE Formulation / IWRP Plan Amendment
+
+1. SELECTED REHABILITATION TRACK
+Track: ${trackName}
+
+2. VOCATIONAL GOAL & INDUSTRY CODES (38 C.F.R. § 21.84)
+Target Occupational Goal: ${goalText}
+O*NET-SOC Classification Code: ${onetText}
+RIASEC Vocational Classification: ${riasecCode}
+
+3. INTERMEDIATE OBJECTIVES
+The following structured milestones are proposed to measure progress toward rehabilitation:
+
+${objectivesText || 'No intermediate objectives defined.'}
+
+4. REQUIRED SERVICES & ACCOMMODATIONS (38 C.F.R. § 21.212)
+Under 38 U.S.C. § 3104(a)(7) and 38 C.F.R. § 21.212, the VA will furnish necessary books, supplies, equipment, and services. The following items are requested as necessary components of my rehabilitation plan:
+
+${servicesText}
+
+5. SUBSISTENCE ALLOWANCE ELECTION
+Election Option: ${mhaText}
+
+6. PLAN MODIFICATION RATIONALE / PERSONAL JUSTIFICATION
+${trainingObjectives || '[Enter a detailed justification explaining why this rehabilitation plan and target occupational goal is suitable for your physical tolerances and vocational interests. Explain how it overcomes your service-connected disability limitations.]'}
+
+Respectfully Submitted,
+
+___________________________________
+[Veteran Signature]`;
   };
 
   const handleCopyPlan = () => {
@@ -231,151 +372,493 @@ ${selectedArea.evidenceChecklist.map(item => `[ ] ${item}`).join('\n')}`;
 
       {/* TAB 1: IPE PLAN BUILDER */}
       {activeTab === 'plan_builder' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Inputs */}
-          <div className="lg:col-span-6 space-y-4">
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Vocational Goal Details</span>
+          <div className="lg:col-span-7 space-y-6">
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Vocational Goal Title</label>
-                <input 
-                  type="text" 
-                  value={vocGoal} 
-                  onChange={(e) => setVocGoal(e.target.value)} 
-                  placeholder="e.g. Software Engineer"
-                  className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-slate-205"
-                />
+            {/* Rehabilitation Track Cards */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <Compass size={14} className="text-indigo-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Vocational Rehabilitation Track (38 U.S.C. § 3105)</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {TRACK_DETAILS.map(track => {
+                  const isSelected = selectedTrack === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTrack(track.id);
+                        // Trigger immediate suggestion to help user
+                        setTimeout(() => {
+                          const goal = vocGoal || 'Target Career';
+                          let suggested = [];
+                          if (track.id === 'long_term') {
+                            suggested = [
+                              { id: '1', desc: `Complete official academic coursework or degree program required for ${goal}`, targetDate: 'Graduation Term', measure: 'Maintain a cumulative GPA of 2.0 or higher' },
+                              { id: '2', desc: `Acquire required professional licenses or complete practical internship for ${goal}`, targetDate: 'Academic Term 6', measure: 'Provide official credential certifications' },
+                              { id: '3', desc: `Transition to IEAP employment assistance and secure suitable placement in target field`, targetDate: 'Post-Graduation', measure: 'Successful employment retention for 60 consecutive days' }
+                            ];
+                          } else if (track.id === 'rapid_employment') {
+                            suggested = [
+                              { id: '1', desc: `Optimize professional resume, LinkedIn, and vocational portfolio for ${goal}`, targetDate: 'Month 2', measure: 'VRC counselor formal review and approval' },
+                              { id: '2', desc: `Complete specialized short-term bootcamps or vocational certificates`, targetDate: 'Month 4', measure: 'Provide certificate of completion' },
+                              { id: '3', desc: `Actively apply to job vacancies and participate in interviews as documented in job logs`, targetDate: 'Month 6', measure: 'Secure placement matching physical tolerances' }
+                            ];
+                          } else if (track.id === 'self_employment') {
+                            suggested = [
+                              { id: '1', desc: `Formulate a comprehensive business plan and conduct local market feasibility study`, targetDate: 'Month 4', measure: 'Concurrence and approval by VRC and VREO' },
+                              { id: '2', desc: `Obtain official business licensing, tax registration, and secure commercial/office space`, targetDate: 'Month 8', measure: 'Provide copy of business license and lease' },
+                              { id: '3', desc: `Procure initial inventory/supplies and launch marketing campaigns`, targetDate: 'Month 12', measure: 'Document first sales and operational records' }
+                            ];
+                          } else if (track.id === 'reemployment') {
+                            suggested = [
+                              { id: '1', desc: `Conduct job site accommodation analysis with current employer and VRC`, targetDate: 'Month 2', measure: 'Provide completed safety/accommodation report' },
+                              { id: '2', desc: `Procure and install necessary ergonomic equipment and adaptive workstation software`, targetDate: 'Month 4', measure: 'VRC verification of equipment installation' },
+                              { id: '3', desc: `Complete workplace adjustment period to ensure stable job retention`, targetDate: 'Month 6', measure: 'Employer letter confirming satisfactory performance' }
+                            ];
+                          } else if (track.id === 'independent_living') {
+                            suggested = [
+                              { id: '1', desc: `Complete comprehensive medical, cognitive, and daily living safety assessments`, targetDate: 'Month 2', measure: 'Provide physician and specialist evaluations' },
+                              { id: '2', desc: `Implement home adjustments and procure daily living assistive equipment`, targetDate: 'Month 8', measure: 'VRC verification of home inspection and receipt of daily living aids' },
+                              { id: '3', desc: `Achieve personal independence in activities of daily living (ADLs) without assistance`, targetDate: 'Month 12', measure: 'Final case worker evaluation and closure report' }
+                            ];
+                          }
+                          setObjectives(suggested);
+                        }, 50);
+                      }}
+                      className={`text-left p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                        isSelected 
+                          ? 'bg-indigo-500/10 border-indigo-500 shadow-md shadow-indigo-500/5' 
+                          : 'bg-slate-900/40 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className={`text-xs font-bold ${isSelected ? 'text-indigo-400' : 'text-slate-200'}`}>
+                          {track.name}
+                        </span>
+                        {isSelected && (
+                          <span className="p-0.5 bg-indigo-500/20 text-indigo-400 rounded-full">
+                            <Check size={12} />
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mb-2">{track.statute}</div>
+                      <p className="text-[10px] text-slate-450 leading-snug">{track.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Vocational Goal Title, ONET, RIASEC */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Vocational Goal Specification</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Target Goal Title</label>
+                  <input 
+                    type="text" 
+                    value={vocGoal} 
+                    onChange={(e) => setVocGoal(e.target.value)} 
+                    placeholder="e.g. Software Engineer"
+                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">O*NET-SOC Code</label>
+                  <input 
+                    type="text" 
+                    value={onetCode} 
+                    onChange={(e) => setOnetCode(e.target.value)} 
+                    placeholder="e.g. 15-1252.00"
+                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">RIASEC Matching</label>
+                  <select
+                    value={riasecCode}
+                    onChange={(e) => setRiasecCode(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                    aria-label="RIASEC Code Matching"
+                  >
+                    <option value="Realistic">Realistic (R)</option>
+                    <option value="Investigative">Investigative (I)</option>
+                    <option value="Artistic">Artistic (A)</option>
+                    <option value="Social">Social (S)</option>
+                    <option value="Enterprising">Enterprising (E)</option>
+                    <option value="Conventional">Conventional (C)</option>
+                  </select>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                * RIASEC interest profiling ensures the vocational goal is compatible with your aptitude and personality traits under 38 C.F.R. § 21.84.
+              </p>
+            </div>
+
+            {/* Intermediate Objectives Builder */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                  <FileText size={14} className="text-indigo-400" />
+                  <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Intermediate Objectives (38 C.F.R. § 21.84)</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSuggestObjectives}
+                    className="px-2.5 py-1 text-[10px] font-bold bg-slate-900 hover:bg-slate-800 border border-slate-850 rounded text-slate-300 flex items-center gap-1 transition cursor-pointer"
+                    title="Auto-fill recommended objectives based on selected track"
+                  >
+                    <Compass size={12} />
+                    <span>Auto-Suggest</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddObjective}
+                    className="px-2.5 py-1 text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 rounded text-white flex items-center gap-1 transition cursor-pointer"
+                  >
+                    <Plus size={12} />
+                    <span>Add Objective</span>
+                  </button>
+                </div>
+              </div>
+
+              {objectives.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-slate-800 rounded-lg text-slate-500 text-xs">
+                  No objectives defined. Click "Auto-Suggest" or "Add Objective" to begin.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {objectives.map((obj, idx) => (
+                    <div key={obj.id} className="p-3 bg-slate-950/40 border border-slate-850 rounded-lg space-y-3 relative">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-500">Objective #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveObjective(obj.id)}
+                          className="text-slate-500 hover:text-red-400 transition cursor-pointer"
+                          title="Delete Objective"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div className="md:col-span-6">
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase mb-0.5">Description</label>
+                          <input
+                            type="text"
+                            value={obj.desc}
+                            onChange={(e) => handleObjectiveChange(obj.id, 'desc', e.target.value)}
+                            placeholder="e.g. Complete core computer programming curriculum"
+                            className="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="md:col-span-3">
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase mb-0.5">Target Completion</label>
+                          <input
+                            type="text"
+                            value={obj.targetDate}
+                            onChange={(e) => handleObjectiveChange(obj.id, 'targetDate', e.target.value)}
+                            placeholder="e.g. Term 4"
+                            className="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="md:col-span-3">
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase mb-0.5">Measure of Progress</label>
+                          <input
+                            type="text"
+                            value={obj.measure}
+                            onChange={(e) => handleObjectiveChange(obj.id, 'measure', e.target.value)}
+                            placeholder="e.g. Cumulative GPA >= 3.0"
+                            className="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Services and Supplies Checklist */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <Scale size={14} className="text-indigo-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Required Services & Supplies (38 C.F.R. § 21.212)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { id: 'tuition', label: 'Tuition & Mandatory Fees', cite: '38 C.F.R. § 21.212', desc: '100% uncapped payment for approved programs' },
+                  { id: 'books', label: 'Books, Supplies & Tools', cite: '38 C.F.R. § 21.212', desc: 'Required academic materials and kits' },
+                  { id: 'laptop', label: 'High-Performance PC Package', cite: '38 C.F.R. § 21.220', desc: 'Laptops, adaptive hardware, or specialized tech' },
+                  { id: 'ergoChair', label: 'Ergonomic Workstation Setup', cite: '38 C.F.R. § 21.212', desc: 'Desk, chair, and physical support gear' },
+                  { id: 'dental', label: 'VA Dental Referral', cite: '38 U.S.C. § 3117', desc: 'Priority dental care to prevent training interruption' },
+                  { id: 'tutoring', label: 'Individualized Tutoring', cite: '38 C.F.R. § 21.212', desc: 'Academic tutoring if difficulty is documented' },
+                  { id: 'certs', label: 'Exam & Licensure Fees', cite: '38 C.F.R. § 21.212', desc: 'Licensing exams and professional credentials' },
+                  { id: 'clothing', label: 'Professional Clothing', cite: '38 C.F.R. § 21.212', desc: 'Initial employment attire or specific uniforms' },
+                  { id: 'placement', label: 'Job Placement Services', cite: '38 C.F.R. § 21.88', desc: 'Job search, interview prep, and placement' }
+                ].map(service => {
+                  const isChecked = requiredServices[service.id];
+                  return (
+                    <label 
+                      key={service.id} 
+                      className={`flex items-start gap-2.5 p-3 rounded-lg border transition-all duration-150 cursor-pointer select-none ${
+                        isChecked 
+                          ? 'bg-indigo-500/5 border-indigo-500/50' 
+                          : 'bg-slate-950/20 border-slate-850 hover:border-slate-800'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => setRequiredServices({
+                          ...requiredServices,
+                          [service.id]: e.target.checked
+                        })}
+                        className="mt-0.5 accent-indigo-500 cursor-pointer"
+                      />
+                      <div className="space-y-0.5">
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span className="text-xs font-semibold text-slate-200">{service.label}</span>
+                          <span className="text-[8px] font-mono text-slate-500 bg-slate-900 px-1 rounded">{service.cite}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 leading-tight">{service.desc}</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Subsistence Allowance and MHA Estimator */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <DollarSign size={14} className="text-indigo-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Subsistence Allowance Election (38 U.S.C. § 3108)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className={`flex flex-col p-3 rounded-lg border cursor-pointer transition ${
+                  subsistenceElection === 'ch31' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-800'
+                }`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <input
+                      type="radio"
+                      name="subsistence_election"
+                      checked={subsistenceElection === 'ch31'}
+                      onChange={() => setSubsistenceElection('ch31')}
+                      className="accent-indigo-500"
+                    />
+                    <span className="text-xs font-semibold text-slate-200">Standard Chapter 31 Rate</span>
+                  </div>
+                  <p className="text-[10px] text-slate-450 pl-5">
+                    Paid based on dependency count (spouse, children, parents). Ideal for low-cost living areas.
+                  </p>
+                </label>
+
+                <label className={`flex flex-col p-3 rounded-lg border cursor-pointer transition ${
+                  subsistenceElection === 'ch33' ? 'bg-indigo-500/5 border-indigo-500' : 'bg-slate-950/20 border-slate-850 hover:border-slate-800'
+                }`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <input
+                      type="radio"
+                      name="subsistence_election"
+                      checked={subsistenceElection === 'ch33'}
+                      onChange={() => setSubsistenceElection('ch33')}
+                      className="accent-indigo-500"
+                    />
+                    <span className="text-xs font-semibold text-slate-200">Post-9/11 MHA Election Rate</span>
+                  </div>
+                  <p className="text-[10px] text-slate-450 pl-5">
+                    Paid based on the ZIP code of your school (E-5 with dependents BAH rate). Ideal for high-cost areas.
+                  </p>
+                </label>
+              </div>
+
+              {subsistenceElection === 'ch33' && (
+                <div className="p-4 bg-slate-950/40 border border-slate-850 rounded-lg space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Training Location ZIP Code</label>
+                      <div className="relative">
+                        <MapPin size={12} className="absolute left-2.5 top-3 text-slate-500" />
+                        <input
+                          type="text"
+                          value={zipCode}
+                          onChange={(e) => setZipCode(e.target.value)}
+                          placeholder="e.g. 20001"
+                          className="w-full bg-slate-900 border border-slate-800 rounded py-2 pl-8 pr-2 text-xs text-slate-100 focus:border-indigo-500 outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Estimated Monthly MHA ($)</label>
+                      <input
+                        type="number"
+                        value={estimatedMha}
+                        onChange={(e) => setEstimatedMha(e.target.value)}
+                        placeholder="e.g. 2450"
+                        className="w-full bg-slate-900 border border-slate-800 rounded py-2 px-2 text-xs text-slate-100 focus:border-indigo-500 outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-start gap-2 text-[10px] text-indigo-300 leading-relaxed">
+                    <Info size={14} className="shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Election Criteria (38 U.S.C. § 3108(f)):</strong> To qualify for the Post-9/11 rate scale, you must possess remaining non-exhausted entitlement under the Post-9/11 GI Bill (Chapter 33) and sign a formal election form (VA Form 22-1995 or VRC equivalent) prior to the start of training.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Plan Modification Justification Textarea */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <Info size={14} className="text-indigo-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Plan Justification & Necessity Statement</span>
               </div>
               <div>
-                <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">O*NET Code</label>
-                <input 
-                  type="text" 
-                  value={onetCode} 
-                  onChange={(e) => setOnetCode(e.target.value)} 
-                  placeholder="e.g. 15-1252.00"
-                  className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-slate-205"
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">
+                  Detailed Explanation / Personal Rationale
+                </label>
+                <textarea
+                  placeholder="Explain how this specific career goal matches your capabilities and interest, and how the requested services directly accommodate your service-connected disabilities..."
+                  value={trainingObjectives}
+                  onChange={(e) => setTrainingObjectives(e.target.value)}
+                  rows={5}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none leading-relaxed"
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1 font-semibold">RIASEC Code Matching</label>
-              <select
-                value={riasecCode}
-                onChange={(e) => setRiasecCode(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-202"
-                aria-label="RIASEC Code Matching"
-              >
-                <option value="Realistic">Realistic (R)</option>
-                <option value="Investigative">Investigative (I)</option>
-                <option value="Artistic">Artistic (A)</option>
-                <option value="Social">Social (S)</option>
-                <option value="Enterprising">Enterprising (E)</option>
-                <option value="Conventional">Conventional (C)</option>
-              </select>
-            </div>
-
-            {/* Accommodation needs */}
-            <div className="space-y-2 bg-slate-900/20 p-4 border border-slate-800 rounded-xl">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Accommodation Needs</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <label className="flex items-center gap-2 text-slate-350 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accommodations.ergoChair}
-                    onChange={(e) => setAccommodations({...accommodations, ergoChair: e.target.checked})}
-                    className="accent-indigo-500"
-                  />
-                  <span>Ergonomic Desk / Chair</span>
-                </label>
-                <label className="flex items-center gap-2 text-slate-350 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accommodations.textToSpeech}
-                    onChange={(e) => setAccommodations({...accommodations, textToSpeech: e.target.checked})}
-                    className="accent-indigo-500"
-                  />
-                  <span>Text-To-Speech / Screen Reader</span>
-                </label>
-                <label className="flex items-center gap-2 text-slate-350 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accommodations.extraTime}
-                    onChange={(e) => setAccommodations({...accommodations, extraTime: e.target.checked})}
-                    className="accent-indigo-500"
-                  />
-                  <span>Extended Test Time</span>
-                </label>
-                <label className="flex items-center gap-2 text-slate-350 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accommodations.dyslexiaFont}
-                    onChange={(e) => setAccommodations({...accommodations, dyslexiaFont: e.target.checked})}
-                    className="accent-indigo-500"
-                  />
-                  <span>Clean Accessibility Font</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Subsistence Allowance Election */}
-            <div className="space-y-2 bg-slate-900/20 p-4 border border-slate-800 rounded-xl">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Subsistence Allowance Election</span>
-              <div className="flex gap-4 text-xs">
-                <label className="flex items-center gap-1.5 text-slate-350 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="subsistence"
-                    checked={subsistenceElection === 'ch31'}
-                    onChange={() => setSubsistenceElection('ch31')}
-                    className="accent-indigo-500"
-                  />
-                  <span>Chapter 31 Institutional Rate</span>
-                </label>
-                <label className="flex items-center gap-1.5 text-slate-350 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="subsistence"
-                    checked={subsistenceElection === 'ch33'}
-                    onChange={() => setSubsistenceElection('ch33')}
-                    className="accent-indigo-500"
-                  />
-                  <span>Post-9/11 MHA Election Rate</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Goal-Change / Plan amendment justification</label>
-              <textarea
-                placeholder="Explain the specific medical or vocational reasons that require this plan update..."
-                value={trainingObjectives}
-                onChange={(e) => setTrainingObjectives(e.target.value)}
-                rows={4}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-202 resize-none"
-              />
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                * A strong Statement of Necessity addresses physical/cognitive tolerances and documents that the requested services are required to prevent disability aggravation during training.
+              </p>
             </div>
           </div>
 
-          {/* Preview Renders */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="flex justify-between items-center bg-slate-950/30 border border-slate-800 rounded-xl p-4">
-              <span className="text-xs text-slate-300 font-semibold">IPE Justification Memo</span>
+          {/* Preview & Compiled Letter / Supporting Evidence */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="flex justify-between items-center bg-slate-900/30 border border-slate-850 rounded-xl p-4">
+              <div className="flex items-center gap-2">
+                <span className="p-1 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
+                  <Compass size={14} />
+                </span>
+                <span className="text-xs font-bold text-slate-200">IPE Justification Memo</span>
+              </div>
               <div className="flex gap-2">
-                <button onClick={handleCopyPlan} className="btn btn-sm btn-secondary">
-                  {copyPlanSuccess ? 'Copied' : 'Copy'}
+                <button 
+                  onClick={handleCopyPlan} 
+                  className="px-3 py-1.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 border border-slate-850 rounded text-slate-205 flex items-center gap-1 cursor-pointer transition"
+                >
+                  <Copy size={13} />
+                  <span>{copyPlanSuccess ? 'Copied' : 'Copy'}</span>
                 </button>
-                <button onClick={handlePrintPlan} className="btn btn-sm btn-primary">
-                  Print Justification
+                <button 
+                  onClick={handlePrintPlan} 
+                  className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 rounded text-white flex items-center gap-1 cursor-pointer transition"
+                >
+                  <Printer size={13} />
+                  <span>Print Memo</span>
                 </button>
               </div>
             </div>
 
-            <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-6 overflow-y-auto max-h-[500px]">
-              <pre className="text-[11px] text-slate-350 font-mono leading-relaxed whitespace-pre-wrap select-text">
+            <div className="bg-slate-950/40 border border-slate-850 rounded-xl p-5 overflow-y-auto max-h-[450px]">
+              <pre className="text-[10px] text-slate-300 font-mono leading-relaxed whitespace-pre-wrap select-text">
                 {compilePlanLetter()}
               </pre>
+            </div>
+
+            {/* Supporting Evidence Checklist */}
+            <div className="bg-slate-900/20 border border-slate-850 p-5 rounded-xl space-y-4">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Required Supporting Evidence</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Before submitting this plan/amendment to your VRC, secure the following supporting documents to guarantee approval and block arbitrary denials:
+              </p>
+              <div className="space-y-2 text-xs">
+                <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                  <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                  <span className="text-[11px] text-slate-300">
+                    <strong>Service-Connected Disability Rating Letter</strong> showing limitations matching the target occupational goal physical profile.
+                  </span>
+                </label>
+                <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                  <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                  <span className="text-[11px] text-slate-300">
+                    <strong>Local Labor Market Research (LMR)</strong> showing at least 3 job postings in the target occupation in your local area.
+                  </span>
+                </label>
+                
+                {selectedTrack === 'self_employment' && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-850 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-indigo-300">
+                      <strong>Draft Business Plan & Market Feasibility Study</strong> (Required for Category I/II Self-Employment under M28C.IV.C.3).
+                    </span>
+                  </label>
+                )}
+                {selectedTrack === 'independent_living' && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-850 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-rose-300">
+                      <strong>Independent Living Specialist Assessment</strong> detailing limitations in ADLs.
+                    </span>
+                  </label>
+                )}
+                {requiredServices.laptop && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-indigo-300">
+                      <strong>Course Syllabus / IT Requirement Policy</strong> showing computer requirements.
+                    </span>
+                  </label>
+                )}
+                {requiredServices.ergoChair && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-indigo-300">
+                      <strong>Medical Recommendation / PT Assessment</strong> justifying specific ergonomic furniture.
+                    </span>
+                  </label>
+                )}
+                {requiredServices.dental && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-emerald-300">
+                      <strong>VR&E Dental Referral Form (VA Form 10-10d)</strong> signed or requested from your VRC counselor.
+                    </span>
+                  </label>
+                )}
+                {requiredServices.tutoring && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-indigo-300">
+                      <strong>Midterm Deficiency Letter or Instructor Statement</strong> noting academic assistance is required.
+                    </span>
+                  </label>
+                )}
+                {subsistenceElection === 'ch33' && (
+                  <label className="flex items-start gap-2.5 p-2 bg-slate-950/20 border border-slate-850 rounded hover:border-slate-800 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 accent-emerald-500" />
+                    <span className="text-[11px] text-slate-300 text-indigo-300">
+                      <strong>VA Certificate of Eligibility (COE)</strong> showing remaining Post-9/11 GI Bill eligibility.
+                    </span>
+                  </label>
+                )}
+              </div>
             </div>
           </div>
         </div>
