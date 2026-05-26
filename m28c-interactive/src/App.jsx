@@ -26,6 +26,11 @@ import AuthorityLibraryView from './views/AuthorityLibraryView';
 import ClaimArgumentBuilderView from './views/ClaimArgumentBuilderView';
 import CoverageReportView from './views/CoverageReportView';
 import SourceDiffView from './views/SourceDiffView';
+import CaseStatusGuideView from './views/CaseStatusGuideView';
+import IndependentLivingBuilderView from './views/IndependentLivingBuilderView';
+import SchoolPaymentTrackerView from './views/SchoolPaymentTrackerView';
+import FormsCenterView from './views/FormsCenterView';
+import CasePacketBuilderView from './views/CasePacketBuilderView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -570,6 +575,22 @@ function App() {
         return <ResourceCenterView reduceMotion={reduceMotion} />;
       case 'glossary':
         return <GlossaryView reduceMotion={reduceMotion} />;
+      case 'case_status_guide':
+        return <CaseStatusGuideView reduceMotion={reduceMotion} />;
+      case 'independent_living_builder':
+        return <IndependentLivingBuilderView reduceMotion={reduceMotion} />;
+      case 'school_payment_tracker':
+        return <SchoolPaymentTrackerView reduceMotion={reduceMotion} />;
+      case 'forms_center':
+        return <FormsCenterView reduceMotion={reduceMotion} />;
+      case 'case_packet_builder':
+        return (
+          <CasePacketBuilderView 
+            reduceMotion={reduceMotion} 
+            userMode={userMode} 
+            setUserMode={setUserMode} 
+          />
+        );
       default:
         return (
           <div className="doc-card text-center p-8 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl">

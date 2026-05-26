@@ -25,7 +25,7 @@ function main() {
     process.exit(1);
   }
 
-  const workflowFiles = fs.readdirSync(WORKFLOWS_DIR).filter(f => f.endsWith('.json') && f !== 'disputeAreas.json');
+  const workflowFiles = fs.readdirSync(WORKFLOWS_DIR).filter(f => f.endsWith('.json') && f !== 'disputeAreas.json' && f !== 'caseStatuses.json');
   const templateFiles = fs.readdirSync(TEMPLATES_DIR).filter(f => f.endsWith('.json'));
 
   const templateIds = new Set();

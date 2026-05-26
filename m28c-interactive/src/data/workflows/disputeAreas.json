@@ -535,5 +535,310 @@
         "rule": "Request an amendment to your IWRP/IPE to update the goal to a profession requiring graduate-level entry."
       }
     ]
+  },
+  {
+    "id": "eh_denial",
+    "name": "No Employment Handicap Denial",
+    "description": "Counselor determined you do not possess an 'Employment Handicap' (EH), denying basic program entitlement under 38 C.F.R. § 21.51.",
+    "vrcArguments": [
+      {
+        "id": "no_barrier",
+        "label": "VRC claims your service-connected conditions do not cause a barrier to employment.",
+        "correction": "An Employment Handicap exists if your disability causes a significant occupational impairment that limits your ability to prepare for, obtain, or retain a job consistent with your interests and abilities."
+      },
+      {
+        "id": "suitable_employment_held",
+        "label": "VRC claims you already hold suitable employment based on your salary or job title.",
+        "correction": "Employment is NOT suitable if it aggravates your service-connected disabilities, is unsafe, or does not utilize your vocational potential."
+      }
+    ],
+    "evidenceChecklist": [
+      {
+        "id": "medical_aggravation",
+        "text": "Medical records proving your current job tasks aggravate your service-connected disabilities",
+        "weight": 35
+      },
+      {
+        "id": "work_limitation_letters",
+        "text": "Supervisor or peer statements describing required on-the-job physical/mental limitations",
+        "weight": 25
+      },
+      {
+        "id": "skills_assessment",
+        "text": "Vocational assessment proving your current skill set is obsolete or physically incompatible",
+        "weight": 25
+      },
+      {
+        "id": "failed_placement_attempts",
+        "text": "Logs of unsuccessful job applications or interviews in your original field",
+        "weight": 15
+      }
+    ],
+    "citations": [
+      {
+        "citation": "38 U.S.C. § 3102",
+        "level": "binding-statute",
+        "relevance": "Sets the basic statutory entitlement to VR&E for veterans with a service-connected rating and an employment handicap."
+      },
+      {
+        "citation": "38 C.F.R. § 21.51",
+        "level": "binding-regulation",
+        "relevance": "Defines Employment Handicap criteria, focusing on whether service-connected conditions cause significant barriers to suitable employment."
+      },
+      {
+        "citation": "M28C.IV.A.2",
+        "level": "va-policy",
+        "relevance": "Provides counselor guidelines on evaluating and documenting the existence of an Employment Handicap."
+      }
+    ],
+    "rebuttalPushback": "VA will argue that since you are currently employed or hold a college degree, you have no handicap. Rebut by showing that your current duties are medically unsustainable under 38 C.F.R. § 21.51.",
+    "adverseFacts": [
+      {
+        "id": "active_stable_employment",
+        "text": "You are currently earning a substantial income in a stable job.",
+        "rule": "You must prove this job aggravates your disability or that you cannot sustain it long-term."
+      }
+    ]
+  },
+  {
+    "id": "seh_denial",
+    "name": "No Serious Employment Handicap Denial",
+    "description": "Counselor denied a 'Serious Employment Handicap' (SEH) finding under 38 C.F.R. § 21.52, blocking eligibility window extensions and 48-month overrides.",
+    "vrcArguments": [
+      {
+        "id": "rating_10_percent",
+        "label": "VRC states you cannot have an SEH because your service-connected rating is only 10%.",
+        "correction": "38 C.F.R. § 21.52(b) explicitly permits an SEH finding for 10% ratings under exceptional circumstances where a significant barrier remains."
+      },
+      {
+        "id": "no_significant_limitation",
+        "label": "VRC claims your occupational barriers are not severe enough to constitute a 'serious' handicap.",
+        "correction": "An SEH is triggered when a veteran has a rating and exhibits significant limitations in preparing for, obtaining, or retaining suitable employment, demonstrated by long unemployment or frequent job losses."
+      }
+    ],
+    "evidenceChecklist": [
+      {
+        "id": "severe_clinical_records",
+        "text": "Clinical diagnostic reports outlining severe physical or mental limitations",
+        "weight": 35
+      },
+      {
+        "id": "job_loss_history",
+        "text": "Employment records (W-2s, termination letters) proving frequent job changes or long unemployment",
+        "weight": 35
+      },
+      {
+        "id": "intensive_services_need",
+        "text": "Therapist or VSO statement detailing your need for specialized rehabilitation services to hold a job",
+        "weight": 30
+      }
+    ],
+    "citations": [
+      {
+        "citation": "38 U.S.C. § 3102(2)",
+        "level": "binding-statute",
+        "relevance": "Statutory definition of Serious Employment Handicap as a prerequisite for extensions and eligibility waivers."
+      },
+      {
+        "citation": "38 C.F.R. § 21.52",
+        "level": "binding-regulation",
+        "relevance": "Outlines regulatory criteria for determining a Serious Employment Handicap, including 10% rating cases."
+      },
+      {
+        "citation": "M28C.IV.A.2",
+        "level": "va-policy",
+        "relevance": "Outlines serious employment handicap (SEH) definitions and counselor decision boundaries."
+      }
+    ],
+    "rebuttalPushback": "VA will claim your daily function is too high for an SEH. Rebut by documenting physical/cognitive restrictions, therapist letters, or your history of job interruptions.",
+    "adverseFacts": [
+      {
+        "id": "lack_of_job_losses",
+        "text": "Your resume shows continuous employment with no gap periods.",
+        "rule": "Provide evidence showing that your employment was only maintained through extreme accommodations or caused medical injury."
+      }
+    ]
+  },
+  {
+    "id": "ipe_change",
+    "name": "IPE Plan Amendment Refused",
+    "description": "Counselor refused to amend your rehabilitation plan (IPE/IWRP) to update your training track, school facility, or add necessary electives.",
+    "vrcArguments": [
+      {
+        "id": "goal_locked",
+        "label": "VRC states that once an IPE is signed, the vocational goal cannot be altered.",
+        "correction": "38 C.F.R. § 21.94 and § 21.96 authorize plan amendments when circumstances change, or when the goal is found to be no longer suitable due to medical or market reasons."
+      },
+      {
+        "id": "elective_denial",
+        "label": "VRC claims electives or certifications are not in the plan and will not be paid.",
+        "correction": "Under 38 C.F.R. § 21.84, all necessary services and courses required to successfully attain the primary vocational objective must be authorized."
+      }
+    ],
+    "evidenceChecklist": [
+      {
+        "id": "medical_change_goal",
+        "text": "Medical records proving your original goal is no longer physically or mentally suitable",
+        "weight": 40
+      },
+      {
+        "id": "program_audit_electives",
+        "text": "Academic program audit showing electives are required for graduation",
+        "weight": 30
+      },
+      {
+        "id": "onet_credential_proof",
+        "text": "O*NET or job listings proving target employers require the new electives/certifications",
+        "weight": 30
+      }
+    ],
+    "citations": [
+      {
+        "citation": "38 C.F.R. § 21.94",
+        "level": "binding-regulation",
+        "relevance": "Authorizes and governs amendments and updates to a veteran's program of rehabilitation."
+      },
+      {
+        "citation": "38 C.F.R. § 21.96",
+        "level": "binding-regulation",
+        "relevance": "Outlines procedures for changing a vocational goal when the original becomes unfeasible."
+      },
+      {
+        "citation": "38 C.F.R. § 21.84",
+        "level": "binding-regulation",
+        "relevance": "Requires providing all necessary courses and tools to complete the rehabilitation path."
+      }
+    ],
+    "rebuttalPushback": "VRCs hate changing goals due to paperwork. Rebut by presenting clear medical evidence or changes in labor market requirements that make the original plan untenable.",
+    "adverseFacts": [
+      {
+        "id": "multiple_goal_changes",
+        "text": "You have changed your academic major multiple times already.",
+        "rule": "Explain how this specific update is the final, medically suitable goal backed by academic counselor statements."
+      }
+    ]
+  },
+  {
+    "id": "case_interrupted",
+    "name": "Case Interrupted Status",
+    "description": "Counselor placed your case in 'Interrupted Status', stopping subsistence pay and tuition vouchers without adequate prior warning.",
+    "vrcArguments": [
+      {
+        "id": "no_contact_interruption",
+        "label": "VRC claims you failed to maintain contact and immediately suspended your active services.",
+        "correction": "Under 38 C.F.R. § 21.197, VRC must coordinate with the veteran, document contact attempts, and issue a warnings notification before suspending active rehabilitation cases."
+      }
+    ],
+    "evidenceChecklist": [
+      {
+        "id": "contact_attempts_log",
+        "text": "Logs of emails and calls sent to the VRC proving active communication attempts",
+        "weight": 40
+      },
+      {
+        "id": "medical_excuse_interrupted",
+        "text": "Physician statement proving medical emergency or hospitalization during the period of missed contact",
+        "weight": 40
+      },
+      {
+        "id": "interrupted_notice_copy",
+        "text": "Copy of the interruption letter (if one was sent)",
+        "weight": 20
+      }
+    ],
+    "citations": [
+      {
+        "citation": "38 C.F.R. § 21.197",
+        "level": "binding-regulation",
+        "relevance": "Defines Interrupted Status and outlines VRC duties to resolve problems and assist before suspending services."
+      },
+      {
+        "citation": "38 C.F.R. § 21.362",
+        "level": "binding-regulation",
+        "relevance": "Governs case manager responsibilities to monitor conduct and coordinate progress."
+      },
+      {
+        "citation": "M28C.IV.C.4",
+        "level": "va-policy",
+        "relevance": "Outlines operational procedures for placing cases in Interrupted status and required contact protocols."
+      }
+    ],
+    "rebuttalPushback": "VRCs will state you were uncooperative. Rebut by submitting your printed call logs, email histories, and proving you are actively engaged in your training.",
+    "adverseFacts": [
+      {
+        "id": "missed_meetings_unexcused",
+        "text": "You missed multiple VRC meetings without sending a prior excuse.",
+        "rule": "Provide compelling documentation of severe illness, tech failures, or transportation issues."
+      }
+    ]
+  },
+  {
+    "id": "il_denial",
+    "name": "Independent Living Needs Denied",
+    "description": "Counselor denied an Independent Living (IL) program, home adaptions, or assistive devices, claiming you hold minor work potential.",
+    "vrcArguments": [
+      {
+        "id": "has_work_potential",
+        "label": "VRC claims IL is barred because you are capable of some sedentary employment.",
+        "correction": "38 C.F.R. § 21.160 establishes that the purpose of IL is to enable a veteran to function independently in their family or community without a requirement of complete vocational incapacity."
+      },
+      {
+        "id": "mod_budget_limits",
+        "label": "VRC states home or vehicle modifications are subject to local regional office caps.",
+        "correction": "IL programs are subject to statutory limits and VREO/Director approval thresholds, not arbitrary local office spending limits."
+      }
+    ],
+    "evidenceChecklist": [
+      {
+        "id": "adl_checklist_completed",
+        "text": "Completed Activities of Daily Living (ADL) assessment outlining severe home barriers",
+        "weight": 35
+      },
+      {
+        "id": "occupational_therapy_report",
+        "text": "OT assessment report outlining required home modifications or safety equipment",
+        "weight": 30
+      },
+      {
+        "id": "landlord_approval_or_ownership",
+        "text": "Proof of home ownership or landlord written consent for modifications",
+        "weight": 20
+      },
+      {
+        "id": "form_28_0791_data",
+        "text": "Medical doctor statement confirming severe daily living limitations",
+        "weight": 15
+      }
+    ],
+    "citations": [
+      {
+        "citation": "38 U.S.C. § 3120",
+        "level": "binding-statute",
+        "relevance": "Authorizes programs of independent living services and assistance for severely disabled veterans."
+      },
+      {
+        "citation": "38 C.F.R. § 21.160",
+        "level": "binding-regulation",
+        "relevance": "Sets forth the purposes and scope of independent living services."
+      },
+      {
+        "citation": "38 C.F.R. § 21.162",
+        "level": "binding-regulation",
+        "relevance": "Outlines participation criteria for independent living service programs."
+      },
+      {
+        "citation": "M28C.V.C.4",
+        "level": "va-policy",
+        "relevance": "Governs the development, approval levels, and implementation of Independent Living Programs."
+      }
+    ],
+    "rebuttalPushback": "VA often tries to limit IL cases because they are expensive. Rebut by focusing on safety, caregiver burden, and your right to daily independence under 38 U.S.C. § 3120.",
+    "adverseFacts": [
+      {
+        "id": "temporary_residence",
+        "text": "You live in a temporary rental with a lease under 12 months.",
+        "rule": "Focus on portable assistive technologies, safety rails, and adaptive vehicle equipment."
+      }
+    ]
   }
 ]

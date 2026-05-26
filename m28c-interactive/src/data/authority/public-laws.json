@@ -1,0 +1,29 @@
+[
+  {
+    "id": "pub-l-116-315",
+    "citation": "Public Law 116-315",
+    "title": "Johnny Isakson and David P. Roe, M.D. Veterans Health Care and Benefits Improvement Act of 2020",
+    "effectiveDate": "2021-01-05",
+    "impact": "Modified the 48-month rule. Under Section 1007, past usage of Chapter 33 Post-9/11 GI Bill does not count against the 48 months of Chapter 31 VR&E benefits, enabling veterans to access up to 48 months of VR&E even if they already exhausted their GI Bill.",
+    "affectedSections": ["38 U.S.C. § 3695", "38 C.F.R. § 21.4020"],
+    "details": "This law dramatically expanded veteran training pathways by separating GI Bill usage from the active Chapter 31 entitlement calculation."
+  },
+  {
+    "id": "pub-l-115-48",
+    "citation": "Public Law 115-48",
+    "title": "Harry W. Colmery Veterans Educational Assistance Act of 2017 (Forever GI Bill)",
+    "effectiveDate": "2017-08-16",
+    "impact": "Removed the 15-year delimiting date for Post-9/11 GI Bill eligibility for veterans discharged on or after January 1, 2013, which influenced Chapter 31 administrative reviews of 12-year basic eligibility windows.",
+    "affectedSections": ["38 U.S.C. § 3311", "38 C.F.R. § 21.41"],
+    "details": "Established that veterans with newer discharges have unlimited time to utilize educational benefits, leading to changes in how VA evaluates basic eligibility duration rules."
+  },
+  {
+    "id": "pub-l-110-252",
+    "citation": "Public Law 110-252",
+    "title": "Post-9/11 Veterans Educational Assistance Act of 2008",
+    "effectiveDate": "2009-08-01",
+    "impact": "Established the Post-9/11 GI Bill (Chapter 33) and introduced the election option allowing Chapter 31 participants who have remaining Chapter 33 entitlement to elect the Post-9/11 subsistence allowance rate.",
+    "affectedSections": ["38 U.S.C. § 3108(b)", "38 C.F.R. § 21.260"],
+    "details": "Allowed Chapter 31 veterans to receive the generally higher housing allowance (MHA) rate of Chapter 33, making VR&E economically viable for many students."
+  }
+]

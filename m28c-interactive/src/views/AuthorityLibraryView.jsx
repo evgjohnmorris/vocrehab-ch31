@@ -100,8 +100,14 @@ function AuthorityLibraryView({
           url = `${import.meta.env.BASE_URL}authority/cfr/${id}.json`;
         } else if (normalizedType === 'm28c') {
           url = `${import.meta.env.BASE_URL}authority/m28c/${id}.json`;
+        } else if (normalizedType === 'public-law') {
+          url = `${import.meta.env.BASE_URL}authority/public-law/${id}.json`;
+        } else if (normalizedType === 'federal-register') {
+          url = `${import.meta.env.BASE_URL}authority/federal-register/${id}.json`;
         }
       }
+
+
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error ${res.status} when loading ${url}`);
@@ -448,7 +454,6 @@ function AuthorityLibraryView({
                 <strong>Database Scope Alert:</strong> Full USC/CFR corpus in progress; M28C public chapter coverage is partial and summary-based.
               </span>
             </div>
-
             {/* Sub Tabs for Sources */}
             <div className="flex gap-2 border-b border-slate-800 pb-2">
               <button
@@ -495,6 +500,36 @@ function AuthorityLibraryView({
                 }`}
               >
                 KnowVA M28C Manual
+              </button>
+              <button
+                onClick={() => {
+                  setBrowseSourceTab('public-laws');
+                  if (manifest.publicLaws && manifest.publicLaws.length > 0) {
+                    loadDocument('public-law', manifest.publicLaws[0].id);
+                  }
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  browseSourceTab === 'public-laws'
+                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Public Laws
+              </button>
+              <button
+                onClick={() => {
+                  setBrowseSourceTab('federal-registers');
+                  if (manifest.federalRegister && manifest.federalRegister.length > 0) {
+                    loadDocument('federal-register', manifest.federalRegister[0].id);
+                  }
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  browseSourceTab === 'federal-registers'
+                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Federal Register
               </button>
             </div>
 
@@ -564,6 +599,48 @@ function AuthorityLibraryView({
                         <span className="text-xs font-semibold leading-snug">{m.title}</span>
                       </button>
                     ))}
+
+                  {/* Public Laws List */}
+                  {browseSourceTab === 'public-laws' && manifest.publicLaws && manifest.publicLaws
+                    .filter(pl => pl.citation.toLowerCase().includes(searchQuery.toLowerCase()) || pl.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(pl => (
+                      <button
+                        key={pl.id}
+                        onClick={() => {
+                          setSelectedSection({ type: 'public-law', id: pl.id });
+                        }}
+                        className={`w-full text-left p-3.5 transition flex flex-col gap-1 ${
+                          selectedItemId === pl.id && selectedItemType === 'public-law'
+                            ? 'bg-emerald-500/5 text-emerald-400 border-l-2 border-emerald-500'
+                            : 'text-slate-400 hover:bg-slate-900/40 hover:text-slate-200'
+                        }`}
+                      >
+                        <span className="text-[10px] font-bold tracking-wider">{pl.citation}</span>
+                        <span className="text-xs font-semibold leading-snug">{pl.title}</span>
+                      </button>
+                    ))
+                  }
+
+                  {/* Federal Register List */}
+                  {browseSourceTab === 'federal-registers' && manifest.federalRegister && manifest.federalRegister
+                    .filter(fr => fr.citation.toLowerCase().includes(searchQuery.toLowerCase()) || fr.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(fr => (
+                      <button
+                        key={fr.id}
+                        onClick={() => {
+                          setSelectedSection({ type: 'federal-register', id: fr.id });
+                        }}
+                        className={`w-full text-left p-3.5 transition flex flex-col gap-1 ${
+                          selectedItemId === fr.id && selectedItemType === 'federal-register'
+                            ? 'bg-emerald-500/5 text-emerald-400 border-l-2 border-emerald-500'
+                            : 'text-slate-400 hover:bg-slate-900/40 hover:text-slate-200'
+                        }`}
+                      >
+                        <span className="text-[10px] font-bold tracking-wider">{fr.citation}</span>
+                        <span className="text-xs font-semibold leading-snug">{fr.title}</span>
+                      </button>
+                    ))
+                  }
                 </div>
               </div>
 

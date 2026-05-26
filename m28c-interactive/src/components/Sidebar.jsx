@@ -1,18 +1,13 @@
 import { 
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
-  FileText, ChevronRight, FileEdit,
-  Gavel, FileCheck, CheckCircle2, RefreshCw, Home, Shield, Settings
+  FileText, FileEdit,
+  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity
 } from 'lucide-react';
-import authorityManifest from '../data/authority/manifest.json';
 
 function Sidebar({ 
   activeView, 
   setActiveView, 
-  selectedSection, 
-  setSelectedSection,
-  expandedCategories, 
-  toggleCategory, 
   setWizardResult,
   setSelfGeneratedLetter,
   setDirQuery,
@@ -88,52 +83,25 @@ function Sidebar({
           </div>
 
           <div 
-            className={`nav-item ${activeView === 'special_programs' ? 'active' : ''}`}
-            onClick={() => handleNavClick('special_programs')}
+            className={`nav-item ${activeView === 'independent_living_builder' ? 'active' : ''}`}
+            onClick={() => handleNavClick('independent_living_builder')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('special_programs'))}
-          >
-            <GraduationCap size={18} />
-            <span>School / Training Track</span>
-          </div>
-
-          <div 
-            className={`nav-item ${activeView === 'dispute_hub' && sessionStorage.getItem('dispute_hub_prefill') === 'computer_denial' ? 'active' : ''}`}
-            onClick={() => {
-              sessionStorage.setItem('dispute_hub_prefill', 'computer_denial');
-              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'computer_denial' }));
-              handleNavClick('dispute_hub');
-            }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => {
-              sessionStorage.setItem('dispute_hub_prefill', 'computer_denial');
-              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'computer_denial' }));
-              handleNavClick('dispute_hub');
-            })}
-          >
-            <Briefcase size={18} />
-            <span>Supplies & Tech Requests</span>
-          </div>
-
-          <div 
-            className={`nav-item`}
-            onClick={() => {
-              sessionStorage.setItem('dispute_hub_prefill', 'feasibility_denial');
-              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'feasibility_denial' }));
-              handleNavClick('dispute_hub');
-            }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => {
-              sessionStorage.setItem('dispute_hub_prefill', 'feasibility_denial');
-              window.dispatchEvent(new CustomEvent('change-dispute-area', { detail: 'feasibility_denial' }));
-              handleNavClick('dispute_hub');
-            })}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('independent_living_builder'))}
           >
             <Shield size={18} />
-            <span>Independent Living Help</span>
+            <span>Independent Living Builder</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'case_status_guide' ? 'active' : ''}`}
+            onClick={() => handleNavClick('case_status_guide')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('case_status_guide'))}
+          >
+            <Activity size={18} />
+            <span>Case Status Guide</span>
           </div>
 
           <div 
@@ -148,17 +116,11 @@ function Sidebar({
           </div>
 
           <div 
-            className={`nav-item ${activeView === 'dispute_hub' && !sessionStorage.getItem('dispute_hub_prefill') ? 'active' : ''}`}
-            onClick={() => {
-              sessionStorage.removeItem('dispute_hub_prefill');
-              handleNavClick('dispute_hub');
-            }}
+            className={`nav-item ${activeView === 'dispute_hub' ? 'active' : ''}`}
+            onClick={() => handleNavClick('dispute_hub')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => {
-              sessionStorage.removeItem('dispute_hub_prefill');
-              handleNavClick('dispute_hub');
-            })}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('dispute_hub'))}
           >
             <Scale size={18} />
             <span>Appeals & Disputes Hub</span>
@@ -181,32 +143,36 @@ function Sidebar({
           </div>
 
           <div 
-            className={`nav-item ${activeView === 'document_generator' ? 'active' : ''}`}
-            onClick={() => handleNavClick('document_generator')}
+            className={`nav-item ${activeView === 'case_packet_builder' ? 'active' : ''}`}
+            onClick={() => handleNavClick('case_packet_builder')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('document_generator'))}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('case_packet_builder'))}
           >
-            <FileEdit size={18} />
-            <span>Build a Letter / Document</span>
+            <FileText size={18} />
+            <span>Case Packet Builder</span>
           </div>
 
           <div 
-            className={`nav-item`}
-            onClick={() => {
-              // Directs to evidence sufficiency checklist within dispute hub
-              window.dispatchEvent(new CustomEvent('change-dispute-tab', { detail: 'evidence' }));
-              handleNavClick('dispute_hub');
-            }}
+            className={`nav-item ${activeView === 'forms_center' ? 'active' : ''}`}
+            onClick={() => handleNavClick('forms_center')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => handleKeyDown(e, () => {
-              window.dispatchEvent(new CustomEvent('change-dispute-tab', { detail: 'evidence' }));
-              handleNavClick('dispute_hub');
-            })}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('forms_center'))}
           >
-            <FileCheck size={18} />
-            <span>Track Evidence Packages</span>
+            <FileEdit size={18} />
+            <span>Forms & Packets Center</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'school_payment_tracker' ? 'active' : ''}`}
+            onClick={() => handleNavClick('school_payment_tracker')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('school_payment_tracker'))}
+          >
+            <GraduationCap size={18} />
+            <span>School Payment Tracker</span>
           </div>
         </div>
 
@@ -274,115 +240,6 @@ function Sidebar({
             <span>Accessibility Settings</span>
           </div>
         </div>
-        
-        {(activeView === 'authority_library' || activeView === 'reference') && (
-          <div style={{ marginTop: '16px', borderTop: '1px solid var(--sidebar-border)', paddingTop: '16px' }}>
-            {/* U.S. Code Accordion */}
-            <div>
-              <div 
-                className="collapsible-header" 
-                onClick={() => toggleCategory('usc')}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('usc'))}
-                aria-expanded={expandedCategories.usc}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Scale size={16} />
-                  38 U.S.C. Chapter 31
-                </span>
-                <ChevronRight size={14} className={`collapsible-icon ${expandedCategories.usc ? 'expanded' : ''}`} />
-              </div>
-              
-              {expandedCategories.usc && (
-                <div role="group">
-                  {authorityManifest.statutes.map(sec => (
-                    <div 
-                      key={sec.id}
-                      className={`nav-item sub-item ${selectedSection.type === 'usc' && selectedSection.id === sec.id ? 'active' : ''}`}
-                      onClick={() => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'usc', id: sec.id }); setIsSidebarOpen(false); })}
-                    >
-                      § {sec.id.split('-').pop()}: {sec.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 38 CFR Accordion */}
-            <div style={{ marginTop: '8px' }}>
-              <div 
-                className="collapsible-header" 
-                onClick={() => toggleCategory('cfr')}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('cfr'))}
-                aria-expanded={expandedCategories.cfr}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={16} />
-                  38 CFR Part 21
-                </span>
-                <ChevronRight size={14} className={`collapsible-icon ${expandedCategories.cfr ? 'expanded' : ''}`} />
-              </div>
-              
-              {expandedCategories.cfr && (
-                <div role="group">
-                  {authorityManifest.regulations.map(reg => (
-                    <div 
-                      key={reg.id}
-                      className={`nav-item sub-item ${selectedSection.type === 'cfr' && selectedSection.id === reg.id ? 'active' : ''}`}
-                      onClick={() => { setSelectedSection({ type: 'cfr', id: reg.id }); setIsSidebarOpen(false); }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'cfr', id: reg.id }); setIsSidebarOpen(false); })}
-                    >
-                      § {reg.section}: {reg.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* M28C Accordion */}
-            <div style={{ marginTop: '8px' }}>
-              <div 
-                className="collapsible-header" 
-                onClick={() => toggleCategory('m28c')}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => handleKeyDown(e, () => toggleCategory('m28c'))}
-                aria-expanded={expandedCategories.m28c}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileText size={16} />
-                  M28C Chapters
-                </span>
-                <ChevronRight size={14} className={`collapsible-icon ${expandedCategories.m28c ? 'expanded' : ''}`} />
-              </div>
-
-              {expandedCategories.m28c && (
-                <div role="group">
-                  {authorityManifest.m28c.map(ch => (
-                    <div 
-                      key={ch.id}
-                      className={`nav-item sub-item ${selectedSection.type === 'm28c' && selectedSection.id === ch.id ? 'active' : ''}`}
-                      onClick={() => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => handleKeyDown(e, () => { setSelectedSection({ type: 'm28c', id: ch.id }); setIsSidebarOpen(false); })}
-                    >
-                      {ch.citation}: {ch.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </aside>
   );
