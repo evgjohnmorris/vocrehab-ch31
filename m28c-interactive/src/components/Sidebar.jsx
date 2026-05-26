@@ -72,6 +72,17 @@ function Sidebar({
           </div>
 
           <div 
+            className={`nav-item ${activeView === 'in_service_edu' ? 'active' : ''}`}
+            onClick={() => handleNavClick('in_service_edu')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('in_service_edu'))}
+          >
+            <GraduationCap size={18} className="text-amber-500" />
+            <span>In-Service Career & Edu</span>
+          </div>
+
+          <div 
             className={`nav-item ${activeView === 'wizard' ? 'active' : ''}`}
             onClick={() => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); }}
             role="button"

@@ -34,6 +34,7 @@ import CasePacketBuilderView from './views/CasePacketBuilderView';
 import TapsModuleView from './views/TapsModuleView';
 import WrittenDecisionAnalyzerView from './views/WrittenDecisionAnalyzerView';
 import VeteransBenefitsIndexView from './views/VeteransBenefitsIndexView';
+import InServiceEducationView from './views/InServiceEducationView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -604,6 +605,8 @@ function App() {
         );
       case 'taps':
         return <TapsModuleView reduceMotion={reduceMotion} />;
+      case 'in_service_edu':
+        return <InServiceEducationView reduceMotion={reduceMotion} />;
       case 'written_decision_analyzer':
         return <WrittenDecisionAnalyzerView reduceMotion={reduceMotion} />;
       case 'benefits_index':
