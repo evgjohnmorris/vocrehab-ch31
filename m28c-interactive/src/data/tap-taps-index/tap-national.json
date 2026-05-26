@@ -1,0 +1,122 @@
+[
+  {
+    "id": "dod-tap-main",
+    "type": "resource",
+    "name": "DoD TAP Main Hub",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "Core National TAP",
+    "whatItProvides": "The main statutory transition program for separating or retiring military personnel. It is an outcome-based program under 10 U.S.C. Chapter 58.",
+    "sourceUrl": "https://www.dodtap.mil",
+    "relatedTools": ["tap-timeline-planner", "capstone-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tapevents-class-finder",
+    "type": "resource",
+    "name": "TAP Class & Event Finder",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "Core National TAP",
+    "whatItProvides": "Search engine and locator for physical TAP classes, workshops, events, and online transition courses.",
+    "sourceUrl": "https://www.tapevents.mil",
+    "relatedTools": ["tap-course-finder-shortcut"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dod-tap-core-curriculum",
+    "type": "resource",
+    "name": "DoD TAP Core Curriculum",
+    "audience": ["transitioning", "education-career"],
+    "category": "Core National TAP",
+    "whatItProvides": "Provides access to the foundational elements: DoD Transition Day, VA Benefits and Services briefing, and the Department of Labor One-Day curriculum.",
+    "sourceUrl": "https://www.dodtap.mil/dodtap/app/transition/core_curriculum",
+    "relatedTools": ["crs-tracker"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "dod-tap-tracks",
+    "type": "resource",
+    "name": "DoD TAP Two-Day Tracks Comparison",
+    "audience": ["transitioning", "education-career"],
+    "category": "Core National TAP",
+    "whatItProvides": "Comparison and alignment rules for the mandatory elective tracks: Higher Education, Vocational Training, Employment, and Entrepreneurship.",
+    "sourceUrl": "https://www.dodtap.mil/dodtap/app/transition/tracks",
+    "relatedTools": ["tap-tracks-comparison-tool"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tap-capstone",
+    "type": "resource",
+    "name": "TAP Capstone Verification",
+    "audience": ["transitioning"],
+    "category": "Core National TAP",
+    "whatItProvides": "The final mandatory verification step where commanders confirm that the transitioning service member has met all Career Readiness Standards (CRS).",
+    "sourceUrl": "https://www.dodtap.mil/dodtap/app/transition/capstone",
+    "relatedTools": ["capstone-checklist"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tap-crs",
+    "type": "resource",
+    "name": "Career Readiness Standards (CRS)",
+    "audience": ["transitioning"],
+    "category": "Core National TAP",
+    "whatItProvides": "A set of mandatory deliverables (budget, resume, gap analysis, DD Form 2648) that verify a service member is prepared to transition.",
+    "sourceUrl": "https://www.dodtap.mil/dodtap/app/transition/crs",
+    "relatedTools": ["crs-tracker"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tap-tol",
+    "type": "resource",
+    "name": "Transition Online Learning (TOL)",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "Core National TAP",
+    "whatItProvides": "Web-based portal for completing TAP courses virtually when physical classes are unavailable or for review.",
+    "sourceUrl": "https://www.tapevents.mil/courses",
+    "relatedTools": ["online-tap-course-hub"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tapevents-yyrp",
+    "type": "resource",
+    "name": "Yellow Ribbon Reintegration Program (YRRP) Courses",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "TAP-related Course Areas",
+    "whatItProvides": "Information and courses designed to support National Guard and Reserve members and their families during the deployment cycle.",
+    "sourceUrl": "https://www.tapevents.mil",
+    "relatedTools": [],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tapevents-esgr",
+    "type": "resource",
+    "name": "Employer Support of the Guard and Reserve (ESGR) Resources",
+    "audience": ["transitioning"],
+    "category": "TAP-related Course Areas",
+    "whatItProvides": "Provides training, advocacy, and support regarding employment rights under USERRA for Reserve components.",
+    "sourceUrl": "https://www.tapevents.mil",
+    "relatedTools": [],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "tapevents-skillbridge",
+    "type": "resource",
+    "name": "SkillBridge Courses",
+    "audience": ["transitioning"],
+    "category": "TAP-related Course Areas",
+    "whatItProvides": "Access to educational materials, guidelines, and training resources regarding the DoD SkillBridge program.",
+    "sourceUrl": "https://www.tapevents.mil",
+    "relatedTools": ["tap-to-skillbridge-planner"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

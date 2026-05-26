@@ -29,6 +29,7 @@ import ipeChangeLetterTpl from '../data/templates/ipe-change-letter.json';
 import sehExtensionLetterTpl from '../data/templates/seh-extension-letter.json';
 
 import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
+import { VRE_OFFICES } from '../data/data.js';
 
 const WORKFLOWS = [
   counselorDelayWf,
@@ -74,6 +75,102 @@ const getCompiledLetter = (wf, facts, stage) => {
 };
 
 
+const getAdjustedLetter = (baseLetter, tone, facts, stage, wfTitle) => {
+  const dateStr = new Date().toLocaleDateString();
+  const veteranName = facts.veteranName || '[Veteran Name]';
+  const caseNumber = facts.caseNumber || '[VA Case Number]';
+  const counselorName = facts.counselorName || '[Counselor Name]';
+  const vreoOfficer = facts.vreoOfficer || '[VR&E Officer Name]';
+  const contactInfo = facts.veteranContact || '[Your Email / Phone]';
+
+  // Clean headers if they already exist in the base letter
+  const cleanLetter = baseLetter
+    .replace(/^DATE:.*?\n/img, '')
+    .replace(/^TO:.*?\n/img, '')
+    .replace(/^FROM:.*?\n/img, '')
+    .replace(/^SUBJECT:.*?\n/img, '')
+    .trim();
+
+  switch (tone) {
+    case 'assertive':
+      return `DATE: ${dateStr}
+TO: VR&E Case Manager ${counselorName}
+FROM: Veteran ${veteranName} (Case Reference: ${caseNumber})
+SUBJECT: FORMAL STATEMENT OF REHABILITATION NECESSITY - Chapter 31 Services
+
+Dear Case Manager ${counselorName},
+
+I am writing to formally submit this request under the statutory provisions of 38 U.S.C. § 3104 and the binding regulations of 38 C.F.R. Part 21.
+
+${cleanLetter}
+
+Please be advised that pursuant to 38 U.S.C. § 5104(b) and 38 C.F.R. § 21.420, I am entitled to receive a formal, written decision notice (VA Form 20-0998) regarding this request within a reasonable time. This written notice must detail the specific evidence considered, the regulatory rules applied, and full administrative review options.
+
+Respectfully submitted,
+${veteranName}
+Contact: ${contactInfo}`;
+
+    case 'escalation':
+      return `DATE: ${dateStr}
+TO: VR&E Officer ${vreoOfficer} / Regional Office Leadership
+FROM: Veteran ${veteranName} (Case Reference: ${caseNumber})
+SUBJECT: REQUEST FOR SUPERVISORY INTERVENTION - VR&E ADMINISTRATIVE COMPLIANCE
+
+Dear VR&E Officer ${vreoOfficer},
+
+I am writing to request immediate supervisory intervention under 38 C.F.5. § 21.412. I have experienced ongoing administrative delays and/or non-statutory barriers regarding my rehabilitation program for "${wfTitle}".
+
+${cleanLetter}
+
+I have compiled a communication log and evidence package detailing these issues. I request that your office review the facts and direct my case manager to comply with rehabilitation necessity guidelines. If this request is denied, please ensure a formal VA Form 20-0998 decision notice is issued immediately.
+
+Sincerely,
+${veteranName}
+Contact Info: ${contactInfo}`;
+
+    case 'congressional':
+      return `DATE: ${dateStr}
+TO: Congressional Liaison / Office of Representative/Senator
+FROM: Veteran ${veteranName} (Case Reference: ${caseNumber})
+SUBJECT: PRIVACY ACT RELEASE & CONSTITUENT INQUIRY - VA VR&E PROGRAM
+
+Dear Congressional Staff / Liaison,
+
+I am writing to request a formal constituent inquiry regarding my Vocational Rehabilitation and Employment (VR&E) case under 38 U.S.C. Chapter 31. I am facing administrative barriers that are preventing me from achieving my rehabilitation goal.
+
+Specifically, the issue involves: "${wfTitle}".
+
+Below is the context of my request:
+${cleanLetter}
+
+I have signed the required Privacy Act Waiver. I request that your office contact the VA Regional Office VR&E Liaison to obtain a status update and ensure compliance with federal regulations. (38 U.S.C. Chapter 31)
+
+Respectfully,
+${veteranName}
+Contact: ${contactInfo}`;
+
+    case 'professional':
+    default:
+      return `DATE: ${dateStr}
+TO: VR&E Case Manager ${counselorName}
+FROM: Veteran ${veteranName}
+SUBJECT: Request regarding Chapter 31 Services - ${wfTitle}
+
+Dear Case Manager ${counselorName},
+
+I hope this message finds you well. I am writing to check in on my case status and request services regarding: "${wfTitle}".
+
+${cleanLetter}
+
+I look forward to discussing this at our next appointment. Thank you for your assistance.
+
+Sincerely,
+${veteranName}
+Contact: ${contactInfo}`;
+  }
+};
+
+
 const CASE_STAGES = [
   'Not Applied',
   'Applied, Waiting Appointment',
@@ -103,6 +200,8 @@ function HomeDashboardView({
   const [tempStage, setTempStage] = useState(currentCaseStage ? currentCaseStage.replace(/_/g, ' ') : CASE_STAGES[0]);
   const [formFacts, setFormFacts] = useState({});
   const [copiedLetter, setCopiedLetter] = useState(false);
+  const [letterTone] = useState('professional'); // 'professional' | 'assertive' | 'escalation' | 'congressional'
+  const [selectedOffice, setSelectedOffice] = useState('');
 
   // Case Packet additional states
   const [packetTab, setPacketTab] = useState('summary'); // 'summary' | 'evidence' | 'timeline' | 'authorities' | 'letter'
@@ -321,6 +420,35 @@ function HomeDashboardView({
               </button>
             </div>
 
+            {/* Stepper Pipeline */}
+            <div className="flex items-center justify-between bg-slate-950/45 p-4 border border-slate-850 rounded-xl overflow-x-auto gap-4">
+              {[
+                { step: 0, label: 'Case Profile', desc: 'Active Stage' },
+                { step: 1, label: 'Fact Ingestion', desc: 'Collect Variables' },
+                { step: 2, label: 'Strategic Dossier', desc: 'Analyze & Action' }
+              ].map((s) => {
+                const isCompleted = wizardStep > s.step;
+                const isActive = wizardStep === s.step;
+                return (
+                  <div key={s.step} className="flex-1 min-w-[120px] flex items-center gap-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center border text-[10px] font-bold ${
+                      isCompleted 
+                        ? 'bg-emerald-500 border-emerald-500 text-white' 
+                        : isActive 
+                        ? 'bg-indigo-650 border-indigo-650 text-white font-bold' 
+                        : 'bg-slate-950 border-slate-850 text-slate-500'
+                    }`}>
+                      {isCompleted ? <Check size={12} /> : s.step + 1}
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className={`text-[10px] font-bold block ${isActive ? 'text-slate-100' : isCompleted ? 'text-slate-300' : 'text-slate-500'}`}>{s.label}</span>
+                      <span className="text-[9px] text-slate-500 block leading-tight">{s.desc}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             {/* STEP 1: SELECT CASE STAGE */}
             {wizardStep === 0 && (
               <div className="space-y-4">
@@ -363,32 +491,114 @@ function HomeDashboardView({
                   <p className="text-[11px] text-slate-400 leading-relaxed">Input details regarding this occurrence to populate the legal claim brief.</p>
                 </div>
 
-                <div className="space-y-4 max-w-lg">
-                  {activeWorkflow.steps[0].fields.map((field) => (
-                    <div key={field.name} className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">{field.label}</label>
-                      {field.type === 'select' ? (
-                        <select
-                           value={formFacts[field.name] || ''}
-                           onChange={(e) => handleFactChange(field.name, e.target.value)}
-                           className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
-                        >
-                          <option value="">-- Select Option --</option>
-                          {field.options.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column: Personal Profile Details */}
+                  <div className="bg-slate-950/20 border border-slate-850 p-4 rounded-xl space-y-4">
+                    <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+                      <ShieldCheck size={16} className="text-indigo-400" />
+                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Case Profile Details</span>
+                    </div>
+                    <div className="space-y-3.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase block">Veteran Full Name</label>
                         <input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          value={formFacts[field.name] || ''}
-                          onChange={(e) => handleFactChange(field.name, e.target.value)}
+                          type="text"
+                          placeholder="e.g. John Doe"
+                          value={formFacts.veteranName || ''}
+                          onChange={(e) => handleFactChange('veteranName', e.target.value)}
                           className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
                         />
-                      )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase block">VR&E Case Number (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. C-1234567"
+                          value={formFacts.caseNumber || ''}
+                          onChange={(e) => handleFactChange('caseNumber', e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase block">Counselor Name (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Counselor Smith"
+                          value={formFacts.counselorName || ''}
+                          onChange={(e) => handleFactChange('counselorName', e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase block">VA Regional Office (Escalation / VR&E Officer Lookup)</label>
+                        <select
+                          value={selectedOffice}
+                          onChange={(e) => setSelectedOffice(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700 focus:ring-1 focus:ring-indigo-500"
+                        >
+                          <option value="">-- Select VA Regional Office --</option>
+                          {VRE_OFFICES.map((off) => (
+                            <option key={off.office} value={off.office}>
+                              {off.office}
+                            </option>
+                          ))}
+                        </select>
+                        {selectedOffice && (() => {
+                          const activeOffice = VRE_OFFICES.find(o => o.office === selectedOffice);
+                          return activeOffice && activeOffice.officer ? (
+                            <div className="text-[10px] text-indigo-400 mt-1">
+                              Identified VR&E Officer: <strong>{activeOffice.officer}</strong>
+                            </div>
+                          ) : null;
+                        })()}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase block">Your Email & Phone (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. vet@example.com / 555-555-5555"
+                          value={formFacts.veteranContact || ''}
+                          onChange={(e) => handleFactChange('veteranContact', e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                        />
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Right Column: Challenge-Specific Details */}
+                  <div className="bg-slate-950/20 border border-slate-850 p-4 rounded-xl space-y-4">
+                    <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+                      <AlertTriangle size={16} className="text-amber-400" />
+                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Dispute Context Details</span>
+                    </div>
+                    <div className="space-y-3.5">
+                      {activeWorkflow.steps[0].fields.map((field) => (
+                        <div key={field.name} className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase block">{field.label}</label>
+                          {field.type === 'select' ? (
+                            <select
+                               value={formFacts[field.name] || ''}
+                               onChange={(e) => handleFactChange(field.name, e.target.value)}
+                               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                            >
+                              <option value="">-- Select Option --</option>
+                              {field.options.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type={field.type}
+                              placeholder={field.placeholder}
+                              value={formFacts[field.name] || ''}
+                              onChange={(e) => handleFactChange(field.name, e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-slate-700"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-between pt-4 border-t border-slate-850">
@@ -429,12 +639,17 @@ function HomeDashboardView({
               // Compile timeline text for the letter if applicable
               const compiledTimeline = contactsLog.map(c => `* ${c.date} | Method: ${c.method} | Notes: ${c.request}`).join('\n');
               
+              const activeOffice = VRE_OFFICES.find(o => o.office === selectedOffice);
+              const vreoOfficerName = activeOffice ? activeOffice.officer : '[VR&E Officer Name]';
+
               // Compile dynamic letter body
               const dynamicFacts = {
                 ...formFacts,
+                vreoOfficer: vreoOfficerName,
                 timelineText: compiledTimeline ? `\nCommunication Timeline:\n${compiledTimeline}` : ''
               };
-              const compiledLetter = getCompiledLetter(activeWorkflow, dynamicFacts, tempStage);
+              const baseCompiledLetter = getCompiledLetter(activeWorkflow, dynamicFacts, tempStage);
+              const compiledLetter = getAdjustedLetter(baseCompiledLetter, letterTone, dynamicFacts, tempStage, activeWorkflow.title);
 
               // Generate Case Packet Markdown File content
               const handleDownloadPacket = () => {

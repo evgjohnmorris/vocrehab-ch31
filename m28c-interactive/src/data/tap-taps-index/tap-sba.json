@@ -1,0 +1,50 @@
+[
+  {
+    "id": "sba-boots-to-business",
+    "type": "resource",
+    "name": "Boots to Business (B2B)",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "SBA Entrepreneurship",
+    "whatItProvides": "The entrepreneurship track within the TAP ecosystem, offering an overview of business ownership, feasibility planning, and market validation.",
+    "sourceUrl": "https://www.sba.gov/boots-to-business",
+    "relatedTools": ["entrepreneurship-track", "startup-track-planner"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "sba-business-plan-basics",
+    "type": "resource",
+    "name": "Business Plan Basics",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "SBA Entrepreneurship",
+    "whatItProvides": "Guided templates and worksheets for drafting business plans, financial projections, and operational models.",
+    "sourceUrl": "https://www.sba.gov/business-guide/plan-your-business/write-your-business-plan",
+    "relatedTools": ["business-plan-worksheet"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "sba-follow-on-training",
+    "type": "resource",
+    "name": "SBA Follow-On Training Courses",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "SBA Entrepreneurship",
+    "whatItProvides": "Follow-up courses such as 'B2B Revenue Readiness' and 'B2B Market Research' available after completing the core course.",
+    "sourceUrl": "https://www.sba.gov/boots-to-business",
+    "relatedTools": ["startup-follow-up-plan"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "sba-vboc-offices",
+    "type": "resource",
+    "name": "Veterans Business Outreach Centers (VBOCs)",
+    "audience": ["transitioning", "spouse-caregiver"],
+    "category": "SBA Entrepreneurship",
+    "whatItProvides": "Local centers providing business counseling, mentoring, training, and referrals to capital/funding options for veteran-owned startups.",
+    "sourceUrl": "https://www.sba.gov/local-assistance/resource-partners/veterans-business-outreach-centers-vboc",
+    "relatedTools": ["veteran-business-resources"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

@@ -32,6 +32,8 @@ import SchoolPaymentTrackerView from './views/SchoolPaymentTrackerView';
 import FormsCenterView from './views/FormsCenterView';
 import CasePacketBuilderView from './views/CasePacketBuilderView';
 import TapsModuleView from './views/TapsModuleView';
+import WrittenDecisionAnalyzerView from './views/WrittenDecisionAnalyzerView';
+import VeteransBenefitsIndexView from './views/VeteransBenefitsIndexView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -175,6 +177,11 @@ function App() {
 
   // Ping backend on load and load initial states if connected
   useEffect(() => {
+    if (!import.meta.env.DEV) {
+      console.log('Running in static production mode. Localhost sync disabled.');
+      return;
+    }
+
     fetch('http://localhost:5000/api/status')
       .then(res => {
         if (!res.ok) throw new Error('Backend not responding');
@@ -184,7 +191,7 @@ function App() {
         if (data.status === 'online') {
           console.log('VRE Backend connected, running in server mode.');
           setIsBackendOnline(true);
-
+          
           // 1. Sync bookmarks
           fetch('http://localhost:5000/api/user/bookmarks')
             .then(r => r.ok ? r.json() : null)
@@ -597,6 +604,10 @@ function App() {
         );
       case 'taps':
         return <TapsModuleView reduceMotion={reduceMotion} />;
+      case 'written_decision_analyzer':
+        return <WrittenDecisionAnalyzerView reduceMotion={reduceMotion} />;
+      case 'benefits_index':
+        return <VeteransBenefitsIndexView reduceMotion={reduceMotion} />;
 
       default:
         return (

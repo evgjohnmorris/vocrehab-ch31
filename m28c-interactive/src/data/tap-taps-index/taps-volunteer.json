@@ -1,0 +1,110 @@
+[
+  {
+    "id": "vol-general",
+    "type": "volunteer",
+    "name": "General TAPS Volunteer Opportunities",
+    "audience": ["survivor-helper", "transitioning"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Enables individuals to support TAPS seminars, staff check-in tables, assist with local admin, or coordinate regional events.",
+    "sourceUrl": "https://www.taps.org/volunteer",
+    "relatedTools": ["volunteer-page"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-military-mentor",
+    "type": "volunteer",
+    "name": "Legacy and Military Mentor",
+    "audience": ["transitioning", "survivor-helper"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Enables active duty service members or veterans to mentor bereaved military children and teenagers during TAPS Good Grief Camps.",
+    "sourceUrl": "https://www.taps.org/militarymentor",
+    "relatedTools": ["mentor-volunteer"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-peer-mentor",
+    "type": "volunteer",
+    "name": "Become a TAPS Peer Mentor",
+    "audience": ["survivor", "grief-casework"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Survivors who are at least 18 months past their loss can complete training to act as peer mentors for newly grieving survivors.",
+    "sourceUrl": "https://www.taps.org/peers/become",
+    "relatedTools": ["become-a-peer-mentor"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-team-taps",
+    "type": "volunteer",
+    "name": "Team TAPS Endurance Program",
+    "audience": ["survivor", "survivor-helper"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Athletic and endurance fundraising group. Members run, walk, or cycle in major national races to raise funds and awareness for TAPS.",
+    "sourceUrl": "https://www.taps.org/teamtaps",
+    "relatedTools": ["team-taps-opportunity"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-golf4taps",
+    "type": "volunteer",
+    "name": "Golf4TAPS Fundraisers",
+    "audience": ["survivor-helper"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Community-led golf tournaments and fundraisers that direct proceeds towards supporting grieving military families.",
+    "sourceUrl": "https://www.taps.org/golf",
+    "relatedTools": ["golf-fundraiser"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-teams4taps",
+    "type": "volunteer",
+    "name": "teams4taps Sports Engagement",
+    "audience": ["survivor"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Coordinates with professional sports teams and college athletics to host survivors at games and honor fallen heroes during ceremonies.",
+    "sourceUrl": "https://www.taps.org/teams4taps",
+    "relatedTools": ["sports-partner-opportunity"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-shop",
+    "type": "volunteer",
+    "name": "Shop to Support TAPS",
+    "audience": ["survivor", "survivor-helper"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Retail partnerships and charity shopping stores (like the TAPS online store) where proceeds benefit the TAPS mission.",
+    "sourceUrl": "https://www.taps.org/shop",
+    "relatedTools": ["shop-to-support-resources"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-share-story",
+    "type": "volunteer",
+    "name": "Share Your Story",
+    "audience": ["survivor"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "Enables survivors to submit articles, quotes, or videos to TAPS Magazine and news pages to honor their fallen loved ones and share hope.",
+    "sourceUrl": "https://www.taps.org/share",
+    "relatedTools": ["story-submission"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "vol-hero-wall",
+    "type": "volunteer",
+    "name": "Memorial Hero Wall",
+    "audience": ["survivor", "survivor-helper"],
+    "category": "Engagement Opportunities",
+    "whatItProvides": "An online memorial wall where survivors can post photos, share memories, and pay tribute to their fallen military loved ones.",
+    "sourceUrl": "https://www.taps.org/herowall",
+    "relatedTools": ["memorial-wall"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

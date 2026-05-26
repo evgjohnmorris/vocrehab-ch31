@@ -1,0 +1,62 @@
+[
+  {
+    "id": "adv-va-moa",
+    "type": "advocacy",
+    "name": "VA & TAPS Collaboration (MOA)",
+    "audience": ["survivor", "survivor-helper", "grief-casework"],
+    "category": "Government Affiliate Relations",
+    "whatItProvides": "Details the long-standing formal relationship between TAPS and the VA, including the Memorandum of Agreement first entered in 2014 and expanded in 2023, allowing direct referrals for counseling and benefit audits.",
+    "sourceUrl": "https://www.taps.org/advocacy",
+    "relatedTools": ["va-taps-collaboration-note"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "adv-dod-forum",
+    "type": "advocacy",
+    "name": "DoD Survivors Forum",
+    "audience": ["survivor-helper", "grief-casework"],
+    "category": "Government Affiliate Relations",
+    "whatItProvides": "TAPS works closely with the VA and DoD Survivors Forum as a central clearinghouse to coordinate government and private survivor support policies and identify program gaps.",
+    "sourceUrl": "https://www.taps.org/advocacy",
+    "relatedTools": ["survivor-policy-coordination"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "adv-federal-agencies",
+    "type": "advocacy",
+    "name": "Federal Agencies Inter-agency Map",
+    "audience": ["survivor-helper"],
+    "category": "Government Affiliate Relations",
+    "whatItProvides": "Advocacy projects and resource coordination maps involving the VA, DoD, Department of Education, Department of Labor, HHS, and state/local entities.",
+    "sourceUrl": "https://www.taps.org/advocacy",
+    "relatedTools": ["survivor-agency-map"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "adv-legislative",
+    "type": "advocacy",
+    "name": "Legislative Advocacy & Policy Tracking",
+    "audience": ["survivor", "survivor-helper"],
+    "category": "Government Affiliate Relations",
+    "whatItProvides": "Tracks active federal legislation affecting survivor benefits, including advocating to eliminate the remarriage penalty and expand educational entitlements.",
+    "sourceUrl": "https://www.taps.org/advocacy",
+    "relatedTools": ["advocacy-tracker"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "adv-va-referrals",
+    "type": "advocacy",
+    "name": "Survivor VA Benefits Navigator",
+    "audience": ["survivor", "grief-casework"],
+    "category": "Government Affiliate Relations",
+    "whatItProvides": "Dedicated referral pipeline to help survivors identify, prepare, and apply for VA educational grants, burial allowances, Dependency and Indemnity Compensation (DIC), and housing benefits.",
+    "sourceUrl": "https://www.taps.org/advocacy",
+    "relatedTools": ["survivor-va-benefits-navigator"],
+    "status": "current",
+    "lastChecked": "2026-05-26"
+  }
+]

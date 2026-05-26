@@ -2,7 +2,7 @@ import {
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
   FileText, FileEdit,
-  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map
+  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map, ShieldAlert
 } from 'lucide-react';
 
 function Sidebar({ 
@@ -136,6 +136,17 @@ function Sidebar({
             <Scale size={18} />
             <span>Appeals & Disputes Hub</span>
           </div>
+
+          <div 
+            className={`nav-item ${activeView === 'written_decision_analyzer' ? 'active' : ''}`}
+            onClick={() => handleNavClick('written_decision_analyzer')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('written_decision_analyzer'))}
+          >
+            <ShieldAlert size={18} className="text-red-400" />
+            <span>Written Decision Analyzer</span>
+          </div>
         </div>
 
         {/* Primary Actions */}
@@ -191,6 +202,17 @@ function Sidebar({
         <div className="nav-category" style={{ marginTop: '12px' }}>
           <div className="nav-title">Research Authority</div>
           
+          <div 
+            className={`nav-item ${activeView === 'benefits_index' ? 'active' : ''}`}
+            onClick={() => handleNavClick('benefits_index')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('benefits_index'))}
+          >
+            <Compass size={18} />
+            <span>Benefits & Rights Index</span>
+          </div>
+
           <div 
             className={`nav-item ${activeView === 'authority_library' ? 'active' : ''}`}
             onClick={() => handleNavClick('authority_library')}
