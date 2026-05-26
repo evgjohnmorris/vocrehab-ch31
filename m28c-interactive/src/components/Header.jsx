@@ -34,7 +34,8 @@ function Header({
   dyslexiaSpacing,
   setDyslexiaSpacing,
   plainLanguageMode,
-  setPlainLanguageMode
+  setPlainLanguageMode,
+  isBackendOnline = false
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -68,12 +69,15 @@ function Header({
     const loadSearchMetadata = async () => {
       try {
         const baseUrl = import.meta.env?.BASE_URL || '/';
-        const manifestRes = await fetch(`${baseUrl}authority/index.json`);
+        const manifestUrl = isBackendOnline ? 'http://localhost:5000/api/authority/manifest' : `${baseUrl}authority/index.json`;
+        const crosswalkUrl = isBackendOnline ? 'http://localhost:5000/api/authority/crosswalk' : `${baseUrl}authority/topic-crosswalk.json`;
+
+        const manifestRes = await fetch(manifestUrl);
         if (manifestRes.ok) {
           const manifestData = await manifestRes.json();
           setManifest(manifestData);
         }
-        const crosswalkRes = await fetch(`${baseUrl}authority/topic-crosswalk.json`);
+        const crosswalkRes = await fetch(crosswalkUrl);
         if (crosswalkRes.ok) {
           const crosswalkData = await crosswalkRes.json();
           setCrosswalk(crosswalkData);
@@ -83,7 +87,7 @@ function Header({
       }
     };
     loadSearchMetadata();
-  }, []);
+  }, [isBackendOnline]);
 
   // Close search results dropdown on outside click
   useEffect(() => {
@@ -389,6 +393,36 @@ function Header({
               />
             )}
           </button>
+
+          {/* SQLite Database Connection Indicator */}
+          <div 
+            className="action-btn select-none"
+            title={isBackendOnline ? "SQLite Database Backend: CONNECTED" : "SQLite Database Backend: OFFLINE (Using Static Fallbacks)"}
+            style={{
+              borderColor: isBackendOnline ? '#10b981' : 'var(--card-border)',
+              color: isBackendOnline ? '#10b981' : 'var(--text-muted)',
+              backgroundColor: isBackendOnline ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              padding: '0 8px',
+              fontSize: '10px',
+              fontWeight: '700',
+              height: '36px',
+              borderRadius: '8px'
+            }}
+          >
+            <span 
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: isBackendOnline ? '#10b981' : '#64748b'
+              }}
+            />
+            <span>SQL</span>
+          </div>
 
           {/* User Mode Selector */}
           <div className="flex items-center gap-1.5 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 h-9">

@@ -68,7 +68,7 @@ function App() {
   // Navigation State
   const [activeView, setActiveView] = useState('home'); // 'home' | 'reference' | 'wizard' | 'calculator' ...
   const [selectedSection, setSelectedSection] = useState({ type: 'usc', id: '38-usc-3100' });
-  
+
   // Accordion Expand/Collapse State
   const [expandedCategories, setExpandedCategories] = useState({
     usc: true,
@@ -164,6 +164,74 @@ function App() {
   // Sidebar Collapsed/Drawer State for mobile viewports
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Backend server online status
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
+
+  // Ping backend on load and load initial states if connected
+  useEffect(() => {
+    fetch('http://localhost:5000/api/status')
+      .then(res => {
+        if (!res.ok) throw new Error('Backend not responding');
+        return res.json();
+      })
+      .then(data => {
+        if (data.status === 'online') {
+          console.log('VRE Backend connected, running in server mode.');
+          setIsBackendOnline(true);
+
+          // 1. Sync bookmarks
+          fetch('http://localhost:5000/api/user/bookmarks')
+            .then(r => r.ok ? r.json() : null)
+            .then(serverBookmarks => {
+              if (serverBookmarks && Array.isArray(serverBookmarks)) {
+                setBookmarks(serverBookmarks);
+              } else {
+                fetch('http://localhost:5000/api/user/bookmarks', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(bookmarks)
+                });
+              }
+            });
+
+          // 2. Sync user mode
+          fetch('http://localhost:5000/api/user/user_mode')
+            .then(r => r.ok ? r.json() : null)
+            .then(serverMode => {
+              if (serverMode) {
+                setUserMode(serverMode);
+              } else {
+                fetch('http://localhost:5000/api/user/user_mode', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(userMode)
+                });
+              }
+            });
+
+          // 3. Sync case stage
+          fetch('http://localhost:5000/api/user/case_stage')
+            .then(r => r.ok ? r.json() : null)
+            .then(serverStage => {
+              if (serverStage) {
+                setCurrentCaseStage(serverStage);
+              } else {
+                fetch('http://localhost:5000/api/user/case_stage', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(currentCaseStage)
+                });
+              }
+            });
+        }
+      })
+      .catch(() => {
+        console.log('VRE Backend offline, running in offline fallback mode.');
+        setIsBackendOnline(false);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const clearAllData = () => {
     if (window.confirm("Are you sure you want to clear all bookmarks, custom rates, accessibility settings, and session case details? This action cannot be undone.")) {
       localStorage.clear();
@@ -236,7 +304,15 @@ function App() {
       localStorage.setItem('m28c_bookmarks', JSON.stringify(bookmarks));
       sessionStorage.removeItem('m28c_bookmarks');
     }
-  }, [bookmarks, privacyMode]);
+
+    if (isBackendOnline) {
+      fetch('http://localhost:5000/api/user/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookmarks)
+      }).catch(err => console.error('Failed to sync bookmarks to server:', err));
+    }
+  }, [bookmarks, privacyMode, isBackendOnline]);
 
   // Listen to custom navigation events from LegalStatements
   useEffect(() => {
@@ -300,12 +376,28 @@ function App() {
   useEffect(() => {
     const storage = privacyMode ? sessionStorage : localStorage;
     storage.setItem('m28c_user_mode', userMode);
-  }, [userMode, privacyMode]);
+    
+    if (isBackendOnline) {
+      fetch('http://localhost:5000/api/user/user_mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userMode)
+      }).catch(err => console.error('Failed to sync user mode to server:', err));
+    }
+  }, [userMode, privacyMode, isBackendOnline]);
 
   useEffect(() => {
     const storage = privacyMode ? sessionStorage : localStorage;
     storage.setItem('m28c_case_stage', currentCaseStage);
-  }, [currentCaseStage, privacyMode]);
+
+    if (isBackendOnline) {
+      fetch('http://localhost:5000/api/user/case_stage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentCaseStage)
+      }).catch(err => console.error('Failed to sync case stage to server:', err));
+    }
+  }, [currentCaseStage, privacyMode, isBackendOnline]);
 
   // Fetch rates.json on load for automatic VA calculator synchronization
   useEffect(() => {
@@ -403,6 +495,7 @@ function App() {
             setActiveView={setActiveView}
             bookmarks={bookmarks}
             toggleBookmark={toggleBookmark}
+            isBackendOnline={isBackendOnline}
           />
         );
       case 'wizard':
@@ -542,6 +635,7 @@ function App() {
           setDyslexiaSpacing={setDyslexiaSpacing}
           plainLanguageMode={plainLanguageMode}
           setPlainLanguageMode={setPlainLanguageMode}
+          isBackendOnline={isBackendOnline}
         />
 
         {/* MAIN BODY CONTENT */}

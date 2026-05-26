@@ -129,6 +129,24 @@ function ResourceCenterView({ reduceMotion }) {
               Download Volume 2 PDF <ExternalLink size={12} />
             </a>
           </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>VA M28C Chapter 31 Policy Manual (Verbatim)</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Verbatim reference publication of all 15 M28C manual chapters, compiled and paginated for print with custom header/footer page numbering.
+            </p>
+            <a 
+              id="download-m28-manual"
+              href={`${import.meta.env.BASE_URL}m28_manual.pdf`} 
+              download="m28_manual.pdf"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}
+            >
+              Download M28C Manual PDF <ExternalLink size={12} />
+            </a>
+          </div>
         </div>
 
         {/* Category 2: Portals & Career Services */}

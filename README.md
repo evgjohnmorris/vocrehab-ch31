@@ -45,11 +45,13 @@ An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calcu
 ## Structure
 - [CFR-2025-title38-vol1-chapI.pdf](CFR-2025-title38-vol1-chapI.pdf) — Official CFR Title 38 Chapter I Volume 1 (Parts 0–17) PDF.
 - [CFR-2025-title38-vol2-chapI.pdf](CFR-2025-title38-vol2-chapI.pdf) — Official CFR Title 38 Chapter I Volume 2 (Parts 18–299) PDF.
-- [m28c_manual.pdf](m28c_manual.pdf) — Static PDF mockup reference manual.
+- [m28_manual.pdf](m28_manual.pdf) — Verbatim compiled reference publication of all 15 M28C manual chapters, print-ready and paginated.
 - [m28c-interactive/](m28c-interactive/) — Core interactive SPA application.
 
 ## Launching locally
 To run the interactive portal locally:
+
+### 1. Launching the Frontend App
 1. Navigate to `m28c-interactive` directory:
    ```bash
    cd m28c-interactive
@@ -58,7 +60,7 @@ To run the interactive portal locally:
    ```bash
    npm install
    ```
-3. Start the dev server:
+3. Start the frontend dev server:
    ```bash
    npm run dev
    ```
@@ -66,4 +68,24 @@ To run the interactive portal locally:
    ```bash
    npm run build
    ```
+
+### 2. Launching the Backend Server (Optional)
+To run the local database engine and REST API server:
+1. Navigate to the `server` directory:
+   ```bash
+   cd server
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Seed the SQLite database with the legal corpus:
+   ```bash
+   npm run seed
+   ```
+4. Start the backend API server:
+   ```bash
+   npm run dev
+   ```
+This starts the backend on `http://localhost:5000`. The frontend will automatically detect the server and sync user case profiles, bookmarks, and contact timeline logs directly to the SQLite database `server/m28c_guide.db`. If the server is offline, the frontend safely falls back to standard client-side browser storage.
 

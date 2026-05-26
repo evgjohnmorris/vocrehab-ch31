@@ -13,7 +13,8 @@ function AuthorityLibraryView({
   setSelectedSection,
   setActiveView,
   bookmarks = [],
-  toggleBookmark
+  toggleBookmark,
+  isBackendOnline = false
 }) {
   const [activeTab, setActiveTab] = useState('crosswalk'); // 'crosswalk' | 'browse' | 'audit'
   const [browseSourceTab, setBrowseSourceTab] = useState('statutes'); // 'statutes' | 'regulations' | 'm28c'
@@ -51,15 +52,19 @@ function AuthorityLibraryView({
   useEffect(() => {
     const loadMetadata = async () => {
       try {
-        const manifestRes = await fetch(`${import.meta.env.BASE_URL}authority/index.json`);
+        const manifestUrl = isBackendOnline ? 'http://localhost:5000/api/authority/manifest' : `${import.meta.env.BASE_URL}authority/index.json`;
+        const crosswalkUrl = isBackendOnline ? 'http://localhost:5000/api/authority/crosswalk' : `${import.meta.env.BASE_URL}authority/topic-crosswalk.json`;
+        const coverageUrl = isBackendOnline ? 'http://localhost:5000/api/authority/coverage' : `${import.meta.env.BASE_URL}authority/coverage-report.json`;
+
+        const manifestRes = await fetch(manifestUrl);
         const manifestData = await manifestRes.json();
         setManifest(manifestData);
 
-        const crosswalkRes = await fetch(`${import.meta.env.BASE_URL}authority/topic-crosswalk.json`);
+        const crosswalkRes = await fetch(crosswalkUrl);
         const crosswalkData = await crosswalkRes.json();
         setCrosswalk(crosswalkData);
 
-        const coverageRes = await fetch(`${import.meta.env.BASE_URL}authority/coverage-report.json`);
+        const coverageRes = await fetch(coverageUrl);
         const coverageData = await coverageRes.json();
         setCoverageReport(coverageData);
       } catch (err) {
@@ -69,7 +74,7 @@ function AuthorityLibraryView({
       }
     };
     loadMetadata();
-  }, []);
+  }, [isBackendOnline]);
 
   // Fetch document text on demand
   const loadDocument = useCallback(async (type, id) => {
@@ -86,12 +91,16 @@ function AuthorityLibraryView({
     setIsLoadingDoc(true);
     try {
       let url = '';
-      if (normalizedType === 'usc') {
-        url = `${import.meta.env.BASE_URL}authority/usc/${id}.json`;
-      } else if (normalizedType === 'cfr') {
-        url = `${import.meta.env.BASE_URL}authority/cfr/${id}.json`;
-      } else if (normalizedType === 'm28c') {
-        url = `${import.meta.env.BASE_URL}authority/m28c/${id}.json`;
+      if (isBackendOnline) {
+        url = `http://localhost:5000/api/authority/${normalizedType}/${id}`;
+      } else {
+        if (normalizedType === 'usc') {
+          url = `${import.meta.env.BASE_URL}authority/usc/${id}.json`;
+        } else if (normalizedType === 'cfr') {
+          url = `${import.meta.env.BASE_URL}authority/cfr/${id}.json`;
+        } else if (normalizedType === 'm28c') {
+          url = `${import.meta.env.BASE_URL}authority/m28c/${id}.json`;
+        }
       }
 
       const res = await fetch(url);
@@ -111,7 +120,7 @@ function AuthorityLibraryView({
     } finally {
       setIsLoadingDoc(false);
     }
-  }, [loadedContent]);
+  }, [loadedContent, isBackendOnline]);
 
   // Sync selectedSection from sidebar
   useEffect(() => {
