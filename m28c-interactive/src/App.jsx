@@ -31,6 +31,7 @@ import IndependentLivingBuilderView from './views/IndependentLivingBuilderView';
 import SchoolPaymentTrackerView from './views/SchoolPaymentTrackerView';
 import FormsCenterView from './views/FormsCenterView';
 import CasePacketBuilderView from './views/CasePacketBuilderView';
+import TapsModuleView from './views/TapsModuleView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -594,6 +595,8 @@ function App() {
             setUserMode={setUserMode} 
           />
         );
+      case 'taps':
+        return <TapsModuleView reduceMotion={reduceMotion} />;
 
       default:
         return (

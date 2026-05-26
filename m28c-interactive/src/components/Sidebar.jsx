@@ -2,7 +2,7 @@ import {
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
   FileText, FileEdit,
-  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity
+  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map
 } from 'lucide-react';
 
 function Sidebar({ 
@@ -60,6 +60,17 @@ function Sidebar({
         <div className="nav-category" style={{ marginTop: '12px' }}>
           <div className="nav-title">My VR&E Situation</div>
           
+          <div 
+            className={`nav-item ${activeView === 'taps' ? 'active' : ''}`}
+            onClick={() => handleNavClick('taps')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('taps'))}
+          >
+            <Map size={18} className="text-amber-500" />
+            <span>Transition (TAP) Guide</span>
+          </div>
+
           <div 
             className={`nav-item ${activeView === 'wizard' ? 'active' : ''}`}
             onClick={() => { handleNavClick('wizard'); if (setWizardResult) setWizardResult(null); }}
