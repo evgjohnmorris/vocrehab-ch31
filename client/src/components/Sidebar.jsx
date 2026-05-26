@@ -2,7 +2,7 @@ import {
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
   FileText, FileEdit, Search, HeartHandshake,
-  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map, ShieldAlert
+  Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map, ShieldAlert, Target
 } from 'lucide-react';
 
 function Sidebar({ 
@@ -122,6 +122,17 @@ function Sidebar({
           >
             <Compass size={18} />
             <span>IPE / Plan Builder</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'planning' ? 'active' : ''}`}
+            onClick={() => handleNavClick('planning')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('planning'))}
+          >
+            <Target size={18} />
+            <span>Career Strategy & O*NET</span>
           </div>
 
           <div 

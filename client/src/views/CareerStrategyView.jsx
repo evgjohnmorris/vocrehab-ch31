@@ -1,6 +1,7 @@
+// @allow-modal
 import { useState } from 'react';
 import { 
-  Scale, Compass, FileText, Search, CheckCircle, AlertTriangle, Info 
+  Scale, Compass, FileText, Search, CheckCircle, AlertTriangle, Info, Activity 
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CAREERS_DATABASE } from '../data/school_data';
@@ -8,6 +9,38 @@ import { INDUSTRIES_LOOKUP } from '../data/industry_data';
 import { generateJustificationLetter } from '../utils/letterGenerators';
 
 function CareerStrategyView({ reduceMotion }) {
+  // Entitlement Timeline States
+  const [transitionYear, setTransitionYear] = useState(8);
+  const [taStartYear, setTaStartYear] = useState(2);
+  const [taEndYear, setTaEndYear] = useState(6);
+  const [useSkillBridge, setUseSkillBridge] = useState(true);
+  const [skillBridgeDuration, setSkillBridgeDuration] = useState(6); // months
+  const [gibillMonths, setGibillMonths] = useState(36);
+  const [gibillStartYear, setGibillStartYear] = useState(9);
+  const [vreMonths, setVreMonths] = useState(24);
+  const [vreStartYear, setVreStartYear] = useState(12);
+  const [hasSEH, setHasSEH] = useState(false);
+
+  const handleTransitionYearChange = (val) => {
+    setTransitionYear(val);
+    if (taEndYear > val) {
+      setTaEndYear(val);
+    }
+    if (taStartYear > val) {
+      setTaStartYear(val);
+    }
+  };
+
+  const handleTaStartChange = (val) => {
+    const startVal = Math.min(val, taEndYear);
+    setTaStartYear(Math.min(startVal, transitionYear));
+  };
+
+  const handleTaEndChange = (val) => {
+    const endVal = Math.max(val, taStartYear);
+    setTaEndYear(Math.min(endVal, transitionYear));
+  };
+
   // Localized Career Strategy States
   const [selectedCareerIndex, setSelectedCareerIndex] = useState(0);
   const [limitStanding, setLimitStanding] = useState(false);
@@ -156,6 +189,82 @@ function CareerStrategyView({ reduceMotion }) {
     setJustGeneratedLetter(letter);
   };
 
+  const pct = (val) => `${(val / 15) * 100}%`;
+
+  const audits = [];
+  const totalVAEduMonths = gibillMonths + vreMonths;
+  
+  if (totalVAEduMonths > 48) {
+    if (!hasSEH) {
+      audits.push({
+        id: 'cap_exceeded',
+        type: 'danger',
+        title: '48-Month Statutory Limit Exceeded',
+        message: `Your planned path uses ${totalVAEduMonths} months of combined VA benefits (Post-9/11 GI Bill + VR&E). Under 38 U.S.C. 3695, a veteran cannot exceed 48 months of combined entitlement unless a Serious Employment Handicap (SEH) is established.`,
+        cite: '38 U.S.C. 3695'
+      });
+    } else {
+      audits.push({
+        id: 'seh_authorized',
+        type: 'success',
+        title: 'SEH Exception Authorized (48-Month Limit Bypassed)',
+        message: `Serious Employment Handicap (SEH) is active. The statutory 48-month entitlement cap is legally bypassed under 38 U.S.C. § 3102, allowing up to ${vreMonths} months of rehabilitation services in addition to GI Bill benefits.`,
+        cite: '38 U.S.C. 3102'
+      });
+    }
+  }
+
+  // Active Duty / VR&E Conflict
+  if (vreMonths > 0 && vreStartYear <= transitionYear) {
+    audits.push({
+      id: 'vre_active_duty',
+      type: 'warning',
+      title: 'VR&E Active Duty Conflict',
+      message: 'VR&E (Chapter 31) is scheduled during active duty service. While active-duty service members awaiting medical separation can apply under IDES, full VR&E services and subsistence allowance are generally limited to veterans with a service-connected disability rating.',
+      cite: '38 U.S.C. 3102'
+    });
+  }
+
+  // Active Duty / TA separation conflict
+  if (taStartYear > transitionYear || taEndYear > transitionYear) {
+    audits.push({
+      id: 'ta_separation',
+      type: 'warning',
+      title: 'TA Separation Conflict',
+      message: 'Tuition Assistance (TA) is scheduled during veteran status. TA is strictly an active-duty benefit and cannot be used post-separation.',
+      cite: 'DoD Vol. Ed. Partnership Memorandum'
+    });
+  }
+
+  // SkillBridge separation conflict
+  if (useSkillBridge && transitionYear < 1) {
+    audits.push({
+      id: 'sb_no_service',
+      type: 'warning',
+      title: 'SkillBridge Service Requirement',
+      message: 'DoD SkillBridge requires active duty service status. Verify that your transition timeline matches your service dates.',
+      cite: 'DoD Instruction 1322.29'
+    });
+  }
+
+  // Overlap check
+  const gibillStartVal = gibillStartYear - 1;
+  const gibillEndVal = gibillStartVal + (gibillMonths / 12);
+  const vreStartVal = vreStartYear - 1;
+  const vreEndVal = vreStartVal + (vreMonths / 12);
+
+  const isOverlapping = vreMonths > 0 && gibillMonths > 0 && 
+                        (vreStartVal < gibillEndVal && gibillStartVal < vreEndVal);
+  if (isOverlapping) {
+    audits.push({
+      id: 'va_overlap',
+      type: 'warning',
+      title: 'Overlapping VA Entitlements',
+      message: 'Post-9/11 GI Bill and VR&E (Chapter 31) are scheduled to overlap. Veterans cannot receive concurrent payments from both chapters for the same course of study. These benefits require sequential rather than concurrent scheduling.',
+      cite: '38 CFR 21.21'
+    });
+  }
+
   return (
     <motion.div 
       initial={reduceMotion ? {} : { opacity: 0, y: 15 }}
@@ -168,6 +277,381 @@ function CareerStrategyView({ reduceMotion }) {
       <h1 className="doc-title">Career Plan, Strategy and Justification Wizard</h1>
       <p className="doc-subtitle">Generate legally structured VRC justification letters, assess physical compatibility, and find industry classification codes.</p>
       <div className="doc-divider"></div>
+
+      {/* 15-Year Entitlement & Transition Stack Chart */}
+      <div className="mb-8 p-6 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl hover:border-slate-700 transition-all duration-300 relative">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-sm font-bold text-amber-500 uppercase tracking-wider flex items-center gap-2">
+              <Activity size={16} />
+              15-Year Entitlement & Transition Stack Chart
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Model your transition timeline, sequence active-duty tuition assistance (TA), SkillBridge, GI Bill, and VR&E, and audit statutory caps.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20">38 U.S.C. § 3695 Compliant</span>
+          </div>
+        </div>
+
+        {/* Timeline Tracks */}
+        <div className="space-y-4 mb-6">
+          {/* Header labels */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Benefit Track</div>
+            <div className="col-span-9 relative h-6">
+              {Array.from({ length: 15 }).map((_, i) => (
+                <div 
+                  key={i} 
+                  className="absolute text-[10px] font-bold text-slate-400 text-center -translate-x-1/2" 
+                  style={{ left: `${((i + 0.5) / 15) * 100}%` }}
+                >
+                  Yr {i + 1}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Track 1: Service Status */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-xs font-bold text-slate-300 flex flex-col">
+              <span>Service Status</span>
+              <span className="text-[10px] text-slate-500 font-normal">Active vs. Veteran</span>
+            </div>
+            <div className="col-span-9 relative h-10 bg-slate-950/40 border border-slate-900 rounded-lg overflow-hidden">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex justify-between pointer-events-none">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="h-full border-r border-slate-900/30" style={{ left: `${(i / 15) * 100}%`, position: 'absolute' }} />
+                ))}
+              </div>
+              
+              {/* Active Duty Bar */}
+              <div 
+                className="absolute top-1 bottom-1 bg-gradient-to-r from-sky-500/20 to-cyan-500/30 border border-cyan-500/30 text-cyan-300 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help shadow-sm transition-all duration-300"
+                style={{ left: 0, width: pct(transitionYear) }}
+                title={`Active Duty Service: Years 1 to ${transitionYear}`}
+              >
+                Active Duty ({transitionYear} Yrs)
+              </div>
+
+              {/* Veteran Bar */}
+              {15 - transitionYear > 0 && (
+                <div 
+                  className="absolute top-1 bottom-1 bg-gradient-to-r from-slate-800/40 to-slate-900/50 border border-slate-700/30 text-slate-400 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help transition-all duration-300"
+                  style={{ left: pct(transitionYear), width: pct(15 - transitionYear) }}
+                  title={`Veteran Status: Years ${transitionYear + 1} to 15`}
+                >
+                  Veteran ({15 - transitionYear} Yrs)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Track 2: Tuition Assistance */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-xs font-bold text-slate-300 flex flex-col">
+              <span>Tuition Assistance (TA)</span>
+              <span className="text-[10px] text-slate-500 font-normal">Active Duty Ed Benefit</span>
+            </div>
+            <div className="col-span-9 relative h-10 bg-slate-950/40 border border-slate-900 rounded-lg overflow-hidden">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex justify-between pointer-events-none">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="h-full border-r border-slate-900/30" style={{ left: `${(i / 15) * 100}%`, position: 'absolute' }} />
+                ))}
+              </div>
+              
+              {/* TA Bar */}
+              {taEndYear >= taStartYear && taStartYear <= transitionYear && (
+                <div 
+                  className="absolute top-1 bottom-1 bg-gradient-to-r from-emerald-600/20 to-teal-500/30 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help transition-all duration-300"
+                  style={{ 
+                    left: pct(taStartYear - 1), 
+                    width: pct(Math.min(taEndYear, transitionYear) - taStartYear + 1) 
+                  }}
+                  title={`Tuition Assistance (TA): Years ${taStartYear} to ${Math.min(taEndYear, transitionYear)}`}
+                >
+                  TA ({Math.min(taEndYear, transitionYear) - taStartYear + 1} Yrs)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Track 3: SkillBridge */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-xs font-bold text-slate-300 flex flex-col">
+              <span>DoD SkillBridge</span>
+              <span className="text-[10px] text-slate-500 font-normal">Transition Internship</span>
+            </div>
+            <div className="col-span-9 relative h-10 bg-slate-950/40 border border-slate-900 rounded-lg overflow-hidden">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex justify-between pointer-events-none">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="h-full border-r border-slate-900/30" style={{ left: `${(i / 15) * 100}%`, position: 'absolute' }} />
+                ))}
+              </div>
+              
+              {/* SkillBridge Bar */}
+              {useSkillBridge && transitionYear > 0 && (
+                <div 
+                  className="absolute top-1 bottom-1 bg-gradient-to-r from-purple-600/20 to-fuchsia-500/30 border border-purple-500/30 text-purple-300 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help transition-all duration-300"
+                  style={{ 
+                    left: pct(transitionYear - skillBridgeDuration / 12), 
+                    width: pct(skillBridgeDuration / 12) 
+                  }}
+                  title={`DoD SkillBridge: Last ${skillBridgeDuration} Months of Active Duty`}
+                >
+                  SkillBridge ({skillBridgeDuration} Mo)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Track 4: Post-9/11 GI Bill */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-xs font-bold text-slate-300 flex flex-col">
+              <span>Post-9/11 GI Bill (Ch33)</span>
+              <span className="text-[10px] text-slate-500 font-normal">VA Education Benefit</span>
+            </div>
+            <div className="col-span-9 relative h-10 bg-slate-950/40 border border-slate-900 rounded-lg overflow-hidden">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex justify-between pointer-events-none">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="h-full border-r border-slate-900/30" style={{ left: `${(i / 15) * 100}%`, position: 'absolute' }} />
+                ))}
+              </div>
+              
+              {/* GI Bill Bar */}
+              {gibillMonths > 0 && (
+                <div 
+                  className="absolute top-1 bottom-1 bg-gradient-to-r from-indigo-600/20 to-blue-500/30 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help transition-all duration-300"
+                  style={{ 
+                    left: pct(gibillStartYear - 1), 
+                    width: pct(gibillMonths / 12) 
+                  }}
+                  title={`Post-9/11 GI Bill: ${gibillMonths} Months starting in Year ${gibillStartYear}`}
+                >
+                  GI Bill ({gibillMonths} Mo)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Track 5: VR&E Ch31 */}
+          <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-3 text-xs font-bold text-slate-300 flex flex-col">
+              <span>VR&E Chapter 31</span>
+              <span className="text-[10px] text-slate-500 font-normal">VA Employment Program</span>
+            </div>
+            <div className="col-span-9 relative h-10 bg-slate-950/40 border border-slate-900 rounded-lg overflow-hidden">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex justify-between pointer-events-none">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <div key={i} className="h-full border-r border-slate-900/30" style={{ left: `${(i / 15) * 100}%`, position: 'absolute' }} />
+                ))}
+              </div>
+              
+              {/* VR&E Bar */}
+              {vreMonths > 0 && (
+                <div 
+                  className="absolute top-1 bottom-1 bg-gradient-to-r from-amber-600/20 to-orange-500/30 border border-amber-500/30 text-amber-300 text-[10px] font-bold flex items-center justify-center rounded-md cursor-help transition-all duration-300"
+                  style={{ 
+                    left: pct(vreStartYear - 1), 
+                    width: pct(vreMonths / 12) 
+                  }}
+                  title={`VR&E Chapter 31: ${vreMonths} Months starting in Year ${vreStartYear}`}
+                >
+                  VR&E ({vreMonths} Mo)
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-5 bg-slate-950/30 border border-slate-800 rounded-xl mb-6">
+          {/* Column 1: Service & Transition */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-slate-800/80 pb-1.5 flex items-center gap-1.5">
+              <span>Service & Transition</span>
+            </h4>
+            
+            <div className="form-group">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Transition Year: Year {transitionYear}</label>
+              <input 
+                type="range" min="1" max="15" value={transitionYear} 
+                onChange={(e) => handleTransitionYearChange(parseInt(e.target.value))}
+                className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-[9px] text-slate-500 mt-1 block">Separate active duty pay from veteran status benefits.</span>
+            </div>
+
+            <div className="pt-2">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+                <input 
+                  type="checkbox" 
+                  checked={useSkillBridge} 
+                  onChange={(e) => setUseSkillBridge(e.target.checked)}
+                  className="accent-amber-500"
+                />
+                <strong>DoD SkillBridge</strong>
+              </label>
+              {useSkillBridge && (
+                <div className="mt-2 pl-5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Duration: {skillBridgeDuration} Months</label>
+                  <input 
+                    type="range" min="1" max="6" value={skillBridgeDuration} 
+                    onChange={(e) => setSkillBridgeDuration(parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2: In-Service Education (TA) */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-slate-800/80 pb-1.5">In-Service Education</h4>
+            
+            <div className="form-group">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1.5">TA Active Window: Yr {taStartYear} to Yr {taEndYear}</label>
+              <div className="flex gap-2 items-center mb-1">
+                <select 
+                  className="form-control text-xs" 
+                  value={taStartYear} 
+                  onChange={(e) => handleTaStartChange(parseInt(e.target.value))}
+                >
+                  {Array.from({ length: 15 }).map((_, i) => (
+                    <option key={i} value={i + 1}>Start: Year {i + 1}</option>
+                  ))}
+                </select>
+                <span className="text-slate-500 text-xs">to</span>
+                <select 
+                  className="form-control text-xs" 
+                  value={taEndYear} 
+                  onChange={(e) => handleTaEndChange(parseInt(e.target.value))}
+                >
+                  {Array.from({ length: 15 }).map((_, i) => (
+                    <option key={i} value={i + 1}>End: Year {i + 1}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-[9px] text-slate-500 block">Tuition Assistance is only available during active duty service.</span>
+            </div>
+          </div>
+
+          {/* Column 3: Post-Service VA Benefits */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 border-b border-slate-800/80 pb-1.5">Post-Service VA Benefits</h4>
+
+            <div className="form-group mb-3">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Post-9/11 GI Bill: {gibillMonths} Months (Yr {gibillStartYear})</label>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <span className="text-[9px] text-slate-500 block mb-0.5">Start Year</span>
+                  <input 
+                    type="range" min="1" max="15" value={gibillStartYear} 
+                    onChange={(e) => setGibillStartYear(parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">
+                  <span className="text-[9px] text-slate-500 block mb-0.5">Months (Max 36)</span>
+                  <input 
+                    type="range" min="0" max="36" step="1" value={gibillMonths} 
+                    onChange={(e) => setGibillMonths(parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group mb-3">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">VR&E Ch31: {vreMonths} Months (Yr {vreStartYear})</label>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <span className="text-[9px] text-slate-500 block mb-0.5">Start Year</span>
+                  <input 
+                    type="range" min="1" max="15" value={vreStartYear} 
+                    onChange={(e) => setVreStartYear(parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">
+                  <span className="text-[9px] text-slate-500 block mb-0.5">Months (Max {hasSEH ? 72 : 48})</span>
+                  <input 
+                    type="range" min="0" max={hasSEH ? 72 : 48} step="1" value={vreMonths} 
+                    onChange={(e) => setVreMonths(parseInt(e.target.value))}
+                    className="w-full accent-amber-500 h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+                <input 
+                  type="checkbox" 
+                  checked={hasSEH} 
+                  onChange={(e) => {
+                    setHasSEH(e.target.checked);
+                    if (!e.target.checked && vreMonths > 48) {
+                      setVreMonths(48);
+                    }
+                  }}
+                  className="accent-amber-500"
+                />
+                <strong className="text-amber-400">Establish Serious Employment Handicap (SEH)</strong>
+              </label>
+              <span className="text-[9px] text-slate-500 block mt-1">Under 38 U.S.C. 3102, an SEH bypasses the standard 48-month entitlement limit.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Audit Log Results */}
+        <div className="bg-slate-950/20 border border-slate-800 rounded-xl p-4">
+          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Scale size={13} className="text-slate-400" />
+            <span>Statutory Compliance Audits & Citations</span>
+          </h4>
+          
+          {audits.length > 0 ? (
+            <div className="space-y-2">
+              {audits.map((a) => (
+                <div key={a.id} className={`flex items-start gap-3 p-3 rounded-lg border text-xs leading-relaxed ${
+                  a.type === 'danger' ? 'bg-red-500/5 border-red-500/20 text-red-400' :
+                  a.type === 'warning' ? 'bg-amber-500/5 border-amber-500/20 text-amber-400' :
+                  'bg-emerald-500/5 border-emerald-500/20 text-emerald-400'
+                }`}>
+                  <div className="flex-shrink-0 mt-0.5 font-bold">
+                    {a.type === 'danger' ? '[LIMIT]' : a.type === 'warning' ? '[CONFLICT]' : '[APPROVED]'}
+                  </div>
+                  <div className="flex-1">
+                    <strong className="block text-slate-200">{a.title}</strong>
+                    <span className="text-slate-400 block mt-0.5">{a.message}</span>
+                  </div>
+                  <div className="text-[10px] font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800/80 text-slate-400 flex-shrink-0 self-center">
+                    {a.cite}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg text-xs text-emerald-400">
+              <div className="font-bold">[COMPLIANT]</div>
+              <div className="flex-1">
+                <strong className="block text-slate-200">Timeline Audited: 100% Compliant</strong>
+                <span className="text-slate-400 block mt-0.5">Your proposed sequence complies with all active-duty service limits, 38 U.S.C. § 3695 caps, and concurrent usage regulations.</span>
+              </div>
+              <div className="text-[10px] font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800/80 text-slate-400">
+                38 U.S.C. § 3695
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Bento Grid for Input Cards */}
