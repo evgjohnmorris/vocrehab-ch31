@@ -27,6 +27,34 @@ const OFFICIAL_FORMS = [
     url: 'https://www.va.gov/find-forms/about-form-28-0791/'
   },
   {
+    id: 'vaf_28_1905',
+    number: 'VA Form 28-1905',
+    name: 'Authorization and Certification of Entrance or Reentrance into Rehabilitation and Certification of Status',
+    purpose: 'The official authorization form issued by the VA to your school or facility, enabling them to bill the VA directly for your tuition, fees, and books.',
+    url: 'https://www.va.gov/find-forms/about-form-28-1905/'
+  },
+  {
+    id: 'vaf_28_1902n',
+    number: 'VA Form 28-1902n',
+    name: 'Counseling Record - Narrative Report',
+    purpose: 'The document where the VRC records their official decision and narrative justification regarding your Serious Employment Handicap (SEH) and Feasibility.',
+    url: 'https://www.va.gov/find-forms/about-form-28-1902n/'
+  },
+  {
+    id: 'vaf_28_8872',
+    number: 'VA Form 28-8872',
+    name: 'Travel Voucher for Vocational Rehabilitation',
+    purpose: 'Use this form to request reimbursement for travel mileage and expenses incurred during counseling appointments, evaluations, or job hunting.',
+    url: 'https://www.va.gov/find-forms/about-form-28-8872/'
+  },
+  {
+    id: 'vaf_20_0998',
+    number: 'VA Form 20-0998',
+    name: 'Your Rights to Seek Further Review of our Decision',
+    purpose: 'The mandatory decision-notice attachment outlining your procedural rights and the timelines for supplemental claims, higher-level reviews, or board appeals.',
+    url: 'https://www.va.gov/find-forms/about-form-20-0998/'
+  },
+  {
     id: 'vaf_20_10206',
     number: 'VA Form 20-10206',
     name: 'Freedom of Information Act (FOIA) / Privacy Act Request',

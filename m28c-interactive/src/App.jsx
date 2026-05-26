@@ -31,7 +31,6 @@ import IndependentLivingBuilderView from './views/IndependentLivingBuilderView';
 import SchoolPaymentTrackerView from './views/SchoolPaymentTrackerView';
 import FormsCenterView from './views/FormsCenterView';
 import CasePacketBuilderView from './views/CasePacketBuilderView';
-import AdvisoryBlogView from './views/AdvisoryBlogView';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -595,15 +594,7 @@ function App() {
             setUserMode={setUserMode} 
           />
         );
-      case 'blog':
-        return (
-          <AdvisoryBlogView 
-            reduceMotion={reduceMotion} 
-            privacyMode={privacyMode} 
-            setActiveView={setActiveView}
-            setSelectedSection={setSelectedSection}
-          />
-        );
+
       default:
         return (
           <div className="doc-card text-center p-8 bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl">
