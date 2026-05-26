@@ -46,13 +46,30 @@ function formatContent(text) {
       continue;
     }
 
-    // Header level 3
+    // Check if it's a bold list item representing a subsection (e.g. * **Title**: Text)
+    const boldMatch = line.match(/^[\*\-]\s+\*\*(.*?)\*\*:\s*(.*)$/);
+    if (boldMatch) {
+      if (inList) {
+        html += "</ul>\n";
+        inList = false;
+      }
+      html += `<div class="subsection-block">\n  <span class="subsection-title">${escapeHtml(boldMatch[1])}</span>\n  <span class="subsection-text">${escapeHtml(boldMatch[2])}</span>\n</div>\n`;
+      continue;
+    }
+
+    // Header level 3 (Sections)
     if (line.startsWith('###')) {
       if (inList) {
         html += "</ul>\n";
         inList = false;
       }
-      html += `<h3>${escapeHtml(line.replace(/^###\s*/, ''))}</h3>\n`;
+      const headingText = line.replace(/^###\s*/, '');
+      const numMatch = headingText.match(/^(\d+\.\d+)\s+(.*)$/);
+      if (numMatch) {
+        html += `<h3 class="section-title"><span class="section-num">${escapeHtml(numMatch[1])}</span> <span class="section-text-inner">${escapeHtml(numMatch[2])}</span></h3>\n`;
+      } else {
+        html += `<h3 class="section-title">${escapeHtml(headingText)}</h3>\n`;
+      }
       continue;
     }
 
@@ -108,7 +125,7 @@ function formatContent(text) {
 }
 
 async function main() {
-  logger.info("Initializing M28C PDF Compiler (Organized & formatted Edition)...");
+  logger.info("Initializing M28C PDF Compiler (Organized & styled subsections)...");
 
   if (!fs.existsSync(INDEX_PATH)) {
     logger.error(`Manual index not found at ${INDEX_PATH}. Run ingestion first.`);
@@ -458,6 +475,64 @@ async function main() {
     color: #dd6b20;
     margin-bottom: 25px;
     font-weight: 500;
+  }
+
+  /* Section and Subsection Styles */
+  .section-title {
+    font-size: 13pt;
+    margin-top: 35px;
+    margin-bottom: 15px;
+    color: #1a365d;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 6px;
+    page-break-after: avoid;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-num {
+    background-color: #1a365d;
+    color: #ffffff;
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .section-text-inner {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+  }
+
+  .subsection-block {
+    margin: 15px 0 15px 15px;
+    padding: 10px 18px;
+    border-left: 3.5px solid #ac5a39;
+    background-color: #fcfcfb;
+    border-radius: 0 6px 6px 0;
+    page-break-inside: avoid;
+  }
+
+  .subsection-title {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 10pt;
+    font-weight: 700;
+    color: #ac5a39;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .subsection-text {
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #2d3748;
+    display: block;
+    text-align: justify;
   }
 
   .chapter-body p {
