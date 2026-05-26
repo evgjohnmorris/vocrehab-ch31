@@ -4,10 +4,10 @@
   "title": "Training and rehabilitation for veterans with service-connected disabilities.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) Purposes.  The purposes of this program are to provide to eligible veterans with compensable service-connected disabilities all services and assistance necessary to enable them to achieve maximum independence in daily living and, to the maximum extent feasible, to become employable and to obtain and maintain suitable employment.\n\n(b) Basic requirements.  Before a service-disabled veteran may receive training and rehabilitation services under Chapter 31, Title 38 U.S.C., three basic requirements must be met:\n\n(1) The Department of Veterans Affairs must first find that the veteran has basic entitlement to services as prescribed by § 21.40.\n\n(2) The services necessary for training and rehabilitation must be identified by the Department of Veterans Affairs and the veteran.\n\n(3) An individual written plan must be developed by the Department of Veterans Affairs and the veteran describing the goals of the program and the means through which these goals will be achieved.\n\n[49 FR 40814, Oct. 18, 1984; 50 FR 9622, Mar. 11, 1985]\n\nNonduplication",
@@ -25,5 +25,6 @@
       "note": "[49 FR 40814, Oct. 18, 1984; 50 FR 9622, Mar. 11, 1985]"
     }
   ],
-  "hash": "ddd5c82b779ff898e21d3c733bd084f0472ee9343eba77409920c819f2344513"
+  "hash": "ddd5c82b779ff898e21d3c733bd084f0472ee9343eba77409920c819f2344513",
+  "previousHash": null
 }

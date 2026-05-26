@@ -4,10 +4,10 @@
   "title": "“Independent living program” status.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) Purpose.  The independent living program status serves to:\n\n(1) Identify veterans who are being furnished a program of independent living services by VA; and\n\n(2) Assure that such veterans receive necessary services from VA in a timely manner.\n\n(b) Assignment to independent living program  status. A veteran may be assigned or reassigned to independent living program status under the provisions of § 21.88, § 21.94, or § 21.96.\n\n(c) Continuation in independent living program  status. A veteran will be in independent living program status during periods in which:\n\n(1) The provisions of § 21.282 for induction into a program are met, but the veteran is pending induction into the facility at which rehabilitation services will be provided;\n\n(2) The veteran receives rehabilitation services prescribed in an IILP; or\n\n(3) The veteran is on authorized leave of absence status.\n\n(d) Termination of independent living program  status. When a veteran's case has been assigned to independent living program status, the case will be terminated from that status, if one of the following occurs:\n\n(1) A veteran, who has been notified of necessary arrangements to begin a program, the date the program begins and instructions as to the next steps to be taken:\n\n(i) Fails to report and does not respond to followup contact by the case manager;\n\n(ii) Declines or refuses to enter the program; or\n\n(iii) Defers entry for more than 30 days beyond the scheduled beginning date, unless the deferment is due to illness or other sufficient reason.\n\n(2) The veteran completes the IILP;\n\n(3) Either the veteran or VA interrupts the program;\n\n(4) Either the veteran or VA discontinues the program; or\n\n(5) Service-connection for the veteran's service-connected disability is severed by VA or he or she otherwise ceases to be eligible.\n\nCross References:\n\nSee §§ 21.160 Independent living services, 21.282 Effective date of induction into a rehabilitation program, 21.322 Commencing date, and 21.324 Reduction or termination date.\n\n[49 FR 40814, Oct. 18, 1984, as amended at 84 FR 193, Jan. 18, 2019]",
@@ -25,5 +25,6 @@
       "note": "[49 FR 40814, Oct. 18, 1984, as amended at 84 FR 193, Jan. 18, 2019]"
     }
   ],
-  "hash": "894a04fc944c2b8c6fd30f8d3574f5c53a01c845aaf8a0a3cd23c2c1068eabd3"
+  "hash": "894a04fc944c2b8c6fd30f8d3574f5c53a01c845aaf8a0a3cd23c2c1068eabd3",
+  "previousHash": null
 }

@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "../..");
 
-const DATE = '2026-05-21';
+const DATE = '2025-07-01';
 const TITLE = '38';
 const PART = '21';
 const SUBPART = 'A';
@@ -148,11 +148,28 @@ async function main() {
         hash: textHash
       };
 
+      const filename = `38-cfr-${sectionNum.replace('.', '-')}.json`;
+      const filePath = path.join(OUTPUT_DIR, filename);
+
+      let previousHash = null;
+      if (fs.existsSync(filePath)) {
+        try {
+          const existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          if (existing.hash !== textHash) {
+            previousHash = existing.hash;
+          } else {
+            previousHash = existing.previousHash || null;
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      record.previousHash = previousHash;
+
       // Validate against Zod schema
       const parsed = AuthorityRecordSchema.parse(record);
 
-      const filename = `38-cfr-${sectionNum.replace('.', '-')}.json`;
-      const filePath = path.join(OUTPUT_DIR, filename);
       fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
 
       sectionList.push({

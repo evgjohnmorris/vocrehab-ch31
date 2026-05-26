@@ -93,6 +93,42 @@ function ResourceCenterView({ reduceMotion }) {
               Open US Code Portal <ExternalLink size={12} />
             </a>
           </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>CFR 2025 Title 38 Vol 1 (Parts 0–17)</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official paginated PDF of Code of Federal Regulations Title 38, Volume 1 (revised July 1, 2025). Contains regulations from Part 0 through Part 17.
+            </p>
+            <a 
+              id="download-cfr-2025-vol1"
+              href={`${import.meta.env.BASE_URL}CFR-2025-title38-vol1-chapI.pdf`} 
+              download="CFR-2025-title38-vol1-chapI.pdf"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}
+            >
+              Download Volume 1 PDF <ExternalLink size={12} />
+            </a>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>CFR 2025 Title 38 Vol 2 (Parts 18–299)</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official paginated PDF of Code of Federal Regulations Title 38, Volume 2 (revised July 1, 2025). Contains Part 18 through Part 299 (including Part 21 Voc Rehab regulations).
+            </p>
+            <a 
+              id="download-cfr-2025-vol2"
+              href={`${import.meta.env.BASE_URL}CFR-2025-title38-vol2-chapI.pdf`} 
+              download="CFR-2025-title38-vol2-chapI.pdf"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600', alignSelf: 'flex-start', marginTop: '4px' }}
+            >
+              Download Volume 2 PDF <ExternalLink size={12} />
+            </a>
+          </div>
         </div>
 
         {/* Category 2: Portals & Career Services */}

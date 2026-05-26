@@ -43,6 +43,8 @@ An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calcu
 - **34 Comprehensive Terms**: Fully expanded the glossary array with detailed definitions and acronyms including EH, SEH, RTE, EMP, REH, IEEP, IEAP, Retroactive Induction, Revolving Fund Loans, Special Restorative Training, and more.
 
 ## Structure
+- [CFR-2025-title38-vol1-chapI.pdf](CFR-2025-title38-vol1-chapI.pdf) — Official CFR Title 38 Chapter I Volume 1 (Parts 0–17) PDF.
+- [CFR-2025-title38-vol2-chapI.pdf](CFR-2025-title38-vol2-chapI.pdf) — Official CFR Title 38 Chapter I Volume 2 (Parts 18–299) PDF.
 - [m28c_manual.pdf](m28c_manual.pdf) — Static PDF mockup reference manual.
 - [m28c-interactive/](m28c-interactive/) — Core interactive SPA application.
 

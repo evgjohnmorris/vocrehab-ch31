@@ -4,10 +4,10 @@
   "title": "Supplies.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) Purpose of furnishing supplies.  Supplies are furnished to enable a veteran to pursue rehabilitation and achieve the goals of his or her program.\n\n(b) Definition.  The term supplies includes books, tools, and other supplies and equipment which VA determines are necessary for the veteran's rehabilitation program.\n\n(c) Periods during which supplies may be furnished.  Supplies may be furnished during:\n\n(1) Extended evaluation;\n\n(2) Rehabilitation to the point of employability;\n\n(3) Employment services; and\n\n(4) An independent living services program.\n\n(d) Supplies precluded.  Notwithstanding the provisions of paragraph (c) of this section, supplies may not be furnished to a veteran who has elected, or is in receipt of, payment at the educational assistance rate paid under Chapter 34.",
@@ -21,5 +21,6 @@
   "publicLawRefs": [],
   "federalRegisterRefs": [],
   "amendmentNotes": [],
-  "hash": "21a575b755488a7dd7bad7b34bde13e5b2b736bddc9c80e2d8ced2b12938417a"
+  "hash": "21a575b755488a7dd7bad7b34bde13e5b2b736bddc9c80e2d8ced2b12938417a",
+  "previousHash": null
 }

@@ -6,7 +6,7 @@
   "sourceType": "usc",
   "sourceUrl": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section3108&num=0&edition=prelim",
   "officialStatus": "official",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2026-05-19",
   "effectiveDate": null,
   "status": "current",
@@ -26,8 +26,8 @@
     }
   ],
   "hash": "9c03e244e9b4e529ed277d41ab3fd23432530a709c58e7223e01cd4ed2003ce2",
+  "previousHash": "9c03e244e9b4e529ed277d41ab3fd23432530a709c58e7223e01cd4ed2003ce2",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "9c03e244e9b4e529ed277d41ab3fd23432530a709c58e7223e01cd4ed2003ce2",
   "changedSinceLastSnapshot": false
 }

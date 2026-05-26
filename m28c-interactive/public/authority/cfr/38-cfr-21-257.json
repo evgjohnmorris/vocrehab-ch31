@@ -4,10 +4,10 @@
   "title": "Self-employment.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) Approval of self-employment as a vocational goal.  A program of vocational rehabilitation benefits and services may include self-employment for an individual if VA determines that such an objective is a suitable vocational goal. VA will make this determination based on—\n\n(1) The results of the individual's initial evaluation conducted in accordance with the provisions of § 21.50; and\n\n(2) The provisions of this section.\n\n(b) Definition.  For purposes of this subpart, individuals with the most severe service-connected disability(ies) who require self-employment means individuals who have been determined by VA to have limitations affecting employability arising from the effects of each individual's service-connected disability(ies), which are so severe as to necessitate selection of self-employment as the only reasonably feasible vocational goal for the individuals.\n\n(c) Scope of self-employment benefits and services. \n\n(1) VA may provide the self-employment services listed in paragraph (d) of this section to program participants who are pursuing the vocational goal of self-employment.\n\n(2) VA may provide the more extensive services listed in paragraph (e) of this section to individuals with the most severe service-connected disability(ies) who require self-employment.\n\n(d) Assistance for other individuals in self-employment.  Subject to the provisions of § 21.258, VA may provide the following assistance to any individual for whom self-employment is determined to be a suitable vocational goal—\n\n(1) Vocational training;\n\n(2) Incidental training in the management of a business;\n\n(3) License or other fees required for self-employment;\n\n(4) Necessary tools and supplies for the occupation; and\n\n(5) Services described in § 21.252.\n\n(e) Special self-employment services for individuals with the most severe service-connected disability(ies) who require self-employment.  Individuals described in paragraph (b) of this section who are in a self-employment program may receive—\n\n(1) The services described in paragraph (d) of this section; and\n\n(2) The assistance described in § 21.214.\n\n(f) Feasibility analysis of a proposed self-employment business plan.  VA will conduct a comprehensive review and analysis of the feasibility of a proposed business plan, as submitted by the individual or developed with VA's assistance, prior to authorizing a rehabilitation plan leading to self-employment (a “self-employment plan”). The feasibility analysis must include—\n\n(1) An analysis of the economic viability of the proposed business;\n\n(2) A cost analysis specifying the amount and types of assistance that VA will provide;\n\n(3) A market analysis for the individual's proposed services or products;\n\n(4) Availability of financing from non-VA sources, including the individual's personal resources, local banks, and other sources;\n\n(5) Evidence of coordination with the Small Business Administration to secure special consideration under section 8 of the Small Business Act, as amended;\n\n(6) The location of the site for the proposed business and the cost of the site, if any; and\n\n(7) A training plan to operate a successful business.\n\n[75 FR 3170, Jan. 20, 2010]",
@@ -26,8 +26,8 @@
     }
   ],
   "hash": "1f6a6d5fae8c5dcd38380d19efd487ced8542fcad9b0fc6a4da6c8586ff6b4ef",
+  "previousHash": "1f6a6d5fae8c5dcd38380d19efd487ced8542fcad9b0fc6a4da6c8586ff6b4ef",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "1f6a6d5fae8c5dcd38380d19efd487ced8542fcad9b0fc6a4da6c8586ff6b4ef",
   "changedSinceLastSnapshot": false
 }

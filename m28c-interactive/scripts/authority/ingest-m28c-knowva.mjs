@@ -518,11 +518,28 @@ function main() {
       hash: textHash
     };
 
+    const filename = `${chapter.id}.json`;
+    const filePath = path.join(OUTPUT_DIR, filename);
+
+    let previousHash = null;
+    if (fs.existsSync(filePath)) {
+      try {
+        const existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        if (existing.hash !== textHash) {
+          previousHash = existing.hash;
+        } else {
+          previousHash = existing.previousHash || null;
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    record.previousHash = previousHash;
+
     // Validate using Zod schema
     const parsed = AuthorityRecordSchema.parse(record);
 
-    const filename = `${parsed.id}.json`;
-    const filePath = path.join(OUTPUT_DIR, filename);
     fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
 
     chapterList.push({

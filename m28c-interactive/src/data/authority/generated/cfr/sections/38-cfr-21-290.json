@@ -4,10 +4,10 @@
   "title": "Training and rehabilitation resources.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) General.  For the purpose of providing training and rehabilitation services under Chapter 31 VA may:\n\n(1) Use facilities, staff and other resources of VA;\n\n(2) Employ any additional personnel and experts needed;\n\n(3) Use the facilities and services of any:\n\n(i) Federal agency;\n\n(ii) State agency;\n\n(iii) Other public agency; or\n\n(iv) Agency maintained by joint Federal and state contributions.\n\n(4) Use the facilities and services of any:\n\n(i) Public institution or establishment;\n\n(ii) Private institution or establishment; or\n\n(iii) Private individual.\n\n(b) Agreement required.  Use of facilities and services provided under paragraph (a) of this section shall be procured through contract, agreement, or other cooperative arrangement. The specific requirements for use of contracts or other arrangements are described in 48 CFR 871.2.\n\n(Authority: 38 U.S.C. 3115)",
@@ -21,5 +21,6 @@
   "publicLawRefs": [],
   "federalRegisterRefs": [],
   "amendmentNotes": [],
-  "hash": "9afa31f41f76ff2eb7e0237a26700ba46015cd2ea77db077c048b54212005c81"
+  "hash": "9afa31f41f76ff2eb7e0237a26700ba46015cd2ea77db077c048b54212005c81",
+  "previousHash": null
 }

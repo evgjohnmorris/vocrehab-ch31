@@ -4,10 +4,10 @@
   "title": "Procurement and reimbursement of cost for training and rehabilitation services, supplies, or facilities.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) General.  Whenever services, supplies and facilities from source outside VA are required by any of these regulations, they shall be provided through contract, agreement of other cooperative arrangement between VA and the vendor.\n\n(b) VA Acquisition Regulations.  Payments of charges for training and rehabilitation services, supplies, or facilities, authorized under Chapter 31 are subject to the provisions of applicable VA Acquisition Regulations especially 48 CFR part 831 and subpart 871.2.",
@@ -21,5 +21,6 @@
   "publicLawRefs": [],
   "federalRegisterRefs": [],
   "amendmentNotes": [],
-  "hash": "f495213aba119c81ad1c641a44d1658729989f26a2fb1bbf4d3cea38570e4cc2"
+  "hash": "f495213aba119c81ad1c641a44d1658729989f26a2fb1bbf4d3cea38570e4cc2",
+  "previousHash": null
 }

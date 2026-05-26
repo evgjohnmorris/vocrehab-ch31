@@ -4,10 +4,10 @@
   "title": "Extending the period of eligibility for a program of independent living beyond basic period of eligibility.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "A Counseling Psychologist (CP) or Vocational Rehabilitation Counselor (VRC) may extend the period of eligibility for a veteran's program of independent living services beyond the veteran's basic period of eligibility if the CP or VRC determines that an extension is necessary for the veteran to achieve maximum independence in daily living. The extension may be for such period as the CP or VRC determines is needed for the veteran to achieve the goals of his or her program of independent living. (See § 21.76(b) concerning duration of independent living services.)\n\n(Authority: 38 U.S.C. 3103(d))\n\n[75 FR 3166, Jan. 20, 2010]",
@@ -25,5 +25,6 @@
       "note": "[75 FR 3166, Jan. 20, 2010]"
     }
   ],
-  "hash": "b87473a8207b85fffdbf2338e2de9e584fcf979a72c76a7748932845ed5fce54"
+  "hash": "b87473a8207b85fffdbf2338e2de9e584fcf979a72c76a7748932845ed5fce54",
+  "previousHash": null
 }

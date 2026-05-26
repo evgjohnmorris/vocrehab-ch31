@@ -1,7 +1,7 @@
 {
   "title": "38 C.F.R. Part 21 Subpart A - Veteran Readiness and Employment",
-  "version": "2026-05-21",
-  "lastChecked": "2026-05-25",
+  "version": "2025-07-01",
+  "lastChecked": "2026-05-26",
   "sections": [
     {
       "id": "38-cfr-21-1",
@@ -935,9 +935,9 @@
       "id": "38-cfr-21-330",
       "section": "21.330",
       "citation": "38 C.F.R. § 21.330",
-      "title": "[Reserved]",
-      "status": "reserved",
-      "hash": "917020704bc0ccd7011808786b6f45539bb605b31b92acdacef18cc328ce9469"
+      "title": "Apportionment.",
+      "status": "current",
+      "hash": "94158ab73bd901d7783a4da76240c79f5adcaa453a04e0ec48d7d4be8536c1a8"
     },
     {
       "id": "38-cfr-21-332",

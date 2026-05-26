@@ -6,7 +6,7 @@
   "sourceType": "m28c",
   "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000146302/M28C.V.B.5.01-Cost-Approval-Thresholds",
   "officialStatus": "va-public",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2025-12-01",
   "status": "summary-only",
   "fullTextStatus": "not-full-official-text",
@@ -29,8 +29,8 @@
   "federalRegisterRefs": [],
   "amendmentNotes": [],
   "hash": "26c37246cea15948458aa2b884f36800a23fea151db8e312fefcd7a9e9869d1f",
+  "previousHash": "26c37246cea15948458aa2b884f36800a23fea151db8e312fefcd7a9e9869d1f",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "26c37246cea15948458aa2b884f36800a23fea151db8e312fefcd7a9e9869d1f",
   "changedSinceLastSnapshot": false
 }

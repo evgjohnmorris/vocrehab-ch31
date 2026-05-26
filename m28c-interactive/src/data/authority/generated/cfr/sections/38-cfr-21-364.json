@@ -4,10 +4,10 @@
   "title": "Unsatisfactory conduct and cooperation.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "(a) General.  If VA determines that a veteran has failed to maintain satisfactory conduct or cooperation, VA may, after determining that all reasonable counseling efforts have been made and are found not reasonably likely to be effective, discontinue services and assistance to the veteran, unless the case manager determines that mitigating circumstances exist. In any case in which such services and assistance have been discontinued, VA may reinstitute such services and assistance only if the Counseling Psychologist (CP) or Vocational Rehabilitation Counselor (VRC) determines that:\n\n(1) The unsatisfactory conduct or cooperation of such veteran will not be likely to recur; and\n\n(2) The rehabilitation program which the veteran proposes to pursue (whether the same or revised) is suitable to such veteran's abilities, aptitudes, and interests.\n\n(b) Unsatisfactory conduct or cooperation exists.  When the case manager determines that the veteran's conduct and/or cooperation are not in conformity with provisions of § 21.362(c), the case manager will:\n\n(1) Discuss the situation with the veteran;\n\n(2) Arrange for services, particularly counseling services, which may assist in resolving the problems which led to the veteran's unsatisfactory conduct or cooperation;\n\n(3) Interrupt the program to allow for more intense efforts, if the unsatisfactory conduct and cooperation persist. If a reasonable effort to remedy the situation is unsuccessful during the period in which the program is interrupted, the veteran's case will be discontinued and assigned to “discontinued” status unless mitigating circumstances are found. When mitigating circumstances exist the case may be continued in “interrupted” status until VA staff determines the veteran may be reentered into the same or a different program because the veteran's conduct and cooperation will be satisfactory, or if a plan has been developed, to enable the veteran to reenter and try to maintain satisfactory conduct and cooperation. Mitigating circumstances include:\n\n(i) The effects of the veteran's service and nonservice-connected condition;\n\n(ii) Family or financial problems which have led the veteran to unsatisfactory conduct or cooperation; or\n\n(iii) Other circumstances beyond the veteran's control.\n\n(Authority: 38 U.S.C. 3111)\n\n[49 FR 40814, Oct. 18, 1984, as amended at 81 FR 26132, May 2, 2016]\n\nInterregional and Intraregional Travel of Veterans",
@@ -25,5 +25,6 @@
       "note": "[49 FR 40814, Oct. 18, 1984, as amended at 81 FR 26132, May 2, 2016]"
     }
   ],
-  "hash": "8a6a232b2381b6abfa4144344c5a0bc0e350370dffcedbc974a14e48c06887ae"
+  "hash": "8a6a232b2381b6abfa4144344c5a0bc0e350370dffcedbc974a14e48c06887ae",
+  "previousHash": null
 }

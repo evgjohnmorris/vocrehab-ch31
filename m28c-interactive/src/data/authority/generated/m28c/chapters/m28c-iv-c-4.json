@@ -6,7 +6,7 @@
   "sourceType": "m28c",
   "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150225/M28C.IV.C.4-Individualized-Written-Rehabilitation-Plan",
   "officialStatus": "va-public",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2024-08-14",
   "status": "summary-only",
   "fullTextStatus": "not-full-official-text",
@@ -28,5 +28,6 @@
   "publicLawRefs": [],
   "federalRegisterRefs": [],
   "amendmentNotes": [],
-  "hash": "50b700c466e10691966c5c8805748b89768bfc230b8f34da676a0e6453866d82"
+  "hash": "50b700c466e10691966c5c8805748b89768bfc230b8f34da676a0e6453866d82",
+  "previousHash": null
 }

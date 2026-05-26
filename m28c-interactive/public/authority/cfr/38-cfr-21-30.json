@@ -4,10 +4,10 @@
   "title": "Claims.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "A specific claim in the form prescribed by the Department of Veterans Affairs must be filed for:\n\n(a) A program of rehabilitation services, or\n\n(b) Employment assistance.\n\n(Authority: 38 U.S.C. 501(a), 3102, 3117, 5101(a))",
@@ -22,8 +22,8 @@
   "federalRegisterRefs": [],
   "amendmentNotes": [],
   "hash": "d5ad2b1c719d413655a82b1f416c700c1cc4e306fc11b3a83fc401fbd2ee9e6d",
+  "previousHash": "d5ad2b1c719d413655a82b1f416c700c1cc4e306fc11b3a83fc401fbd2ee9e6d",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "d5ad2b1c719d413655a82b1f416c700c1cc4e306fc11b3a83fc401fbd2ee9e6d",
   "changedSinceLastSnapshot": false
 }

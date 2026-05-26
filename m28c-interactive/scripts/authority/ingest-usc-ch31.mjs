@@ -117,10 +117,27 @@ async function ingestSection(sec) {
     hash: textHash
   };
 
+  const filePath = path.join(OUTPUT_DIR, `38-usc-${sec}.json`);
+
+  let previousHash = null;
+  if (fs.existsSync(filePath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if (existing.hash !== textHash) {
+        previousHash = existing.hash;
+      } else {
+        previousHash = existing.previousHash || null;
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  record.previousHash = previousHash;
+
   // Validate using Zod schema
   const parsed = AuthorityRecordSchema.parse(record);
 
-  const filePath = path.join(OUTPUT_DIR, `38-usc-${sec}.json`);
   fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2));
   logger.success(`Ingested 38 U.S.C. § ${sec} -> ${filePath}`);
 

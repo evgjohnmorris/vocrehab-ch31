@@ -6,7 +6,7 @@
   "sourceType": "usc",
   "sourceUrl": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section3104&num=0&edition=prelim",
   "officialStatus": "official",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2026-05-19",
   "effectiveDate": null,
   "status": "current",
@@ -26,8 +26,8 @@
     }
   ],
   "hash": "ad0681fce373e291f338b4e9b3b548deb4fc48c6d4ddf649469a896ca2730ab6",
+  "previousHash": "ad0681fce373e291f338b4e9b3b548deb4fc48c6d4ddf649469a896ca2730ab6",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "ad0681fce373e291f338b4e9b3b548deb4fc48c6d4ddf649469a896ca2730ab6",
   "changedSinceLastSnapshot": false
 }

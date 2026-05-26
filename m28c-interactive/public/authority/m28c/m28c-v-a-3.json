@@ -6,7 +6,7 @@
   "sourceType": "m28c",
   "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000146298/M28CVA3-Services-Supplies-and-Equipment",
   "officialStatus": "va-public",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2025-12-01",
   "status": "summary-only",
   "fullTextStatus": "not-full-official-text",
@@ -29,8 +29,8 @@
   "federalRegisterRefs": [],
   "amendmentNotes": [],
   "hash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151",
+  "previousHash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "117c8fefc8693df0e385d43e3cac32ed3f9104c2a6434b1b2bf65a98c678f151",
   "changedSinceLastSnapshot": false
 }

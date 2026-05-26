@@ -81,5 +81,7 @@ export const AuthorityRecordSchema = z.object({
     note: z.string()
   })).default([]),
 
-  hash: z.string().min(32)
+  hash: z.string().min(32),
+  previousHash: z.string().nullable().optional()
 });
+

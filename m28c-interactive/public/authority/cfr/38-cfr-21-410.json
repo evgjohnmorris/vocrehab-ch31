@@ -4,10 +4,10 @@
   "title": "Delegation of authority.",
   "authorityLevel": "binding-regulation",
   "sourceType": "cfr",
-  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2026-05-21/title-38?part=21&subpart=A",
+  "sourceUrl": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/2025-07-01/title-38?part=21&subpart=A",
   "officialStatus": "current-unofficial",
-  "lastChecked": "2026-05-25",
-  "sourceUpdated": "2026-05-21",
+  "lastChecked": "2026-05-26",
+  "sourceUpdated": "2025-07-01",
   "effectiveDate": null,
   "status": "current",
   "fullText": "The Secretary delegates authority to the Under Secretary for Benefits to make findings and decisions under 38 U.S.C. chapter 31 and regulations, precedents, and instructions that affect vocational rehabilitation services for disabled veterans. The Under Secretary for Benefits may further delegate this authority to supervisory and non-supervisory Veteran Readiness and Employment (VR&E) staff members.\n\n(Authority: 38 U.S.C. 512(a))\n\n[62 FR 17710, Apr. 11, 1997, as amended at 87 FR 8743, Feb. 16, 2022]",
@@ -26,8 +26,8 @@
     }
   ],
   "hash": "df9cde52952f00141f3a7d4cd5eb1a0cfa5cbfe6667610585c3ec4c10ded2f53",
+  "previousHash": "df9cde52952f00141f3a7d4cd5eb1a0cfa5cbfe6667610585c3ec4c10ded2f53",
   "snapshotDate": "2026-05-25",
   "sourceLastChecked": "2026-05-25",
-  "previousHash": "df9cde52952f00141f3a7d4cd5eb1a0cfa5cbfe6667610585c3ec4c10ded2f53",
   "changedSinceLastSnapshot": false
 }

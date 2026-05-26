@@ -6,7 +6,7 @@
   "sourceType": "m28c",
   "sourceUrl": "https://www.knowva.ebenefits.va.gov/system/templates/selfservice/va_ssnew/help/customer/locale/en-US/portal/554400000001018/content/554400000150223/M28CIVB2-Vocational-Exploration",
   "officialStatus": "va-public",
-  "lastChecked": "2026-05-25",
+  "lastChecked": "2026-05-26",
   "sourceUpdated": "2024-11-20",
   "status": "summary-only",
   "fullTextStatus": "not-full-official-text",
@@ -27,5 +27,6 @@
   "publicLawRefs": [],
   "federalRegisterRefs": [],
   "amendmentNotes": [],
-  "hash": "6ca69329b4b86c33cfbae4efb2edffd63ea4e5c6b4d8ea148f22d89e5f206995"
+  "hash": "6ca69329b4b86c33cfbae4efb2edffd63ea4e5c6b4d8ea148f22d89e5f206995",
+  "previousHash": null
 }
