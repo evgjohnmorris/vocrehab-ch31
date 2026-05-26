@@ -29,6 +29,22 @@ function escapeHtml(text) {
     .replace(/'/g, "&#039;");
 }
 
+function linkCitations(text) {
+  if (!text) return "";
+  
+  // Link 38 U.S.C. XXX
+  text = text.replace(/38\s+U\.S\.C\.\s+(?:section\s+)?(\d+)/gi, (match, secNum) => {
+    return `<a href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title38-section${secNum}&amp;edition=prelim" style="color: #ac5a39; text-decoration: none; font-weight: 600;">38 U.S.C. ${secNum}</a>`;
+  });
+
+  // Link 38 C.F.R. § 21.XX
+  text = text.replace(/38\s+C\.F\.R\.\s+(?:§\s*)?21\.(\d+)/gi, (match, secNum) => {
+    return `<a href="https://www.ecfr.gov/current/title-38/chapter-I/part-21/subpart-A/section-21.${secNum}" style="color: #1a365d; text-decoration: none; font-weight: 600;">38 C.F.R. § 21.${secNum}</a>`;
+  });
+  
+  return text;
+}
+
 function formatContent(text) {
   if (!text) return "";
   
@@ -53,7 +69,17 @@ function formatContent(text) {
         html += "</ul>\n";
         inList = false;
       }
-      html += `<div class="subsection-block">\n  <span class="subsection-title">${escapeHtml(boldMatch[1])}</span>\n  <span class="subsection-text">${escapeHtml(boldMatch[2])}</span>\n</div>\n`;
+      
+      const titleEscaped = escapeHtml(boldMatch[1]);
+      let textEscaped = escapeHtml(boldMatch[2]);
+      textEscaped = linkCitations(textEscaped);
+      
+      // Style VA Error Spotter differently
+      if (titleEscaped.includes("VA Error Spotter")) {
+        html += `<div class="subsection-block error-spotter-block">\n  <span class="subsection-title error-spotter-title">⚠️ ${titleEscaped}</span>\n  <span class="subsection-text">${textEscaped}</span>\n</div>\n`;
+      } else {
+        html += `<div class="subsection-block">\n  <span class="subsection-title">${titleEscaped}</span>\n  <span class="subsection-text">${textEscaped}</span>\n</div>\n`;
+      }
       continue;
     }
 
@@ -99,7 +125,9 @@ function formatContent(text) {
         html += "<ul>\n";
         inList = true;
       }
-      html += `  <li>${escapeHtml(line.replace(/^[\*\-]\s*/, ''))}</li>\n`;
+      let liText = escapeHtml(line.replace(/^[\*\-]\s*/, ''));
+      liText = linkCitations(liText);
+      html += `  <li>${liText}</li>\n`;
       continue;
     }
 
@@ -109,11 +137,14 @@ function formatContent(text) {
       inList = false;
     }
     
+    let pText = escapeHtml(line);
+    pText = linkCitations(pText);
+
     // Check if it looks like a manual subsection index, e.g. M28C.I.A.1.01.a
     if (line.startsWith('M28C.') || /^\d+\.\d+/.test(line)) {
-      html += `<p class="manual-section"><strong>${escapeHtml(line)}</strong></p>\n`;
+      html += `<p class="manual-section"><strong>${pText}</strong></p>\n`;
     } else {
-      html += `<p>${escapeHtml(line)}</p>\n`;
+      html += `<p>${pText}</p>\n`;
     }
   }
 
@@ -125,7 +156,7 @@ function formatContent(text) {
 }
 
 async function main() {
-  logger.info("Initializing M28C PDF Compiler (Organized & styled subsections)...");
+  logger.info("Initializing M28C PDF Compiler (Architectural & Styled Edition)...");
 
   if (!fs.existsSync(INDEX_PATH)) {
     logger.error(`Manual index not found at ${INDEX_PATH}. Run ingestion first.`);
@@ -145,29 +176,55 @@ async function main() {
     chapters.push(chapData);
   }
 
-  logger.info(`Loaded ${chapters.length} chapters. Organizing into logical Parts...`);
+  logger.info(`Loaded ${chapters.length} chapters. Organizing into logical Lifecycle Phases...`);
 
-  // Group chapters by Part
+  // Group chapters by Veteran Lifecycle Phase
   const partsList = [
-    { id: "PART I", title: "Overview & Interagency Partnerships", chapters: [] },
-    { id: "PART II", title: "Advisory Committees & Feasibility Assessment Panels", chapters: [] },
-    { id: "PART IV", title: "Initial Evaluation, Vocational Exploration, & Rehabilitation Plans", chapters: [] },
-    { id: "PART V", title: "Services, Procurement Costs, Retroactive Induction, & Payouts", chapters: [] }
+    { 
+      id: "PHASE 1", 
+      title: "Entry, Evaluation, & Entitlement", 
+      subtitle: "Initial application, VRC assessment, and Employment Handicap determinations",
+      chapterIds: ["m28c-i-a-1", "m28c-iv-a-2", "m28c-iv-b-1"],
+      chapters: []
+    },
+    { 
+      id: "PHASE 2", 
+      title: "Career Strategy & Plan Construction", 
+      subtitle: "Vocational goals, feasibility assessments, and IWRP/IILP development",
+      chapterIds: ["m28c-iv-b-2", "m28c-iv-b-3", "m28c-iv-c-4", "m28c-iv-c-6"],
+      chapters: []
+    },
+    { 
+      id: "PHASE 3", 
+      title: "Tuition Procurement, Technology, & Supplies", 
+      subtitle: "School selection, laptop packages, and cost approval thresholds",
+      chapterIds: ["m28c-iv-c-1", "m28c-v-a-3", "m28c-v-b-1", "m28c-v-b-5-01"],
+      chapters: []
+    },
+    { 
+      id: "PHASE 4", 
+      title: "Maintenance, Subsistence, & GI Bill Restoration", 
+      subtitle: "Direct reimbursements, monthly allowance elections, and retroactive inductions",
+      chapterIds: ["m28c-i-a-2", "m28c-v-b-7", "m28c-v-b-6"],
+      chapters: []
+    },
+    { 
+      id: "PHASE 5", 
+      title: "Disputes & Advisory Committees", 
+      subtitle: "Appealing decisions and case reviews by the Vocational Rehabilitation Panel",
+      chapterIds: ["m28c-ii-a-4"],
+      chapters: []
+    }
   ];
 
-  chapters.forEach(chap => {
-    const citation = chap.canonicalCitation;
-    if (citation.startsWith("M28C.I")) {
-      partsList[0].chapters.push(chap);
-    } else if (citation.startsWith("M28C.II")) {
-      partsList[1].chapters.push(chap);
-    } else if (citation.startsWith("M28C.IV")) {
-      partsList[2].chapters.push(chap);
-    } else if (citation.startsWith("M28C.V")) {
-      partsList[3].chapters.push(chap);
-    } else {
-      partsList[2].chapters.push(chap);
-    }
+  // Map loaded chapters into the parts list based on their IDs
+  partsList.forEach(part => {
+    part.chapterIds.forEach(cid => {
+      const match = chapters.find(chap => chap.id === cid);
+      if (match) {
+        part.chapters.push(match);
+      }
+    });
   });
 
   // Build Table of Contents HTML
@@ -207,7 +264,7 @@ async function main() {
           <div class="part-number">${part.id}</div>
           <div class="part-divider"></div>
           <h1 class="part-title">${escapeHtml(part.title)}</h1>
-          <p class="part-subtitle">Department of Veterans Affairs VR&E Chapter 31 Codification</p>
+          <p class="part-subtitle">${escapeHtml(part.subtitle)}</p>
         </div>
       </div>`;
     
@@ -249,7 +306,7 @@ async function main() {
   body {
     font-family: 'Lora', Georgia, serif;
     font-size: 11pt;
-    line-height: 1.6;
+    line-height: 1.65;
     color: #1a202c;
     margin: 0;
     padding: 0;
@@ -516,6 +573,11 @@ async function main() {
     page-break-inside: avoid;
   }
 
+  .error-spotter-block {
+    border-left: 3.5px solid #e53e3e;
+    background-color: #fff5f5;
+  }
+
   .subsection-title {
     display: block;
     font-family: 'Inter', sans-serif;
@@ -525,6 +587,10 @@ async function main() {
     margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+  }
+
+  .error-spotter-title {
+    color: #e53e3e;
   }
 
   .subsection-text {
@@ -642,7 +708,12 @@ async function main() {
       right: '1in'
     },
     displayHeaderFooter: true,
-    headerTemplate: '<div></div>',
+    headerTemplate: `
+      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 7.5px; color: #cbd5e0; width: 100%; padding: 0 1in; box-sizing: border-box; border-bottom: 0.5px solid #edf2f7; padding-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
+        <span>U.S. Department of Veterans Affairs &mdash; Chapter 31 Policy Manual</span>
+        <span>Verbatim Reference Publication</span>
+      </div>
+    `,
     footerTemplate: `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 8px; color: #a0aec0; width: 100%; padding: 0 1in; box-sizing: border-box; display: flex; justify-content: space-between;">
         <span>VA M28C Veteran Readiness & Employment Manual</span>
