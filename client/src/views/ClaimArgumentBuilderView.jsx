@@ -1,10 +1,11 @@
 // @allow-modal
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ChevronRight, Compass, Plus, Trash2, Printer, Copy, Info, CheckCircle2, Scale,
   FileText, Sparkles, DollarSign, MapPin, Check
 } from 'lucide-react';
+import { fetchCurrentPlanDraft, saveCurrentPlanDraft } from '../utils/backendApi';
 
 const DISPUTE_AREAS = [
   {
@@ -89,29 +90,34 @@ const TRACK_DETAILS = [
   }
 ];
 
-function ClaimArgumentBuilderView({ reduceMotion }) {
-  const [activeTab, setActiveTab] = useState('plan_builder'); // 'plan_builder' | 'brief_builder'
-  
-  // Tab 1: IPE Plan Builder State
-  const [vocGoal, setVocGoal] = useState('');
-  const [onetCode, setOnetCode] = useState('');
-  const [riasecCode, setRiasecCode] = useState('Realistic');
-  const [selectedTrack, setSelectedTrack] = useState('long_term');
-  const [trainingObjectives, setTrainingObjectives] = useState('');
-  const [zipCode, setZipCode] = useState('');
-  const [estimatedMha, setEstimatedMha] = useState('');
-  const [subsistenceElection, setSubsistenceElection] = useState('ch31'); // 'ch31' | 'ch33'
-  const [copyPlanSuccess, setCopyPlanSuccess] = useState(false);
+const CLAIM_BUILDER_DRAFT_TYPE = 'claim_builder_workspace';
+const CLAIM_BUILDER_STORAGE_KEY = 'm28c_claim_builder_workspace';
 
-  // Intermediate Objectives array
-  const [objectives, setObjectives] = useState([
-    { id: '1', desc: 'Complete academic training requirements for the target vocational goal', targetDate: 'Year 3', measure: 'Maintain GPA >= 2.0 and submit term transcripts' },
-    { id: '2', desc: 'Acquire required industry certifications or complete capstone/internship', targetDate: 'Year 3', measure: 'Provide passing scores / supervisor evaluation' },
-    { id: '3', desc: 'Transition to IEAP (Employment Plan) and secure suitable direct placement', targetDate: 'Year 4', measure: '60 days continuous employment in target field' }
-  ]);
+function createDefaultObjectives() {
+  return [
+    {
+      id: '1',
+      desc: 'Complete academic training requirements for the target vocational goal',
+      targetDate: 'Year 3',
+      measure: 'Maintain GPA >= 2.0 and submit term transcripts'
+    },
+    {
+      id: '2',
+      desc: 'Acquire required industry certifications or complete capstone/internship',
+      targetDate: 'Year 3',
+      measure: 'Provide passing scores / supervisor evaluation'
+    },
+    {
+      id: '3',
+      desc: 'Transition to IEAP (Employment Plan) and secure suitable direct placement',
+      targetDate: 'Year 4',
+      measure: '60 days continuous employment in target field'
+    }
+  ];
+}
 
-  // Services checklist
-  const [requiredServices, setRequiredServices] = useState({
+function createDefaultRequiredServices() {
+  return {
     tuition: true,
     books: true,
     laptop: true,
@@ -121,7 +127,471 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
     placement: true,
     clothing: false,
     certs: true
+  };
+}
+
+function createInitialUserFacts() {
+  return {
+    veteranName: '',
+    claimNumber: '',
+    schoolOrProgram: '',
+    counselorArgument: '',
+    personalContext: ''
+  };
+}
+
+function getDisputeAreaById(areaId) {
+  return DISPUTE_AREAS.find((area) => area.id === areaId) || DISPUTE_AREAS[0];
+}
+
+function createInitialSelectedErrors(area) {
+  const initialErrors = {};
+  area.legalErrors.forEach((error) => {
+    initialErrors[error.id] = true;
   });
+  return initialErrors;
+}
+
+function createInitialSelectedCitations(area) {
+  const initialCitations = {};
+  area.citations.forEach((_, index) => {
+    initialCitations[index] = true;
+  });
+  return initialCitations;
+}
+
+function getSuggestedObjectives(trackId, goalValue) {
+  const goal = goalValue || 'Target Career';
+
+  if (trackId === 'long_term') {
+    return [
+      { id: '1', desc: `Complete official academic coursework or degree program required for ${goal}`, targetDate: 'Graduation Term', measure: 'Maintain a cumulative GPA of 2.0 or higher' },
+      { id: '2', desc: `Acquire required professional licenses or complete practical internship for ${goal}`, targetDate: 'Academic Term 6', measure: 'Provide official credential certifications' },
+      { id: '3', desc: 'Transition to IEAP employment assistance and secure suitable placement in target field', targetDate: 'Post-Graduation', measure: 'Successful employment retention for 60 consecutive days' }
+    ];
+  }
+
+  if (trackId === 'rapid_employment') {
+    return [
+      { id: '1', desc: `Optimize professional resume, LinkedIn, and vocational portfolio for ${goal}`, targetDate: 'Month 2', measure: 'VRC counselor formal review and approval' },
+      { id: '2', desc: 'Complete specialized short-term bootcamps or vocational certificates', targetDate: 'Month 4', measure: 'Provide certificate of completion' },
+      { id: '3', desc: 'Actively apply to job vacancies and participate in interviews as documented in job logs', targetDate: 'Month 6', measure: 'Secure placement matching physical tolerances' }
+    ];
+  }
+
+  if (trackId === 'self_employment') {
+    return [
+      { id: '1', desc: 'Formulate a comprehensive business plan and conduct local market feasibility study', targetDate: 'Month 4', measure: 'Concurrence and approval by VRC and VREO' },
+      { id: '2', desc: 'Obtain official business licensing, tax registration, and secure commercial/office space', targetDate: 'Month 8', measure: 'Provide copy of business license and lease' },
+      { id: '3', desc: 'Procure initial inventory/supplies and launch marketing campaigns', targetDate: 'Month 12', measure: 'Document first sales and operational records' }
+    ];
+  }
+
+  if (trackId === 'reemployment') {
+    return [
+      { id: '1', desc: 'Conduct job site accommodation analysis with current employer and VRC', targetDate: 'Month 2', measure: 'Provide completed safety/accommodation report' },
+      { id: '2', desc: 'Procure and install necessary ergonomic equipment and adaptive workstation software', targetDate: 'Month 4', measure: 'VRC verification of equipment installation' },
+      { id: '3', desc: 'Complete workplace adjustment period to ensure stable job retention', targetDate: 'Month 6', measure: 'Employer letter confirming satisfactory performance' }
+    ];
+  }
+
+  if (trackId === 'independent_living') {
+    return [
+      { id: '1', desc: 'Complete comprehensive medical, cognitive, and daily living safety assessments', targetDate: 'Month 2', measure: 'Provide physician and specialist evaluations' },
+      { id: '2', desc: 'Implement home adjustments and procure daily living assistive equipment', targetDate: 'Month 8', measure: 'VRC verification of home inspection and receipt of daily living aids' },
+      { id: '3', desc: 'Achieve personal independence in activities of daily living (ADLs) without assistance', targetDate: 'Month 12', measure: 'Final case worker evaluation and closure report' }
+    ];
+  }
+
+  return createDefaultObjectives();
+}
+
+function createDefaultWorkspaceDraft() {
+  return {
+    schemaVersion: 1,
+    activeTab: 'plan_builder',
+    planBuilder: {
+      vocGoal: '',
+      onetCode: '',
+      riasecCode: 'Realistic',
+      selectedTrack: 'long_term',
+      trainingObjectives: '',
+      zipCode: '',
+      estimatedMha: '',
+      subsistenceElection: 'ch31',
+      objectives: createDefaultObjectives(),
+      requiredServices: createDefaultRequiredServices()
+    },
+    briefBuilder: {
+      step: 1,
+      selectedAreaId: DISPUTE_AREAS[0].id,
+      userFacts: createInitialUserFacts(),
+      selectedErrors: {},
+      selectedCitations: {}
+    }
+  };
+}
+
+function normalizeWorkspaceDraft(rawDraft) {
+  const defaultDraft = createDefaultWorkspaceDraft();
+  if (!rawDraft || typeof rawDraft !== 'object' || Array.isArray(rawDraft)) {
+    return defaultDraft;
+  }
+
+  const normalizedPlanBuilder = rawDraft.planBuilder && typeof rawDraft.planBuilder === 'object' && !Array.isArray(rawDraft.planBuilder)
+    ? rawDraft.planBuilder
+    : {};
+  const normalizedBriefBuilder = rawDraft.briefBuilder && typeof rawDraft.briefBuilder === 'object' && !Array.isArray(rawDraft.briefBuilder)
+    ? rawDraft.briefBuilder
+    : {};
+  const selectedArea = getDisputeAreaById(normalizedBriefBuilder.selectedAreaId);
+  const selectedErrors = normalizedBriefBuilder.selectedErrors && typeof normalizedBriefBuilder.selectedErrors === 'object' && !Array.isArray(normalizedBriefBuilder.selectedErrors)
+    ? normalizedBriefBuilder.selectedErrors
+    : {};
+  const selectedCitations = normalizedBriefBuilder.selectedCitations && typeof normalizedBriefBuilder.selectedCitations === 'object' && !Array.isArray(normalizedBriefBuilder.selectedCitations)
+    ? normalizedBriefBuilder.selectedCitations
+    : {};
+
+  return {
+    schemaVersion: 1,
+    activeTab: rawDraft.activeTab === 'brief_builder' ? 'brief_builder' : 'plan_builder',
+    planBuilder: {
+      vocGoal: typeof normalizedPlanBuilder.vocGoal === 'string' ? normalizedPlanBuilder.vocGoal : defaultDraft.planBuilder.vocGoal,
+      onetCode: typeof normalizedPlanBuilder.onetCode === 'string' ? normalizedPlanBuilder.onetCode : defaultDraft.planBuilder.onetCode,
+      riasecCode: typeof normalizedPlanBuilder.riasecCode === 'string' ? normalizedPlanBuilder.riasecCode : defaultDraft.planBuilder.riasecCode,
+      selectedTrack: typeof normalizedPlanBuilder.selectedTrack === 'string' ? normalizedPlanBuilder.selectedTrack : defaultDraft.planBuilder.selectedTrack,
+      trainingObjectives: typeof normalizedPlanBuilder.trainingObjectives === 'string' ? normalizedPlanBuilder.trainingObjectives : defaultDraft.planBuilder.trainingObjectives,
+      zipCode: typeof normalizedPlanBuilder.zipCode === 'string' ? normalizedPlanBuilder.zipCode : defaultDraft.planBuilder.zipCode,
+      estimatedMha: typeof normalizedPlanBuilder.estimatedMha === 'string' ? normalizedPlanBuilder.estimatedMha : defaultDraft.planBuilder.estimatedMha,
+      subsistenceElection: normalizedPlanBuilder.subsistenceElection === 'ch33' ? 'ch33' : 'ch31',
+      objectives: Array.isArray(normalizedPlanBuilder.objectives) && normalizedPlanBuilder.objectives.length > 0
+        ? normalizedPlanBuilder.objectives.map((objective, index) => ({
+          id: typeof objective?.id === 'string' ? objective.id : String(index + 1),
+          desc: typeof objective?.desc === 'string' ? objective.desc : '',
+          targetDate: typeof objective?.targetDate === 'string' ? objective.targetDate : '',
+          measure: typeof objective?.measure === 'string' ? objective.measure : ''
+        }))
+        : defaultDraft.planBuilder.objectives,
+      requiredServices: {
+        ...defaultDraft.planBuilder.requiredServices,
+        ...(normalizedPlanBuilder.requiredServices || {})
+      }
+    },
+    briefBuilder: {
+      step: normalizedBriefBuilder.step === 2 ? 2 : 1,
+      selectedAreaId: selectedArea.id,
+      userFacts: {
+        ...defaultDraft.briefBuilder.userFacts,
+        ...(normalizedBriefBuilder.userFacts || {})
+      },
+      selectedErrors: Object.keys(selectedErrors).length > 0 || normalizedBriefBuilder.step !== 2
+        ? selectedErrors
+        : createInitialSelectedErrors(selectedArea),
+      selectedCitations: Object.keys(selectedCitations).length > 0 || normalizedBriefBuilder.step !== 2
+        ? selectedCitations
+        : createInitialSelectedCitations(selectedArea)
+    }
+  };
+}
+
+function readWorkspaceDraft(privacyMode) {
+  const storage = privacyMode ? sessionStorage : localStorage;
+  const rawDraft = storage.getItem(CLAIM_BUILDER_STORAGE_KEY);
+  if (!rawDraft) {
+    return null;
+  }
+
+  try {
+    return normalizeWorkspaceDraft(JSON.parse(rawDraft));
+  } catch (error) {
+    console.warn('Failed to parse saved claim builder draft, ignoring stored value.', error);
+    return null;
+  }
+}
+
+function writeWorkspaceDraft(privacyMode, draft) {
+  const storage = privacyMode ? sessionStorage : localStorage;
+  const otherStorage = privacyMode ? localStorage : sessionStorage;
+  storage.setItem(CLAIM_BUILDER_STORAGE_KEY, JSON.stringify(draft));
+  otherStorage.removeItem(CLAIM_BUILDER_STORAGE_KEY);
+}
+
+function buildDraftTitle(vocGoal, selectedTrack) {
+  if (vocGoal.trim()) {
+    return `${vocGoal.trim()} IPE draft`;
+  }
+
+  const track = TRACK_DETAILS.find((item) => item.id === selectedTrack);
+  return track ? `${track.name} IPE draft` : 'IPE / Plan Builder draft';
+}
+
+function ClaimArgumentBuilderView({
+  reduceMotion,
+  privacyMode = false,
+  isBackendOnline = false,
+  dataResetToken = 0
+}) {
+  const [activeTab, setActiveTab] = useState('plan_builder');
+  const [vocGoal, setVocGoal] = useState('');
+  const [onetCode, setOnetCode] = useState('');
+  const [riasecCode, setRiasecCode] = useState('Realistic');
+  const [selectedTrack, setSelectedTrack] = useState('long_term');
+  const [trainingObjectives, setTrainingObjectives] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [estimatedMha, setEstimatedMha] = useState('');
+  const [subsistenceElection, setSubsistenceElection] = useState('ch31');
+  const [copyPlanSuccess, setCopyPlanSuccess] = useState(false);
+  const [objectives, setObjectives] = useState(createDefaultObjectives);
+  const [requiredServices, setRequiredServices] = useState(createDefaultRequiredServices);
+  const [step, setStep] = useState(1);
+  const [selectedArea, setSelectedArea] = useState(DISPUTE_AREAS[0]);
+  const [userFacts, setUserFacts] = useState(createInitialUserFacts);
+  const [selectedErrors, setSelectedErrors] = useState({});
+  const [selectedCitations, setSelectedCitations] = useState({});
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [draftId, setDraftId] = useState(null);
+  const [draftStatus, setDraftStatus] = useState(isBackendOnline ? 'ready' : 'local');
+  const [draftError, setDraftError] = useState('');
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+
+  const hasHydratedRef = useRef(false);
+  const skipAutosaveRef = useRef(true);
+  const saveTimerRef = useRef(null);
+
+  const applyWorkspaceDraft = useCallback((draft) => {
+    const normalizedDraft = normalizeWorkspaceDraft(draft);
+    const area = getDisputeAreaById(normalizedDraft.briefBuilder.selectedAreaId);
+
+    setActiveTab(normalizedDraft.activeTab);
+    setVocGoal(normalizedDraft.planBuilder.vocGoal);
+    setOnetCode(normalizedDraft.planBuilder.onetCode);
+    setRiasecCode(normalizedDraft.planBuilder.riasecCode);
+    setSelectedTrack(normalizedDraft.planBuilder.selectedTrack);
+    setTrainingObjectives(normalizedDraft.planBuilder.trainingObjectives);
+    setZipCode(normalizedDraft.planBuilder.zipCode);
+    setEstimatedMha(normalizedDraft.planBuilder.estimatedMha);
+    setSubsistenceElection(normalizedDraft.planBuilder.subsistenceElection);
+    setObjectives(normalizedDraft.planBuilder.objectives);
+    setRequiredServices(normalizedDraft.planBuilder.requiredServices);
+    setStep(normalizedDraft.briefBuilder.step);
+    setSelectedArea(area);
+    setUserFacts(normalizedDraft.briefBuilder.userFacts);
+    setSelectedErrors(normalizedDraft.briefBuilder.selectedErrors);
+    setSelectedCitations(normalizedDraft.briefBuilder.selectedCitations);
+  }, []);
+
+  const buildWorkspaceDraft = useCallback(() => ({
+    schemaVersion: 1,
+    activeTab,
+    planBuilder: {
+      vocGoal,
+      onetCode,
+      riasecCode,
+      selectedTrack,
+      trainingObjectives,
+      zipCode,
+      estimatedMha,
+      subsistenceElection,
+      objectives,
+      requiredServices
+    },
+    briefBuilder: {
+      step,
+      selectedAreaId: selectedArea.id,
+      userFacts,
+      selectedErrors,
+      selectedCitations
+    }
+  }), [
+    activeTab,
+    vocGoal,
+    onetCode,
+    riasecCode,
+    selectedTrack,
+    trainingObjectives,
+    zipCode,
+    estimatedMha,
+    subsistenceElection,
+    objectives,
+    requiredServices,
+    step,
+    selectedArea.id,
+    userFacts,
+    selectedErrors,
+    selectedCitations
+  ]);
+
+  const resetDraftSessionMeta = useCallback(() => {
+    setDraftError('');
+    setDraftId(null);
+    setLastSavedAt(null);
+  }, []);
+
+  const markLocalDraftState = useCallback(() => {
+    setDraftStatus('local');
+    setDraftError('');
+  }, []);
+
+  const persistDraft = useCallback(async (draftPayload = buildWorkspaceDraft()) => {
+    if (!isBackendOnline) {
+      writeWorkspaceDraft(privacyMode, draftPayload);
+      markLocalDraftState();
+      return null;
+    }
+
+    setDraftStatus('saving');
+    const savedDraft = await saveCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, draftPayload, {
+      privacyMode,
+      title: buildDraftTitle(draftPayload.planBuilder.vocGoal, draftPayload.planBuilder.selectedTrack)
+    });
+
+    const normalizedPayload = normalizeWorkspaceDraft(savedDraft.payload || draftPayload);
+    writeWorkspaceDraft(privacyMode, normalizedPayload);
+    setDraftId(savedDraft.id);
+    setLastSavedAt(savedDraft.updatedAt || new Date().toISOString());
+    setDraftStatus('synced');
+    setDraftError('');
+    return savedDraft;
+  }, [buildWorkspaceDraft, isBackendOnline, markLocalDraftState, privacyMode]);
+
+  useEffect(() => {
+    const sourceStorage = privacyMode ? localStorage : sessionStorage;
+    const targetStorage = privacyMode ? sessionStorage : localStorage;
+    const sourceDraft = sourceStorage.getItem(CLAIM_BUILDER_STORAGE_KEY);
+    const targetDraft = targetStorage.getItem(CLAIM_BUILDER_STORAGE_KEY);
+
+    if (!targetDraft && sourceDraft) {
+      targetStorage.setItem(CLAIM_BUILDER_STORAGE_KEY, sourceDraft);
+    }
+
+    sourceStorage.removeItem(CLAIM_BUILDER_STORAGE_KEY);
+  }, [privacyMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const localDraft = readWorkspaceDraft(privacyMode);
+    const fallbackDraft = localDraft || createDefaultWorkspaceDraft();
+
+    hasHydratedRef.current = false;
+    skipAutosaveRef.current = true;
+    queueMicrotask(() => {
+      if (cancelled) {
+        return;
+      }
+
+      resetDraftSessionMeta();
+      applyWorkspaceDraft(fallbackDraft);
+    });
+
+    if (!isBackendOnline) {
+      queueMicrotask(() => {
+        if (!cancelled) {
+          markLocalDraftState();
+        }
+      });
+      hasHydratedRef.current = true;
+      window.setTimeout(() => {
+        skipAutosaveRef.current = false;
+      }, 0);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setDraftStatus('loading');
+      }
+    });
+
+    const loadRemoteDraft = async () => {
+      try {
+        const remoteDraft = await fetchCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, { privacyMode });
+        if (cancelled) {
+          return;
+        }
+
+        if (remoteDraft?.payload) {
+          const normalizedPayload = normalizeWorkspaceDraft(remoteDraft.payload);
+          applyWorkspaceDraft(normalizedPayload);
+          writeWorkspaceDraft(privacyMode, normalizedPayload);
+          setDraftId(remoteDraft.id);
+          setLastSavedAt(remoteDraft.updatedAt || null);
+          setDraftStatus('synced');
+          return;
+        }
+
+        if (localDraft) {
+          await persistDraft(localDraft);
+        } else {
+          setDraftStatus('ready');
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setDraftStatus(localDraft ? 'local' : 'error');
+        setDraftError(error.message || 'Failed to load plan draft.');
+      } finally {
+        if (!cancelled) {
+          hasHydratedRef.current = true;
+          window.setTimeout(() => {
+            skipAutosaveRef.current = false;
+          }, 0);
+        }
+      }
+    };
+
+    loadRemoteDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyWorkspaceDraft, dataResetToken, isBackendOnline, markLocalDraftState, persistDraft, privacyMode, resetDraftSessionMeta]);
+
+  useEffect(() => () => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedRef.current) {
+      return undefined;
+    }
+
+    const draftPayload = buildWorkspaceDraft();
+    writeWorkspaceDraft(privacyMode, draftPayload);
+
+    if (skipAutosaveRef.current) {
+      skipAutosaveRef.current = false;
+      return undefined;
+    }
+
+    if (!isBackendOnline) {
+      queueMicrotask(markLocalDraftState);
+      return undefined;
+    }
+
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = window.setTimeout(() => {
+      setDraftStatus('saving');
+      persistDraft(draftPayload).catch((error) => {
+        setDraftStatus('local');
+        setDraftError(error.message || 'Failed to save plan draft.');
+      });
+    }, 700);
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [buildWorkspaceDraft, isBackendOnline, markLocalDraftState, persistDraft, privacyMode]);
 
   const handleAddObjective = () => {
     const newId = (objectives.length > 0 ? Math.max(...objectives.map(o => parseInt(o.id) || 0)) + 1 : 1).toString();
@@ -140,65 +610,13 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
   };
 
   const handleSuggestObjectives = () => {
-    const goal = vocGoal || 'Target Career';
-    let suggested = [];
-    if (selectedTrack === 'long_term') {
-      suggested = [
-        { id: '1', desc: `Complete official academic coursework or degree program required for ${goal}`, targetDate: 'Graduation Term', measure: 'Maintain a cumulative GPA of 2.0 or higher' },
-        { id: '2', desc: `Acquire required professional licenses or complete practical internship for ${goal}`, targetDate: 'Academic Term 6', measure: 'Provide official credential certifications' },
-        { id: '3', desc: `Transition to IEAP employment assistance and secure suitable placement in target field`, targetDate: 'Post-Graduation', measure: 'Successful employment retention for 60 consecutive days' }
-      ];
-    } else if (selectedTrack === 'rapid_employment') {
-      suggested = [
-        { id: '1', desc: `Optimize professional resume, LinkedIn, and vocational portfolio for ${goal}`, targetDate: 'Month 2', measure: 'VRC counselor formal review and approval' },
-        { id: '2', desc: `Complete specialized short-term bootcamps or vocational certificates`, targetDate: 'Month 4', measure: 'Provide certificate of completion' },
-        { id: '3', desc: `Actively apply to job vacancies and participate in interviews as documented in job logs`, targetDate: 'Month 6', measure: 'Secure placement matching physical tolerances' }
-      ];
-    } else if (selectedTrack === 'self_employment') {
-      suggested = [
-        { id: '1', desc: `Formulate a comprehensive business plan and conduct local market feasibility study`, targetDate: 'Month 4', measure: 'Concurrence and approval by VRC and VREO' },
-        { id: '2', desc: `Obtain official business licensing, tax registration, and secure commercial/office space`, targetDate: 'Month 8', measure: 'Provide copy of business license and lease' },
-        { id: '3', desc: `Procure initial inventory/supplies and launch marketing campaigns`, targetDate: 'Month 12', measure: 'Document first sales and operational records' }
-      ];
-    } else if (selectedTrack === 'reemployment') {
-      suggested = [
-        { id: '1', desc: `Conduct job site accommodation analysis with current employer and VRC`, targetDate: 'Month 2', measure: 'Provide completed safety/accommodation report' },
-        { id: '2', desc: `Procure and install necessary ergonomic equipment and adaptive workstation software`, targetDate: 'Month 4', measure: 'VRC verification of equipment installation' },
-        { id: '3', desc: `Complete workplace adjustment period to ensure stable job retention`, targetDate: 'Month 6', measure: 'Employer letter confirming satisfactory performance' }
-      ];
-    } else if (selectedTrack === 'independent_living') {
-      suggested = [
-        { id: '1', desc: `Complete comprehensive medical, cognitive, and daily living safety assessments`, targetDate: 'Month 2', measure: 'Provide physician and specialist evaluations' },
-        { id: '2', desc: `Implement home adjustments and procure daily living assistive equipment`, targetDate: 'Month 8', measure: 'VRC verification of home inspection and receipt of daily living aids' },
-        { id: '3', desc: `Achieve personal independence in activities of daily living (ADLs) without assistance`, targetDate: 'Month 12', measure: 'Final case worker evaluation and closure report' }
-      ];
-    }
-    setObjectives(suggested);
+    setObjectives(getSuggestedObjectives(selectedTrack, vocGoal));
   };
-
-  // Tab 2: Brief Builder State
-  const [step, setStep] = useState(1);
-  const [selectedArea, setSelectedArea] = useState(DISPUTE_AREAS[0]);
-  const [userFacts, setUserFacts] = useState({
-    veteranName: '',
-    claimNumber: '',
-    schoolOrProgram: '',
-    counselorArgument: '',
-    personalContext: '',
-  });
-  const [selectedErrors, setSelectedErrors] = useState({});
-  const [selectedCitations, setSelectedCitations] = useState({});
-  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleSelectArea = (area) => {
     setSelectedArea(area);
-    const initialErrors = {};
-    area.legalErrors.forEach(err => { initialErrors[err.id] = true; });
-    setSelectedErrors(initialErrors);
-
-    const initialCitations = {};
-    area.citations.forEach((_, idx) => { initialCitations[idx] = true; });
-    setSelectedCitations(initialCitations);
+    setSelectedErrors(createInitialSelectedErrors(area));
+    setSelectedCitations(createInitialSelectedCitations(area));
     setStep(2);
   };
 
@@ -206,12 +624,76 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
     setUserFacts(prev => ({ ...prev, [field]: value }));
   };
 
-  // Compile Plan Summary Letter
+  const handleTrackSelection = (trackId) => {
+    setSelectedTrack(trackId);
+    setObjectives(getSuggestedObjectives(trackId, vocGoal));
+  };
+
+  const handleSaveDraftNow = () => {
+    const draftPayload = buildWorkspaceDraft();
+    writeWorkspaceDraft(privacyMode, draftPayload);
+    persistDraft(draftPayload).catch((error) => {
+      setDraftStatus('local');
+      setDraftError(error.message || 'Failed to save plan draft.');
+    });
+  };
+
+  const draftStatusMeta = useMemo(() => {
+    switch (draftStatus) {
+      case 'loading':
+        return {
+          label: 'Loading draft',
+          className: 'bg-sky-500/10 border-sky-500/30 text-sky-300'
+        };
+      case 'saving':
+        return {
+          label: 'Saving to SQLite',
+          className: 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+        };
+      case 'synced':
+        return {
+          label: 'Synced to SQLite',
+          className: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+        };
+      case 'ready':
+        return {
+          label: 'Ready to save',
+          className: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
+        };
+      case 'error':
+        return {
+          label: 'Load error',
+          className: 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+        };
+      default:
+        return {
+          label: 'Stored locally',
+          className: 'bg-slate-500/10 border-slate-500/30 text-slate-300'
+        };
+    }
+  }, [draftStatus]);
+
+  const lastSavedLabel = useMemo(() => {
+    if (!lastSavedAt) {
+      return '';
+    }
+
+    try {
+      return new Date(lastSavedAt).toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  }, [lastSavedAt]);
+
   const compilePlanLetter = () => {
     const goalText = vocGoal || '[GOAL TITLE]';
     const onetText = onetCode || '[O*NET CODE]';
-    
-    // Map tracks to full names
+
     const trackNames = {
       reemployment: 'Reemployment Track (38 U.S.C. § 3105 / 38 C.F.R. § 21.48)',
       rapid_employment: 'Rapid Employment Services Track (38 U.S.C. § 3105 / 38 C.F.R. § 21.49)',
@@ -221,14 +703,12 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
     };
     const trackName = trackNames[selectedTrack];
 
-    // Format objectives
     const objectivesText = objectives.map((o, idx) => 
       `${idx + 1}. OBJECTIVE: ${o.desc || '[Enter objective description]'}
    TARGET COMPLETION: ${o.targetDate || '[Target date]'}
    MEASURE OF PROGRESS: ${o.measure || '[Progress metric]'}`
     ).join('\n\n');
 
-    // Format services
     const servicesList = [];
     if (requiredServices.tuition) servicesList.push('* Tuition and Mandatory Fees (100% uncapped - 38 C.F.R. § 21.212)');
     if (requiredServices.books) servicesList.push('* Required Textbooks, Supplies, and Tools (38 C.F.R. § 21.212)');
@@ -242,7 +722,6 @@ function ClaimArgumentBuilderView({ reduceMotion }) {
 
     const servicesText = servicesList.length > 0 ? servicesList.join('\n') : '* No specific services selected';
 
-    // Format MHA details
     const mhaText = subsistenceElection === 'ch31'
       ? 'Chapter 31 Standard Institutional Subsistence Rate scale (38 U.S.C. § 3108)'
       : `Post-9/11 MHA Election Rate based on school ZIP ${zipCode || '[ZIP]'} (Estimated MHA: $${estimatedMha || '[BAH Rate]'} / Mo - 38 U.S.C. § 3108(f))`;
@@ -292,6 +771,9 @@ ___________________________________
   const handlePrintPlan = () => {
     const text = compilePlanLetter();
     const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      return;
+    }
     printWindow.document.write(`
       <html>
         <head><title>Plan Justification</title></head>
@@ -343,13 +825,31 @@ ${selectedArea.evidenceChecklist.map(item => `[ ] ${item}`).join('\n')}`;
       animate={{ opacity: 1, y: 0 }}
       className="doc-card text-slate-100"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
-          <Compass size={20} />
-        </span>
-        <div>
-          <h1 className="text-lg font-bold text-slate-100">IPE / Plan Builder Workspace</h1>
-          <p className="text-[11px] text-slate-400">Design training goals, vocational goals, required services lists, and draft plan amendments.</p>
+      <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <Compass size={20} />
+          </span>
+          <div>
+            <h1 className="text-lg font-bold text-slate-100">IPE / Plan Builder Workspace</h1>
+            <p className="text-[11px] text-slate-400">Design training goals, vocational goals, required services lists, and draft plan amendments.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold ${draftStatusMeta.className}`}>
+            {draftStatusMeta.label}
+          </span>
+          {draftId && (
+            <span className="text-[10px] text-slate-500">
+              Draft ID: <span className="font-mono text-slate-400">{draftId.slice(0, 10)}</span>
+            </span>
+          )}
+          {lastSavedLabel && (
+            <span className="text-[10px] text-slate-500">Last saved {lastSavedLabel}</span>
+          )}
+          {draftError && (
+            <span className="text-[10px] text-amber-300">{draftError}</span>
+          )}
         </div>
       </div>
 
@@ -389,46 +889,7 @@ ${selectedArea.evidenceChecklist.map(item => `[ ] ${item}`).join('\n')}`;
                     <button
                       key={track.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedTrack(track.id);
-                        // Trigger immediate suggestion to help user
-                        setTimeout(() => {
-                          const goal = vocGoal || 'Target Career';
-                          let suggested = [];
-                          if (track.id === 'long_term') {
-                            suggested = [
-                              { id: '1', desc: `Complete official academic coursework or degree program required for ${goal}`, targetDate: 'Graduation Term', measure: 'Maintain a cumulative GPA of 2.0 or higher' },
-                              { id: '2', desc: `Acquire required professional licenses or complete practical internship for ${goal}`, targetDate: 'Academic Term 6', measure: 'Provide official credential certifications' },
-                              { id: '3', desc: `Transition to IEAP employment assistance and secure suitable placement in target field`, targetDate: 'Post-Graduation', measure: 'Successful employment retention for 60 consecutive days' }
-                            ];
-                          } else if (track.id === 'rapid_employment') {
-                            suggested = [
-                              { id: '1', desc: `Optimize professional resume, LinkedIn, and vocational portfolio for ${goal}`, targetDate: 'Month 2', measure: 'VRC counselor formal review and approval' },
-                              { id: '2', desc: `Complete specialized short-term bootcamps or vocational certificates`, targetDate: 'Month 4', measure: 'Provide certificate of completion' },
-                              { id: '3', desc: `Actively apply to job vacancies and participate in interviews as documented in job logs`, targetDate: 'Month 6', measure: 'Secure placement matching physical tolerances' }
-                            ];
-                          } else if (track.id === 'self_employment') {
-                            suggested = [
-                              { id: '1', desc: `Formulate a comprehensive business plan and conduct local market feasibility study`, targetDate: 'Month 4', measure: 'Concurrence and approval by VRC and VREO' },
-                              { id: '2', desc: `Obtain official business licensing, tax registration, and secure commercial/office space`, targetDate: 'Month 8', measure: 'Provide copy of business license and lease' },
-                              { id: '3', desc: `Procure initial inventory/supplies and launch marketing campaigns`, targetDate: 'Month 12', measure: 'Document first sales and operational records' }
-                            ];
-                          } else if (track.id === 'reemployment') {
-                            suggested = [
-                              { id: '1', desc: `Conduct job site accommodation analysis with current employer and VRC`, targetDate: 'Month 2', measure: 'Provide completed safety/accommodation report' },
-                              { id: '2', desc: `Procure and install necessary ergonomic equipment and adaptive workstation software`, targetDate: 'Month 4', measure: 'VRC verification of equipment installation' },
-                              { id: '3', desc: `Complete workplace adjustment period to ensure stable job retention`, targetDate: 'Month 6', measure: 'Employer letter confirming satisfactory performance' }
-                            ];
-                          } else if (track.id === 'independent_living') {
-                            suggested = [
-                              { id: '1', desc: `Complete comprehensive medical, cognitive, and daily living safety assessments`, targetDate: 'Month 2', measure: 'Provide physician and specialist evaluations' },
-                              { id: '2', desc: `Implement home adjustments and procure daily living assistive equipment`, targetDate: 'Month 8', measure: 'VRC verification of home inspection and receipt of daily living aids' },
-                              { id: '3', desc: `Achieve personal independence in activities of daily living (ADLs) without assistance`, targetDate: 'Month 12', measure: 'Final case worker evaluation and closure report' }
-                            ];
-                          }
-                          setObjectives(suggested);
-                        }, 50);
-                      }}
+                      onClick={() => handleTrackSelection(track.id)}
                       className={`text-left p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
                         isSelected 
                           ? 'bg-indigo-500/10 border-indigo-500 shadow-md shadow-indigo-500/5' 
@@ -748,14 +1209,28 @@ ${selectedArea.evidenceChecklist.map(item => `[ ] ${item}`).join('\n')}`;
 
           {/* Preview & Compiled Letter / Supporting Evidence */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="flex justify-between items-center bg-slate-900/30 border border-slate-850 rounded-xl p-4">
+            <div className="flex flex-col gap-3 bg-slate-900/30 border border-slate-850 rounded-xl p-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-2">
                 <span className="p-1 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
                   <Compass size={14} />
                 </span>
-                <span className="text-xs font-bold text-slate-200">IPE Justification Memo</span>
+                <div className="space-y-0.5">
+                  <span className="block text-xs font-bold text-slate-200">IPE Justification Memo</span>
+                  <span className="block text-[10px] text-slate-500">
+                    {isBackendOnline ? 'Autosaves to your scoped SQLite draft.' : 'Stored in browser storage until the local backend is available.'}
+                  </span>
+                </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                {isBackendOnline && (
+                  <button
+                    onClick={handleSaveDraftNow}
+                    className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 rounded text-white flex items-center gap-1 cursor-pointer transition"
+                  >
+                    <CheckCircle2 size={13} />
+                    <span>Save Draft</span>
+                  </button>
+                )}
                 <button 
                   onClick={handleCopyPlan} 
                   className="px-3 py-1.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 border border-slate-850 rounded text-slate-205 flex items-center gap-1 cursor-pointer transition"

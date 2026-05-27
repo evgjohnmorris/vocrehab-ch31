@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, BookMarked, Settings, Sun, Moon, Eye, Menu, X, Shield, Trash2, HelpCircle } from 'lucide-react';
 import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
+import { buildBackendUrl } from '../utils/backendApi';
 
 function Header({
   setActiveView,
@@ -44,6 +45,7 @@ function Header({
   // Dynamic search data states
   const [manifest, setManifest] = useState(null);
   const [crosswalk, setCrosswalk] = useState([]);
+  const [ecfrDirectory, setEcfrDirectory] = useState(null);
   const [searchFilter, setSearchFilter] = useState('all'); // 'all' | 'usc' | 'cfr' | 'm28c' | 'topic' | 'workflow'
 
   // Bind settingsForm to the active rates year subset
@@ -69,8 +71,9 @@ function Header({
     const loadSearchMetadata = async () => {
       try {
         const baseUrl = import.meta.env?.BASE_URL || '/';
-        const manifestUrl = isBackendOnline ? 'http://localhost:5000/api/authority/manifest' : `${baseUrl}authority/index.json`;
-        const crosswalkUrl = isBackendOnline ? 'http://localhost:5000/api/authority/crosswalk' : `${baseUrl}authority/topic-crosswalk.json`;
+        const manifestUrl = isBackendOnline ? buildBackendUrl('/api/authority/manifest') : `${baseUrl}authority/index.json`;
+        const crosswalkUrl = isBackendOnline ? buildBackendUrl('/api/authority/crosswalk') : `${baseUrl}authority/topic-crosswalk.json`;
+        const ecfrDirectoryUrl = `${baseUrl}authority/ecfr-title-directory.json`;
 
         const manifestRes = await fetch(manifestUrl);
         if (manifestRes.ok) {
@@ -81,6 +84,12 @@ function Header({
         if (crosswalkRes.ok) {
           const crosswalkData = await crosswalkRes.json();
           setCrosswalk(crosswalkData);
+        }
+
+        const ecfrDirectoryRes = await fetch(ecfrDirectoryUrl);
+        if (ecfrDirectoryRes.ok) {
+          const ecfrDirectoryData = await ecfrDirectoryRes.json();
+          setEcfrDirectory(ecfrDirectoryData);
         }
       } catch (err) {
         console.error("Failed to load header search metadata:", err);
@@ -219,6 +228,21 @@ function Header({
       });
     }
 
+    if (searchFilter === 'all' || searchFilter === 'ecfr') {
+      (ecfrDirectory?.titles || []).forEach(title => {
+        const titleText = `${title.label} ${title.shortLabel} ${(title.keywords || []).join(' ')}`;
+        if (isMatch(titleText, `title ${title.titleNumber}`)) {
+          results.push({
+            type: 'ecfr-title',
+            id: title.id,
+            title: title.label,
+            snippet: `${title.stats.sections} indexed sections • ${title.stats.parts} parts • structure snapshot ${title.structureDate}`,
+            category: 'Related eCFR Title'
+          });
+        }
+      });
+    }
+
     return results.slice(0, 10); // Limit to top 10
   })();
 
@@ -238,7 +262,7 @@ function Header({
             <Search size={18} className="search-input-icon" />
             <input 
               type="text" 
-              placeholder="Search U.S. Code, CFR, & M28C guidelines..." 
+              placeholder="Search U.S. Code, CFR, M28C, and related eCFR titles..." 
               className="search-input"
               value={searchQuery}
               onChange={(e) => {
@@ -269,6 +293,7 @@ function Header({
                   { label: 'Statutes', value: 'usc' },
                   { label: 'Regulations', value: 'cfr' },
                   { label: 'Manual (M28C)', value: 'm28c' },
+                  { label: 'eCFR Titles', value: 'ecfr' },
                   { label: 'Topics', value: 'topic' },
                   { label: 'Workflows', value: 'workflow' }
                 ].map(tab => (

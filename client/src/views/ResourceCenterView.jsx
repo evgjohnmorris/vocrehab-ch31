@@ -208,6 +208,50 @@ function ResourceCenterView({ reduceMotion }) {
 
         {/* Category 3: Financial & Special Access */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Industry & Standards</h3>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BookOpen size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>2022 NAICS Manual & Search</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official Census references for validating North American Industry Classification System sectors, definitions, and exact 2-digit through 6-digit code matches.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <a href="https://www.census.gov/naics/reference_files_tools/2022_NAICS_Manual.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open NAICS Manual <ExternalLink size={12} />
+              </a>
+              <a href="https://www.census.gov/naics/?year=2022" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open NAICS Search <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>ISO 9001 Quality Standards</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official ISO references for quality management systems used in manufacturing, operations, logistics, construction, healthcare, technology, and supplier-quality workflows.
+            </p>
+            <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '6px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Full ISO standards are licensed publications, so this workspace links to the official standard pages and guidance instead of third-party PDF mirrors.
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <a href="https://www.iso.org/standard/62085.html" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open ISO 9001 <ExternalLink size={12} />
+              </a>
+              <a href="https://www.iso.org/home/insights-news/resources/iso-9001-explained.html" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open ISO 9001 Guide <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Category 4: Financial & Special Access */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Specialized & Financial</h3>
 
           <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -263,7 +307,7 @@ function ResourceCenterView({ reduceMotion }) {
           </div>
         </div>
 
-        {/* Category 4: Federal & Advocacy Support */}
+        {/* Category 5: Federal & Advocacy Support */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Federal & Advocacy</h3>
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing Guide
+    url: https://github.com/evgjohnmorris/vocrehab-ch31/blob/main/CONTRIBUTING.md
+    about: Read the contribution workflow and quality bar before starting.
+  - name: Security Guidance
+    url: https://github.com/evgjohnmorris/vocrehab-ch31/blob/main/SECURITY.md
+    about: Use this guidance if your report involves privacy or security.

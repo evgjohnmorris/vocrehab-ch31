@@ -1,3 +1,6 @@
 node_modules/
 m28c_guide.db
+m28c_guide.db-*
+*.db-wal
+*.db-shm
 .env

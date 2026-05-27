@@ -1,13 +1,56 @@
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import db from '../db.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import {
+  getCoverageReport,
+  getManifestMetadata,
+  getTopicCrosswalk
+} from '../lib/authorityStaticData.js';
 
 const router = express.Router();
+
+const AUTHORITY_TYPES = new Set([
+  'usc',
+  'cfr',
+  'm28c',
+  'public-law',
+  'federal-register'
+]);
+
+function parseTopics(rawTopics) {
+  if (!rawTopics) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(rawTopics);
+  } catch {
+    return [];
+  }
+}
+
+function normalizeSearchQuery(query) {
+  const tokens = String(query || '')
+    .trim()
+    .split(/\s+/)
+    .map((token) => token.replace(/"/g, '""'))
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return '';
+  }
+
+  return tokens.map((token) => `"${token}"`).join(' AND ');
+}
+
+function getSearchLimit(limitParam) {
+  const parsed = Number.parseInt(limitParam, 10);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return 20;
+  }
+
+  return Math.min(parsed, 50);
+}
 
 // Get manifest (returns consolidated list formatted as index.json)
 router.get('/manifest', (req, res) => {
@@ -19,73 +62,84 @@ router.get('/manifest', (req, res) => {
       return res.status(500).json({ error: err.message });
     }
 
-    const manifest = {
-      version: "1.0.0",
-      lastUpdated: new Date().toISOString().split('T')[0],
-      statutes: [],
-      regulations: [],
-      m28c: [],
-      publicLaws: [],
-      federalRegister: []
-    };
-
-    rows.forEach(row => {
-      const item = {
-        id: row.id,
-        citation: row.citation,
-        title: row.title,
-        hash: row.hash,
-        status: row.status
+    try {
+      const manifestMeta = getManifestMetadata();
+      const manifest = {
+        version: manifestMeta.version,
+        lastUpdated: manifestMeta.lastUpdated,
+        statutes: [],
+        regulations: [],
+        m28c: [],
+        publicLaws: [],
+        federalRegister: []
       };
 
-      if (row.type === 'usc') manifest.statutes.push(item);
-      else if (row.type === 'cfr') manifest.regulations.push(item);
-      else if (row.type === 'm28c') manifest.m28c.push(item);
-      else if (row.type === 'public-law') manifest.publicLaws.push(item);
-      else if (row.type === 'federal-register') manifest.federalRegister.push(item);
-    });
+      rows.forEach(row => {
+        const item = {
+          id: row.id,
+          citation: row.citation,
+          title: row.title,
+          hash: row.hash,
+          status: row.status
+        };
 
-    res.json(manifest);
+        if (row.type === 'usc') manifest.statutes.push(item);
+        else if (row.type === 'cfr') manifest.regulations.push(item);
+        else if (row.type === 'm28c') manifest.m28c.push(item);
+        else if (row.type === 'public-law') manifest.publicLaws.push(item);
+        else if (row.type === 'federal-register') manifest.federalRegister.push(item);
+      });
+
+      res.json(manifest);
+    } catch (assetError) {
+      res.status(500).json({ error: assetError.message });
+    }
   });
 });
 
 // Get crosswalk
 router.get('/crosswalk', (req, res) => {
   try {
-    const crosswalkPath = path.resolve(__dirname, '../../client/src/data/authority/topic-crosswalk.json');
-    const raw = fs.readFileSync(crosswalkPath, 'utf8');
-    res.json(JSON.parse(raw));
+    res.json(getTopicCrosswalk());
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read crosswalk file: ' + err.message });
+    res.status(500).json({ error: `Failed to read crosswalk file: ${err.message}` });
   }
 });
 
 // Get coverage report
 router.get('/coverage', (req, res) => {
   try {
-    const coveragePath = path.resolve(__dirname, '../../client/public/authority/coverage-report.json');
-    const raw = fs.readFileSync(coveragePath, 'utf8');
-    res.json(JSON.parse(raw));
+    res.json(getCoverageReport());
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read coverage report file: ' + err.message });
+    res.status(500).json({ error: `Failed to read coverage report file: ${err.message}` });
   }
 });
 
 // Search documents
 router.get('/search', (req, res) => {
-  const query = req.query.q || '';
+  const query = String(req.query.q || '').trim();
   if (!query) {
     return res.json([]);
   }
 
+  const limit = getSearchLimit(req.query.limit);
+  const ftsQuery = normalizeSearchQuery(query);
+
   // Try FTS5 first
   db.all(`
-    SELECT id, citation, title, full_text, type
-    FROM authority_records
-    WHERE id IN (
-      SELECT id FROM authority_search_idx WHERE authority_search_idx MATCH ?
-    )
-  `, [query], (err, rows) => {
+    SELECT
+      authority_records.id,
+      authority_records.citation,
+      authority_records.title,
+      authority_records.type,
+      snippet(authority_search_idx, 3, '', '', ' ... ', 24) AS snippet,
+      substr(authority_records.full_text, 1, 320) AS previewText
+    FROM authority_search_idx
+    JOIN authority_records ON authority_records.rowid = authority_search_idx.rowid
+    WHERE authority_search_idx MATCH ?
+    ORDER BY bm25(authority_search_idx)
+    LIMIT ?
+  `, [ftsQuery, limit], (err, rows) => {
     if (!err) {
       return res.json(rows);
     }
@@ -93,10 +147,23 @@ router.get('/search', (req, res) => {
     // Fallback standard LIKE query
     const matchText = `%${query}%`;
     db.all(`
-      SELECT id, citation, title, full_text, type
+      SELECT
+        id,
+        citation,
+        title,
+        type,
+        substr(full_text, 1, 320) AS previewText
       FROM authority_records
       WHERE citation LIKE ? OR title LIKE ? OR full_text LIKE ?
-    `, [matchText, matchText, matchText], (fallbackErr, fallbackRows) => {
+      ORDER BY
+        CASE
+          WHEN citation LIKE ? THEN 0
+          WHEN title LIKE ? THEN 1
+          ELSE 2
+        END,
+        citation
+      LIMIT ?
+    `, [matchText, matchText, matchText, matchText, matchText, limit], (fallbackErr, fallbackRows) => {
       if (fallbackErr) {
         return res.status(500).json({ error: fallbackErr.message });
       }
@@ -107,15 +174,20 @@ router.get('/search', (req, res) => {
 
 // Get specific document by type and id
 router.get('/:type/:id', (req, res) => {
-  const { id } = req.params;
+  const { type, id } = req.params;
+
+  if (!AUTHORITY_TYPES.has(type)) {
+    return res.status(400).json({ error: `Unsupported authority type: ${type}` });
+  }
+
   db.get(`
-    SELECT * FROM authority_records WHERE id = ?
-  `, [id], (err, row) => {
+    SELECT * FROM authority_records WHERE type = ? AND id = ?
+  `, [type, id], (err, row) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
     if (!row) {
-      return res.status(404).json({ error: `Record not found: ${id}` });
+      return res.status(404).json({ error: `Record not found: ${type}/${id}` });
     }
 
     // Format back to JSON object matching schema
@@ -127,7 +199,7 @@ router.get('/:type/:id', (req, res) => {
       title: row.title,
       fullText: row.full_text,
       text: row.full_text,
-      topics: JSON.parse(row.topics || '[]'),
+      topics: parseTopics(row.topics),
       hash: row.hash,
       authorityLevel: row.authority_level,
       status: row.status,

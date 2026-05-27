@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a workflow, backend, data, or UX improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Case management backend
+        - Authority and source verification
+        - Workflow engine
+        - Document generation
+        - Career strategy and occupations
+        - Forms, rates, or contacts
+        - Navigation or search
+        - Accessibility or UX
+        - Testing or CI
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      placeholder: Veterans cannot currently...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      placeholder: Add or change...
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Sources or references
+      description: Link authority, VA, DOL, BLS, NCES, Census, or other primary sources when relevant.
+  - type: textarea
+    id: success
+    attributes:
+      label: What success looks like
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help implement this.

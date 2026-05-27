@@ -1,25 +1,537 @@
 // @allow-modal
-import { useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { 
-  Scale, Compass, FileText, Search, CheckCircle, AlertTriangle, Info, Activity 
+  Scale, Compass, FileText, Search, CheckCircle, AlertTriangle, Info, Activity, ExternalLink
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CAREERS_DATABASE } from '../data/school_data';
 import { INDUSTRIES_LOOKUP } from '../data/industry_data';
 import { generateJustificationLetter } from '../utils/letterGenerators';
+import { fetchCurrentPlanDraft, fetchReferenceLibraryOverview, saveCurrentPlanDraft } from '../utils/backendApi';
+import {
+  buildCareerIndex,
+  CAREER_DEMAND_FILTERS,
+  CAREER_SORT_OPTIONS,
+  evaluateCareerCompatibility,
+  filterCareerIndex,
+  summarizeCareerGroups
+} from '../utils/careerIndex';
 
-function CareerStrategyView({ reduceMotion }) {
-  // Entitlement Timeline States
+const CAREER_STRATEGY_DRAFT_TYPE = 'career_strategy_workspace';
+const CAREER_STRATEGY_STORAGE_KEY = 'm28c_career_strategy_workspace';
+const OFFICIAL_INDUSTRY_REFERENCES = [
+  {
+    id: 'naics-manual',
+    source: 'U.S. Census Bureau',
+    title: '2022 NAICS Manual',
+    href: 'https://www.census.gov/naics/reference_files_tools/2022_NAICS_Manual.pdf',
+    badge: 'Official PDF',
+    description: 'Full classification manual for validating sector language, hierarchy, and exact 2022 code definitions.'
+  },
+  {
+    id: 'iso-9001-standard',
+    source: 'International Organization for Standardization',
+    title: 'ISO 9001:2015',
+    href: 'https://www.iso.org/standard/62085.html',
+    badge: 'Official ISO',
+    description: 'Current official quality-management standard page for manufacturing, operations, supply-chain, and service roles.'
+  },
+  {
+    id: 'iso-9001-explained',
+    source: 'International Organization for Standardization',
+    title: 'ISO 9001 Explained',
+    href: 'https://www.iso.org/home/insights-news/resources/iso-9001-explained.html',
+    badge: 'Quick Guide',
+    description: 'Practical explainer covering how ISO 9001 works, who uses it, and what the requirements mean operationally.'
+  }
+];
+
+function clampCareerIndex(index) {
+  if (!Number.isFinite(index)) {
+    return 0;
+  }
+
+  const normalized = Math.max(0, Math.min(CAREERS_DATABASE.length - 1, Math.trunc(index)));
+  return normalized;
+}
+
+function createDefaultGoalIndexWorkspace() {
+  return {
+    query: '',
+    group: 'all',
+    demand: 'all',
+    sortMode: 'recommended',
+    compatibleOnly: false
+  };
+}
+
+function createDefaultCareerStrategyDraft() {
+  return {
+    schemaVersion: 1,
+    timeline: {
+      transitionYear: 8,
+      taStartYear: 2,
+      taEndYear: 6,
+      useSkillBridge: true,
+      skillBridgeDuration: 6,
+      gibillMonths: 36,
+      gibillStartYear: 9,
+      vreMonths: 24,
+      vreStartYear: 12,
+      hasSEH: false
+    },
+    strategist: {
+      selectedCareerIndex: 0,
+      goalIndex: createDefaultGoalIndexWorkspace(),
+      limitations: {
+        limitStanding: false,
+        limitLifting: false,
+        limitBending: false,
+        limitEnvironment: false,
+        limitSitting: false,
+        limitRepetitive: false,
+        limitSensory: false,
+        limitStress: false,
+        limitRespiratory: false
+      }
+    },
+    profiler: {
+      riasecR: 3,
+      riasecI: 3,
+      riasecA: 3,
+      riasecS: 3,
+      riasecE: 3,
+      riasecC: 3,
+      showProfiler: false
+    },
+    justification: {
+      justCurrentGoal: 'Operations Specialist',
+      justProposedGoal: 'Software Developer',
+      justReason: 'disability_worsened',
+      justMedicalEvidence: true,
+      justPhysicalImpact: 'Current job requires frequent bending, lifting, and carrying gear up to 50 lbs, which exacerbates my service-connected spinal stenosis and lumbar strain. Sitting at a computer desk is medically recommended.',
+      justGeneratedLetter: ''
+    },
+    industryFinder: {
+      industrySearchQuery: '',
+      showIndustryFinder: false
+    }
+  };
+}
+
+function normalizeCareerStrategyDraft(rawDraft) {
+  const defaults = createDefaultCareerStrategyDraft();
+  if (!rawDraft || typeof rawDraft !== 'object' || Array.isArray(rawDraft)) {
+    return defaults;
+  }
+
+  return {
+    schemaVersion: 1,
+    timeline: {
+      ...defaults.timeline,
+      ...(rawDraft.timeline || {})
+    },
+    strategist: {
+      selectedCareerIndex: clampCareerIndex(rawDraft.strategist?.selectedCareerIndex ?? defaults.strategist.selectedCareerIndex),
+      goalIndex: {
+        ...defaults.strategist.goalIndex,
+        ...(rawDraft.strategist?.goalIndex || {})
+      },
+      limitations: {
+        ...defaults.strategist.limitations,
+        ...(rawDraft.strategist?.limitations || {})
+      }
+    },
+    profiler: {
+      ...defaults.profiler,
+      ...(rawDraft.profiler || {})
+    },
+    justification: {
+      ...defaults.justification,
+      ...(rawDraft.justification || {})
+    },
+    industryFinder: {
+      ...defaults.industryFinder,
+      ...(rawDraft.industryFinder || {})
+    }
+  };
+}
+
+function readCareerStrategyDraft(privacyMode) {
+  const storage = privacyMode ? sessionStorage : localStorage;
+  const rawDraft = storage.getItem(CAREER_STRATEGY_STORAGE_KEY);
+  if (!rawDraft) {
+    return null;
+  }
+
+  try {
+    return normalizeCareerStrategyDraft(JSON.parse(rawDraft));
+  } catch (error) {
+    console.warn('Failed to parse saved career strategy draft, ignoring stored value.', error);
+    return null;
+  }
+}
+
+function writeCareerStrategyDraft(privacyMode, draftPayload) {
+  const storage = privacyMode ? sessionStorage : localStorage;
+  const otherStorage = privacyMode ? localStorage : sessionStorage;
+  storage.setItem(CAREER_STRATEGY_STORAGE_KEY, JSON.stringify(draftPayload));
+  otherStorage.removeItem(CAREER_STRATEGY_STORAGE_KEY);
+}
+
+function buildCareerStrategyDraftTitle(proposedGoal, careerIndex) {
+  if (typeof proposedGoal === 'string' && proposedGoal.trim()) {
+    return `${proposedGoal.trim()} strategy draft`;
+  }
+
+  const career = CAREERS_DATABASE[clampCareerIndex(careerIndex)] || CAREERS_DATABASE[0];
+  return `${career.title} strategy draft`;
+}
+
+function CareerStrategyView({
+  reduceMotion,
+  privacyMode = false,
+  isBackendOnline = false,
+  dataResetToken = 0
+}) {
   const [transitionYear, setTransitionYear] = useState(8);
   const [taStartYear, setTaStartYear] = useState(2);
   const [taEndYear, setTaEndYear] = useState(6);
   const [useSkillBridge, setUseSkillBridge] = useState(true);
-  const [skillBridgeDuration, setSkillBridgeDuration] = useState(6); // months
+  const [skillBridgeDuration, setSkillBridgeDuration] = useState(6);
   const [gibillMonths, setGibillMonths] = useState(36);
   const [gibillStartYear, setGibillStartYear] = useState(9);
   const [vreMonths, setVreMonths] = useState(24);
   const [vreStartYear, setVreStartYear] = useState(12);
   const [hasSEH, setHasSEH] = useState(false);
+  const [selectedCareerIndex, setSelectedCareerIndex] = useState(0);
+  const [limitStanding, setLimitStanding] = useState(false);
+  const [limitLifting, setLimitLifting] = useState(false);
+  const [limitBending, setLimitBending] = useState(false);
+  const [limitEnvironment, setLimitEnvironment] = useState(false);
+  const [limitSitting, setLimitSitting] = useState(false);
+  const [limitRepetitive, setLimitRepetitive] = useState(false);
+  const [limitSensory, setLimitSensory] = useState(false);
+  const [limitStress, setLimitStress] = useState(false);
+  const [limitRespiratory, setLimitRespiratory] = useState(false);
+  const [riasecR, setRiasecR] = useState(3);
+  const [riasecI, setRiasecI] = useState(3);
+  const [riasecA, setRiasecA] = useState(3);
+  const [riasecS, setRiasecS] = useState(3);
+  const [riasecE, setRiasecE] = useState(3);
+  const [riasecC, setRiasecC] = useState(3);
+  const [showProfiler, setShowProfiler] = useState(false);
+  const [justCurrentGoal, setJustCurrentGoal] = useState('Operations Specialist');
+  const [justProposedGoal, setJustProposedGoal] = useState('Software Developer');
+  const [justReason, setJustReason] = useState('disability_worsened');
+  const [justMedicalEvidence, setJustMedicalEvidence] = useState(true);
+  const [justPhysicalImpact, setJustPhysicalImpact] = useState(
+    'Current job requires frequent bending, lifting, and carrying gear up to 50 lbs, which exacerbates my service-connected spinal stenosis and lumbar strain. Sitting at a computer desk is medically recommended.'
+  );
+  const [justGeneratedLetter, setJustGeneratedLetter] = useState('');
+  const [careerSearchQuery, setCareerSearchQuery] = useState('');
+  const [careerGroupFilter, setCareerGroupFilter] = useState('all');
+  const [careerDemandFilter, setCareerDemandFilter] = useState('all');
+  const [careerSortMode, setCareerSortMode] = useState('recommended');
+  const [careerCompatibleOnly, setCareerCompatibleOnly] = useState(false);
+  const [industrySearchQuery, setIndustrySearchQuery] = useState('');
+  const [showIndustryFinder, setShowIndustryFinder] = useState(false);
+  const [draftId, setDraftId] = useState(null);
+  const [draftStatus, setDraftStatus] = useState(isBackendOnline ? 'ready' : 'local');
+  const [draftError, setDraftError] = useState('');
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+
+  const hasHydratedRef = useRef(false);
+  const skipAutosaveRef = useRef(true);
+  const saveTimerRef = useRef(null);
+
+  const deferredCareerSearchQuery = useDeferredValue(careerSearchQuery);
+  const careerIndexEntries = useMemo(() => buildCareerIndex(CAREERS_DATABASE), []);
+  const careerGroupSummary = useMemo(() => summarizeCareerGroups(careerIndexEntries), [careerIndexEntries]);
+
+  const activeLimitations = useMemo(() => ({
+    limitStanding,
+    limitLifting,
+    limitBending,
+    limitEnvironment,
+    limitSitting,
+    limitRepetitive,
+    limitSensory,
+    limitStress,
+    limitRespiratory
+  }), [
+    limitStanding,
+    limitLifting,
+    limitBending,
+    limitEnvironment,
+    limitSitting,
+    limitRepetitive,
+    limitSensory,
+    limitStress,
+    limitRespiratory
+  ]);
+
+  const compatibilityByIndex = useMemo(() => careerIndexEntries.reduce((accumulator, careerEntry) => {
+    accumulator[careerEntry.index] = evaluateCareerCompatibility(careerEntry, activeLimitations);
+    return accumulator;
+  }, {}), [activeLimitations, careerIndexEntries]);
+
+  const filteredCareerEntries = useMemo(() => filterCareerIndex(careerIndexEntries, {
+    query: deferredCareerSearchQuery,
+    group: careerGroupFilter,
+    demand: careerDemandFilter,
+    sortMode: careerSortMode,
+    compatibleOnly: careerCompatibleOnly,
+    compatibilityByIndex
+  }), [
+    careerCompatibleOnly,
+    careerDemandFilter,
+    careerGroupFilter,
+    careerIndexEntries,
+    careerSortMode,
+    compatibilityByIndex,
+    deferredCareerSearchQuery
+  ]);
+
+  const careerIndexStats = useMemo(() => ({
+    total: careerIndexEntries.length,
+    compatible: careerIndexEntries.filter((entry) => compatibilityByIndex[entry.index]?.compatible).length,
+    highGrowth: careerIndexEntries.filter((entry) => entry.growthValue >= 15).length,
+    lowDemand: careerIndexEntries.filter((entry) => entry.physicalDemand === 'Sedentary' || entry.physicalDemand === 'Light').length
+  }), [careerIndexEntries, compatibilityByIndex]);
+
+  const selectedCareerVisibleInResults = useMemo(
+    () => filteredCareerEntries.some((entry) => entry.index === selectedCareerIndex),
+    [filteredCareerEntries, selectedCareerIndex]
+  );
+
+  const currentCareer = useMemo(
+    () => CAREERS_DATABASE[clampCareerIndex(selectedCareerIndex)] || CAREERS_DATABASE[0],
+    [selectedCareerIndex]
+  );
+
+  const currentCareerCompatibility = useMemo(
+    () => compatibilityByIndex[selectedCareerIndex] || { compatible: true, reasons: [] },
+    [compatibilityByIndex, selectedCareerIndex]
+  );
+  const [referenceLibraryOverview, setReferenceLibraryOverview] = useState(null);
+
+  const industryReferenceLinks = useMemo(() => ([
+    {
+      id: 'selected-naics-lookup',
+      source: 'U.S. Census Bureau',
+      title: `Selected goal NAICS lookup`,
+      href: `https://www.census.gov/naics/?input=${encodeURIComponent(currentCareer.naics || currentCareer.title)}&year=2022`,
+      badge: 'Live Lookup',
+      description: `Open the official 2022 NAICS search prefilled for ${currentCareer.title} (${currentCareer.naics}).`
+    },
+    ...OFFICIAL_INDUSTRY_REFERENCES
+  ]), [currentCareer]);
+
+  useEffect(() => {
+    if (!isBackendOnline) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    fetchReferenceLibraryOverview({ privacyMode })
+      .then((overview) => {
+        if (!isCancelled) {
+          setReferenceLibraryOverview(overview);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load backend reference library overview:', error);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isBackendOnline, privacyMode]);
+
+  const applyDraft = useCallback((draft) => {
+    const normalizedDraft = normalizeCareerStrategyDraft(draft);
+    setTransitionYear(normalizedDraft.timeline.transitionYear);
+    setTaStartYear(normalizedDraft.timeline.taStartYear);
+    setTaEndYear(normalizedDraft.timeline.taEndYear);
+    setUseSkillBridge(Boolean(normalizedDraft.timeline.useSkillBridge));
+    setSkillBridgeDuration(normalizedDraft.timeline.skillBridgeDuration);
+    setGibillMonths(normalizedDraft.timeline.gibillMonths);
+    setGibillStartYear(normalizedDraft.timeline.gibillStartYear);
+    setVreMonths(normalizedDraft.timeline.vreMonths);
+    setVreStartYear(normalizedDraft.timeline.vreStartYear);
+    setHasSEH(Boolean(normalizedDraft.timeline.hasSEH));
+    setSelectedCareerIndex(normalizedDraft.strategist.selectedCareerIndex);
+    setLimitStanding(Boolean(normalizedDraft.strategist.limitations.limitStanding));
+    setLimitLifting(Boolean(normalizedDraft.strategist.limitations.limitLifting));
+    setLimitBending(Boolean(normalizedDraft.strategist.limitations.limitBending));
+    setLimitEnvironment(Boolean(normalizedDraft.strategist.limitations.limitEnvironment));
+    setLimitSitting(Boolean(normalizedDraft.strategist.limitations.limitSitting));
+    setLimitRepetitive(Boolean(normalizedDraft.strategist.limitations.limitRepetitive));
+    setLimitSensory(Boolean(normalizedDraft.strategist.limitations.limitSensory));
+    setLimitStress(Boolean(normalizedDraft.strategist.limitations.limitStress));
+    setLimitRespiratory(Boolean(normalizedDraft.strategist.limitations.limitRespiratory));
+    setCareerSearchQuery(normalizedDraft.strategist.goalIndex.query);
+    setCareerGroupFilter(normalizedDraft.strategist.goalIndex.group);
+    setCareerDemandFilter(normalizedDraft.strategist.goalIndex.demand);
+    setCareerSortMode(normalizedDraft.strategist.goalIndex.sortMode);
+    setCareerCompatibleOnly(Boolean(normalizedDraft.strategist.goalIndex.compatibleOnly));
+    setRiasecR(normalizedDraft.profiler.riasecR);
+    setRiasecI(normalizedDraft.profiler.riasecI);
+    setRiasecA(normalizedDraft.profiler.riasecA);
+    setRiasecS(normalizedDraft.profiler.riasecS);
+    setRiasecE(normalizedDraft.profiler.riasecE);
+    setRiasecC(normalizedDraft.profiler.riasecC);
+    setShowProfiler(Boolean(normalizedDraft.profiler.showProfiler));
+    setJustCurrentGoal(normalizedDraft.justification.justCurrentGoal);
+    setJustProposedGoal(normalizedDraft.justification.justProposedGoal);
+    setJustReason(normalizedDraft.justification.justReason);
+    setJustMedicalEvidence(Boolean(normalizedDraft.justification.justMedicalEvidence));
+    setJustPhysicalImpact(normalizedDraft.justification.justPhysicalImpact);
+    setJustGeneratedLetter(normalizedDraft.justification.justGeneratedLetter);
+    setIndustrySearchQuery(normalizedDraft.industryFinder.industrySearchQuery);
+    setShowIndustryFinder(Boolean(normalizedDraft.industryFinder.showIndustryFinder));
+  }, []);
+
+  const buildDraftPayload = useCallback(() => ({
+    schemaVersion: 1,
+    timeline: {
+      transitionYear,
+      taStartYear,
+      taEndYear,
+      useSkillBridge,
+      skillBridgeDuration,
+      gibillMonths,
+      gibillStartYear,
+      vreMonths,
+      vreStartYear,
+      hasSEH
+    },
+    strategist: {
+      selectedCareerIndex,
+      goalIndex: {
+        query: careerSearchQuery,
+        group: careerGroupFilter,
+        demand: careerDemandFilter,
+        sortMode: careerSortMode,
+        compatibleOnly: careerCompatibleOnly
+      },
+      limitations: {
+        limitStanding,
+        limitLifting,
+        limitBending,
+        limitEnvironment,
+        limitSitting,
+        limitRepetitive,
+        limitSensory,
+        limitStress,
+        limitRespiratory
+      }
+    },
+    profiler: {
+      riasecR,
+      riasecI,
+      riasecA,
+      riasecS,
+      riasecE,
+      riasecC,
+      showProfiler
+    },
+    justification: {
+      justCurrentGoal,
+      justProposedGoal,
+      justReason,
+      justMedicalEvidence,
+      justPhysicalImpact,
+      justGeneratedLetter
+    },
+    industryFinder: {
+      industrySearchQuery,
+      showIndustryFinder
+    }
+  }), [
+    careerCompatibleOnly,
+    careerDemandFilter,
+    careerGroupFilter,
+    careerSearchQuery,
+    careerSortMode,
+    gibillMonths,
+    gibillStartYear,
+    hasSEH,
+    industrySearchQuery,
+    justCurrentGoal,
+    justGeneratedLetter,
+    justMedicalEvidence,
+    justPhysicalImpact,
+    justProposedGoal,
+    justReason,
+    limitBending,
+    limitEnvironment,
+    limitLifting,
+    limitRepetitive,
+    limitRespiratory,
+    limitSensory,
+    limitSitting,
+    limitStanding,
+    limitStress,
+    riasecA,
+    riasecC,
+    riasecE,
+    riasecI,
+    riasecR,
+    riasecS,
+    selectedCareerIndex,
+    showIndustryFinder,
+    showProfiler,
+    skillBridgeDuration,
+    taEndYear,
+    taStartYear,
+    transitionYear,
+    useSkillBridge,
+    vreMonths,
+    vreStartYear
+  ]);
+
+  const resetDraftSessionMeta = useCallback(() => {
+    setDraftError('');
+    setDraftId(null);
+    setLastSavedAt(null);
+  }, []);
+
+  const markLocalDraftState = useCallback(() => {
+    setDraftStatus('local');
+    setDraftError('');
+  }, []);
+
+  const buildDraftPayloadRef = useRef(buildDraftPayload);
+
+  useEffect(() => {
+    buildDraftPayloadRef.current = buildDraftPayload;
+  }, [buildDraftPayload]);
+
+  const persistDraft = useCallback(async (draftPayload) => {
+    const payloadToPersist = draftPayload ?? buildDraftPayloadRef.current();
+    if (!isBackendOnline) {
+      writeCareerStrategyDraft(privacyMode, payloadToPersist);
+      markLocalDraftState();
+      return null;
+    }
+
+    setDraftStatus('saving');
+    const savedDraft = await saveCurrentPlanDraft(CAREER_STRATEGY_DRAFT_TYPE, payloadToPersist, {
+      privacyMode,
+      title: buildCareerStrategyDraftTitle(payloadToPersist.justification.justProposedGoal, payloadToPersist.strategist.selectedCareerIndex)
+    });
+
+    const normalizedPayload = normalizeCareerStrategyDraft(savedDraft.payload || payloadToPersist);
+    writeCareerStrategyDraft(privacyMode, normalizedPayload);
+    setDraftId(savedDraft.id);
+    setLastSavedAt(savedDraft.updatedAt || new Date().toISOString());
+    setDraftStatus('synced');
+    setDraftError('');
+    return savedDraft;
+  }, [isBackendOnline, markLocalDraftState, privacyMode]);
 
   const handleTransitionYearChange = (val) => {
     setTransitionYear(val);
@@ -41,108 +553,226 @@ function CareerStrategyView({ reduceMotion }) {
     setTaEndYear(Math.min(endVal, transitionYear));
   };
 
-  // Localized Career Strategy States
-  const [selectedCareerIndex, setSelectedCareerIndex] = useState(0);
-  const [limitStanding, setLimitStanding] = useState(false);
-  const [limitLifting, setLimitLifting] = useState(false);
-  const [limitBending, setLimitBending] = useState(false);
-  const [limitEnvironment, setLimitEnvironment] = useState(false);
-  const [limitSitting, setLimitSitting] = useState(false);
-  const [limitRepetitive, setLimitRepetitive] = useState(false);
-  const [limitSensory, setLimitSensory] = useState(false);
-  const [limitStress, setLimitStress] = useState(false);
-  const [limitRespiratory, setLimitRespiratory] = useState(false);
-
-  const [riasecR, setRiasecR] = useState(3);
-  const [riasecI, setRiasecI] = useState(3);
-  const [riasecA, setRiasecA] = useState(3);
-  const [riasecS, setRiasecS] = useState(3);
-  const [riasecE, setRiasecE] = useState(3);
-  const [riasecC, setRiasecC] = useState(3);
-  const [showProfiler, setShowProfiler] = useState(false);
-
-  const [justCurrentGoal, setJustCurrentGoal] = useState('Operations Specialist');
-  const [justProposedGoal, setJustProposedGoal] = useState('Software Developer');
-  const [justReason, setJustReason] = useState('disability_worsened');
-  const [justMedicalEvidence, setJustMedicalEvidence] = useState(true);
-  const [justPhysicalImpact, setJustPhysicalImpact] = useState(
-    'Current job requires frequent bending, lifting, and carrying gear up to 50 lbs, which exacerbates my service-connected spinal stenosis and lumbar strain. Sitting at a computer desk is medically recommended.'
-  );
-  const [justGeneratedLetter, setJustGeneratedLetter] = useState('');
-
-  const [industrySearchQuery, setIndustrySearchQuery] = useState('');
-  const [showIndustryFinder, setShowIndustryFinder] = useState(false);
-
-  // Sync selected career to justProposedGoal during render
-  const [prevCareerIndex, setPrevCareerIndex] = useState(selectedCareerIndex);
-  if (selectedCareerIndex !== prevCareerIndex) {
-    setPrevCareerIndex(selectedCareerIndex);
-    const career = CAREERS_DATABASE[selectedCareerIndex];
+  const handleCareerSelection = useCallback((nextIndex) => {
+    const normalizedIndex = clampCareerIndex(nextIndex);
+    setSelectedCareerIndex(normalizedIndex);
+    const career = CAREERS_DATABASE[normalizedIndex];
     if (career) {
       setJustProposedGoal(career.title);
     }
-  }
+  }, []);
 
-  const getCareerCompatibility = (career) => {
-    if (!career) return { compatible: true, reasons: [] };
-    const reasons = [];
-    let compatible = true;
+  const clearCareerIndexFilters = useCallback(() => {
+    setCareerSearchQuery('');
+    setCareerGroupFilter('all');
+    setCareerDemandFilter('all');
+    setCareerSortMode('recommended');
+    setCareerCompatibleOnly(false);
+  }, []);
 
-    if (limitStanding) {
-      if (career.physicalDemand === 'Light' || career.physicalDemand === 'Medium' || career.physicalDemand === 'Heavy') {
-        compatible = false;
-        reasons.push(`Career requires standing/walking ("${career.physicalDemand}" strength rating), which conflicts with standing constraints.`);
+  useEffect(() => {
+    const sourceStorage = privacyMode ? localStorage : sessionStorage;
+    const targetStorage = privacyMode ? sessionStorage : localStorage;
+    const sourceDraft = sourceStorage.getItem(CAREER_STRATEGY_STORAGE_KEY);
+    const targetDraft = targetStorage.getItem(CAREER_STRATEGY_STORAGE_KEY);
+
+    if (!targetDraft && sourceDraft) {
+      targetStorage.setItem(CAREER_STRATEGY_STORAGE_KEY, sourceDraft);
+    }
+
+    sourceStorage.removeItem(CAREER_STRATEGY_STORAGE_KEY);
+  }, [privacyMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const localDraft = readCareerStrategyDraft(privacyMode);
+    const fallbackDraft = localDraft || createDefaultCareerStrategyDraft();
+
+    hasHydratedRef.current = false;
+    skipAutosaveRef.current = true;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        resetDraftSessionMeta();
       }
-    }
-
-    if (limitLifting) {
-      if (career.physicalDemand === 'Light' || career.physicalDemand === 'Medium' || career.physicalDemand === 'Heavy') {
-        compatible = false;
-        reasons.push(`Career requires lifting capabilities beyond 15 lbs ("${career.physicalDemand}" strength rating).`);
+    });
+    queueMicrotask(() => {
+      if (!cancelled) {
+        applyDraft(fallbackDraft);
       }
+    });
+
+    if (!isBackendOnline) {
+      queueMicrotask(markLocalDraftState);
+      hasHydratedRef.current = true;
+      window.setTimeout(() => {
+        skipAutosaveRef.current = false;
+      }, 0);
+      return () => {
+        cancelled = true;
+      };
     }
 
-    if (limitBending) {
-      if (career.physicalDemand === 'Medium' || career.physicalDemand === 'Heavy') {
-        compatible = false;
-        reasons.push(`Medium/Heavy demand roles require frequent bending, kneeling, or crouching.`);
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setDraftStatus('loading');
       }
-    }
+    });
 
-    if (limitEnvironment) {
-      if (career.title === 'Solar Photovoltaic Installer' || career.title === 'CNC Machinist' || career.title === 'Commercial Pilot') {
-        compatible = false;
-        reasons.push(`Career involves outdoor exposure, non-climate-controlled environments, or specific pressure/altitude factors.`);
+    const loadRemoteDraft = async () => {
+      try {
+        const remoteDraft = await fetchCurrentPlanDraft(CAREER_STRATEGY_DRAFT_TYPE, { privacyMode });
+        if (cancelled) {
+          return;
+        }
+
+        if (remoteDraft?.payload) {
+          const normalizedPayload = normalizeCareerStrategyDraft(remoteDraft.payload);
+          applyDraft(normalizedPayload);
+          writeCareerStrategyDraft(privacyMode, normalizedPayload);
+          setDraftId(remoteDraft.id);
+          setLastSavedAt(remoteDraft.updatedAt || null);
+          setDraftStatus('synced');
+          return;
+        }
+
+        if (localDraft) {
+          await persistDraft(localDraft);
+        } else {
+          setDraftStatus('ready');
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setDraftStatus(localDraft ? 'local' : 'error');
+        setDraftError(error.message || 'Failed to load career strategy draft.');
+      } finally {
+        if (!cancelled) {
+          hasHydratedRef.current = true;
+          window.setTimeout(() => {
+            skipAutosaveRef.current = false;
+          }, 0);
+        }
       }
+    };
+
+    loadRemoteDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyDraft, dataResetToken, isBackendOnline, markLocalDraftState, persistDraft, privacyMode, resetDraftSessionMeta]);
+
+  useEffect(() => () => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedRef.current) {
+      return undefined;
     }
 
-    if (limitSitting && career.requiresSitting) {
-      compatible = false;
-      reasons.push(`Career requires prolonged sitting ("Sedentary" or flight-deck posture), which conflicts with sitting tolerance limits.`);
+    const draftPayload = buildDraftPayload();
+    writeCareerStrategyDraft(privacyMode, draftPayload);
+
+    if (skipAutosaveRef.current) {
+      skipAutosaveRef.current = false;
+      return undefined;
     }
 
-    if (limitRepetitive && career.requiresRepetitiveMotion) {
-      compatible = false;
-      reasons.push(`Role involves extensive keyboarding or repetitive wrist-finger motions, which conflicts with upper extremity limitations.`);
+    if (!isBackendOnline) {
+      queueMicrotask(markLocalDraftState);
+      return undefined;
     }
 
-    if (limitSensory && career.requiresVisionHearing) {
-      compatible = false;
-      reasons.push(`Career has strict FAA/DOT sensory, vision (20/20 corrected), or hearing thresholds that conflict with sensory limitations.`);
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
     }
 
-    if (limitStress && career.requiresHighStressConfinement) {
-      compatible = false;
-      reasons.push(`High-stress operations, cockpit confinement, or rapid decision-making requirements conflict with stress tolerance thresholds.`);
-    }
+    saveTimerRef.current = window.setTimeout(() => {
+      setDraftStatus('saving');
+      persistDraft(draftPayload).catch((error) => {
+        setDraftStatus('local');
+        setDraftError(error.message || 'Failed to save career strategy draft.');
+      });
+    }, 700);
 
-    if (limitRespiratory && career.requiresRespiratorFumes) {
-      compatible = false;
-      reasons.push(`Role requires exposure to machine coolant mist, dust, or potential pulmonary irritants, which conflicts with respiratory limits.`);
-    }
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [
+    buildDraftPayload,
+    isBackendOnline,
+    markLocalDraftState,
+    persistDraft,
+    privacyMode
+  ]);
 
-    return { compatible, reasons };
+  const handleSaveDraftNow = () => {
+    const draftPayload = buildDraftPayload();
+    writeCareerStrategyDraft(privacyMode, draftPayload);
+    persistDraft(draftPayload).catch((error) => {
+      setDraftStatus('local');
+      setDraftError(error.message || 'Failed to save career strategy draft.');
+    });
   };
+
+  const draftStatusMeta = useMemo(() => {
+    switch (draftStatus) {
+      case 'loading':
+        return {
+          label: 'Loading draft',
+          className: 'bg-sky-500/10 border-sky-500/30 text-sky-300'
+        };
+      case 'saving':
+        return {
+          label: 'Saving to SQLite',
+          className: 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+        };
+      case 'synced':
+        return {
+          label: 'Synced to SQLite',
+          className: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+        };
+      case 'ready':
+        return {
+          label: 'Ready to save',
+          className: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
+        };
+      case 'error':
+        return {
+          label: 'Load error',
+          className: 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+        };
+      default:
+        return {
+          label: 'Stored locally',
+          className: 'bg-slate-500/10 border-slate-500/30 text-slate-300'
+        };
+    }
+  }, [draftStatus]);
+
+  const lastSavedLabel = useMemo(() => {
+    if (!lastSavedAt) {
+      return '';
+    }
+
+    try {
+      return new Date(lastSavedAt).toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  }, [lastSavedAt]);
 
   const getRiasecRecommendations = () => {
     const scores = [
@@ -177,10 +807,9 @@ function CareerStrategyView({ reduceMotion }) {
 
   const handleGenerateLetter = () => {
     const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const career = CAREERS_DATABASE[selectedCareerIndex] || CAREERS_DATABASE[0];
     const letter = generateJustificationLetter({
       dateStr,
-      career,
+      career: currentCareer,
       justReason,
       justCurrentGoal,
       justPhysicalImpact,
@@ -273,9 +902,38 @@ function CareerStrategyView({ reduceMotion }) {
       transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
       className="doc-card"
     >
-      <span className="doc-tag">VA Career Plan and Strategy</span>
-      <h1 className="doc-title">Career Plan, Strategy and Justification Wizard</h1>
-      <p className="doc-subtitle">Generate legally structured VRC justification letters, assess physical compatibility, and find industry classification codes.</p>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <span className="doc-tag">VA Career Plan and Strategy</span>
+          <h1 className="doc-title">Career Plan, Strategy and Justification Wizard</h1>
+          <p className="doc-subtitle">Generate legally structured VRC justification letters, assess physical compatibility, and find industry classification codes.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold ${draftStatusMeta.className}`}>
+            {draftStatusMeta.label}
+          </span>
+          {draftId && (
+            <span className="text-[10px] text-slate-500">
+              Draft ID: <span className="font-mono text-slate-400">{draftId.slice(0, 10)}</span>
+            </span>
+          )}
+          {lastSavedLabel && (
+            <span className="text-[10px] text-slate-500">Last saved {lastSavedLabel}</span>
+          )}
+          {draftError && (
+            <span className="text-[10px] text-amber-300">{draftError}</span>
+          )}
+          {isBackendOnline && (
+            <button
+              type="button"
+              className="px-3 py-1.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded border border-amber-300/20 cursor-pointer transition-colors duration-150"
+              onClick={handleSaveDraftNow}
+            >
+              Save Workspace
+            </button>
+          )}
+        </div>
+      </div>
       <div className="doc-divider"></div>
 
       {/* 15-Year Entitlement & Transition Stack Chart */}
@@ -665,15 +1323,184 @@ function CareerStrategyView({ reduceMotion }) {
             
             <div className="form-group">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Target Occupational Goal (OOH/O*NET Classification Database)</label>
-              <select
-                className="form-control"
-                value={selectedCareerIndex}
-                onChange={(e) => setSelectedCareerIndex(parseInt(e.target.value))}
-              >
-                {CAREERS_DATABASE.map((c, i) => (
-                  <option key={i} value={i}>{c.title} ({c.soc})</option>
-                ))}
-              </select>
+              <div className="space-y-3 rounded-xl border border-slate-800/80 bg-slate-950/35 p-3">
+                <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.45fr)]">
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="text"
+                        className="form-control pl-9 text-xs"
+                        placeholder="Search title, SOC, OOH group, education, SIC, NAICS, or duties..."
+                        value={careerSearchQuery}
+                        onChange={(e) => setCareerSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <select
+                        className="form-control text-xs"
+                        value={careerGroupFilter}
+                        onChange={(e) => setCareerGroupFilter(e.target.value)}
+                      >
+                        <option value="all">All OOH families</option>
+                        {careerGroupSummary.map((groupEntry) => (
+                          <option key={groupEntry.group} value={groupEntry.group}>
+                            {groupEntry.group} ({groupEntry.count})
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        className="form-control text-xs"
+                        value={careerDemandFilter}
+                        onChange={(e) => setCareerDemandFilter(e.target.value)}
+                      >
+                        {CAREER_DEMAND_FILTERS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+
+                      <select
+                        className="form-control text-xs"
+                        value={careerSortMode}
+                        onChange={(e) => setCareerSortMode(e.target.value)}
+                      >
+                        {CAREER_SORT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+
+                      <label className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-200">
+                        <input
+                          type="checkbox"
+                          className="accent-amber-500"
+                          checked={careerCompatibleOnly}
+                          onChange={(e) => setCareerCompatibleOnly(e.target.checked)}
+                        />
+                        <span>Show medically compatible only</span>
+                      </label>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 text-[10px]">
+                      <span className="rounded-full border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-slate-300">
+                        {careerIndexStats.total} indexed goals
+                      </span>
+                      <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-emerald-300">
+                        {careerIndexStats.compatible} compatible right now
+                      </span>
+                      <span className="rounded-full border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 text-sky-300">
+                        {careerIndexStats.highGrowth} high-growth roles
+                      </span>
+                      <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-amber-300">
+                        {careerIndexStats.lowDemand} low-demand roles
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {careerGroupSummary.map((groupEntry) => (
+                        <button
+                          key={groupEntry.group}
+                          type="button"
+                          className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors duration-150 ${
+                            careerGroupFilter === groupEntry.group
+                              ? 'border-amber-500/40 bg-amber-500/15 text-amber-300'
+                              : 'border-slate-700 bg-slate-900/60 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                          }`}
+                          onClick={() => setCareerGroupFilter(careerGroupFilter === groupEntry.group ? 'all' : groupEntry.group)}
+                        >
+                          {groupEntry.group} ({groupEntry.count})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-800/80 bg-slate-950/45">
+                    <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        {filteredCareerEntries.length} results
+                      </div>
+                      <button
+                        type="button"
+                        className="text-[10px] font-bold uppercase tracking-wide text-slate-400 transition-colors duration-150 hover:text-slate-200"
+                        onClick={clearCareerIndexFilters}
+                      >
+                        Clear filters
+                      </button>
+                    </div>
+
+                    <div className="max-h-80 space-y-2 overflow-y-auto p-2">
+                      {filteredCareerEntries.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-slate-800 bg-slate-950/35 px-3 py-6 text-center text-xs text-slate-400">
+                          No occupational goals match the current search and filter settings.
+                        </div>
+                      ) : (
+                        filteredCareerEntries.map((careerEntry) => {
+                          const isSelected = careerEntry.index === selectedCareerIndex;
+                          const compatibility = careerEntry.compatibility;
+
+                          return (
+                            <button
+                              key={`${careerEntry.soc}-${careerEntry.index}`}
+                              type="button"
+                              className={`block w-full rounded-xl border p-3 text-left transition-all duration-150 ${
+                                isSelected
+                                  ? 'border-amber-500/45 bg-amber-500/10 shadow-[0_0_0_1px_rgba(245,158,11,0.08)]'
+                                  : 'border-slate-800 bg-slate-900/65 hover:border-slate-700 hover:bg-slate-900'
+                              }`}
+                              onClick={() => handleCareerSelection(careerEntry.index)}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <strong className="block text-sm text-slate-100">{careerEntry.title}</strong>
+                                  <span className="mt-1 block text-[11px] text-slate-400">
+                                    {careerEntry.oohGroup} · {careerEntry.soc}
+                                  </span>
+                                </div>
+
+                                <div className="flex flex-col items-end gap-1">
+                                  {isSelected && (
+                                    <span className="rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-300">
+                                      Selected
+                                    </span>
+                                  )}
+                                  <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                                    compatibility.compatible
+                                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                                      : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+                                  }`}>
+                                    {compatibility.compatible ? 'Compatible' : 'Needs review'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400 sm:grid-cols-4">
+                                <span>Pay: <strong className="text-slate-200">${careerEntry.medianPay.toLocaleString()}</strong></span>
+                                <span>Growth: <strong className="text-slate-200">{careerEntry.outlook}</strong></span>
+                                <span>Demand: <strong className="text-slate-200">{careerEntry.physicalDemand}</strong></span>
+                                <span>Prep: <strong className="text-slate-200">{careerEntry.education}</strong></span>
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {!selectedCareerVisibleInResults && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200">
+                    <span>The current selected goal is hidden by the active filters.</span>
+                    <button
+                      type="button"
+                      className="rounded-full border border-amber-500/35 px-2.5 py-1 font-bold uppercase tracking-wide text-[10px]"
+                      onClick={clearCareerIndexFilters}
+                    >
+                      Reveal selection
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Disability / Physical Constraints Checkboxes */}
@@ -706,8 +1533,7 @@ function CareerStrategyView({ reduceMotion }) {
 
             {/* Compatibility Badge & Reasons */}
             {(() => {
-              const currentCareer = CAREERS_DATABASE[selectedCareerIndex] || CAREERS_DATABASE[0];
-              const { compatible, reasons } = getCareerCompatibility(currentCareer);
+              const { compatible, reasons } = currentCareerCompatibility;
               return (
                 <div className={`flex items-start gap-3 p-4 rounded-xl border ${
                   compatible 
@@ -756,7 +1582,7 @@ function CareerStrategyView({ reduceMotion }) {
                     setLimitSensory(false);
                     setLimitStress(false);
                     setLimitRespiratory(false);
-                    setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Software Developer'));
+                    handleCareerSelection(CAREERS_DATABASE.findIndex(c => c.title === 'Software Developer'));
                   }}
                 >
                   <strong className="text-[11px] text-slate-200 block">Profile A: Orthopedic Limits</strong>
@@ -776,7 +1602,7 @@ function CareerStrategyView({ reduceMotion }) {
                     setLimitSensory(false);
                     setLimitStress(false);
                     setLimitRespiratory(true);
-                    setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Solar Photovoltaic Installer'));
+                    handleCareerSelection(CAREERS_DATABASE.findIndex(c => c.title === 'Solar Photovoltaic Installer'));
                   }}
                 >
                   <strong className="text-[11px] text-slate-200 block">Profile B: Outdoors & Dust</strong>
@@ -796,7 +1622,7 @@ function CareerStrategyView({ reduceMotion }) {
                     setLimitSensory(false);
                     setLimitStress(false);
                     setLimitRespiratory(false);
-                    setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Accountant'));
+                    handleCareerSelection(CAREERS_DATABASE.findIndex(c => c.title === 'Accountant'));
                   }}
                 >
                   <strong className="text-[11px] text-slate-200 block">Profile C: Hand Repetition</strong>
@@ -816,7 +1642,7 @@ function CareerStrategyView({ reduceMotion }) {
                     setLimitSensory(true);
                     setLimitStress(true);
                     setLimitRespiratory(false);
-                    setSelectedCareerIndex(CAREERS_DATABASE.findIndex(c => c.title === 'Commercial Pilot'));
+                    handleCareerSelection(CAREERS_DATABASE.findIndex(c => c.title === 'Commercial Pilot'));
                   }}
                 >
                   <strong className="text-[11px] text-slate-200 block">Profile D: Sensory & Flight</strong>
@@ -930,7 +1756,7 @@ function CareerStrategyView({ reduceMotion }) {
                                   <button
                                     type="button"
                                     className="px-2 py-0.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 rounded cursor-pointer transition-colors duration-150"
-                                    onClick={() => setSelectedCareerIndex(originalIndex)}
+                                    onClick={() => handleCareerSelection(originalIndex)}
                                   >
                                     Set as Goal
                                   </button>
@@ -1039,19 +1865,121 @@ function CareerStrategyView({ reduceMotion }) {
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Search classifications from the SEC SIC Standard Industrial Classification list and BLS Industry Groups.
+              Crosswalk the selected occupational goal against the SIC and NAICS index, then verify it with official Census and ISO references without leaving the planning workflow.
             </p>
 
             {showIndustryFinder && (
               <div className="border-t border-dashed border-slate-800 pt-4 space-y-4">
-                <div className="form-group mb-3">
-                  <input
-                    type="text"
-                    className="form-control text-xs"
-                    placeholder="Search by keyword (e.g. software, logistics, pilot, CNC)..."
-                    value={industrySearchQuery}
-                    onChange={(e) => setIndustrySearchQuery(e.target.value)}
-                  />
+                {isBackendOnline && referenceLibraryOverview && (
+                  <div className="rounded-xl border border-cyan-500/15 bg-cyan-500/5 p-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+                          Backend Code Library
+                        </span>
+                        <strong className="mt-1 block text-xs text-slate-100">
+                          CIP to SOC to O*NET to BLS to IPE
+                        </strong>
+                      </div>
+                      <span className="rounded-full border border-cyan-400/20 bg-slate-950/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-200">
+                        Server Indexed
+                      </span>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-4">
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">Occupations</span>
+                        <strong className="mt-1 block text-sm text-slate-100">{referenceLibraryOverview.counts.occupations}</strong>
+                      </div>
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">Industries</span>
+                        <strong className="mt-1 block text-sm text-slate-100">{referenceLibraryOverview.counts.industries}</strong>
+                      </div>
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">Training Programs</span>
+                        <strong className="mt-1 block text-sm text-slate-100">{referenceLibraryOverview.counts.trainingPrograms}</strong>
+                      </div>
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-950/40 p-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">Crosswalks</span>
+                        <strong className="mt-1 block text-sm text-slate-100">{referenceLibraryOverview.counts.crosswalks}</strong>
+                      </div>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-slate-300">
+                      {referenceLibraryOverview.chain.join(' -> ')}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {industryReferenceLinks.map((reference) => (
+                    <a
+                      key={reference.id}
+                      href={reference.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-3 text-left transition-all duration-150 hover:border-slate-700 hover:bg-slate-950/60"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                            {reference.source}
+                          </span>
+                          <strong className="mt-1 block text-xs text-slate-100">
+                            {reference.title}
+                          </strong>
+                        </div>
+                        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                          {reference.badge}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
+                        {reference.description}
+                      </p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                        Open reference <ExternalLink size={11} />
+                      </span>
+                    </a>
+                  ))}
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  ISO full-text standards are licensed publications. This workspace links to ISO&apos;s official standard pages and guidance instead of mirroring third-party PDFs.
+                </p>
+
+                <div className="form-group mb-3 space-y-2">
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      className="form-control text-xs"
+                      placeholder="Search by keyword (e.g. software, logistics, pilot, CNC)..."
+                      value={industrySearchQuery}
+                      onChange={(e) => setIndustrySearchQuery(e.target.value)}
+                    />
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-amber-300 transition-colors duration-150 hover:border-slate-600 hover:text-amber-200"
+                        onClick={() => setIndustrySearchQuery(currentCareer.title)}
+                      >
+                        Use selected goal
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-cyan-300 transition-colors duration-150 hover:border-slate-600 hover:text-cyan-200"
+                        onClick={() => setIndustrySearchQuery(currentCareer.sic)}
+                      >
+                        Use SIC {currentCareer.sic}
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-emerald-300 transition-colors duration-150 hover:border-slate-600 hover:text-emerald-200"
+                        onClick={() => setIndustrySearchQuery(currentCareer.naics)}
+                      >
+                        Use NAICS {currentCareer.naics}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Pull the selected occupational goal, SIC, or NAICS code directly into the crosswalk search when you need faster industry matching.
+                  </p>
                 </div>
 
                 {/* Industry Search Results */}

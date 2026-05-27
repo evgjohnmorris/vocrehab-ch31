@@ -37,6 +37,7 @@ import VeteransBenefitsIndexView from './views/VeteransBenefitsIndexView';
 import InServiceEducationView from './views/InServiceEducationView';
 import FamilyCaregiversView from './views/FamilyCaregiversView';
 import GlobalSearchView from './views/GlobalSearchView';
+import { backendFetch } from './utils/backendApi';
 
 const DEFAULT_RATES = {
   version: "2026.2",
@@ -73,6 +74,9 @@ const DEFAULT_RATES = {
 };
 
 function App() {
+  const canUseLocalBackend = typeof window !== 'undefined'
+    && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
   // Theme State
   const [theme, setTheme] = useState(() => localStorage.getItem('m28c_theme') || 'dark');
 
@@ -177,68 +181,70 @@ function App() {
 
   // Backend server online status
   const [isBackendOnline, setIsBackendOnline] = useState(false);
+  const [dataResetToken, setDataResetToken] = useState(0);
 
   // Ping backend on load and load initial states if connected
   useEffect(() => {
-    if (!import.meta.env.DEV) {
-      console.log('Running in static production mode. Localhost sync disabled.');
+    if (!canUseLocalBackend) {
+      console.log('Running in static-host mode. Local backend sync disabled.');
       return;
     }
 
-    fetch('http://localhost:5000/api/status')
+    const readRemoteState = (key) => (
+      backendFetch(`/api/user/${key}`, { privacyMode })
+        .then((response) => (response.ok ? response.json() : null))
+    );
+
+    const writeRemoteState = (key, value) => (
+      backendFetch(`/api/user/${key}`, {
+        method: 'POST',
+        includeJson: true,
+        privacyMode,
+        body: JSON.stringify(value)
+      })
+    );
+
+    backendFetch('/api/status', { privacyMode })
       .then(res => {
         if (!res.ok) throw new Error('Backend not responding');
         return res.json();
       })
-      .then(data => {
-        if (data.status === 'online') {
-          console.log('VRE Backend connected, running in server mode.');
-          setIsBackendOnline(true);
-          
-          // 1. Sync bookmarks
-          fetch('http://localhost:5000/api/user/bookmarks')
-            .then(r => r.ok ? r.json() : null)
-            .then(serverBookmarks => {
-              if (serverBookmarks && Array.isArray(serverBookmarks)) {
-                setBookmarks(serverBookmarks);
-              } else {
-                fetch('http://localhost:5000/api/user/bookmarks', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(bookmarks)
-                });
-              }
-            });
+      .then(async (data) => {
+        if (!data.ready) {
+          throw new Error('Backend is online but not seeded.');
+        }
 
-          // 2. Sync user mode
-          fetch('http://localhost:5000/api/user/user_mode')
-            .then(r => r.ok ? r.json() : null)
-            .then(serverMode => {
-              if (serverMode) {
-                setUserMode(serverMode);
-              } else {
-                fetch('http://localhost:5000/api/user/user_mode', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(userMode)
-                });
-              }
-            });
+        console.log('VRE Backend connected, running in server mode.');
+        setIsBackendOnline(true);
 
-          // 3. Sync case stage
-          fetch('http://localhost:5000/api/user/case_stage')
-            .then(r => r.ok ? r.json() : null)
-            .then(serverStage => {
-              if (serverStage) {
-                setCurrentCaseStage(serverStage);
-              } else {
-                fetch('http://localhost:5000/api/user/case_stage', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(currentCaseStage)
-                });
-              }
-            });
+        const [serverBookmarks, serverMode, serverStage] = await Promise.all([
+          readRemoteState('bookmarks'),
+          readRemoteState('user_mode'),
+          readRemoteState('case_stage')
+        ]);
+
+        if (serverBookmarks && Array.isArray(serverBookmarks)) {
+          setBookmarks(serverBookmarks);
+        } else {
+          writeRemoteState('bookmarks', bookmarks).catch((error) => {
+            console.error('Failed to seed bookmarks on server:', error);
+          });
+        }
+
+        if (serverMode) {
+          setUserMode(serverMode);
+        } else {
+          writeRemoteState('user_mode', userMode).catch((error) => {
+            console.error('Failed to seed user mode on server:', error);
+          });
+        }
+
+        if (serverStage) {
+          setCurrentCaseStage(serverStage);
+        } else {
+          writeRemoteState('case_stage', currentCaseStage).catch((error) => {
+            console.error('Failed to seed case stage on server:', error);
+          });
         }
       })
       .catch(() => {
@@ -268,6 +274,7 @@ function App() {
       setDyslexiaSpacing(false);
       setPlainLanguageMode(false);
       setTheme('dark');
+      setDataResetToken((currentToken) => currentToken + 1);
       sessionStorage.setItem('m28c_privacy_mode', 'true');
     }
   };
@@ -325,9 +332,10 @@ function App() {
     }
 
     if (isBackendOnline) {
-      fetch('http://localhost:5000/api/user/bookmarks', {
+      backendFetch('/api/user/bookmarks', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        includeJson: true,
+        privacyMode,
         body: JSON.stringify(bookmarks)
       }).catch(err => console.error('Failed to sync bookmarks to server:', err));
     }
@@ -397,9 +405,10 @@ function App() {
     storage.setItem('m28c_user_mode', userMode);
     
     if (isBackendOnline) {
-      fetch('http://localhost:5000/api/user/user_mode', {
+      backendFetch('/api/user/user_mode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        includeJson: true,
+        privacyMode,
         body: JSON.stringify(userMode)
       }).catch(err => console.error('Failed to sync user mode to server:', err));
     }
@@ -410,9 +419,10 @@ function App() {
     storage.setItem('m28c_case_stage', currentCaseStage);
 
     if (isBackendOnline) {
-      fetch('http://localhost:5000/api/user/case_stage', {
+      backendFetch('/api/user/case_stage', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        includeJson: true,
+        privacyMode,
         body: JSON.stringify(currentCaseStage)
       }).catch(err => console.error('Failed to sync case stage to server:', err));
     }
@@ -493,6 +503,7 @@ function App() {
             userMode={userMode}
             currentCaseStage={currentCaseStage}
             setCurrentCaseStage={setCurrentCaseStage}
+            isBackendOnline={isBackendOnline}
           />
         );
       case 'dispute_hub':
@@ -556,7 +567,14 @@ function App() {
           />
         );
       case 'planning':
-        return <CareerStrategyView reduceMotion={reduceMotion} />;
+        return (
+          <CareerStrategyView
+            reduceMotion={reduceMotion}
+            privacyMode={privacyMode}
+            isBackendOnline={isBackendOnline}
+            dataResetToken={dataResetToken}
+          />
+        );
       case 'self_employment':
         return <SelfEmploymentView reduceMotion={reduceMotion} />;
       case 'special_programs':
@@ -582,7 +600,14 @@ function App() {
       case 'source_diff':
         return <SourceDiffView reduceMotion={reduceMotion} />;
       case 'claim_builder':
-        return <ClaimArgumentBuilderView reduceMotion={reduceMotion} />;
+        return (
+          <ClaimArgumentBuilderView
+            reduceMotion={reduceMotion}
+            privacyMode={privacyMode}
+            isBackendOnline={isBackendOnline}
+            dataResetToken={dataResetToken}
+          />
+        );
       case 'directory':
         return <CounselorDirectoryView reduceMotion={reduceMotion} />;
       case 'resources':
@@ -692,12 +717,16 @@ function App() {
             {renderView()}
           </div>
 
-          {/* RIGHT SIDEBAR (Bookmarks & Quick References) */}
+          {/* RIGHT SIDEBAR (Bookmarks & AI Assistant) */}
           <BookmarkSidebar
             bookmarks={bookmarks}
             setSelectedSection={setSelectedSection}
             setActiveView={setActiveView}
             toggleBookmark={toggleBookmark}
+            privacyMode={privacyMode}
+            activeView={activeView}
+            selectedSection={selectedSection}
+            dataResetToken={dataResetToken}
           />
         </div>
 

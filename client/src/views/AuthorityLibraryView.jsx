@@ -6,6 +6,8 @@ import {
   CheckCircle2, Gavel, FileCheck
 } from 'lucide-react';
 import AuthorityBadge from '../components/AuthorityBadge';
+import EcfrTitleDirectoryPanel from '../components/EcfrTitleDirectoryPanel';
+import { buildBackendUrl } from '../utils/backendApi';
 
 function AuthorityLibraryView({ 
   reduceMotion, 
@@ -19,29 +21,13 @@ function AuthorityLibraryView({
   const [activeTab, setActiveTab] = useState('crosswalk'); // 'crosswalk' | 'browse' | 'audit'
   const [browseSourceTab, setBrowseSourceTab] = useState('statutes'); // 'statutes' | 'regulations' | 'm28c'
   const [prevSelectedSection, setPrevSelectedSection] = useState(selectedSection);
-  if (selectedSection && selectedSection.id && (selectedSection.id !== prevSelectedSection?.id || selectedSection.type !== prevSelectedSection?.type)) {
-    setPrevSelectedSection(selectedSection);
-    if (selectedSection.type === 'topic') {
-      setActiveTab('crosswalk');
-      setSelectedCategory('All');
-      setSearchQuery(selectedSection.id);
-    } else {
-      setActiveTab('browse');
-      const type = selectedSection.type;
-      setBrowseSourceTab(
-        type === 'usc' ? 'statutes' : 
-        type === 'cfr' ? 'regulations' : 
-        type === 'public-law' ? 'public-laws' : 
-        type === 'federal-register' ? 'federal-registers' : 
-        'm28c'
-      );
-    }
-  }
   
   const [manifest, setManifest] = useState(null);
   const [crosswalk, setCrosswalk] = useState([]);
   const [coverageReport, setCoverageReport] = useState(null);
+  const [ecfrDirectory, setEcfrDirectory] = useState(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
+  const [selectedEcfrTitleId, setSelectedEcfrTitleId] = useState(null);
 
   // Searching & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,13 +40,37 @@ function AuthorityLibraryView({
   const [isLoadingDoc, setIsLoadingDoc] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false); // true when copied
 
+  if (selectedSection && selectedSection.id && (selectedSection.id !== prevSelectedSection?.id || selectedSection.type !== prevSelectedSection?.type)) {
+    setPrevSelectedSection(selectedSection);
+    if (selectedSection.type === 'topic') {
+      setActiveTab('crosswalk');
+      setSelectedCategory('All');
+      setSearchQuery(selectedSection.id);
+    } else if (selectedSection.type === 'ecfr-title') {
+      setActiveTab('browse');
+      setBrowseSourceTab('ecfr-titles');
+      setSelectedEcfrTitleId(selectedSection.id);
+    } else {
+      setActiveTab('browse');
+      const type = selectedSection.type;
+      setBrowseSourceTab(
+        type === 'usc' ? 'statutes' :
+        type === 'cfr' ? 'regulations' :
+        type === 'public-law' ? 'public-laws' :
+        type === 'federal-register' ? 'federal-registers' :
+        'm28c'
+      );
+    }
+  }
+
   // Load manifest, crosswalk, and coverage report on mount
   useEffect(() => {
     const loadMetadata = async () => {
       try {
-        const manifestUrl = isBackendOnline ? 'http://localhost:5000/api/authority/manifest' : `${import.meta.env.BASE_URL}authority/index.json`;
-        const crosswalkUrl = isBackendOnline ? 'http://localhost:5000/api/authority/crosswalk' : `${import.meta.env.BASE_URL}authority/topic-crosswalk.json`;
-        const coverageUrl = isBackendOnline ? 'http://localhost:5000/api/authority/coverage' : `${import.meta.env.BASE_URL}authority/coverage-report.json`;
+        const manifestUrl = isBackendOnline ? buildBackendUrl('/api/authority/manifest') : `${import.meta.env.BASE_URL}authority/index.json`;
+        const crosswalkUrl = isBackendOnline ? buildBackendUrl('/api/authority/crosswalk') : `${import.meta.env.BASE_URL}authority/topic-crosswalk.json`;
+        const coverageUrl = isBackendOnline ? buildBackendUrl('/api/authority/coverage') : `${import.meta.env.BASE_URL}authority/coverage-report.json`;
+        const ecfrDirectoryUrl = `${import.meta.env.BASE_URL}authority/ecfr-title-directory.json`;
 
         const manifestRes = await fetch(manifestUrl);
         const manifestData = await manifestRes.json();
@@ -73,6 +83,15 @@ function AuthorityLibraryView({
         const coverageRes = await fetch(coverageUrl);
         const coverageData = await coverageRes.json();
         setCoverageReport(coverageData);
+
+        const ecfrDirectoryRes = await fetch(ecfrDirectoryUrl);
+        if (ecfrDirectoryRes.ok) {
+          const ecfrDirectoryData = await ecfrDirectoryRes.json();
+          setEcfrDirectory(ecfrDirectoryData);
+          if (ecfrDirectoryData?.titles?.length > 0) {
+            setSelectedEcfrTitleId((prev) => prev || ecfrDirectoryData.titles[0].id);
+          }
+        }
       } catch (err) {
         console.error("Failed to load authority index or crosswalk metadata:", err);
       } finally {
@@ -98,7 +117,7 @@ function AuthorityLibraryView({
     try {
       let url = '';
       if (isBackendOnline) {
-        url = `http://localhost:5000/api/authority/${normalizedType}/${id}`;
+        url = buildBackendUrl(`/api/authority/${normalizedType}/${id}`);
       } else {
         if (normalizedType === 'usc') {
           url = `${import.meta.env.BASE_URL}authority/usc/${id}.json`;
@@ -137,6 +156,10 @@ function AuthorityLibraryView({
   // Sync selectedSection from sidebar
   useEffect(() => {
     if (selectedSection && selectedSection.id) {
+      if (selectedSection.type === 'ecfr-title') {
+        return;
+      }
+
       const type = selectedSection.type;
       Promise.resolve().then(() => {
         loadDocument(type, selectedSection.id);
@@ -295,6 +318,8 @@ function AuthorityLibraryView({
                   loadDocument('cfr', manifest.regulations[0].id);
                 } else if (browseSourceTab === 'm28c' && manifest.m28c.length > 0) {
                   loadDocument('m28c', manifest.m28c[0].id);
+                } else if (browseSourceTab === 'ecfr-titles' && ecfrDirectory?.titles?.length > 0 && !selectedEcfrTitleId) {
+                  setSelectedEcfrTitleId(ecfrDirectory.titles[0].id);
                 }
               }
             }}
@@ -457,7 +482,7 @@ function AuthorityLibraryView({
             <div className="bg-slate-950/50 border border-slate-800 text-slate-400 rounded-xl p-3.5 text-xs flex gap-2.5 items-center">
               <Info size={16} className="text-emerald-400 shrink-0" />
               <span>
-                <strong>Database Scope Alert:</strong> Full USC/CFR corpus in progress; M28C public chapter coverage is partial and summary-based.
+                <strong>Database Scope Alert:</strong> Full USC/CFR corpus in progress; M28C public chapter coverage is partial and summary-based. Related eCFR title indexes below are structural directories, not stored full-text authorities.
               </span>
             </div>
             {/* Sub Tabs for Sources */}
@@ -537,8 +562,38 @@ function AuthorityLibraryView({
               >
                 Federal Register
               </button>
+              <button
+                onClick={() => {
+                  setBrowseSourceTab('ecfr-titles');
+                  if (selectedEcfrTitleId) {
+                    setSelectedSection({ type: 'ecfr-title', id: selectedEcfrTitleId });
+                  } else if (ecfrDirectory?.titles?.length > 0) {
+                    const defaultTitleId = ecfrDirectory.titles[0].id;
+                    setSelectedEcfrTitleId(defaultTitleId);
+                    setSelectedSection({ type: 'ecfr-title', id: defaultTitleId });
+                  }
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  browseSourceTab === 'ecfr-titles'
+                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Related eCFR Titles
+              </button>
             </div>
 
+            {browseSourceTab === 'ecfr-titles' ? (
+              <EcfrTitleDirectoryPanel
+                directory={ecfrDirectory}
+                searchQuery={searchQuery}
+                selectedTitleId={selectedEcfrTitleId}
+                onSelectTitle={(id) => {
+                  setSelectedEcfrTitleId(id);
+                  setSelectedSection({ type: 'ecfr-title', id });
+                }}
+              />
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
               {/* Sidebar list (left col) */}
               <div className="md:col-span-4 bg-slate-900/30 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-[550px]">
@@ -851,6 +906,7 @@ function AuthorityLibraryView({
                 )}
               </div>
             </div>
+            )}
           </div>
         )}
 

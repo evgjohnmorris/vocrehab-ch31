@@ -5,12 +5,18 @@ node_modules/
 
 # Production builds
 /client/dist/
+/client/.tmp/
+/client/playwright-report/
+/client/test-results/
 
 # Local databases & secrets
 /server/*.db
 /server/.env
 .env
 .env.local
+
+# Local logs
+*.log
 
 # IDEs & System files
 .vscode/

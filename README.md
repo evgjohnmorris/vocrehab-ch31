@@ -1,91 +1,125 @@
-# Veteran Resource Guide
+# vocrehab-ch31
 
+[![CI](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/ci.yml/badge.svg)](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/ci.yml)
 [![Deploy to GitHub Pages](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/deploy.yml/badge.svg)](https://github.com/evgjohnmorris/vocrehab-ch31/actions/workflows/deploy.yml)
 
-An interactive Reference Manual, Entitlement Wizard, Subsistence Allowance Calculator, and VREO Contact Directory for Chapter 31 Vocational Rehabilitation and Employment (VR&E) and other veteran benefits/resources.
+VR&E Chapter 31 advocacy workspace with authority research, case workflows, career planning, calculators, and an optional SQLite backend.
 
-🔗 **Live Interactive App**: **[https://evgjohnmorris.github.io/vocrehab-ch31/](https://evgjohnmorris.github.io/vocrehab-ch31/)**
+Live app: [https://evgjohnmorris.github.io/vocrehab-ch31/](https://evgjohnmorris.github.io/vocrehab-ch31/)
 
-## Features
+This repository is building toward a practical self-advocacy platform for veterans, caregivers, school staff, and advocates working through Chapter 31 Vocational Rehabilitation and Employment cases. The frontend runs as a static React app on GitHub Pages. When you want persistence and structured workflows locally, the optional Express and SQLite backend adds scoped drafts, case management, authority search, and a backend reference library.
 
-### 1. Unified Reference Library
-- **Side-by-Side Reference Navigation**: Merges **38 U.S.C. Chapter 31** (Statutory Law), **38 CFR Part 21 Subpart A** (Federal Regulations), and the **VA M28C Manual** (Operational Policy Guidelines) in a single unified navigation tree.
-- **CFR Integration**: Fully integrated **17 crucial CFR regulations** covering definitions, eligibility deferral/extensions, evaluations, feasibility assessments, case tracking statuses, and allowances.
-- **Accordion Structure**: Grouped by Part, Section, and Chapter for clean categorization and seamless browsing.
+## What the app includes
 
-### 2. Interactive Entitlement Wizard
-- Guides users in establishing whether a claimant is entitled to benefits based on:
-  - VA Disability Rating (10%, 20%, 30%+)
-  - Discharge Characterization (stating statutory bars under 38 U.S.C. § 5303)
-  - Finding of an **Employment Handicap (EH)** or **Serious Employment Handicap (SEH)**
-- **Expert Linkages**: Dynamically attaches "Key Regulations Applied" tags to the outcome box, letting users click to jump directly to the relevant U.S. Code or 38 CFR section.
+- Authority Library with 38 U.S.C. Chapter 31, Part 21 authority records, M28C material, coverage reporting, source diffs, and related eCFR title indexing.
+- Dashboard-first VR&E workflows for counselor delay, supplies and tuition disputes, case closure problems, feasibility issues, plan amendments, and escalation scenarios.
+- Eligibility and Entitlement wizard, Chapter 31 and Post-9/11 payment calculator, case packet builder, forms center, and school payment tracker.
+- IPE / Plan Builder, Career Strategy and O*NET target-goal tooling, self-employment support, independent living planning, and written decision analysis surfaces.
+- VRE regional office directory, resource center, benefits and rights index, glossary, and accessibility controls.
+- Optional local backend for scoped browser sync, structured case records, draft autosave, issue taxonomy, backend code-library fields, forms metadata, and regional office records.
 
-### 3. Subsistence Allowance Calculator
-- A side-by-side comparison tool comparing:
-  - **Regular Chapter 31 Rates**: Evaluated dynamically based on institutional/OJT time and number of qualifying dependents.
-  - **Post-9/11 housing allowance (P911SA) Option**: Simulates housing allowances based on local E-5 with dependents BAH rates.
-  - **Recommendation Engine**: Automatically identifies the financially superior option and calculates the monthly difference.
+## Current architecture
 
-### 4. Official VR&E Counselor Directory & Escalation Guide
-- **All 56 Regional Offices Resolved**: Restored the Atlanta, GA (316) and Pittsburgh, PA (311) offices into distinct, searchable entries.
-- **Comprehensive Outstations & Field Offices**: Ingested and parsed the official directory, adding structured `outStations` arrays to each regional office.
-- **Full Outstation Searchability**: The Counselor Directory search input filters results by regional office name, officer name, and outstation/field office name or address.
-- **Escalation Path**: Features a community-backed guide for resolving communication breakdowns or unresponsiveness with counselors.
+- `client/`
+  - React 19 + Vite single-page app.
+  - Frontend views, calculators, workflows, legal-ingest scripts, and Playwright accessibility coverage.
+- `server/`
+  - Express + SQLite backend.
+  - Routes for `/api/authority`, `/api/cases`, `/api/library`, `/api/plans`, and `/api/user`.
+  - Auto-seeded workflow taxonomy and backend reference catalog.
+- Root workspace
+  - Shared npm workspaces and repo-level scripts.
+  - GitHub Actions for CI and Pages deploy.
+- Reference PDFs
+  - `CFR-2025-title38-vol1-chapI.pdf`
+  - `CFR-2025-title38-vol2-chapI.pdf`
+  - `m28_manual.pdf`
 
-### 5. Centralized Resource Center
-- Centralizes official reference materials and external support links into a structured 4-column responsive grid:
-  - **Handbooks & Regulations**: School Certifying Official (SCO) Handbook, KnowVA VR&E Resource Hub, Miscellaneous VA Resources.
-  - **VA Career Portals**: VA VR&E Official Homepage, Careers & Employment Hub, Veteran Resources Catalog.
-  - **Specialized & Financial**: Early Access via IDES Guide, Subsistence Allowance Rate Charts, VR&E Eligibility Guides, MIRECC FinVet budgeting and financial resources.
-  - **Federal & Advocacy Support**: Department of Labor (DOL) Voc Rehab FAQs, CareerOneStop Vocational Rehabilitation Portal, National Veterans Foundation (NVF) VR&E Benefit Guide.
+## Quick start
 
-### 6. Expanded Glossary of VR&E Terms
-- **34 Comprehensive Terms**: Fully expanded the glossary array with detailed definitions and acronyms including EH, SEH, RTE, EMP, REH, IEEP, IEAP, Retroactive Induction, Revolving Fund Loans, Special Restorative Training, and more.
+### Run the full local workspace
 
-## Structure
-- [CFR-2025-title38-vol1-chapI.pdf](CFR-2025-title38-vol1-chapI.pdf) — Official CFR Title 38 Chapter I Volume 1 (Parts 0–17) PDF.
-- [CFR-2025-title38-vol2-chapI.pdf](CFR-2025-title38-vol2-chapI.pdf) — Official CFR Title 38 Chapter I Volume 2 (Parts 18–299) PDF.
-- [m28_manual.pdf](m28_manual.pdf) — Verbatim compiled reference publication of all 15 M28C manual chapters, print-ready and paginated.
-- [m28c-interactive/](m28c-interactive/) — Core interactive SPA application.
+```bash
+npm install
+npm run seed
+npm run dev
+```
 
-## Launching locally
-To run the interactive portal locally:
+- Frontend: `http://localhost:5173/vocrehab-ch31/`
+- Backend: `http://localhost:5000`
 
-### 1. Launching the Frontend App
-1. Navigate to `m28c-interactive` directory:
-   ```bash
-   cd m28c-interactive
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the frontend dev server:
-   ```bash
-   npm run dev
-   ```
-4. Build for production:
-   ```bash
-   npm run build
-   ```
+The backend is recommended for draft autosave, structured case tracking, and the backend code-library panels. If the backend is offline, the frontend falls back to browser storage where supported.
 
-### 2. Launching the Backend Server (Optional)
-To run the local database engine and REST API server:
-1. Navigate to the `server` directory:
-   ```bash
-   cd server
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Seed the SQLite database with the legal corpus:
-   ```bash
-   npm run seed
-   ```
-4. Start the backend API server:
-   ```bash
-   npm run dev
-   ```
-This starts the backend on `http://localhost:5000`. The frontend will automatically detect the server and sync user case profiles, bookmarks, and contact timeline logs directly to the SQLite database `server/m28c_guide.db`. If the server is offline, the frontend safely falls back to standard client-side browser storage.
+### Frontend only
 
+```bash
+npm install
+npm run client:dev
+```
+
+### Production build
+
+```bash
+npm run build
+```
+
+## Repo scripts
+
+- `npm run dev` starts the frontend and backend together.
+- `npm run client:dev` starts the Vite frontend only.
+- `npm run server:dev` starts the backend only.
+- `npm run seed` seeds the backend authority corpus.
+- `npm run lint` runs the frontend lint rules.
+- `npm run build` runs legal validation and builds the frontend.
+- `npm run server:smoke` boots the backend schema against a temporary SQLite database and verifies core tables and seeded catalogs.
+- `npm run check` runs the current contributor health gate.
+
+## Contribution priorities
+
+Contributions are wanted. The highest-value work right now is not just adding more screens. It is tightening trust, workflow depth, and maintainability across the whole stack.
+
+- Route-backed navigation and deep links so the app survives reloads and supports shareable states.
+- Search unification so header search and backend authority search share one contract.
+- Bundle splitting and frontend architecture cleanup around `App.jsx` and the larger workflow views.
+- Backend expansion for document generation, deadline engines, versioned templates, and richer per-draft schemas.
+- Verified ingest pipelines for forms, rate tables, O*NET and BLS data, WEAMS and school approvals, and contact refreshes.
+- Data-quality cleanup in directory, school, and forms datasets.
+- More backend tests and stronger Playwright coverage around key veteran workflows.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+If you are improving any of the following, include source links and effective dates in your PR:
+
+- legal authority text
+- VA forms and public URLs
+- payment rates
+- school approval information
+- regional office or contact data
+- workflow logic that makes legal or case-handling claims
+
+Please do not commit real veteran case files, SSNs, VA file numbers, medical records, or unredacted correspondence.
+
+## Security and privacy
+
+Read [SECURITY.md](SECURITY.md) for reporting guidance and handling rules.
+
+Important defaults in this repo:
+
+- Keep case data minimal.
+- Prefer synthetic or redacted examples.
+- Treat browser-entered AI API keys as local testing credentials only. A static frontend cannot truly keep them secret.
+- Do not claim legal authority freshness unless the source has been verified.
+
+## Good first contribution areas
+
+- Add backend tests for `/api/cases`, `/api/library`, and `/api/plans`.
+- Improve the route model and navigation persistence.
+- Normalize data imports and remove malformed directory records.
+- Expand the backend code library with additional CIP, SOC, O*NET, forms, and labor-market sources.
+- Add verified workflows and templates for more Chapter 31 dispute types.
+
+## Maintainer note
+
+This repo is moving from a static reference app toward a full VR&E case-support platform. The most helpful contributions are the ones that improve trust, traceability, and real task completion for veterans using the tool.

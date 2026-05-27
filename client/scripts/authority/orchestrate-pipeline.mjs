@@ -22,7 +22,8 @@ const INGESTION_SCRIPTS = [
   { name: 'CFR Ingestion', path: 'scripts/authority/ingest-cfr-part21-subpart-a.mjs' },
   { name: 'M28C Ingestion', path: 'scripts/authority/ingest-m28c-knowva.mjs' },
   { name: 'Generate Manifest', path: 'scripts/authority/generate-manifest.mjs' },
-  { name: 'Distribute Corpus', path: 'scripts/legal/distribute-corpus.mjs' }
+  { name: 'Distribute Corpus', path: 'scripts/legal/distribute-corpus.mjs' },
+  { name: 'Build eCFR Title Directory', path: 'scripts/authority/build-ecfr-title-directory.mjs' }
 ];
 
 const VALIDATION_SCRIPTS = [

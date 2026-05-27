@@ -1,7 +1,7 @@
 import { 
   ShieldCheck, Award, Calculator, Scale, 
   Compass, Briefcase, GraduationCap, Users, 
-  FileText, FileEdit, Search, HeartHandshake,
+  FileText, FileEdit, Search, HeartHandshake, BookOpen,
   Gavel, CheckCircle2, RefreshCw, Home, Shield, Settings, Activity, Map, ShieldAlert, Target
 } from 'lucide-react';
 
@@ -280,6 +280,17 @@ function Sidebar({
           >
             <Gavel size={18} />
             <span>Authority Library</span>
+          </div>
+
+          <div 
+            className={`nav-item ${activeView === 'resources' ? 'active' : ''}`}
+            onClick={() => handleNavClick('resources')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => handleKeyDown(e, () => handleNavClick('resources'))}
+          >
+            <BookOpen size={18} className="text-sky-400" />
+            <span>Resource Center</span>
           </div>
 
           <div 

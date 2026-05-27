@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, ArrowRight, BookOpen, Shield, 
@@ -30,8 +30,9 @@ import sehExtensionLetterTpl from '../data/templates/seh-extension-letter.json';
 
 import DISPUTE_AREAS from '../data/workflows/disputeAreas.json';
 import { VRE_OFFICES } from '../data/data.js';
+import { addCurrentCaseActivity, deleteCurrentCaseActivity, fetchCaseDashboard, saveCurrentCaseRecord } from '../utils/backendApi.js';
 
-const WORKFLOWS = [
+const LOCAL_WORKFLOWS = [
   counselorDelayWf,
   suppliesDenialWf,
   tuitionUnpaidWf,
@@ -186,18 +187,89 @@ const CASE_STAGES = [
   'Appeal Pending'
 ];
 
+const CASE_SYNC_STATUS_LABELS = {
+  offline: 'Offline',
+  syncing: 'Syncing',
+  synced: 'Synced',
+  error: 'Sync issue'
+};
+
+function formatCaseStageLabel(caseStageValue) {
+  if (!caseStageValue) {
+    return CASE_STAGES[0];
+  }
+
+  const normalizedValue = caseStageValue.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  return CASE_STAGES.find((stage) => (
+    stage.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') === normalizedValue
+  )) || CASE_STAGES[0];
+}
+
+function normalizeCaseStageValue(stageLabel) {
+  return stageLabel.toLowerCase().replace(/, /g, '_').replace(/ \/ /g, '_').replace(/ /g, '_');
+}
+
+function inferIpeStatusFromStage(stageLabel) {
+  switch (stageLabel) {
+    case 'Entitled, No IPE':
+      return 'under_review';
+    case 'IPE Signed':
+      return 'signed';
+    case 'In School / Training':
+    case 'Employment Services':
+      return 'signed';
+    case 'Interrupted Status':
+      return 'interrupted';
+    case 'Discontinued Status':
+      return 'discontinued';
+    case 'Rehabilitated':
+      return 'rehabilitated';
+    default:
+      return 'not_started';
+  }
+}
+
+function summarizeFormFacts(facts) {
+  const entries = Object.entries(facts)
+    .filter(([, value]) => value != null && String(value).trim())
+    .slice(0, 8);
+
+  if (entries.length === 0) {
+    return '';
+  }
+
+  return entries
+    .map(([key, value]) => `${key}: ${String(value).trim()}`)
+    .join('\n');
+}
+
+function mapActivityToContactLog(activity) {
+  return {
+    id: activity.id,
+    date: activity.occurredAt || '',
+    method: activity.activityType || 'Note',
+    request: activity.summary || '',
+    response: activity.responseStatus || 'No response'
+  };
+}
+
 function HomeDashboardView({ 
   reduceMotion, 
   setActiveView, 
   setSelectedSection,
+  privacyMode,
   bookmarksCount,
   userMode,
   currentCaseStage,
-  setCurrentCaseStage
+  setCurrentCaseStage,
+  isBackendOnline
 }) {
+  const [workflowCatalog, setWorkflowCatalog] = useState(LOCAL_WORKFLOWS);
+  const [caseDashboard, setCaseDashboard] = useState(null);
+  const [caseSyncStatus, setCaseSyncStatus] = useState(isBackendOnline ? 'syncing' : 'offline');
   const [activeWorkflow, setActiveWorkflow] = useState(null);
   const [wizardStep, setWizardStep] = useState(0); // 0: Case Stage, 1: Collect Facts, 2: Report / Letter
-  const [tempStage, setTempStage] = useState(currentCaseStage ? currentCaseStage.replace(/_/g, ' ') : CASE_STAGES[0]);
+  const [tempStage, setTempStage] = useState(formatCaseStageLabel(currentCaseStage));
   const [formFacts, setFormFacts] = useState({});
   const [copiedLetter, setCopiedLetter] = useState(false);
   const [letterTone] = useState('professional'); // 'professional' | 'assertive' | 'escalation' | 'congressional'
@@ -206,9 +278,7 @@ function HomeDashboardView({
   // Case Packet additional states
   const [packetTab, setPacketTab] = useState('summary'); // 'summary' | 'evidence' | 'timeline' | 'authorities' | 'letter'
   const [checkedEvidence, setCheckedEvidence] = useState({});
-  const [contactsLog, setContactsLog] = useState([
-    { id: '1', date: '2026-05-01', method: 'Email', request: 'Requested status update from counselor', response: 'No response' }
-  ]);
+  const [contactsLog, setContactsLog] = useState([]);
   const [newContact, setNewContact] = useState({ date: '', method: 'Email', request: '', response: 'No response' });
   const [hasWrittenNoticeState, setHasWrittenNoticeState] = useState('no'); // 'yes' | 'no'
 
@@ -223,6 +293,165 @@ function HomeDashboardView({
     };
     const areaId = map[wfId];
     return DISPUTE_AREAS.find(a => a.id === areaId);
+  };
+
+  useEffect(() => {
+    if (!isBackendOnline) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    fetchCaseDashboard({ privacyMode })
+      .then((dashboard) => {
+        if (isCancelled) {
+          return;
+        }
+
+        if (Array.isArray(dashboard.workflows) && dashboard.workflows.length > 0) {
+          setWorkflowCatalog(dashboard.workflows);
+        } else {
+          setWorkflowCatalog(LOCAL_WORKFLOWS);
+        }
+
+        setCaseDashboard(dashboard);
+        setCaseSyncStatus('synced');
+      })
+      .catch((error) => {
+        console.error('Failed to load case dashboard from backend:', error);
+        if (isCancelled) {
+          return;
+        }
+
+        setWorkflowCatalog(LOCAL_WORKFLOWS);
+        setCaseDashboard(null);
+        setCaseSyncStatus('error');
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isBackendOnline, privacyMode]);
+
+  const buildCurrentCasePayload = (workflow = activeWorkflow, stageLabel = tempStage, extraFacts = formFacts) => {
+    if (!workflow) {
+      return null;
+    }
+
+    return {
+      title: workflow.title,
+      issueTypeId: workflow.workflowId,
+      caseStage: stageLabel,
+      track: workflow.track || 'long_term',
+      ipeStatus: inferIpeStatusFromStage(stageLabel),
+      veteranName: extraFacts.veteranName || '',
+      claimantReference: extraFacts.caseNumber || '',
+      counselorName: extraFacts.counselorName || extraFacts.vrcName || '',
+      regionalOffice: selectedOffice || '',
+      schoolName: extraFacts.schoolName || extraFacts.schoolOrProgram || extraFacts.courseOrProgram || extraFacts.goalDenied || '',
+      issueSummary: workflow.desc || '',
+      disputeHistory: summarizeFormFacts(extraFacts),
+      escalationHistory: '',
+      evidenceSummary: '',
+      decisionNoticeDate: '',
+      followUpDeadlineDate: '',
+      createdFromWorkflowId: workflow.workflowId
+    };
+  };
+
+  const persistCurrentCase = async (workflow = activeWorkflow, stageLabel = tempStage, extraFacts = formFacts) => {
+    if (!isBackendOnline || !workflow) {
+      return null;
+    }
+
+    try {
+      setCaseSyncStatus('syncing');
+      const currentCase = await saveCurrentCaseRecord(buildCurrentCasePayload(workflow, stageLabel, extraFacts), {
+        privacyMode
+      });
+      setCaseDashboard((previousDashboard) => ({
+        ...(previousDashboard || {}),
+        currentCase,
+        workflows: previousDashboard?.workflows || workflowCatalog,
+        issueTaxonomy: previousDashboard?.issueTaxonomy,
+        privacyGuidance: previousDashboard?.privacyGuidance
+      }));
+      setCaseSyncStatus('synced');
+      return currentCase;
+    } catch (error) {
+      console.error('Failed to persist structured case record:', error);
+      setCaseSyncStatus('error');
+      return null;
+    }
+  };
+
+  const handleAddContactAttempt = async () => {
+    if (!newContact.date || !newContact.request) {
+      window.alert('Please fill out date and details.');
+      return;
+    }
+
+    if (isBackendOnline && caseDashboard?.currentCase) {
+      try {
+        setCaseSyncStatus('syncing');
+        const activity = await addCurrentCaseActivity({
+          activityType: newContact.method,
+          occurredAt: newContact.date,
+          summary: newContact.request,
+          responseStatus: newContact.response,
+          notes: ''
+        }, { privacyMode });
+
+        setContactsLog((previous) => [...previous, mapActivityToContactLog(activity)]);
+        setCaseDashboard((previousDashboard) => ({
+          ...(previousDashboard || {}),
+          currentCase: previousDashboard?.currentCase
+            ? {
+                ...previousDashboard.currentCase,
+                activities: [...(previousDashboard.currentCase.activities || []), activity]
+              }
+            : previousDashboard?.currentCase
+        }));
+        setCaseSyncStatus('synced');
+      } catch (error) {
+        console.error('Failed to save case activity:', error);
+        setCaseSyncStatus('error');
+      }
+    } else {
+      setContactsLog((previous) => [
+        ...previous,
+        {
+          ...newContact,
+          id: Date.now().toString()
+        }
+      ]);
+    }
+
+    setNewContact({ date: '', method: 'Email', request: '', response: 'No response' });
+  };
+
+  const handleRemoveContactAttempt = async (contactId) => {
+    if (isBackendOnline && caseDashboard?.currentCase) {
+      try {
+        setCaseSyncStatus('syncing');
+        await deleteCurrentCaseActivity(contactId, { privacyMode });
+        setCaseSyncStatus('synced');
+      } catch (error) {
+        console.error('Failed to delete case activity:', error);
+        setCaseSyncStatus('error');
+      }
+    }
+
+    setContactsLog((previous) => previous.filter((entry) => entry.id !== contactId));
+    setCaseDashboard((previousDashboard) => ({
+      ...(previousDashboard || {}),
+      currentCase: previousDashboard?.currentCase
+        ? {
+            ...previousDashboard.currentCase,
+            activities: (previousDashboard.currentCase.activities || []).filter((entry) => entry.id !== contactId)
+          }
+        : previousDashboard?.currentCase
+    }));
   };
 
   const getModeAdvice = () => {
@@ -255,20 +484,41 @@ function HomeDashboardView({
   };
 
   const modeAdvice = getModeAdvice();
+  const currentCaseRecord = caseDashboard?.currentCase || null;
+  const currentCaseIssueTitle = currentCaseRecord?.issue?.title || currentCaseRecord?.title || 'No structured case record yet';
+  const currentCaseNextDeadline = currentCaseRecord?.followUpDeadlineDate
+    || currentCaseRecord?.deadlines?.[0]?.dueDate
+    || '';
 
   const handleStartWorkflow = (wf) => {
+    const currentCase = caseDashboard?.currentCase;
+    const stageLabel = formatCaseStageLabel(currentCaseStage);
     setActiveWorkflow(wf);
     setWizardStep(0);
+    setTempStage(stageLabel);
     setFormFacts({});
     setCopiedLetter(false);
+    setPacketTab('summary');
+    setCheckedEvidence({});
+    setHasWrittenNoticeState('no');
+    setContactsLog(
+      currentCase && currentCase.issueTypeId === wf.workflowId && Array.isArray(currentCase.activities)
+        ? currentCase.activities.map(mapActivityToContactLog)
+        : []
+    );
+    persistCurrentCase(wf, stageLabel, {});
   };
 
   const handleNextStep = () => {
     if (wizardStep === 0) {
-      // Sync temp stage back to App state if needed
-      const normalizedStage = tempStage.toLowerCase().replace(/, /g, '_').replace(/ \/ /g, '_').replace(/ /g, '_');
-      setCurrentCaseStage(normalizedStage);
+      setCurrentCaseStage(normalizeCaseStageValue(tempStage));
+      persistCurrentCase(activeWorkflow, tempStage, formFacts);
     }
+
+    if (wizardStep === 1) {
+      persistCurrentCase(activeWorkflow, tempStage, formFacts);
+    }
+
     setWizardStep(prev => prev + 1);
   };
 
@@ -279,8 +529,12 @@ function HomeDashboardView({
   const handleReset = () => {
     setActiveWorkflow(null);
     setWizardStep(0);
+    setTempStage(formatCaseStageLabel(currentCaseStage));
     setFormFacts({});
     setCopiedLetter(false);
+    setPacketTab('summary');
+    setCheckedEvidence({});
+    setContactsLog([]);
   };
 
   const handleFactChange = (name, value) => {
@@ -348,6 +602,52 @@ function HomeDashboardView({
         <p className="text-[11px] text-slate-300 leading-relaxed">{modeAdvice.text}</p>
       </div>
 
+      {isBackendOnline && (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <div className="xl:col-span-8 bg-slate-900/35 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">Structured Case Backend</span>
+                <h3 className="text-sm font-bold text-slate-100">{currentCaseIssueTitle}</h3>
+              </div>
+              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                caseSyncStatus === 'synced'
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                  : caseSyncStatus === 'error'
+                    ? 'border-red-500/30 bg-red-500/10 text-red-300'
+                    : 'border-slate-700 bg-slate-950/50 text-slate-300'
+              }`}>
+                {CASE_SYNC_STATUS_LABELS[caseSyncStatus] || 'Syncing'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Case Stage</span>
+                <strong className="mt-1 block text-slate-100">{currentCaseRecord?.caseStage || tempStage}</strong>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Issue Types</span>
+                <strong className="mt-1 block text-slate-100">
+                  {caseDashboard?.issueTaxonomy?.total || workflowCatalog.length} cataloged
+                </strong>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Next Deadline</span>
+                <strong className="mt-1 block text-slate-100">{currentCaseNextDeadline || 'Not logged yet'}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="xl:col-span-4 bg-slate-950/35 border border-slate-800 rounded-2xl p-5 space-y-2">
+            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Storage Guardrail</span>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              {caseDashboard?.privacyGuidance?.warning || 'Store only the minimum case facts needed for planning and escalation.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* MAIN WORKFLOW AREA */}
       <AnimatePresence mode="wait">
         {!activeWorkflow ? (
@@ -364,7 +664,7 @@ function HomeDashboardView({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {WORKFLOWS.map((wf) => (
+              {workflowCatalog.map((wf) => (
                 <div 
                   key={wf.workflowId}
                   className="bg-slate-900/40 border border-slate-800 rounded-xl p-5 hover:border-slate-700 hover:bg-slate-900/60 transition duration-300 flex flex-col justify-between"
@@ -624,7 +924,9 @@ function HomeDashboardView({
               const mappedArea = getDisputeAreaForWorkflow(activeWorkflow.workflowId);
               
               // Compute evidence score
-              const currentChecklist = mappedArea?.evidenceChecklist || [];
+              const currentChecklist = activeWorkflow.evidenceChecklist?.length
+                ? activeWorkflow.evidenceChecklist
+                : (mappedArea?.evidenceChecklist || []);
               const evidenceScore = currentChecklist.reduce((acc, item) => {
                 return checkedEvidence[item.id] ? acc + item.weight : acc;
               }, 0);
@@ -1036,14 +1338,7 @@ ${compiledLetter}
                           </div>
                           <div>
                             <button
-                              onClick={() => {
-                                if (!newContact.date || !newContact.request) {
-                                  alert('Please fill out date and details.');
-                                  return;
-                                }
-                                setContactsLog([...contactsLog, { ...newContact, id: Date.now().toString() }]);
-                                setNewContact({ date: '', method: 'Email', request: '', response: 'No response' });
-                              }}
+                              onClick={handleAddContactAttempt}
                               className="w-full btn btn-primary flex justify-center items-center gap-1 h-9"
                             >
                               <Plus size={14} />
@@ -1063,7 +1358,7 @@ ${compiledLetter}
                                   <span className="text-slate-200">{log.request}</span>
                                 </div>
                                 <button 
-                                  onClick={() => setContactsLog(contactsLog.filter(c => c.id !== log.id))}
+                                  onClick={() => handleRemoveContactAttempt(log.id)}
                                   className="text-red-400 hover:text-red-300 p-1"
                                 >
                                   <Trash2 size={14} />

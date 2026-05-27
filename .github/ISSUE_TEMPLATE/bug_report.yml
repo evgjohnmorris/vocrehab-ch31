@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a broken workflow, data issue, or backend/frontend regression.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: module
+    attributes:
+      label: Affected module
+      options:
+        - Authority Library
+        - Dashboard workflow
+        - Eligibility and Entitlement
+        - IPE / Plan Builder
+        - Career Strategy and O*NET
+        - School Payment Tracker
+        - Forms or Resource Center
+        - Contacts directory
+        - Backend API
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: bug
+    attributes:
+      label: What is broken
+      description: Describe the actual behavior.
+      placeholder: The saved draft disappears after...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Click...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend status
+      options:
+        - Local backend running
+        - Frontend only
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Source or data reference
+      description: Include source URLs if the issue involves authority text, forms, rates, or contacts.
+  - type: textarea
+    id: context
+    attributes:
+      label: Extra context
+      description: Browser, screenshots, logs, and any other useful notes.

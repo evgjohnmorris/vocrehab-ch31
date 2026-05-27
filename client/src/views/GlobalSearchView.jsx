@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { Search, BookOpen, ExternalLink, ShieldAlert, CheckCircle } from 'lucide-react';
+import { backendFetch } from '../utils/backendApi';
 
 // eslint-disable-next-line no-unused-vars
 function GlobalSearchView({ reduceMotion, isBackendOnline }) {
@@ -18,7 +19,7 @@ function GlobalSearchView({ reduceMotion, isBackendOnline }) {
 
     try {
       // Connect to the redeveloped Express backend search endpoint
-      const response = await fetch(`http://localhost:5000/api/authority/search?q=${encodeURIComponent(query)}`);
+      const response = await backendFetch(`/api/authority/search?q=${encodeURIComponent(query)}`);
       if (!response.ok) {
         throw new Error('Search failed on the backend.');
       }
@@ -142,9 +143,9 @@ function GlobalSearchView({ reduceMotion, isBackendOnline }) {
                   </div>
                   <h4 className="text-xs font-bold text-slate-200 mt-2">{doc.title}</h4>
                   
-                  {doc.full_text && (
+                  {(doc.snippet || doc.previewText || doc.full_text) && (
                     <p className="text-[10px] text-slate-450 leading-relaxed mt-2.5 line-clamp-3 bg-slate-950/20 p-2 border border-slate-900 rounded-lg">
-                      {doc.full_text}
+                      {doc.snippet || doc.previewText || doc.full_text}
                     </p>
                   )}
                 </div>
