@@ -46,5 +46,89 @@
     "relatedTools": ["veteran-business-resources"],
     "status": "current",
     "lastChecked": "2026-05-26"
+  },
+  {
+    "id": "sba-b2b-virtual-workbook",
+    "type": "resource",
+    "name": "Boots to Business Virtual Workbook",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "SBA Course Workbook",
+    "whatItProvides": "The full TAP entrepreneurship workbook covering opportunity recognition, market research, startup economics, legal considerations, planning, financing, and partner resources.",
+    "sourceUrl": "https://tapevents.mil/Assets/ResourceContent/TAP/SBA-B2B_Virtual_Workbook.pdf",
+    "relatedTools": ["entrepreneurship-track", "startup-track-planner"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "sba-instructor-portal",
+    "type": "resource",
+    "name": "SBA Instructor Portal",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "SBA Delivery Portal",
+    "whatItProvides": "Direct portal endpoint for SBA instructor and facilitator resources used to support Boots to Business delivery and course administration.",
+    "sourceUrl": "https://sba.my.salesforce-sites.com/instructor",
+    "relatedTools": ["entrepreneurship-track"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "dol-military-spouse-entrepreneurship-workbook",
+    "type": "resource",
+    "name": "Military Spouse Entrepreneurship Workbook",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "Military Spouse Pathway",
+    "whatItProvides": "A DOL-hosted SBA workbook focused on military spouse entrepreneurship, access to capital, no-cost training, local assistance, and VBOC connections.",
+    "sourceUrl": "https://www.dol.gov/sites/dolgov/files/VETS/files/SBA-Virtual-Workbook-UA.pdf",
+    "relatedTools": ["startup-track-planner", "veteran-business-resources"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "vboc-handout-packet",
+    "type": "resource",
+    "name": "VBOC Boots to Business Handout Packet",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "VBOC Field Packet",
+    "whatItProvides": "A 17-page VBOC packet explaining Boots to Business, Boots to Business Reboot, business-planning workshops, mentoring, capital access, and contracting preparation.",
+    "sourceUrl": "https://vboc.org/wp-content/uploads/2022/11/VBOC-B2B-2022-HANDOUT-PACKET-for-email.pdf",
+    "relatedTools": ["veteran-business-resources", "startup-follow-up-plan"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "vboc-fact-sheet",
+    "type": "resource",
+    "name": "VBOC Program Fact Sheet",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "VBOC Fact Sheet",
+    "whatItProvides": "A quick reference on VBOC eligibility, top reasons to contact a VBOC, Boots to Business and Reboot services, counseling, training, and local coverage areas.",
+    "sourceUrl": "https://ussba.github.io/brand/assets/sba/resource-partners/VBOC-Factsheet-508.pdf",
+    "relatedTools": ["veteran-business-resources"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "score-mentor-methodology-handbook",
+    "type": "resource",
+    "name": "SCORE Mentor Methodology Handbook",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "SCORE Mentoring Guide",
+    "whatItProvides": "SCORE mentoring reference material shared through the SCORE Box workspace for mentor methodology and advisor workflow support.",
+    "sourceUrl": "https://score.app.box.com/s/sw7qid3jajxybthlipehdn2a0yhxcgcw",
+    "relatedTools": ["veteran-business-resources", "startup-follow-up-plan"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
+  },
+  {
+    "id": "score-support-center",
+    "type": "resource",
+    "name": "SCORE Support Knowledge Base",
+    "audience": ["transitioning", "spouse-caregiver", "education-career"],
+    "category": "SCORE Support",
+    "whatItProvides": "SCORE's support knowledge base with training, mentoring journey, webinar, volunteer, event, and help-center materials.",
+    "sourceUrl": "https://supportcenter.score.org/kb/",
+    "relatedTools": ["veteran-business-resources", "startup-follow-up-plan"],
+    "status": "current",
+    "lastChecked": "2026-05-27"
   }
 ]

@@ -13,7 +13,7 @@ function ResourceCenterView({ reduceMotion }) {
     >
       <span className="doc-tag">Official References</span>
       <h1 className="doc-title">Resource Center</h1>
-      <p className="doc-subtitle">Official VA manuals, eligibility handbooks, rate guides, and financial tools for Chapter 31.</p>
+      <p className="doc-subtitle">Official VA manuals, transition business resources, eligibility handbooks, rate guides, and financial tools for Chapter 31.</p>
       <div className="doc-divider"></div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -206,7 +206,69 @@ function ResourceCenterView({ reduceMotion }) {
           </div>
         </div>
 
-        {/* Category 3: Financial & Special Access */}
+        {/* Category 3: Entrepreneurship & Transition Business */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Entrepreneurship & Business Transition</h3>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BookOpen size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>Boots to Business Workbooks</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Official entrepreneurship workbooks for transition planning and military spouse business development. Useful for market testing, planning, financing, and follow-on course prep.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <a href="https://tapevents.mil/Assets/ResourceContent/TAP/SBA-B2B_Virtual_Workbook.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open B2B Workbook <ExternalLink size={12} />
+              </a>
+              <a href="https://www.dol.gov/sites/dolgov/files/VETS/files/SBA-Virtual-Workbook-UA.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open Spouse Workbook <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Users size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>VBOC Guides & Fact Sheets</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              SBA partner materials explaining who VBOCs serve, why to contact them, and how Boots to Business, Reboot, mentoring, capital access, and contracting prep are delivered.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <a href="https://ussba.github.io/brand/assets/sba/resource-partners/VBOC-Factsheet-508.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open VBOC Fact Sheet <ExternalLink size={12} />
+              </a>
+              <a href="https://vboc.org/wp-content/uploads/2022/11/VBOC-B2B-2022-HANDOUT-PACKET-for-email.pdf" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open VBOC Packet <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+
+          <div className="resource-item" style={{ padding: '16px', backgroundColor: 'var(--glass-bg)', border: '1px solid var(--card-border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Info size={16} style={{ color: 'var(--accent-color)' }} />
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '700', margin: 0 }}>SBA & SCORE Support Portals</h4>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Direct support links for SBA course delivery resources and SCORE mentoring/help-center materials that can support veterans building and refining a venture plan.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <a href="https://sba.my.salesforce-sites.com/instructor" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open SBA Instructor Portal <ExternalLink size={12} />
+              </a>
+              <a href="https://score.app.box.com/s/sw7qid3jajxybthlipehdn2a0yhxcgcw" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open SCORE Mentor Handbook <ExternalLink size={12} />
+              </a>
+              <a href="https://supportcenter.score.org/kb/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                Open SCORE Knowledge Base <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Category 4: Industry & Standards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Industry & Standards</h3>
 
@@ -250,7 +312,7 @@ function ResourceCenterView({ reduceMotion }) {
           </div>
         </div>
 
-        {/* Category 4: Financial & Special Access */}
+        {/* Category 5: Specialized & Financial */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Specialized & Financial</h3>
 
@@ -307,7 +369,7 @@ function ResourceCenterView({ reduceMotion }) {
           </div>
         </div>
 
-        {/* Category 5: Federal & Advocacy Support */}
+        {/* Category 6: Federal & Advocacy Support */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--accent-color)', borderBottom: '2px solid var(--accent-color)', paddingBottom: '6px' }}>Federal & Advocacy</h3>
 

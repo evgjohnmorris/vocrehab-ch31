@@ -3,6 +3,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { seedCaseIssueTaxonomy } from './lib/caseManagement.js';
+import { seedWorkforceProgramCatalog } from './lib/programCatalog.js';
 import { seedReferenceCatalog } from './lib/referenceCatalog.js';
 import { LEGACY_USER_SCOPE } from './lib/userState.js';
 
@@ -208,6 +209,165 @@ db.serialize(() => {
   `);
 
   db.run(`
+    CREATE TABLE IF NOT EXISTS reference_indexes (
+      id TEXT PRIMARY KEY,
+      namespace TEXT NOT NULL,
+      code TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      parent_code TEXT NOT NULL DEFAULT '',
+      hierarchy_level INTEGER NOT NULL DEFAULT 0,
+      effective_date TEXT NOT NULL DEFAULT '',
+      retired_date TEXT NOT NULL DEFAULT '',
+      source_name TEXT NOT NULL DEFAULT '',
+      official_source_link TEXT NOT NULL DEFAULT '',
+      last_checked_at TEXT NOT NULL DEFAULT '',
+      version TEXT NOT NULL DEFAULT '',
+      authority_level TEXT NOT NULL DEFAULT 'federal_data',
+      refresh_frequency TEXT NOT NULL DEFAULT '',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(namespace, code)
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_reference_indexes_namespace_code ON reference_indexes(namespace, code)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_reference_indexes_parent_code ON reference_indexes(parent_code)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS reference_crosswalks (
+      id TEXT PRIMARY KEY,
+      source_namespace TEXT NOT NULL,
+      source_code TEXT NOT NULL,
+      target_namespace TEXT NOT NULL,
+      target_code TEXT NOT NULL,
+      relationship_type TEXT NOT NULL,
+      confidence REAL NOT NULL DEFAULT 0,
+      source_link TEXT NOT NULL DEFAULT '',
+      version TEXT NOT NULL DEFAULT '',
+      last_checked_at TEXT NOT NULL DEFAULT '',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(source_namespace, source_code, target_namespace, target_code, relationship_type)
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_reference_crosswalks_source ON reference_crosswalks(source_namespace, source_code)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_reference_crosswalks_target ON reference_crosswalks(target_namespace, target_code)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS business_strategy_index (
+      id TEXT PRIMARY KEY,
+      strategy_code TEXT NOT NULL UNIQUE,
+      strategy_name TEXT NOT NULL,
+      parent_family TEXT NOT NULL,
+      strategy_level TEXT NOT NULL,
+      definition TEXT NOT NULL,
+      when_to_use TEXT NOT NULL DEFAULT '',
+      when_not_to_use TEXT NOT NULL DEFAULT '',
+      related_framework TEXT NOT NULL DEFAULT '',
+      upstream_indexes TEXT NOT NULL DEFAULT '[]',
+      downstream_indexes TEXT NOT NULL DEFAULT '[]',
+      key_metrics TEXT NOT NULL DEFAULT '[]',
+      source_name TEXT NOT NULL DEFAULT '',
+      source_url TEXT NOT NULL DEFAULT '',
+      source_type TEXT NOT NULL DEFAULT 'practitioner',
+      evidence_required TEXT NOT NULL DEFAULT '',
+      example_use_case TEXT NOT NULL DEFAULT '',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_business_strategy_family_level ON business_strategy_index(parent_family, strategy_level, strategy_name)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_benefit_types (
+      code TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      description TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_training_types (
+      code TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      description TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_profile_flags (
+      flag_key TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      category TEXT NOT NULL,
+      question_prompt TEXT NOT NULL,
+      description TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_profile_flags_category ON workforce_profile_flags(category, label)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_programs (
+      id TEXT PRIMARY KEY,
+      program_code TEXT NOT NULL UNIQUE,
+      program_name TEXT NOT NULL,
+      program_family TEXT NOT NULL,
+      program_bucket TEXT NOT NULL,
+      agency TEXT NOT NULL,
+      federal_department TEXT NOT NULL,
+      authority TEXT NOT NULL,
+      assistance_listing_number TEXT NOT NULL DEFAULT '',
+      target_population TEXT NOT NULL,
+      eligibility_summary TEXT NOT NULL,
+      benefit_types_json TEXT NOT NULL DEFAULT '[]',
+      training_types_json TEXT NOT NULL DEFAULT '[]',
+      administered_by TEXT NOT NULL DEFAULT '',
+      official_source TEXT NOT NULL DEFAULT '',
+      state_source TEXT NOT NULL DEFAULT '',
+      application_path TEXT NOT NULL DEFAULT '',
+      related_indexes_json TEXT NOT NULL DEFAULT '[]',
+      related_forms_json TEXT NOT NULL DEFAULT '[]',
+      deadline_rules TEXT NOT NULL DEFAULT '',
+      evidence_required TEXT NOT NULL DEFAULT '',
+      last_verified_at TEXT NOT NULL DEFAULT '',
+      service_scope TEXT NOT NULL DEFAULT 'federal',
+      priority_rank INTEGER NOT NULL DEFAULT 5,
+      match_flags_json TEXT NOT NULL DEFAULT '{"required":[],"preferred":[],"excluded":[]}',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_programs_bucket_family ON workforce_programs(program_bucket, program_family, program_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_programs_department ON workforce_programs(federal_department, agency)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_program_aliases (
+      id TEXT PRIMARY KEY,
+      program_code TEXT NOT NULL,
+      alias TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(program_code, alias),
+      FOREIGN KEY(program_code) REFERENCES workforce_programs(program_code) ON DELETE CASCADE
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_program_aliases_alias ON workforce_program_aliases(alias)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workforce_program_crosswalks (
+      id TEXT PRIMARY KEY,
+      program_code TEXT NOT NULL,
+      relation_type TEXT NOT NULL,
+      target_namespace TEXT NOT NULL,
+      target_code TEXT NOT NULL,
+      notes TEXT NOT NULL DEFAULT '',
+      confidence REAL NOT NULL DEFAULT 0,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(program_code, relation_type, target_namespace, target_code),
+      FOREIGN KEY(program_code) REFERENCES workforce_programs(program_code) ON DELETE CASCADE
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_program_crosswalks_program ON workforce_program_crosswalks(program_code, relation_type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_workforce_program_crosswalks_target ON workforce_program_crosswalks(target_namespace, target_code)');
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS vrne_tracks (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -342,6 +502,7 @@ db.serialize(() => {
 
   seedCaseIssueTaxonomy(db);
   seedReferenceCatalog(db);
+  seedWorkforceProgramCatalog(db);
   db.run(`
     INSERT OR IGNORE INTO authority_versions (
       id,

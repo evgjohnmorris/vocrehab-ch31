@@ -335,7 +335,7 @@ function Header({
                           setActiveView('dispute_hub');
                         } else {
                           setSelectedSection({ type: res.type, id: res.id });
-                          setActiveView('reference');
+                          setActiveView('authority_library');
                         }
                         setShowSearchResults(false);
                         setSearchQuery('');
@@ -366,7 +366,7 @@ function Header({
               className="action-btn"
               title="View Bookmarks"
               onClick={() => {
-                setActiveView('reference');
+                setActiveView('authority_library');
                 if (bookmarks.length > 0) {
                   setSelectedSection({ type: bookmarks[0].type, id: bookmarks[0].id });
                 }

@@ -513,7 +513,7 @@ function BookmarkSidebar({
                   className="panel-item-text"
                   onClick={() => {
                     setSelectedSection({ type: bookmark.type, id: bookmark.id });
-                    setActiveView('reference');
+                      setActiveView('authority_library');
                   }}
                 >
                   {bookmark.title}

@@ -346,7 +346,7 @@ function App() {
     const handleNav = (e) => {
       const { type, id } = e.detail;
       setSelectedSection({ type, id });
-      setActiveView('reference');
+      setActiveView('authority_library');
     };
     window.addEventListener('navigate-to-authority', handleNav);
     return () => window.removeEventListener('navigate-to-authority', handleNav);
@@ -731,14 +731,14 @@ function App() {
         </div>
 
         {/* MOBILE BOTTOM NAVIGATION BAR */}
-        <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
-          <button 
-            className={`mobile-nav-tab ${activeView === 'reference' ? 'active' : ''}`}
-            onClick={() => setActiveView('reference')}
-          >
-            <BookOpen size={20} />
-            <span>Reference</span>
-          </button>
+          <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
+            <button 
+              className={`mobile-nav-tab ${activeView === 'authority_library' || activeView === 'reference' ? 'active' : ''}`}
+              onClick={() => setActiveView('authority_library')}
+            >
+              <BookOpen size={20} />
+              <span>Library</span>
+            </button>
           <button 
             className={`mobile-nav-tab ${activeView === 'wizard' ? 'active' : ''}`}
             onClick={() => setActiveView('wizard')}

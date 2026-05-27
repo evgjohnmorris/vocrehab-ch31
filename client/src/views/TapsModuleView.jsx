@@ -847,7 +847,7 @@ function TapsModuleView({ reduceMotion }) {
                         rel="noopener noreferrer"
                         className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
                       >
-                        <span>Official Page</span>
+                        <span>Open Resource</span>
                         <ExternalLink size={9} />
                       </a>
                     </div>
