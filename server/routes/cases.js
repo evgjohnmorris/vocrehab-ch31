@@ -5,6 +5,8 @@ import {
   createCaseChildId,
   createCaseRecordId,
   getCaseIssueDefinition,
+  getCommunitySignalSummary,
+  getProblemRouter,
   validateCaseActivityPayload,
   validateCaseDeadlinePayload,
   validateCaseDocumentPayload,
@@ -120,7 +122,17 @@ async function loadIssueCatalog(options = {}) {
   sql += ' ORDER BY title ASC';
 
   const rows = await dbAll(sql, params);
-  return rows.map(mapIssueRow).filter(Boolean);
+  return rows
+    .map(mapIssueRow)
+    .filter(Boolean)
+    .sort((left, right) => {
+      const priorityDiff = (left.priorityRank ?? 999) - (right.priorityRank ?? 999);
+      if (priorityDiff !== 0) {
+        return priorityDiff;
+      }
+
+      return String(left.title || '').localeCompare(String(right.title || ''));
+    });
 }
 
 async function loadCurrentCaseRow(scope) {
@@ -156,13 +168,22 @@ async function loadCaseBundleByScope(scope) {
     issueTypeId: row.issue_type_id,
     caseStage: row.case_stage,
     track: row.track,
+    trackRequested: row.track_requested,
+    trackApproved: row.track_approved,
+    employmentHandicapStatus: row.employment_handicap_status,
+    seriousEmploymentHandicapStatus: row.serious_employment_handicap_status,
+    feasibilityStatus: row.feasibility_status,
     ipeStatus: row.ipe_status,
+    iilpStatus: row.iilp_status,
     issueSummary: row.issue_summary,
     disputeHistory: row.dispute_history,
     escalationHistory: row.escalation_history,
     evidenceSummary: row.evidence_summary,
     decisionNoticeDate: row.decision_notice_date,
     followUpDeadlineDate: row.follow_up_deadline_date,
+    termStart: row.term_start,
+    termEnd: row.term_end,
+    urgentDeadline: row.urgent_deadline,
     createdFromWorkflowId: row.created_from_workflow_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -196,6 +217,10 @@ router.get('/dashboard', async (req, res) => {
     res.json({
       currentCase,
       workflows,
+      problemRouter: {
+        options: getProblemRouter()
+      },
+      communitySignals: getCommunitySignalSummary(),
       issueTaxonomy: {
         total: allIssues.length,
         dashboardEnabled: workflows.length
@@ -212,6 +237,17 @@ router.get('/taxonomy', async (req, res) => {
     const dashboardOnly = req.query.dashboardOnly === 'true';
     const workflows = await loadIssueCatalog({ dashboardOnly });
     res.json(workflows);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+});
+
+router.get('/problem-router', async (req, res) => {
+  try {
+    res.json({
+      communitySignals: getCommunitySignalSummary(),
+      options: getProblemRouter()
+    });
   } catch (error) {
     res.status(error.statusCode || 500).json({ error: error.message });
   }
@@ -254,13 +290,22 @@ router.put('/current', async (req, res) => {
           issue_type_id = ?,
           case_stage = ?,
           track = ?,
+          track_requested = ?,
+          track_approved = ?,
+          employment_handicap_status = ?,
+          serious_employment_handicap_status = ?,
+          feasibility_status = ?,
           ipe_status = ?,
+          iilp_status = ?,
           issue_summary = ?,
           dispute_history = ?,
           escalation_history = ?,
           evidence_summary = ?,
           decision_notice_date = ?,
           follow_up_deadline_date = ?,
+          term_start = ?,
+          term_end = ?,
+          urgent_deadline = ?,
           created_from_workflow_id = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ? AND scope = ?
@@ -274,13 +319,22 @@ router.put('/current', async (req, res) => {
         payload.issueTypeId,
         payload.caseStage,
         payload.track,
+        payload.trackRequested,
+        payload.trackApproved,
+        payload.employmentHandicapStatus,
+        payload.seriousEmploymentHandicapStatus,
+        payload.feasibilityStatus,
         payload.ipeStatus,
+        payload.iilpStatus,
         payload.issueSummary,
         payload.disputeHistory,
         payload.escalationHistory,
         payload.evidenceSummary,
         payload.decisionNoticeDate,
         payload.followUpDeadlineDate,
+        payload.termStart,
+        payload.termEnd,
+        payload.urgentDeadline,
         payload.createdFromWorkflowId,
         caseId,
         scope
@@ -299,17 +353,26 @@ router.put('/current', async (req, res) => {
           issue_type_id,
           case_stage,
           track,
+          track_requested,
+          track_approved,
+          employment_handicap_status,
+          serious_employment_handicap_status,
+          feasibility_status,
           ipe_status,
+          iilp_status,
           issue_summary,
           dispute_history,
           escalation_history,
           evidence_summary,
           decision_notice_date,
           follow_up_deadline_date,
+          term_start,
+          term_end,
+          urgent_deadline,
           created_from_workflow_id,
           created_at,
           updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `, [
         caseId,
         scope,
@@ -322,13 +385,22 @@ router.put('/current', async (req, res) => {
         payload.issueTypeId,
         payload.caseStage,
         payload.track,
+        payload.trackRequested,
+        payload.trackApproved,
+        payload.employmentHandicapStatus,
+        payload.seriousEmploymentHandicapStatus,
+        payload.feasibilityStatus,
         payload.ipeStatus,
+        payload.iilpStatus,
         payload.issueSummary,
         payload.disputeHistory,
         payload.escalationHistory,
         payload.evidenceSummary,
         payload.decisionNoticeDate,
         payload.followUpDeadlineDate,
+        payload.termStart,
+        payload.termEnd,
+        payload.urgentDeadline,
         payload.createdFromWorkflowId
       ]);
     }

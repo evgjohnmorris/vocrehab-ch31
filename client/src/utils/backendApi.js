@@ -160,6 +160,21 @@ export async function addCurrentCaseActivity(payload, options = {}) {
   return response.json();
 }
 
+export async function addCurrentCaseDeadline(payload, options = {}) {
+  const response = await backendFetch('/api/cases/current/deadlines', {
+    method: 'POST',
+    includeJson: true,
+    privacyMode: options.privacyMode,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await createBackendError(response);
+  }
+
+  return response.json();
+}
+
 export async function deleteCurrentCaseActivity(activityId, options = {}) {
   const response = await backendFetch(`/api/cases/current/activities/${encodeURIComponent(activityId)}`, {
     method: 'DELETE',
@@ -169,6 +184,21 @@ export async function deleteCurrentCaseActivity(activityId, options = {}) {
   if (!response.ok && response.status !== 204) {
     throw await createBackendError(response);
   }
+}
+
+export async function addCurrentCaseDocument(payload, options = {}) {
+  const response = await backendFetch('/api/cases/current/documents', {
+    method: 'POST',
+    includeJson: true,
+    privacyMode: options.privacyMode,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await createBackendError(response);
+  }
+
+  return response.json();
 }
 
 export async function fetchReferenceLibraryOverview(options = {}) {

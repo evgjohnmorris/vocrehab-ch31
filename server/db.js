@@ -43,10 +43,16 @@ db.serialize(() => {
       status TEXT,
       source_url TEXT,
       plain_english TEXT,
-      veteran_use TEXT
+      veteran_use TEXT,
+      metadata_json TEXT
     )
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_authority_records_type ON authority_records(type)');
+  db.run('ALTER TABLE authority_records ADD COLUMN metadata_json TEXT', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('authority_records metadata_json migration skipped:', err.message);
+    }
+  });
 
   // 2. Preserve the legacy user_state table if it exists, but write all new data to a scoped table.
   db.run(`
@@ -121,13 +127,22 @@ db.serialize(() => {
       issue_type_id TEXT NOT NULL,
       case_stage TEXT NOT NULL,
       track TEXT NOT NULL DEFAULT '',
+      track_requested TEXT NOT NULL DEFAULT '',
+      track_approved TEXT NOT NULL DEFAULT '',
+      employment_handicap_status TEXT NOT NULL DEFAULT '',
+      serious_employment_handicap_status TEXT NOT NULL DEFAULT '',
+      feasibility_status TEXT NOT NULL DEFAULT '',
       ipe_status TEXT NOT NULL DEFAULT '',
+      iilp_status TEXT NOT NULL DEFAULT '',
       issue_summary TEXT NOT NULL DEFAULT '',
       dispute_history TEXT NOT NULL DEFAULT '',
       escalation_history TEXT NOT NULL DEFAULT '',
       evidence_summary TEXT NOT NULL DEFAULT '',
       decision_notice_date TEXT NOT NULL DEFAULT '',
       follow_up_deadline_date TEXT NOT NULL DEFAULT '',
+      term_start TEXT NOT NULL DEFAULT '',
+      term_end TEXT NOT NULL DEFAULT '',
+      urgent_deadline TEXT NOT NULL DEFAULT '',
       created_from_workflow_id TEXT NOT NULL DEFAULT '',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -136,6 +151,51 @@ db.serialize(() => {
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_case_records_issue_stage ON case_records(issue_type_id, case_stage)');
   db.run('CREATE INDEX IF NOT EXISTS idx_case_records_updated_at ON case_records(updated_at DESC)');
+  db.run('ALTER TABLE case_records ADD COLUMN track_requested TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records track_requested migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN track_approved TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records track_approved migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN employment_handicap_status TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records employment_handicap_status migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN serious_employment_handicap_status TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records serious_employment_handicap_status migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN feasibility_status TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records feasibility_status migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN iilp_status TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records iilp_status migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN term_start TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records term_start migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN term_end TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records term_end migration skipped:', err.message);
+    }
+  });
+  db.run('ALTER TABLE case_records ADD COLUMN urgent_deadline TEXT NOT NULL DEFAULT \'\'', (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.warn('case_records urgent_deadline migration skipped:', err.message);
+    }
+  });
 
   db.run(`
     CREATE TABLE IF NOT EXISTS case_deadlines (
