@@ -1,5 +1,5 @@
 // @allow-modal
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ChevronRight, Compass, Plus, Trash2, Printer, Copy, Info, CheckCircle2, Scale,
@@ -92,6 +92,7 @@ const TRACK_DETAILS = [
 
 const CLAIM_BUILDER_DRAFT_TYPE = 'claim_builder_workspace';
 const CLAIM_BUILDER_STORAGE_KEY = 'm28c_claim_builder_workspace';
+const DRAFT_REQUEST_TIMEOUT_MS = 8000;
 
 function createDefaultObjectives() {
   return [
@@ -325,6 +326,22 @@ function buildDraftTitle(vocGoal, selectedTrack) {
   return track ? `${track.name} IPE draft` : 'IPE / Plan Builder draft';
 }
 
+function withDraftRequestTimeout(requestPromise, message) {
+  let timeoutId = null;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(message));
+    }, DRAFT_REQUEST_TIMEOUT_MS);
+  });
+
+  return Promise.race([requestPromise, timeoutPromise]).finally(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  });
+}
+
 function ClaimArgumentBuilderView({
   reduceMotion,
   privacyMode = false,
@@ -357,27 +374,30 @@ function ClaimArgumentBuilderView({
   const hasHydratedRef = useRef(false);
   const skipAutosaveRef = useRef(true);
   const saveTimerRef = useRef(null);
+  const localDraftTimerRef = useRef(null);
 
   const applyWorkspaceDraft = useCallback((draft) => {
     const normalizedDraft = normalizeWorkspaceDraft(draft);
     const area = getDisputeAreaById(normalizedDraft.briefBuilder.selectedAreaId);
 
-    setActiveTab(normalizedDraft.activeTab);
-    setVocGoal(normalizedDraft.planBuilder.vocGoal);
-    setOnetCode(normalizedDraft.planBuilder.onetCode);
-    setRiasecCode(normalizedDraft.planBuilder.riasecCode);
-    setSelectedTrack(normalizedDraft.planBuilder.selectedTrack);
-    setTrainingObjectives(normalizedDraft.planBuilder.trainingObjectives);
-    setZipCode(normalizedDraft.planBuilder.zipCode);
-    setEstimatedMha(normalizedDraft.planBuilder.estimatedMha);
-    setSubsistenceElection(normalizedDraft.planBuilder.subsistenceElection);
-    setObjectives(normalizedDraft.planBuilder.objectives);
-    setRequiredServices(normalizedDraft.planBuilder.requiredServices);
-    setStep(normalizedDraft.briefBuilder.step);
-    setSelectedArea(area);
-    setUserFacts(normalizedDraft.briefBuilder.userFacts);
-    setSelectedErrors(normalizedDraft.briefBuilder.selectedErrors);
-    setSelectedCitations(normalizedDraft.briefBuilder.selectedCitations);
+    startTransition(() => {
+      setActiveTab(normalizedDraft.activeTab);
+      setVocGoal(normalizedDraft.planBuilder.vocGoal);
+      setOnetCode(normalizedDraft.planBuilder.onetCode);
+      setRiasecCode(normalizedDraft.planBuilder.riasecCode);
+      setSelectedTrack(normalizedDraft.planBuilder.selectedTrack);
+      setTrainingObjectives(normalizedDraft.planBuilder.trainingObjectives);
+      setZipCode(normalizedDraft.planBuilder.zipCode);
+      setEstimatedMha(normalizedDraft.planBuilder.estimatedMha);
+      setSubsistenceElection(normalizedDraft.planBuilder.subsistenceElection);
+      setObjectives(normalizedDraft.planBuilder.objectives);
+      setRequiredServices(normalizedDraft.planBuilder.requiredServices);
+      setStep(normalizedDraft.briefBuilder.step);
+      setSelectedArea(area);
+      setUserFacts(normalizedDraft.briefBuilder.userFacts);
+      setSelectedErrors(normalizedDraft.briefBuilder.selectedErrors);
+      setSelectedCitations(normalizedDraft.briefBuilder.selectedCitations);
+    });
   }, []);
 
   const buildWorkspaceDraft = useCallback(() => ({
@@ -432,7 +452,19 @@ function ClaimArgumentBuilderView({
     setDraftError('');
   }, []);
 
-  const persistDraft = useCallback(async (draftPayload = buildWorkspaceDraft()) => {
+  const clearPendingDraftTimers = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    if (localDraftTimerRef.current) {
+      clearTimeout(localDraftTimerRef.current);
+      localDraftTimerRef.current = null;
+    }
+  }, []);
+
+  const persistDraft = useCallback(async (draftPayload) => {
     if (!isBackendOnline) {
       writeWorkspaceDraft(privacyMode, draftPayload);
       markLocalDraftState();
@@ -440,10 +472,13 @@ function ClaimArgumentBuilderView({
     }
 
     setDraftStatus('saving');
-    const savedDraft = await saveCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, draftPayload, {
-      privacyMode,
-      title: buildDraftTitle(draftPayload.planBuilder.vocGoal, draftPayload.planBuilder.selectedTrack)
-    });
+    const savedDraft = await withDraftRequestTimeout(
+      saveCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, draftPayload, {
+        privacyMode,
+        title: buildDraftTitle(draftPayload.planBuilder.vocGoal, draftPayload.planBuilder.selectedTrack)
+      }),
+      'Saving the plan draft timed out. Your changes remain stored locally.'
+    );
 
     const normalizedPayload = normalizeWorkspaceDraft(savedDraft.payload || draftPayload);
     writeWorkspaceDraft(privacyMode, normalizedPayload);
@@ -452,7 +487,7 @@ function ClaimArgumentBuilderView({
     setDraftStatus('synced');
     setDraftError('');
     return savedDraft;
-  }, [buildWorkspaceDraft, isBackendOnline, markLocalDraftState, privacyMode]);
+  }, [isBackendOnline, markLocalDraftState, privacyMode]);
 
   useEffect(() => {
     const sourceStorage = privacyMode ? localStorage : sessionStorage;
@@ -506,7 +541,10 @@ function ClaimArgumentBuilderView({
 
     const loadRemoteDraft = async () => {
       try {
-        const remoteDraft = await fetchCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, { privacyMode });
+        const remoteDraft = await withDraftRequestTimeout(
+          fetchCurrentPlanDraft(CLAIM_BUILDER_DRAFT_TYPE, { privacyMode }),
+          'Loading the saved plan draft timed out. Using your local copy instead.'
+        );
         if (cancelled) {
           return;
         }
@@ -551,10 +589,8 @@ function ClaimArgumentBuilderView({
   }, [applyWorkspaceDraft, dataResetToken, isBackendOnline, markLocalDraftState, persistDraft, privacyMode, resetDraftSessionMeta]);
 
   useEffect(() => () => {
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current);
-    }
-  }, []);
+    clearPendingDraftTimers();
+  }, [clearPendingDraftTimers]);
 
   useEffect(() => {
     if (!hasHydratedRef.current) {
@@ -562,20 +598,26 @@ function ClaimArgumentBuilderView({
     }
 
     const draftPayload = buildWorkspaceDraft();
-    writeWorkspaceDraft(privacyMode, draftPayload);
 
     if (skipAutosaveRef.current) {
       skipAutosaveRef.current = false;
       return undefined;
     }
 
-    if (!isBackendOnline) {
-      queueMicrotask(markLocalDraftState);
-      return undefined;
-    }
+    clearPendingDraftTimers();
 
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current);
+    localDraftTimerRef.current = window.setTimeout(() => {
+      writeWorkspaceDraft(privacyMode, draftPayload);
+
+      if (!isBackendOnline) {
+        markLocalDraftState();
+      }
+    }, 180);
+
+    if (!isBackendOnline) {
+      return () => {
+        clearPendingDraftTimers();
+      };
     }
 
     saveTimerRef.current = window.setTimeout(() => {
@@ -587,11 +629,9 @@ function ClaimArgumentBuilderView({
     }, 700);
 
     return () => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-      }
+      clearPendingDraftTimers();
     };
-  }, [buildWorkspaceDraft, isBackendOnline, markLocalDraftState, persistDraft, privacyMode]);
+  }, [buildWorkspaceDraft, clearPendingDraftTimers, isBackendOnline, markLocalDraftState, persistDraft, privacyMode]);
 
   const handleAddObjective = () => {
     const newId = (objectives.length > 0 ? Math.max(...objectives.map(o => parseInt(o.id) || 0)) + 1 : 1).toString();
@@ -630,6 +670,7 @@ function ClaimArgumentBuilderView({
   };
 
   const handleSaveDraftNow = () => {
+    clearPendingDraftTimers();
     const draftPayload = buildWorkspaceDraft();
     writeWorkspaceDraft(privacyMode, draftPayload);
     persistDraft(draftPayload).catch((error) => {
@@ -690,7 +731,7 @@ function ClaimArgumentBuilderView({
     }
   }, [lastSavedAt]);
 
-  const compilePlanLetter = () => {
+  const compiledPlanLetter = useMemo(() => {
     const goalText = vocGoal || '[GOAL TITLE]';
     const onetText = onetCode || '[O*NET CODE]';
 
@@ -759,17 +800,26 @@ Respectfully Submitted,
 
 ___________________________________
 [Veteran Signature]`;
-  };
+  }, [
+    estimatedMha,
+    objectives,
+    onetCode,
+    requiredServices,
+    riasecCode,
+    selectedTrack,
+    subsistenceElection,
+    trainingObjectives,
+    vocGoal,
+    zipCode
+  ]);
 
   const handleCopyPlan = () => {
-    const text = compilePlanLetter();
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(compiledPlanLetter);
     setCopyPlanSuccess(true);
     setTimeout(() => setCopyPlanSuccess(false), 2000);
   };
 
   const handlePrintPlan = () => {
-    const text = compilePlanLetter();
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       return;
@@ -777,7 +827,7 @@ ___________________________________
     printWindow.document.write(`
       <html>
         <head><title>Plan Justification</title></head>
-        <body style="font-family: Courier; white-space: pre-wrap; padding: 40px; color: #000;">${text}</body>
+        <body style="font-family: Courier; white-space: pre-wrap; padding: 40px; color: #000;">${compiledPlanLetter}</body>
       </html>
     `);
     printWindow.document.close();
@@ -1250,7 +1300,7 @@ ${selectedArea.evidenceChecklist.map(item => `[ ] ${item}`).join('\n')}`;
 
             <div className="bg-slate-950/40 border border-slate-850 rounded-xl p-5 overflow-y-auto max-h-[450px]">
               <pre className="text-[10px] text-slate-300 font-mono leading-relaxed whitespace-pre-wrap select-text">
-                {compilePlanLetter()}
+                {compiledPlanLetter}
               </pre>
             </div>
 
