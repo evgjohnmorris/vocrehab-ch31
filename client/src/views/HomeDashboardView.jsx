@@ -982,6 +982,95 @@ function HomeDashboardView({
       value: `${currentCaseRecord.documents?.length || 0} saved drafts`
     }
   ] : [];
+  const currentRegionalOffice = selectedOffice || currentCaseRecord?.regionalOffice || '';
+  const currentIssueSummary = caseWorkspaceDraft.issueSummary
+    || currentCaseRecord?.issueSummary
+    || 'No issue summary captured yet.';
+  const totalDeadlines = currentCaseRecord?.deadlines?.length || 0;
+  const totalDocuments = currentCaseRecord?.documents?.length || 0;
+  const totalActivities = currentCaseRecord?.activities?.length || contactsLog.length || 0;
+  const recentActivityLog = (contactsLog.length > 0
+    ? contactsLog
+    : (currentCaseRecord?.activities || []).map(mapActivityToContactLog))
+    .slice(-4)
+    .reverse();
+  const syncStatusClasses = caseSyncStatus === 'synced'
+    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+    : caseSyncStatus === 'error'
+      ? 'border-red-500/30 bg-red-500/10 text-red-300'
+      : 'border-slate-700 bg-slate-950/50 text-slate-300';
+  const privacyPostureLabel = privacyMode ? 'Session-first local mode' : 'Persistent local mode';
+  const caseHealthSignals = [
+    {
+      label: 'Issue record',
+      value: currentCaseRecord ? 'Active case record loaded' : 'No active case record',
+      detail: currentCaseRecord ? currentCaseIssueTitle : 'Open a workflow from the problem router to create the case.',
+      ready: Boolean(currentCaseRecord)
+    },
+    {
+      label: 'Deadline control',
+      value: currentCaseNextDeadline || 'No deadline logged',
+      detail: currentCaseNextDeadline ? 'A next action date is on file.' : 'Add the next school, review, or escalation date.',
+      ready: Boolean(currentCaseNextDeadline)
+    },
+    {
+      label: 'Escalation path',
+      value: currentRegionalOffice || 'Regional office not selected',
+      detail: currentRegionalOffice ? 'Office routing is ready for VREO escalation.' : 'Select the regional office and confirm the VREO chain.',
+      ready: Boolean(currentRegionalOffice)
+    },
+    {
+      label: 'Packet history',
+      value: totalDocuments > 0 ? `${totalDocuments} saved drafts` : 'No saved packet drafts',
+      detail: totalDocuments > 0 ? 'Prior letters can be reused and updated.' : 'Save the first action letter into the case file.',
+      ready: totalDocuments > 0
+    }
+  ];
+  const workspacePriorityQueue = currentCaseRecord
+    ? [
+        !currentCaseNextDeadline && {
+          id: 'log-deadline',
+          title: 'Log the next hard deadline',
+          detail: 'Capture the next school, review-lane, or escalation date before building anything else.'
+        },
+        !currentRegionalOffice && {
+          id: 'set-office',
+          title: 'Set the regional office and VREO path',
+          detail: 'This makes the escalation chain usable when the counselor stalls or a supervisor review is needed.'
+        },
+        !caseWorkspaceDraft.issueSummary && !currentCaseRecord?.issueSummary && {
+          id: 'capture-issue',
+          title: 'Write the issue summary in one sentence',
+          detail: 'State what VA did, what relief is requested, and why the current posture is wrong.'
+        },
+        totalActivities === 0 && {
+          id: 'log-contact',
+          title: 'Start the counselor contact timeline',
+          detail: 'Add the first outreach attempt so the packet has a documented contact history.'
+        },
+        totalDocuments === 0 && {
+          id: 'save-draft',
+          title: 'Save the first packet draft to the case',
+          detail: 'Once a letter is generated, store it in the case file so the record can be reused.'
+        }
+      ].filter(Boolean)
+    : [
+        {
+          id: 'route-problem',
+          title: 'Start from the real VR&E problem',
+          detail: 'Open the problem router first so the dashboard builds the right case record instead of a generic note.'
+        },
+        {
+          id: 'capture-core-facts',
+          title: 'Capture only the minimum case facts',
+          detail: 'Save the issue, next deadline, office, and requested relief before assembling authorities.'
+        },
+        {
+          id: 'build-first-packet',
+          title: 'Build a first packet from one workflow',
+          detail: 'Use one workflow to produce the opening summary, evidence list, and action letter.'
+        }
+      ];
 
   const handleStartWorkflow = (wf) => {
     const currentCase = caseDashboard?.currentCase;
@@ -1066,122 +1155,380 @@ function HomeDashboardView({
     setActiveView('authority_library');
   };
 
+  const currentWorkflowContext = resolveCurrentWorkflowContext();
+  const counselorRoute = problemRouterOptions.find((option) => option.id === 'counselor_disappeared') || problemRouterOptions[0] || null;
+  const schoolRoute = problemRouterOptions.find((option) => option.id === 'school_not_paid') || problemRouterOptions[1] || null;
+  const writtenDecisionWorkflow = resolveWorkflowById('written-decision-request');
+  const actionAccentStyles = {
+    cyan: {
+      border: 'border-cyan-500/20 hover:border-cyan-400/40',
+      badge: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200',
+      button: 'bg-cyan-600 hover:bg-cyan-500'
+    },
+    amber: {
+      border: 'border-amber-500/20 hover:border-amber-400/40',
+      badge: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
+      button: 'bg-amber-600 hover:bg-amber-500'
+    },
+    emerald: {
+      border: 'border-emerald-500/20 hover:border-emerald-400/40',
+      badge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+      button: 'bg-emerald-600 hover:bg-emerald-500'
+    },
+    indigo: {
+      border: 'border-indigo-500/20 hover:border-indigo-400/40',
+      badge: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-200',
+      button: 'bg-indigo-600 hover:bg-indigo-500'
+    },
+    violet: {
+      border: 'border-fuchsia-500/20 hover:border-fuchsia-400/40',
+      badge: 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-200',
+      button: 'bg-fuchsia-600 hover:bg-fuchsia-500'
+    },
+    rose: {
+      border: 'border-rose-500/20 hover:border-rose-400/40',
+      badge: 'border-rose-500/30 bg-rose-500/10 text-rose-200',
+      button: 'bg-rose-600 hover:bg-rose-500'
+    }
+  };
+  const quickActionCards = [
+    {
+      id: 'resume-case',
+      eyebrow: 'Case workflow',
+      title: currentWorkflowContext ? 'Resume the active issue workflow' : 'Start the first case workflow',
+      text: currentWorkflowContext
+        ? 'Reopen the matching guided workflow and continue packet assembly from the case record.'
+        : 'Open a guided workflow and create the first structured issue record.',
+      actionLabel: currentWorkflowContext ? 'Open active workflow' : 'Open first workflow',
+      icon: FileText,
+      accent: 'cyan',
+      onClick: () => {
+        if (currentWorkflowContext) {
+          handleStartWorkflow(currentWorkflowContext);
+        }
+      },
+      disabled: !currentWorkflowContext
+    },
+    {
+      id: 'counselor-route',
+      eyebrow: 'Escalation',
+      title: 'Counselor not responding',
+      text: 'Launch the intake that builds the written record, supervisor escalation, and follow-up timeline.',
+      actionLabel: 'Open counselor route',
+      icon: Mail,
+      accent: 'amber',
+      onClick: () => counselorRoute && handleRouteProblem(counselorRoute),
+      disabled: !counselorRoute
+    },
+    {
+      id: 'school-route',
+      eyebrow: 'School risk',
+      title: 'School, tuition, or allowance problem',
+      text: 'Jump into the payment-delay workflow or the school payment tracker when term-start risk is active.',
+      actionLabel: 'Open school route',
+      icon: Briefcase,
+      accent: 'emerald',
+      onClick: () => {
+        if (schoolRoute) {
+          handleRouteProblem(schoolRoute);
+        } else {
+          setActiveView('school_payment_tracker');
+        }
+      }
+    },
+    {
+      id: 'authority-library',
+      eyebrow: 'Authorities',
+      title: 'Open the authority library',
+      text: 'Go straight to statutes, regulations, and manual references when the packet needs stronger authority support.',
+      actionLabel: 'Browse authorities',
+      icon: Award,
+      accent: 'indigo',
+      onClick: () => setActiveView('authority_library')
+    },
+    {
+      id: 'il-builder',
+      eyebrow: 'ILP / Whole Health',
+      title: 'Open the ILP activity planner',
+      text: 'Route adaptive activity, Whole Health, gym, boxing, or structured independence requests into the dedicated builder.',
+      actionLabel: 'Open IL planner',
+      icon: Compass,
+      accent: 'violet',
+      onClick: () => setActiveView('independent_living_builder')
+    },
+    {
+      id: 'written-decision',
+      eyebrow: 'Preserve the record',
+      title: 'Request a written decision',
+      text: 'Use the written-decision workflow when VA gave only a verbal denial or refused to explain the basis.',
+      actionLabel: 'Open written-decision path',
+      icon: AlertTriangle,
+      accent: 'rose',
+      onClick: () => {
+        if (writtenDecisionWorkflow) {
+          handleStartWorkflow(writtenDecisionWorkflow);
+        } else {
+          setActiveView('document_generator');
+        }
+      }
+    }
+  ];
+
   return (
     <motion.div
       initial={reduceMotion ? {} : { opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 select-text text-slate-100"
     >
-      {/* Title & Info Strip */}
-      <div className="relative overflow-hidden bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-md">
-        <div className="absolute inset-y-0 right-0 w-[28rem] bg-[radial-gradient(circle_at_top_right,rgba(216,161,41,0.12),transparent_42%),radial-gradient(circle_at_center_right,rgba(0,60,113,0.16),transparent_52%)] -z-10"></div>
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
-          <div className="xl:col-span-8 space-y-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">
+      {/* Command Center Hero */}
+      <div className="relative overflow-hidden rounded-[28px] border border-slate-800 bg-[linear-gradient(145deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))] p-6 md:p-7 backdrop-blur-md">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.14),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(245,158,11,0.12),transparent_38%),linear-gradient(120deg,transparent_0%,rgba(99,102,241,0.06)_55%,transparent_100%)]" />
+        <div className="relative grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <div className="xl:col-span-7 space-y-5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-200">
               <ShieldCheck size={12} />
               <span>{modeAdvice.badge}</span>
             </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl md:text-[2rem] font-extrabold text-slate-50 tracking-tight">
+
+            <div className="space-y-3">
+              <h1 className="text-2xl md:text-[2.15rem] font-extrabold tracking-tight text-slate-50">
                 VR&amp;E Case Command Center
               </h1>
-              <p className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                A Chapter 31 operations desk for issue triage, authority-backed planning, deadline control, and case packet assembly.
+              <p className="max-w-3xl text-sm leading-relaxed text-slate-300">
+                A case-building dashboard for Chapter 31 triage, legal framing, deadline control, and packet generation. Start with what VA did, capture only the facts that matter, and route the next move into the right workflow.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
               {dashboardHeroMetrics.map((metric) => (
-                <div key={metric.label} className="rounded-2xl border border-slate-800/90 bg-slate-950/45 px-4 py-3">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">
+                <div key={metric.label} className="rounded-2xl border border-slate-800/90 bg-slate-950/45 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                     {metric.label}
                   </span>
-                  <strong className="mt-1.5 block text-sm text-slate-100 leading-snug">
+                  <strong className="mt-1.5 block text-sm leading-snug text-slate-100">
                     {metric.value}
                   </strong>
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="xl:col-span-4 rounded-2xl border border-slate-800/90 bg-slate-950/55 p-5 space-y-4">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-400 block">
-                Operating Posture
-              </span>
-              <h2 className="text-base font-bold text-slate-100">
-                {currentCaseRecord ? currentCaseIssueTitle : 'No issue packet in motion'}
-              </h2>
-            </div>
-
-            <div className="space-y-3 text-[11px] text-slate-300 leading-relaxed">
-              <div className="rounded-xl border border-slate-800 bg-slate-950/45 p-3">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 block">Current deadline</span>
-                <strong className="mt-1 block text-slate-100">{currentCaseNextDeadline || 'No deadline logged'}</strong>
-              </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-950/45 p-3">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 block">Privacy stance</span>
-                <div className="mt-1 flex items-center gap-1.5 text-emerald-300 font-semibold">
-                  <Shield size={11} />
-                  <span>Session-first planning</span>
+            {microProblemChips.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                  <CheckCircle2 size={13} className="text-emerald-300" />
+                  <span>Fast Lanes</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {microProblemChips.slice(0, 6).map((chip) => (
+                    <button
+                      key={`hero-${chip.id}`}
+                      type="button"
+                      onClick={() => handleMicroProblemRoute(chip.workflowId)}
+                      className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-2 text-[11px] font-medium text-slate-200 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-100"
+                      title={`Open ${chip.workflow.title}`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-              <p>{dashboardNextMove}</p>
+            )}
+          </div>
+
+          <div className="xl:col-span-5 space-y-4">
+            <div className="rounded-[24px] border border-slate-800/90 bg-slate-950/60 p-5 space-y-4 shadow-[0_18px_40px_rgba(2,6,23,0.28)]">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                    Mission Brief
+                  </span>
+                  <h2 className="text-base font-bold text-slate-100">
+                    {currentCaseRecord ? currentCaseIssueTitle : 'No issue packet in motion'}
+                  </h2>
+                </div>
+                {isBackendOnline && (
+                  <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${syncStatusClasses}`}>
+                    {CASE_SYNC_STATUS_LABELS[caseSyncStatus] || 'Syncing'}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-slate-300">
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/45 p-3">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">Current deadline</span>
+                  <strong className="mt-1 block text-slate-100">{currentCaseNextDeadline || 'No deadline logged'}</strong>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/45 p-3">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">Privacy posture</span>
+                  <div className="mt-1 flex items-center gap-1.5 font-semibold text-emerald-300">
+                    <Shield size={11} />
+                    <span>{privacyPostureLabel}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-[11px] leading-relaxed text-slate-300">
+                {dashboardNextMove}
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-slate-800/90 bg-slate-950/45 p-5 space-y-3">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+                <AlertOctagon size={14} />
+                <span>Priority Queue</span>
+              </div>
+              <div className="space-y-2">
+                {workspacePriorityQueue.slice(0, 3).map((item, index) => (
+                  <div key={item.id} className="rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-[10px] font-bold text-slate-300">
+                        {index + 1}
+                      </span>
+                      <div className="space-y-1">
+                        <strong className="block text-xs text-slate-100">{item.title}</strong>
+                        <p className="text-[11px] leading-relaxed text-slate-400">{item.detail}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mode-Specific Guidance Callout */}
-      <div className="rounded-2xl border border-amber-500/15 bg-[linear-gradient(180deg,rgba(146,64,14,0.08),rgba(120,53,15,0.03))] p-4 space-y-1.5">
-        <h4 className="text-[10px] font-bold text-amber-300 uppercase tracking-[0.18em]">{modeAdvice.title}</h4>
-        <p className="text-[11px] text-slate-300 leading-relaxed">{modeAdvice.text}</p>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {quickActionCards.map((action) => {
+          const styles = actionAccentStyles[action.accent] || actionAccentStyles.cyan;
+          const Icon = action.icon;
+
+          return (
+            <div
+              key={action.id}
+              className={`rounded-[24px] border bg-slate-900/45 p-5 transition duration-300 ${styles.border}`}
+            >
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-2">
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] ${styles.badge}`}>
+                      <Icon size={11} />
+                      <span>{action.eyebrow}</span>
+                    </span>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold leading-tight text-slate-100">{action.title}</h3>
+                      <p className="text-[11px] leading-relaxed text-slate-400">{action.text}</p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                  className={`w-full rounded-xl px-3 py-2.5 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 ${styles.button}`}
+                >
+                  {action.actionLabel}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {isBackendOnline && (
+      {/* Mode-Specific Guidance Callout */}
+      <div className="rounded-2xl border border-amber-500/15 bg-[linear-gradient(180deg,rgba(146,64,14,0.08),rgba(120,53,15,0.03))] p-4 space-y-1.5">
+        <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">{modeAdvice.title}</h4>
+        <p className="text-[11px] leading-relaxed text-slate-300">{modeAdvice.text}</p>
+      </div>
+
+      {isBackendOnline ? (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-          <div className="xl:col-span-8 bg-slate-900/35 border border-slate-800 rounded-2xl p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-[0.18em] block">Active Case Record</span>
-                <h3 className="text-sm font-bold text-slate-100">{currentCaseIssueTitle}</h3>
-                <p className="text-[11px] text-slate-400 mt-1">Structured issue, stage, and deadline data ready for workflow assembly.</p>
-              </div>
-              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                caseSyncStatus === 'synced'
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                  : caseSyncStatus === 'error'
-                    ? 'border-red-500/30 bg-red-500/10 text-red-300'
-                    : 'border-slate-700 bg-slate-950/50 text-slate-300'
-              }`}>
-                {CASE_SYNC_STATUS_LABELS[caseSyncStatus] || 'Syncing'}
-              </span>
+          <div className="xl:col-span-5 rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
+            <div className="space-y-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">Case Workspace Pulse</span>
+              <h3 className="text-sm font-bold text-slate-100">The case file should always answer what happened, what is next, and what evidence is missing.</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Case Stage</span>
-                <strong className="mt-1 block text-slate-100">{currentCaseRecord?.caseStage || tempStage}</strong>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Deadlines</span>
+                <strong className="mt-1 block text-slate-100">{totalDeadlines}</strong>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Issue Types</span>
-                <strong className="mt-1 block text-slate-100">
-                  {caseDashboard?.issueTaxonomy?.total || workflowCatalog.length} cataloged
-                </strong>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Contacts</span>
+                <strong className="mt-1 block text-slate-100">{totalActivities}</strong>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-950/35 p-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Next Deadline</span>
-                <strong className="mt-1 block text-slate-100">{currentCaseNextDeadline || 'Not logged yet'}</strong>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Saved drafts</span>
+                <strong className="mt-1 block text-slate-100">{totalDocuments}</strong>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              {workspacePriorityQueue.map((item) => (
+                <div key={`workspace-${item.id}`} className="rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3">
+                  <strong className="block text-xs text-slate-100">{item.title}</strong>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{item.detail}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="xl:col-span-4 bg-slate-950/35 border border-slate-800 rounded-2xl p-5 space-y-2">
-            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-[0.18em] block">Data Handling Standard</span>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              {caseDashboard?.privacyGuidance?.warning || 'Store only the minimum case facts needed for planning and escalation.'}
-            </p>
+          <div className="xl:col-span-4 rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
+            <div className="space-y-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Case Health</span>
+              <h3 className="text-sm font-bold text-slate-100">Use this as a fast check before you draft or escalate.</h3>
+            </div>
+            <div className="space-y-3">
+              {caseHealthSignals.map((signal) => (
+                <div key={signal.label} className="rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{signal.label}</span>
+                      <strong className="block text-xs text-slate-100">{signal.value}</strong>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                      signal.ready ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                    }`}>
+                      {signal.ready ? 'Ready' : 'Needs work'}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] leading-relaxed text-slate-400">{signal.detail}</p>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <div className="xl:col-span-3 rounded-[24px] border border-slate-800 bg-slate-950/35 p-5 space-y-4">
+            <div className="space-y-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">Data Handling Standard</span>
+              <p className="text-[11px] leading-relaxed text-slate-300">
+                {caseDashboard?.privacyGuidance?.warning || 'Store only the minimum case facts needed for planning and escalation.'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Current record</span>
+              <p className="mt-2 text-xs leading-relaxed text-slate-200">
+                {currentCaseRecord ? currentCaseIssueTitle : 'No active record yet. Start from the problem router or open a workflow to create one.'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Issue summary preview</span>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-300">{currentIssueSummary}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-2">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
+            <Clock size={14} />
+            <span>Static Workspace Mode</span>
+          </div>
+          <p className="text-[11px] leading-relaxed text-slate-300">
+            The local backend is offline, so the dashboard is running in reference-and-planning mode. You can still route issues, open workflows, and draft packets, but case records, deadlines, and saved drafts will not persist until the backend is available.
+          </p>
         </div>
       )}
 
@@ -1189,18 +1536,23 @@ function HomeDashboardView({
         <div className="space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
-              <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-[0.18em]">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-indigo-300">
                 <FileText size={16} />
                 <span>Veteran Case Workspace</span>
               </div>
-              <h2 className="text-base font-bold text-slate-100">A structured case file for status, deadlines, contact history, and saved packet drafts.</h2>
-              <p className="text-[11px] text-slate-400 max-w-3xl leading-relaxed">
-                This is the central case record layer for the platform. Keep it thin, factual, and tied to the active Chapter 31 problem so downstream letters, activity plans, and escalation packets stay consistent.
+              <h2 className="text-base font-bold text-slate-100">A cleaner case file for posture, deadlines, office routing, evidence notes, and saved packet drafts.</h2>
+              <p className="max-w-3xl text-[11px] leading-relaxed text-slate-400">
+                Keep this record thin, factual, and synchronized to the actual Chapter 31 problem. Everything below should help the later packet read like one coherent case theory instead of scattered notes.
               </p>
             </div>
-            <div className="max-w-md rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3 text-[11px] text-slate-300 leading-relaxed">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Current record</span>
-              <p className="mt-1">{currentCaseRecord ? currentCaseIssueTitle : 'No active record yet. Start from the problem router or open a workflow to create one.'}</p>
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3 text-[11px] leading-relaxed text-slate-300">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Workspace sync</span>
+              <div className="mt-2 flex items-center gap-2">
+                <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${syncStatusClasses}`}>
+                  {CASE_SYNC_STATUS_LABELS[caseSyncStatus] || 'Syncing'}
+                </span>
+                <span>{currentCaseRecord ? 'Active case workspace loaded' : 'Waiting for the first structured case record'}</span>
+              </div>
             </div>
           </div>
 
@@ -1209,10 +1561,10 @@ function HomeDashboardView({
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {workspaceSnapshotCards.map((card) => (
                   <div key={card.label} className="rounded-2xl border border-slate-800 bg-slate-950/35 px-4 py-3">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 block">
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                       {card.label}
                     </span>
-                    <strong className="mt-1.5 block text-sm text-slate-100 leading-snug">
+                    <strong className="mt-1.5 block text-sm leading-snug text-slate-100">
                       {card.value}
                     </strong>
                   </div>
@@ -1220,231 +1572,286 @@ function HomeDashboardView({
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <div className="xl:col-span-7 bg-slate-900/35 border border-slate-800 rounded-2xl p-5 space-y-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300 block">Case Profile</span>
-                      <h3 className="text-sm font-bold text-slate-100">Status, term, and evidence fields that power later packet generation.</h3>
+                <div className="xl:col-span-8 space-y-4">
+                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">Case Profile</span>
+                        <h3 className="text-sm font-bold text-slate-100">Capture only the status, office, school, and issue details that later packets need.</h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSaveWorkspace}
+                        disabled={savingWorkspace}
+                        className="rounded-xl bg-cyan-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-cyan-500 disabled:bg-cyan-900/50 disabled:text-slate-400"
+                      >
+                        {savingWorkspace ? 'Saving case file...' : 'Save Case Workspace'}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleSaveWorkspace}
-                      disabled={savingWorkspace}
-                      className="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:bg-cyan-900/50 disabled:text-slate-400 text-white text-xs font-bold transition"
-                    >
-                      {savingWorkspace ? 'Saving case file...' : 'Save Case Workspace'}
-                    </button>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Veteran Name</label>
-                      <input
-                        type="text"
-                        value={caseWorkspaceDraft.veteranName}
-                        onChange={(e) => handleWorkspaceDraftChange('veteranName', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Claimant Reference</label>
-                      <input
-                        type="text"
-                        value={caseWorkspaceDraft.claimantReference}
-                        onChange={(e) => handleWorkspaceDraftChange('claimantReference', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Counselor Name</label>
-                      <input
-                        type="text"
-                        value={caseWorkspaceDraft.counselorName}
-                        onChange={(e) => handleWorkspaceDraftChange('counselorName', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Regional Office</label>
-                      <select
-                        value={selectedOffice}
-                        onChange={(e) => {
-                          setSelectedOffice(e.target.value);
-                          handleWorkspaceDraftChange('regionalOffice', e.target.value);
-                        }}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        <option value="">-- Select VA Regional Office --</option>
-                        {VRE_OFFICES.map((off) => (
-                          <option key={off.office} value={off.office}>
-                            {off.office}
-                          </option>
-                        ))}
-                      </select>
-                      {activeOfficeDetails?.officer ? (
-                        <div className="text-[10px] text-indigo-300">VR&E Officer: <strong>{activeOfficeDetails.officer}</strong></div>
-                      ) : null}
-                    </div>
-                    <div className="space-y-1 md:col-span-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">School / Program</label>
-                      <input
-                        type="text"
-                        value={caseWorkspaceDraft.schoolName}
-                        onChange={(e) => handleWorkspaceDraftChange('schoolName', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-4">
+                        <div className="space-y-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Identity and office routing</span>
+                          <p className="text-[11px] leading-relaxed text-slate-400">Keep the claimant, counselor, and regional office current so escalation letters stay correctly addressed.</p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Veteran Name</label>
+                            <input
+                              type="text"
+                              value={caseWorkspaceDraft.veteranName}
+                              onChange={(e) => handleWorkspaceDraftChange('veteranName', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Claimant Reference</label>
+                            <input
+                              type="text"
+                              value={caseWorkspaceDraft.claimantReference}
+                              onChange={(e) => handleWorkspaceDraftChange('claimantReference', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Counselor Name</label>
+                            <input
+                              type="text"
+                              value={caseWorkspaceDraft.counselorName}
+                              onChange={(e) => handleWorkspaceDraftChange('counselorName', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Regional Office</label>
+                            <select
+                              value={selectedOffice}
+                              onChange={(e) => {
+                                setSelectedOffice(e.target.value);
+                                handleWorkspaceDraftChange('regionalOffice', e.target.value);
+                              }}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              <option value="">-- Select VA Regional Office --</option>
+                              {VRE_OFFICES.map((off) => (
+                                <option key={off.office} value={off.office}>
+                                  {off.office}
+                                </option>
+                              ))}
+                            </select>
+                            {activeOfficeDetails?.officer ? (
+                              <div className="text-[10px] text-indigo-300">VR&amp;E Officer: <strong>{activeOfficeDetails.officer}</strong></div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Track Requested</label>
-                      <select
-                        value={caseWorkspaceDraft.trackRequested}
-                        onChange={(e) => handleWorkspaceDraftChange('trackRequested', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_TRACK_OPTIONS.map((option) => (
-                          <option key={`track-requested-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
+                      <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-4">
+                        <div className="space-y-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Program and issue posture</span>
+                          <p className="text-[11px] leading-relaxed text-slate-400">Keep the requested program and one-sentence issue summary clear before you move into authorities and letter drafting.</p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">School / Program</label>
+                            <input
+                              type="text"
+                              value={caseWorkspaceDraft.schoolName}
+                              onChange={(e) => handleWorkspaceDraftChange('schoolName', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Issue Summary / Requested Relief</label>
+                            <textarea
+                              value={caseWorkspaceDraft.issueSummary}
+                              onChange={(e) => handleWorkspaceDraftChange('issueSummary', e.target.value)}
+                              className="h-24 w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-200"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-slate-400">Track Requested</label>
+                              <select
+                                value={caseWorkspaceDraft.trackRequested}
+                                onChange={(e) => handleWorkspaceDraftChange('trackRequested', e.target.value)}
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                              >
+                                {CASE_TRACK_OPTIONS.map((option) => (
+                                  <option key={`track-requested-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-slate-400">Track Approved</label>
+                              <select
+                                value={caseWorkspaceDraft.trackApproved}
+                                onChange={(e) => handleWorkspaceDraftChange('trackApproved', e.target.value)}
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                              >
+                                {CASE_TRACK_OPTIONS.map((option) => (
+                                  <option key={`track-approved-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Track Approved</label>
-                      <select
-                        value={caseWorkspaceDraft.trackApproved}
-                        onChange={(e) => handleWorkspaceDraftChange('trackApproved', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_TRACK_OPTIONS.map((option) => (
-                          <option key={`track-approved-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Employment Handicap</label>
-                      <select
-                        value={caseWorkspaceDraft.employmentHandicapStatus}
-                        onChange={(e) => handleWorkspaceDraftChange('employmentHandicapStatus', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_HANDICAP_STATUS_OPTIONS.map((option) => (
-                          <option key={`eh-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Serious Employment Handicap</label>
-                      <select
-                        value={caseWorkspaceDraft.seriousEmploymentHandicapStatus}
-                        onChange={(e) => handleWorkspaceDraftChange('seriousEmploymentHandicapStatus', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_HANDICAP_STATUS_OPTIONS.map((option) => (
-                          <option key={`seh-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Feasibility Status</label>
-                      <select
-                        value={caseWorkspaceDraft.feasibilityStatus}
-                        onChange={(e) => handleWorkspaceDraftChange('feasibilityStatus', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_FEASIBILITY_STATUS_OPTIONS.map((option) => (
-                          <option key={`feasibility-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">IPE Status</label>
-                      <select
-                        value={caseWorkspaceDraft.ipeStatus}
-                        onChange={(e) => handleWorkspaceDraftChange('ipeStatus', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_IPE_STATUS_OPTIONS.map((option) => (
-                          <option key={`ipe-${option.value}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">IILP Status</label>
-                      <select
-                        value={caseWorkspaceDraft.iilpStatus}
-                        onChange={(e) => handleWorkspaceDraftChange('iilpStatus', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      >
-                        {CASE_IILP_STATUS_OPTIONS.map((option) => (
-                          <option key={`iilp-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Term Start</label>
-                      <input
-                        type="date"
-                        value={caseWorkspaceDraft.termStart}
-                        onChange={(e) => handleWorkspaceDraftChange('termStart', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Term End</label>
-                      <input
-                        type="date"
-                        value={caseWorkspaceDraft.termEnd}
-                        onChange={(e) => handleWorkspaceDraftChange('termEnd', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Urgent Deadline</label>
-                      <input
-                        type="date"
-                        value={caseWorkspaceDraft.urgentDeadline}
-                        onChange={(e) => handleWorkspaceDraftChange('urgentDeadline', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-4">
+                        <div className="space-y-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Chapter 31 posture</span>
+                          <p className="text-[11px] leading-relaxed text-slate-400">These status fields drive feasibility, IPE, and Independent Living positioning later in the packet.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Employment Handicap</label>
+                            <select
+                              value={caseWorkspaceDraft.employmentHandicapStatus}
+                              onChange={(e) => handleWorkspaceDraftChange('employmentHandicapStatus', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              {CASE_HANDICAP_STATUS_OPTIONS.map((option) => (
+                                <option key={`eh-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Serious Employment Handicap</label>
+                            <select
+                              value={caseWorkspaceDraft.seriousEmploymentHandicapStatus}
+                              onChange={(e) => handleWorkspaceDraftChange('seriousEmploymentHandicapStatus', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              {CASE_HANDICAP_STATUS_OPTIONS.map((option) => (
+                                <option key={`seh-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">Feasibility Status</label>
+                            <select
+                              value={caseWorkspaceDraft.feasibilityStatus}
+                              onChange={(e) => handleWorkspaceDraftChange('feasibilityStatus', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              {CASE_FEASIBILITY_STATUS_OPTIONS.map((option) => (
+                                <option key={`feasibility-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">IPE Status</label>
+                            <select
+                              value={caseWorkspaceDraft.ipeStatus}
+                              onChange={(e) => handleWorkspaceDraftChange('ipeStatus', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              {CASE_IPE_STATUS_OPTIONS.map((option) => (
+                                <option key={`ipe-${option.value}`} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400">IILP Status</label>
+                            <select
+                              value={caseWorkspaceDraft.iilpStatus}
+                              onChange={(e) => handleWorkspaceDraftChange('iilpStatus', e.target.value)}
+                              className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                            >
+                              {CASE_IILP_STATUS_OPTIONS.map((option) => (
+                                <option key={`iilp-${option.value || 'blank'}`} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Case Overview / What Happened</label>
-                      <textarea
-                        value={caseWorkspaceDraft.disputeHistory}
-                        onChange={(e) => handleWorkspaceDraftChange('disputeHistory', e.target.value)}
-                        className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200"
-                      />
+                      <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-4">
+                        <div className="space-y-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Timing and urgency</span>
+                          <p className="text-[11px] leading-relaxed text-slate-400">Use the school window and urgent deadline fields to keep packet timing aligned with the real risk.</p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-slate-400">Term Start</label>
+                              <input
+                                type="date"
+                                value={caseWorkspaceDraft.termStart}
+                                onChange={(e) => handleWorkspaceDraftChange('termStart', e.target.value)}
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-slate-400">Term End</label>
+                              <input
+                                type="date"
+                                value={caseWorkspaceDraft.termEnd}
+                                onChange={(e) => handleWorkspaceDraftChange('termEnd', e.target.value)}
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block text-[10px] font-bold uppercase text-slate-400">Urgent Deadline</label>
+                              <input
+                                type="date"
+                                value={caseWorkspaceDraft.urgentDeadline}
+                                onChange={(e) => handleWorkspaceDraftChange('urgentDeadline', e.target.value)}
+                                className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
+                              />
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-[11px] leading-relaxed text-slate-300">
+                            <strong className="block text-xs text-slate-100">What the dashboard should know right now</strong>
+                            <p className="mt-2">{dashboardNextMove}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Evidence Matrix Notes</label>
-                      <textarea
-                        value={caseWorkspaceDraft.evidenceSummary}
-                        onChange={(e) => handleWorkspaceDraftChange('evidenceSummary', e.target.value)}
-                        className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase block">Escalation / Follow-Up Notes</label>
-                      <textarea
-                        value={caseWorkspaceDraft.escalationHistory}
-                        onChange={(e) => handleWorkspaceDraftChange('escalationHistory', e.target.value)}
-                        className="w-full h-24 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200"
-                      />
+
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-4">
+                      <div className="space-y-1">
+                        <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Working notes</span>
+                        <p className="text-[11px] leading-relaxed text-slate-400">These note blocks should read like the beginning of the packet: what happened, what proves it, and what escalation path is being preserved.</p>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-slate-400">Case Overview / What Happened</label>
+                          <textarea
+                            value={caseWorkspaceDraft.disputeHistory}
+                            onChange={(e) => handleWorkspaceDraftChange('disputeHistory', e.target.value)}
+                            className="h-24 w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-200"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-slate-400">Evidence Matrix Notes</label>
+                          <textarea
+                            value={caseWorkspaceDraft.evidenceSummary}
+                            onChange={(e) => handleWorkspaceDraftChange('evidenceSummary', e.target.value)}
+                            className="h-24 w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-200"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-slate-400">Escalation / Follow-Up Notes</label>
+                          <textarea
+                            value={caseWorkspaceDraft.escalationHistory}
+                            onChange={(e) => handleWorkspaceDraftChange('escalationHistory', e.target.value)}
+                            className="h-24 w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-200"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="xl:col-span-5 space-y-4">
-                  <div className="bg-slate-900/35 border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div className="xl:col-span-4 space-y-4">
+                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300 block">Deadlines</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">Deadlines</span>
                       <h3 className="text-sm font-bold text-slate-100">Track the next school, review-lane, or escalation date.</h3>
                     </div>
                     <div className="grid grid-cols-1 gap-3">
@@ -1453,42 +1860,42 @@ function HomeDashboardView({
                         placeholder="Deadline title"
                         value={newDeadline.title}
                         onChange={(e) => setNewDeadline((previous) => ({ ...previous, title: e.target.value }))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
                       />
                       <input
                         type="date"
                         value={newDeadline.dueDate}
                         onChange={(e) => setNewDeadline((previous) => ({ ...previous, dueDate: e.target.value }))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
                       />
                       <input
                         type="text"
                         placeholder="Source or trigger"
                         value={newDeadline.source}
                         onChange={(e) => setNewDeadline((previous) => ({ ...previous, source: e.target.value }))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200"
                       />
                       <textarea
                         placeholder="Notes"
                         value={newDeadline.notes}
                         onChange={(e) => setNewDeadline((previous) => ({ ...previous, notes: e.target.value }))}
-                        className="w-full h-20 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200"
+                        className="h-20 w-full rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-200"
                       />
                       <button
                         type="button"
                         onClick={handleAddDeadline}
-                        className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition"
+                        className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-amber-500"
                       >
                         Add Deadline
                       </button>
                     </div>
 
                     <div className="space-y-2">
-                      {(currentCaseRecord.deadlines || []).length > 0 ? (
-                        currentCaseRecord.deadlines.slice(0, 5).map((deadline) => (
+                      {totalDeadlines > 0 ? (
+                        (currentCaseRecord.deadlines || []).slice(0, 5).map((deadline) => (
                           <div key={deadline.id} className="rounded-xl border border-slate-800 bg-slate-950/35 px-3 py-2">
-                            <strong className="text-xs text-slate-100 block">{deadline.title}</strong>
-                            <span className="text-[10px] text-slate-400 block mt-1">
+                            <strong className="block text-xs text-slate-100">{deadline.title}</strong>
+                            <span className="mt-1 block text-[10px] text-slate-400">
                               Due {deadline.dueDate} {deadline.source ? `- ${deadline.source}` : ''}
                             </span>
                           </div>
@@ -1501,17 +1908,41 @@ function HomeDashboardView({
                     </div>
                   </div>
 
-                  <div className="bg-slate-900/35 border border-slate-800 rounded-2xl p-5 space-y-4">
+                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300 block">Generated Documents</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300">Recent Contact Activity</span>
+                      <h3 className="text-sm font-bold text-slate-100">Keep the counselor timeline visible while the packet develops.</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {recentActivityLog.length > 0 ? (
+                        recentActivityLog.map((entry) => (
+                          <div key={`recent-${entry.id}`} className="rounded-xl border border-slate-800 bg-slate-950/35 px-3 py-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <strong className="text-xs text-slate-100">{entry.method}</strong>
+                              <span className="text-[10px] text-indigo-300">{entry.date || 'No date'}</span>
+                            </div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-slate-400">{entry.request || 'No details captured.'}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-slate-800 px-3 py-4 text-[11px] text-slate-500">
+                          No contact activity logged yet. Use the workflow timeline tab to start the record.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
+                    <div className="space-y-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Generated Documents</span>
                       <h3 className="text-sm font-bold text-slate-100">Saved drafts from case workflows live here.</h3>
                     </div>
                     <div className="space-y-2">
-                      {(currentCaseRecord.documents || []).length > 0 ? (
-                        currentCaseRecord.documents.slice(0, 6).map((document) => (
+                      {totalDocuments > 0 ? (
+                        (currentCaseRecord.documents || []).slice(0, 6).map((document) => (
                           <div key={document.id} className="rounded-xl border border-slate-800 bg-slate-950/35 px-3 py-2">
-                            <strong className="text-xs text-slate-100 block">{document.title}</strong>
-                            <span className="text-[10px] text-slate-400 block mt-1">
+                            <strong className="block text-xs text-slate-100">{document.title}</strong>
+                            <span className="mt-1 block text-[10px] text-slate-400">
                               {formatCaseWorkspaceValue(document.documentType, 'Document')} - {document.status || 'draft'}
                             </span>
                           </div>
@@ -1527,8 +1958,33 @@ function HomeDashboardView({
               </div>
             </>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/25 px-5 py-6 text-[12px] text-slate-400">
-              Start with the problem router or open a guided workflow. Once the issue record exists, this workspace becomes the Veteran case dashboard for statuses, deadlines, contact logs, and saved packet drafts.
+            <div className="rounded-[24px] border border-dashed border-slate-800 bg-slate-950/25 px-5 py-6 space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-slate-100">No structured case record yet.</h3>
+                <p className="text-[12px] leading-relaxed text-slate-400">
+                  Start with the problem router or open a guided workflow. Once the issue record exists, this workspace becomes the Veteran case dashboard for posture, deadlines, office routing, contact logs, and saved packet drafts.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (problemRouterOptions[0]) {
+                      handleRouteProblem(problemRouterOptions[0]);
+                    }
+                  }}
+                  className="rounded-xl bg-cyan-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-cyan-500"
+                >
+                  Open First Problem Route
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveView('independent_living_builder')}
+                  className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-200 transition hover:border-fuchsia-500/40 hover:bg-fuchsia-500/10 hover:text-fuchsia-100"
+                >
+                  Open ILP / Whole Health Builder
+                </button>
+              </div>
             </div>
           )}
         </div>
