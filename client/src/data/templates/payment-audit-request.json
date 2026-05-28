@@ -1,0 +1,10 @@
+{
+  "templateId": "payment-audit-request",
+  "title": "Request for Chapter 31 Subsistence Audit",
+  "authorityIds": [
+    "38-usc-3108",
+    "38-cfr-21-260",
+    "38-cfr-21-264"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager / VR&E Officer\n\nSubject: Request for Chapter 31 Subsistence Allowance Audit\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nI am requesting a written audit of my Chapter 31 subsistence allowance for the term {{termWindow}}.\n\nMy training type is {{trainingType}}, my reported credit or clock-hour load is {{creditLoad}}, and the rate election shown or expected is {{rateElection}}. My school or training location ZIP is {{schoolZip}}.\n\nThe current award or payment record appears inconsistent with my enrollment pattern and/or entitlement history. The letter or payment record shows remaining entitlement of {{remainingMonthsShown}}.\n\nPlease provide a written explanation of the rate used, the training-time classification applied, the dates used for proration, and any effect of Chapter 33 election or prior entitlement usage.\n\nThank you.\n\n[Your Name]\n[Your Contact Information]"
+}

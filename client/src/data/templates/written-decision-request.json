@@ -1,0 +1,10 @@
+{
+  "templateId": "written-decision-request",
+  "title": "Request for Written VR&E Decision",
+  "authorityIds": [
+    "38-cfr-21-420",
+    "38-cfr-21-416",
+    "38-cfr-21-50"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager / VR&E Officer\n\nSubject: Request for Written Decision and Review Rights Notice\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nOn {{informalDenialDate}}, I was informed that VR&E would not act on or approve the following issue: {{issueAtStake}}.\n\nThe denial or refusal was communicated by: {{whoSaidNo}}.\n\nAt this time, I do not have a formal written notice explaining the issue decided, the reasons for the action, the evidence considered, or my review options. The missing notice problem is: {{missingNotice}}.\n\nPlease issue a written decision identifying the action taken, the legal basis relied upon, the evidence considered, and the available review options and deadlines.\n\nRespectfully,\n\n[Your Name]\n[Your Contact Information]"
+}

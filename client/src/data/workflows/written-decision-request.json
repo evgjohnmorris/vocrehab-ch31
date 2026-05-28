@@ -1,0 +1,100 @@
+{
+  "workflowId": "written-decision-request",
+  "title": "Written Decision Request",
+  "desc": "VR&E denied, delayed, or refused action without issuing a real written decision notice.",
+  "primaryCode": "VRE.APPEAL.WRITTEN_DECISION_REQUEST",
+  "supportingCodes": [
+    "VRE.APPEAL.DENIAL",
+    "VRE.COUNSELOR.NONRESPONSE"
+  ],
+  "riskLevel": "critical",
+  "priorityRank": 25,
+  "communitySignalCount": 10,
+  "problemRouterLabel": "VR&E denied me or refuses to issue a written decision",
+  "recommendedPages": [
+    "written_decision_analyzer",
+    "dispute_hub"
+  ],
+  "caseStages": [
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed",
+    "Interrupted Status",
+    "Discontinued Status",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-cfr-21-420",
+    "38-cfr-21-416",
+    "38-cfr-21-50"
+  ],
+  "citations": [
+    "38-cfr-21-420",
+    "38-cfr-21-416",
+    "38-cfr-21-50"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "informalDenialDate",
+          "label": "Date of verbal or email denial",
+          "type": "text",
+          "placeholder": "e.g. May 22, 2026"
+        },
+        {
+          "name": "issueAtStake",
+          "label": "Issue at stake",
+          "type": "text",
+          "placeholder": "e.g. laptop package, extension, or IPE amendment"
+        },
+        {
+          "name": "whoSaidNo",
+          "label": "Who communicated the denial or refusal",
+          "type": "text",
+          "placeholder": "e.g. VRC or support specialist"
+        },
+        {
+          "name": "missingNotice",
+          "label": "What notice is missing",
+          "type": "text",
+          "placeholder": "e.g. no written decision, no appeal rights, no rationale"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Informal denials prevent veterans from using review rights because there is no formal notice date, rationale, or appeal-lane guidance.",
+    "A written-decision request is often the cleanest next move when the office is delaying action instead of owning the denial."
+  ],
+  "templates": [
+    "written-decision-request"
+  ],
+  "reviewLaneWarning": true,
+  "evidenceChecklist": [
+    {
+      "id": "denial_message",
+      "text": "Email, portal message, or notes showing the office denied or refused action",
+      "weight": 35
+    },
+    {
+      "id": "request_history",
+      "text": "Timeline of requests showing repeated attempts to get an answer",
+      "weight": 30
+    },
+    {
+      "id": "harm_or_deadline",
+      "text": "School, payment, or enrollment harm caused by the missing decision",
+      "weight": 20
+    },
+    {
+      "id": "authority_request",
+      "text": "Request that the office cite the legal basis and review options in writing",
+      "weight": 15
+    }
+  ],
+  "outputPacket": [
+    "written-decision-request"
+  ]
+}

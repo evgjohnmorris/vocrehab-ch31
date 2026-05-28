@@ -1,0 +1,10 @@
+{
+  "templateId": "degree-suitability-rebuttal",
+  "title": "Suitable Employment Rebuttal for Existing Degree Denial",
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-35",
+    "38-cfr-21-80"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager\n\nSubject: Response to Position That Current Degrees Already Lead to Suitable Employment\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nI request reconsideration of the position that my current degrees or credentials already provide suitable employment.\n\nMy existing credentials are: {{existingCredentials}}.\nThese credentials usually lead to: {{currentCredentialJobs}}.\n\nThose jobs are not suitable in my case because: {{unsuitableWhy}}.\n\nThe occupation I am requesting is: {{targetOccupation}}.\nThe education, license, or credential normally needed for that occupation is: {{requiredCredential}}.\n\nVA's stated rationale was: {{vaRationale}}.\n\nPlease evaluate whether my current credentials truly lead to suitable employment that I can obtain and maintain without worsening service-connected disabilities, and provide any contrary rationale in writing.\n\nRespectfully,\n\n[Your Name]\n[Your Contact Information]"
+}

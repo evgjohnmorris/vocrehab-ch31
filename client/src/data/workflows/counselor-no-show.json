@@ -1,0 +1,96 @@
+{
+  "workflowId": "counselor-no-show",
+  "title": "Counselor No-Show / Missed Orientation",
+  "desc": "Your counselor missed a scheduled orientation or case meeting and follow-up went nowhere.",
+  "primaryCode": "VRE.COUNSELOR.NO_SHOW",
+  "supportingCodes": [
+    "VRE.COUNSELOR.NONRESPONSE",
+    "VRE.COUNSELOR.SUPERVISOR_ESCALATION"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 18,
+  "communitySignalCount": 15,
+  "problemRouterLabel": "My counselor missed an appointment or orientation",
+  "recommendedPages": [
+    "directory",
+    "written_decision_analyzer"
+  ],
+  "caseStages": [
+    "Applied, Waiting Appointment",
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed"
+  ],
+  "authorityIds": [
+    "38-cfr-21-50",
+    "38-cfr-21-420"
+  ],
+  "citations": [
+    "38-cfr-21-50",
+    "38-cfr-21-420"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "meetingDate",
+          "label": "Missed Meeting Date",
+          "type": "text",
+          "placeholder": "e.g. May 27, 2026"
+        },
+        {
+          "name": "meetingType",
+          "label": "Meeting Type",
+          "type": "text",
+          "placeholder": "e.g. Orientation or intake appointment"
+        },
+        {
+          "name": "timeOffImpact",
+          "label": "Work or school impact",
+          "type": "text",
+          "placeholder": "e.g. Took PTO or missed class"
+        },
+        {
+          "name": "followUpProof",
+          "label": "Follow-up attempts after the no-show",
+          "type": "text",
+          "placeholder": "e.g. 3 emails and 1 portal message"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Missed orientations can delay entitlement, IPE approval, and term-start planning before any written denial exists.",
+    "A no-show becomes a stronger escalation issue when the veteran can document lost time, missed work, or continued silence afterward."
+  ],
+  "templates": [
+    "counselor-escalation"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "meeting_notice",
+      "text": "Calendar invite, email, or Teams notice confirming the appointment",
+      "weight": 35
+    },
+    {
+      "id": "attendance_proof",
+      "text": "Screenshot or log showing you attended or were ready for the meeting",
+      "weight": 30
+    },
+    {
+      "id": "post_no_show_messages",
+      "text": "Follow-up emails or portal messages after the missed meeting",
+      "weight": 20
+    },
+    {
+      "id": "harm_statement",
+      "text": "Short statement explaining work, school, or deadline harm",
+      "weight": 15
+    }
+  ],
+  "outputPacket": [
+    "counselor-escalation"
+  ]
+}

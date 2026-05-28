@@ -1,0 +1,94 @@
+{
+  "workflowId": "retroactive-induction",
+  "title": "Retroactive Induction",
+  "desc": "You want prior training, tuition, or supplies recognized retroactively under Chapter 31 and may need GI Bill month restoration.",
+  "primaryCode": "VRE.ENTITLEMENT.RETROACTIVE_INDUCTION",
+  "supportingCodes": [
+    "VRE.ENTITLEMENT.GI_BILL_RESTORATION"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 50,
+  "communitySignalCount": 10,
+  "problemRouterLabel": "I need retroactive induction",
+  "recommendedPages": [
+    "claim_builder",
+    "forms_center"
+  ],
+  "caseStages": [
+    "Entitled, No IPE",
+    "In School / Training",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-cfr-21-282",
+    "38-usc-3104"
+  ],
+  "citations": [
+    "38-cfr-21-282",
+    "38-usc-3104"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "priorProgram",
+          "label": "Prior program or degree",
+          "type": "text",
+          "placeholder": "e.g. B.S. in Nursing started under Chapter 33"
+        },
+        {
+          "name": "priorTermWindow",
+          "label": "Prior term dates or training window",
+          "type": "text",
+          "placeholder": "e.g. Fall 2023 through Spring 2025"
+        },
+        {
+          "name": "serviceConnectionStatus",
+          "label": "Service-connection status at the time",
+          "type": "text",
+          "placeholder": "e.g. Already service connected at 80%"
+        },
+        {
+          "name": "currentGoalAlignment",
+          "label": "How the prior training aligns with the current rehabilitation goal",
+          "type": "text",
+          "placeholder": "e.g. Same occupational path later approved under Chapter 31"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Retroactive induction requests fail when the record does not clearly tie prior training to a later-approved rehabilitation goal.",
+    "Veterans often need a packet that explains why the prior education should have been treated as part of the Chapter 31 rehabilitation path."
+  ],
+  "templates": [
+    "retroactive-induction-request"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "past_invoices",
+      "text": "Past tuition invoices, receipts, or supply records",
+      "weight": 35
+    },
+    {
+      "id": "transcripts",
+      "text": "Transcripts or enrollment records from the prior terms",
+      "weight": 25
+    },
+    {
+      "id": "service_connection",
+      "text": "Rating decision or proof of service-connected status during the prior period",
+      "weight": 20
+    },
+    {
+      "id": "goal_alignment",
+      "text": "Explanation showing the past training aligns with the approved goal",
+      "weight": 20
+    }
+  ],
+  "outputPacket": [
+    "retroactive-induction-request"
+  ]
+}

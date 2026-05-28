@@ -1,0 +1,126 @@
+{
+  "workflowId": "benefit-strategy-compare",
+  "title": "GI Bill vs VR&E Strategy Comparator",
+  "desc": "You are deciding whether to use Chapter 33 first, pursue VR&E first, or preserve benefits for later schooling and support needs.",
+  "primaryCode": "VRE.STRATEGY.GIBILL_VS_VRE",
+  "supportingCodes": [
+    "VRE.STRATEGY.PRESERVE_CH33",
+    "VRE.ENTITLEMENT.RETROACTIVE_INDUCTION_RISK"
+  ],
+  "riskLevel": "medium",
+  "priorityRank": 92,
+  "communitySignalCount": 8,
+  "problemRouterLabel": "Should I use GI Bill or VR&E first?",
+  "recommendedPages": [
+    "calculator",
+    "planning"
+  ],
+  "caseStages": [
+    "Not Applied",
+    "Applied, Waiting Appointment",
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed"
+  ],
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-70",
+    "38-cfr-21-78"
+  ],
+  "citations": [
+    "38-usc-3104",
+    "38-cfr-21-70",
+    "38-cfr-21-78"
+  ],
+  "steps": [
+    {
+      "title": "Should I use GI Bill or VR&E first?",
+      "fields": [
+        {
+          "name": "vreStatus",
+          "label": "Are you already entitled to VR&E or only eligible to apply?",
+          "type": "text",
+          "placeholder": "e.g. Eligible to apply, not yet found entitled"
+        },
+        {
+          "name": "chapter33Remaining",
+          "label": "How many months of Post-9/11 GI Bill remain?",
+          "type": "text",
+          "placeholder": "e.g. 18 months"
+        },
+        {
+          "name": "supportNeeds",
+          "label": "Do you need tuition only, or also equipment, accommodations, counseling, and job-placement support?",
+          "type": "text",
+          "placeholder": "e.g. Need laptop, counseling, and school coordination"
+        },
+        {
+          "name": "futureSchooling",
+          "label": "Do you expect future schooling after this program?",
+          "type": "text",
+          "placeholder": "e.g. May need graduate school later"
+        },
+        {
+          "name": "preserveReason",
+          "label": "Are you trying to preserve Chapter 33 months or avoid retroactive induction issues later?",
+          "type": "text",
+          "placeholder": "e.g. Want to preserve Ch33 for doctorate"
+        }
+      ]
+    }
+  ],
+  "intakeQuestions": [
+    "Are you already entitled to VR&E or only eligible to apply?",
+    "How many months of Post-9/11 GI Bill remain?",
+    "Do you need tuition, books, equipment, accommodations, or counseling support?",
+    "Do you expect future schooling after this program?",
+    "Are you trying to preserve GI Bill months?",
+    "Would using GI Bill first create a retroactive induction issue later?"
+  ],
+  "likelyVaErrors": [
+    "The strategy decision may be getting reduced to monthly housing amount alone instead of overall rehabilitation support and future benefit preservation.",
+    "The veteran may not have compared restoration or retroactive-induction implications before choosing benefit order."
+  ],
+  "generatedTools": [
+    "Benefit Strategy Comparator",
+    "Preserve-Chapter-33 memo",
+    "Retroactive-induction risk screen",
+    "Question list for initial VRC appointment"
+  ],
+  "recordsToRequest": [
+    "Current Chapter 33 entitlement balance",
+    "Any prior VR&E entitlement determination",
+    "Program cost, equipment, and accommodation needs list",
+    "Long-term schooling plan if additional education may be needed later"
+  ],
+  "errors": [
+    "Veterans often compare only tuition or housing rates instead of the full rehabilitation support package.",
+    "Choosing the wrong benefit order early can reduce flexibility for future training or retroactive restoration arguments."
+  ],
+  "templates": [
+    "benefit-strategy-memo"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "benefit_balance",
+      "text": "Current Chapter 33 remaining entitlement information",
+      "weight": 25
+    },
+    {
+      "id": "support_need_map",
+      "text": "List of non-tuition supports that Chapter 31 may be better positioned to provide",
+      "weight": 25
+    },
+    {
+      "id": "future_education_plan",
+      "text": "Future education plan showing why preserving Chapter 33 may matter",
+      "weight": 25
+    },
+    {
+      "id": "retro_risk",
+      "text": "Evidence or reasoning showing whether retroactive induction could matter later",
+      "weight": 25
+    }
+  ]
+}

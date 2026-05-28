@@ -1,0 +1,132 @@
+{
+  "workflowId": "current-degree-denial",
+  "title": "Denied Because You Already Have a Degree",
+  "desc": "VR&E says your current degrees or credentials already qualify you for work, so additional training is unnecessary.",
+  "primaryCode": "VRE.DENIAL.CURRENT_DEGREE_MARKETABLE",
+  "supportingCodes": [
+    "VRE.DENIAL.GAINFUL_EMPLOYMENT_AVAILABLE",
+    "VRE.TRAINING.ADDITIONAL_TRAINING_NEEDED",
+    "VRE.IPE.NEW_GOAL_JUSTIFICATION"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 34,
+  "communitySignalCount": 10,
+  "problemRouterLabel": "They denied me because I already have a degree",
+  "recommendedPages": [
+    "planning",
+    "claim_builder"
+  ],
+  "caseStages": [
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-35",
+    "38-cfr-21-80"
+  ],
+  "citations": [
+    "38-usc-3104",
+    "38-cfr-21-35",
+    "38-cfr-21-80"
+  ],
+  "steps": [
+    {
+      "title": "They denied me because I already have a degree",
+      "fields": [
+        {
+          "name": "existingCredentials",
+          "label": "What degrees or certifications do you already have?",
+          "type": "text",
+          "placeholder": "e.g. B.S. in Nursing and MBA"
+        },
+        {
+          "name": "currentCredentialJobs",
+          "label": "What jobs do those credentials usually qualify you for?",
+          "type": "text",
+          "placeholder": "e.g. Bedside nursing or patient-facing management roles"
+        },
+        {
+          "name": "unsuitableWhy",
+          "label": "Why are those jobs unsuitable because of service-connected disabilities?",
+          "type": "text",
+          "placeholder": "e.g. Migraines and PTSD make patient-facing work unsafe"
+        },
+        {
+          "name": "targetOccupation",
+          "label": "What specific target occupation are you now requesting?",
+          "type": "text",
+          "placeholder": "e.g. Healthcare administrator"
+        },
+        {
+          "name": "requiredCredential",
+          "label": "What degree, license, or credential is normally required for that occupation?",
+          "type": "text",
+          "placeholder": "e.g. MHA strongly preferred"
+        },
+        {
+          "name": "vaRationale",
+          "label": "Did VA explain why your current credentials already lead to suitable employment?",
+          "type": "text",
+          "placeholder": "e.g. Said I could work anywhere with my MBA"
+        }
+      ]
+    }
+  ],
+  "intakeQuestions": [
+    "What degrees or certifications do you already have?",
+    "What jobs do those credentials qualify you for?",
+    "Why are those jobs unsuitable because of service-connected disabilities?",
+    "Are you unemployed, underemployed, or working in a job that aggravates your conditions?",
+    "What specific target occupation are you requesting?",
+    "What degree, license, or credential is normally required for that occupation?"
+  ],
+  "likelyVaErrors": [
+    "The office may be conflating any employment with suitable employment.",
+    "The file may not distinguish between being able to get a job and being able to obtain and maintain suitable work without worsening disabilities."
+  ],
+  "generatedTools": [
+    "Degree suitability rebuttal",
+    "New-goal justification memo",
+    "Suitable-employment comparison chart",
+    "Written decision request"
+  ],
+  "recordsToRequest": [
+    "Resume and current credentials list",
+    "Evidence that current jobs aggravate service-connected conditions",
+    "Labor-market evidence for the requested occupation",
+    "Any VA rationale claiming current credentials are already marketable"
+  ],
+  "errors": [
+    "Denials based on existing degrees often skip the separate question of whether those credentials lead to suitable, sustainable employment.",
+    "The record may ignore how the veteran’s disabilities limit the jobs those current credentials usually support."
+  ],
+  "templates": [
+    "degree-suitability-rebuttal"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "credential_history",
+      "text": "Degree, certification, and transcript history",
+      "weight": 20
+    },
+    {
+      "id": "unsuitable_current_work",
+      "text": "Evidence current or qualifying jobs aggravate disabilities or are otherwise unsuitable",
+      "weight": 30
+    },
+    {
+      "id": "target_occupation_requirement",
+      "text": "Evidence the requested occupation needs the new degree or credential",
+      "weight": 30
+    },
+    {
+      "id": "market_gap",
+      "text": "Evidence current credentials are not producing suitable employment outcomes",
+      "weight": 20
+    }
+  ]
+}

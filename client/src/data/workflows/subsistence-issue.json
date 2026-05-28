@@ -1,0 +1,124 @@
+{
+  "workflowId": "subsistence-issue",
+  "title": "Subsistence / MHA Problem",
+  "desc": "Your Chapter 31 subsistence allowance, Post-9/11 election rate, partial month, or training-load payment looks wrong.",
+  "primaryCode": "VRE.PAYMENT.SUBSISTENCE_RATE",
+  "supportingCodes": [
+    "VRE.PAYMENT.POST911_CH31_RATE",
+    "VRE.PAYMENT.ONLINE_ONLY",
+    "VRE.PAYMENT.SUMMER_TERM",
+    "VRE.PAYMENT.PARTIAL_MONTH",
+    "VRE.PAYMENT.NOT_RECEIVED",
+    "VRE.PAYMENT.OJT_APPRENTICESHIP"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 15,
+  "communitySignalCount": 15,
+  "problemRouterLabel": "I have a subsistence, MHA, or partial-payment problem",
+  "recommendedPages": [
+    "calculator",
+    "school_payment_tracker"
+  ],
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training",
+    "Employment Services",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-usc-3108",
+    "38-cfr-21-260",
+    "38-cfr-21-264"
+  ],
+  "citations": [
+    "38-usc-3108",
+    "38-cfr-21-260",
+    "38-cfr-21-264"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "trainingType",
+          "label": "Training Type",
+          "type": "select",
+          "options": [
+            "Resident college",
+            "Hybrid schedule",
+            "Online-only",
+            "OJT / Apprenticeship",
+            "Non-college or clock-hour program"
+          ]
+        },
+        {
+          "name": "termWindow",
+          "label": "Term Start and End",
+          "type": "text",
+          "placeholder": "e.g. May 20, 2026 to August 12, 2026"
+        },
+        {
+          "name": "creditLoad",
+          "label": "Credit / Clock Hour Load",
+          "type": "text",
+          "placeholder": "e.g. 5 summer credits or 18 clock hours"
+        },
+        {
+          "name": "rateElection",
+          "label": "Rate Election",
+          "type": "select",
+          "options": [
+            "Standard Chapter 31 subsistence",
+            "Post-9/11 Chapter 31 election",
+            "Not sure"
+          ]
+        },
+        {
+          "name": "schoolZip",
+          "label": "School ZIP / Training Location",
+          "type": "text",
+          "placeholder": "e.g. 15213"
+        },
+        {
+          "name": "remainingMonthsShown",
+          "label": "Remaining Entitlement Shown on Letter",
+          "type": "text",
+          "placeholder": "e.g. 0 months 0 days"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Rate disputes often mix up standard Chapter 31 subsistence, Post-9/11 election rates, partial-month proration, and online-only classification.",
+    "Veterans frequently need a term-by-term audit when the award letter, enrollment pattern, and actual school delivery mode do not match."
+  ],
+  "templates": [
+    "payment-audit-request"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "award_letter",
+      "text": "Award letter or payment history showing the disputed amount",
+      "weight": 30
+    },
+    {
+      "id": "enrollment_pattern",
+      "text": "Class schedule showing resident, hybrid, or online status by term",
+      "weight": 25
+    },
+    {
+      "id": "term_calendar",
+      "text": "Official school calendar or term dates",
+      "weight": 20
+    },
+    {
+      "id": "rate_election",
+      "text": "Any rate-election or Chapter 33 usage records affecting the calculation",
+      "weight": 25
+    }
+  ],
+  "outputPacket": [
+    "payment-audit-request"
+  ]
+}

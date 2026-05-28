@@ -1,0 +1,9 @@
+{
+  "templateId": "retroactive-induction-request",
+  "title": "Retroactive Induction Request Packet Cover Letter",
+  "authorityIds": [
+    "38-cfr-21-282",
+    "38-usc-3104"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager / VR&E Officer\n\nSubject: Request for Retroactive Induction Review\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nI request review for retroactive induction based on prior training that should be recognized as part of my Chapter 31 rehabilitation path.\n\nThe prior program or degree was {{priorProgram}} during {{priorTermWindow}}. At that time, my service-connection status was {{serviceConnectionStatus}}.\n\nThe prior training aligns with my current rehabilitation goal as follows: {{currentGoalAlignment}}.\n\nPlease review the enclosed records and provide a written decision addressing whether the earlier education or related costs should be recognized retroactively under Chapter 31 and whether any Chapter 33 entitlement restoration is implicated.\n\nRespectfully,\n\n[Your Name]\n[Your Contact Information]"
+}

@@ -1,0 +1,103 @@
+{
+  "workflowId": "graduate-school-justification",
+  "title": "Graduate or Advanced Training Approval",
+  "desc": "You need graduate school, professional school, or another advanced training path justified as necessary for suitable employment.",
+  "primaryCode": "VRE.TRAINING.GRAD_SCHOOL",
+  "supportingCodes": [
+    "VRE.TRAINING.MBA",
+    "VRE.TRAINING.PA_SCHOOL",
+    "VRE.TRAINING.NURSING",
+    "VRE.TRAINING.LAW_SCHOOL",
+    "VRE.TRAINING.PREREQUISITES",
+    "VRE.TRAINING.OUT_OF_STATE",
+    "VRE.TRAINING.PRIVATE_SCHOOL"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 35,
+  "communitySignalCount": 15,
+  "problemRouterLabel": "I need graduate school or advanced training approved",
+  "recommendedPages": [
+    "planning",
+    "claim_builder"
+  ],
+  "caseStages": [
+    "Evaluation Phase",
+    "Entitled, No IPE",
+    "IPE Signed",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-72",
+    "38-cfr-21-80"
+  ],
+  "citations": [
+    "38-usc-3104",
+    "38-cfr-21-72",
+    "38-cfr-21-80"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "targetOccupation",
+          "label": "Target Occupation",
+          "type": "text",
+          "placeholder": "e.g. Physician Assistant or Nurse Practitioner"
+        },
+        {
+          "name": "targetProgram",
+          "label": "Requested Program",
+          "type": "text",
+          "placeholder": "e.g. PA Studies M.S."
+        },
+        {
+          "name": "whyPriorTrainingFails",
+          "label": "Why prior degree or work is unsuitable",
+          "type": "text",
+          "placeholder": "e.g. No realistic path to employment in current field"
+        },
+        {
+          "name": "licensureNeed",
+          "label": "Licensure or market requirement",
+          "type": "text",
+          "placeholder": "e.g. State license or clinical credential needed"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Advanced-training disputes are often framed as personal preference instead of a necessity question tied to employability, licensure, and disability-compatible work.",
+    "Cost objections are weaker when the requested program is clearly linked to a specific occupation, credential, and realistic employment path."
+  ],
+  "templates": [
+    "advanced-training-justification"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "occupation_link",
+      "text": "SOC, O*NET, or labor-market evidence linking the degree to the target occupation",
+      "weight": 30
+    },
+    {
+      "id": "program_map",
+      "text": "Program map, prerequisites, or acceptance materials for the requested school",
+      "weight": 25
+    },
+    {
+      "id": "licensure_rule",
+      "text": "Licensure, certification, or employer requirement showing the training is necessary",
+      "weight": 25
+    },
+    {
+      "id": "unsuitable_prior_path",
+      "text": "Evidence that prior education or work no longer produces suitable employment",
+      "weight": 20
+    }
+  ],
+  "outputPacket": [
+    "advanced-training-justification"
+  ]
+}

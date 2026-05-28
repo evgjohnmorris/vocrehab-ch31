@@ -1,0 +1,10 @@
+{
+  "templateId": "benefit-strategy-memo",
+  "title": "GI Bill vs VR&E Strategy Memo",
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-70",
+    "38-cfr-21-78"
+  ],
+  "body": "Date: {{date}}\n\nSubject: Benefit Strategy Comparison - Chapter 33 vs Chapter 31\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nVR&E status: {{vreStatus}}\nRemaining Chapter 33 entitlement: {{chapter33Remaining}}\nSupport needs: {{supportNeeds}}\nFuture schooling plan: {{futureSchooling}}\nPreservation / retroactive-induction concern: {{preserveReason}}\n\nThis memo compares whether tuition-only use of Chapter 33 is enough, or whether the broader Chapter 31 rehabilitation package better fits the current goal, support needs, and future benefit preservation strategy.\n\nUse this summary to prepare for a benefits-planning conversation, an initial VRC appointment, or a decision about whether preserving Chapter 33 months matters for later schooling.\n\n[Your Name]"
+}

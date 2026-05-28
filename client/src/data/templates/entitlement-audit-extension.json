@@ -1,0 +1,9 @@
+{
+  "templateId": "entitlement-audit-extension",
+  "title": "Entitlement Audit and Extension Request",
+  "authorityIds": [
+    "38-usc-3105",
+    "38-cfr-21-78"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager / VR&E Officer\n\nSubject: Request for Entitlement Audit and Extension Review\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nI am requesting a written entitlement audit and, if needed, review for extension authority under Chapter 31.\n\nMy records show Chapter 33 usage of {{chapter33Used}}, Chapter 31 usage of {{chapter31Used}}, and remaining entitlement listed as {{remainingShown}}.\n\nThe training still needed to complete the approved plan is: {{programCompletionGap}}.\n\nPlease provide a written accounting of the months used, explain any aggregate-limit calculation being applied, and address whether an extension is available based on the remaining training and rehabilitation objective.\n\nThank you.\n\n[Your Name]\n[Your Contact Information]"
+}

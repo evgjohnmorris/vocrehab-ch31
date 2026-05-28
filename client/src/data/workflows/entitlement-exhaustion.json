@@ -1,0 +1,95 @@
+{
+  "workflowId": "entitlement-exhaustion",
+  "title": "Remaining Entitlement / 48-Month Exhaustion",
+  "desc": "Your file shows little or no entitlement remaining, or VR&E says the program will end before graduation.",
+  "primaryCode": "VRE.ENTITLEMENT.FORTY_EIGHT_MONTH_LIMIT",
+  "supportingCodes": [
+    "VRE.ENTITLEMENT.EXTENSION",
+    "VRE.ENTITLEMENT.SECOND_USE"
+  ],
+  "riskLevel": "high",
+  "priorityRank": 45,
+  "communitySignalCount": 10,
+  "problemRouterLabel": "I am running out of entitlement",
+  "recommendedPages": [
+    "claim_builder",
+    "calculator"
+  ],
+  "caseStages": [
+    "IPE Signed",
+    "In School / Training",
+    "Appeal Pending"
+  ],
+  "authorityIds": [
+    "38-usc-3105",
+    "38-cfr-21-78"
+  ],
+  "citations": [
+    "38-usc-3105",
+    "38-cfr-21-78"
+  ],
+  "steps": [
+    {
+      "title": "Collected Facts",
+      "fields": [
+        {
+          "name": "chapter33Used",
+          "label": "Chapter 33 Months Used",
+          "type": "text",
+          "placeholder": "e.g. 24 months"
+        },
+        {
+          "name": "chapter31Used",
+          "label": "Chapter 31 Months Used",
+          "type": "text",
+          "placeholder": "e.g. 21 months"
+        },
+        {
+          "name": "remainingShown",
+          "label": "Remaining Entitlement Shown",
+          "type": "text",
+          "placeholder": "e.g. 0 months 0 days"
+        },
+        {
+          "name": "programCompletionGap",
+          "label": "Training Still Needed to Finish",
+          "type": "text",
+          "placeholder": "e.g. 2 terms and final clinical rotation"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Entitlement-exhaustion letters often blur accounting issues, aggregate benefit limits, and serious-employment-handicap extension authority.",
+    "Veterans near graduation need a completion-focused record showing exactly what remains and why interruption would defeat rehabilitation."
+  ],
+  "templates": [
+    "entitlement-audit-extension"
+  ],
+  "reviewLaneWarning": false,
+  "evidenceChecklist": [
+    {
+      "id": "benefit_usage",
+      "text": "Benefit usage history showing Chapter 33 and Chapter 31 months used",
+      "weight": 30
+    },
+    {
+      "id": "remaining_requirements",
+      "text": "Graduation audit or term-by-term plan showing what remains",
+      "weight": 30
+    },
+    {
+      "id": "approved_completion_path",
+      "text": "Evidence that the plan was previously approved through completion or close to completion",
+      "weight": 20
+    },
+    {
+      "id": "seh_support",
+      "text": "Evidence supporting extension factors or serious employment handicap",
+      "weight": 20
+    }
+  ],
+  "outputPacket": [
+    "entitlement-audit-extension"
+  ]
+}

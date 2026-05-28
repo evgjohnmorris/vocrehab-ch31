@@ -1,0 +1,10 @@
+{
+  "templateId": "advanced-training-justification",
+  "title": "Advanced Training Necessity Statement",
+  "authorityIds": [
+    "38-usc-3104",
+    "38-cfr-21-72",
+    "38-cfr-21-80"
+  ],
+  "body": "Date: {{date}}\n\nTo: VR&E Case Manager\n\nSubject: Request for Approval of Graduate / Advanced Training\nVeteran: [Your Name]\nCase Status Stage: {{stage}}\n\nI request approval of the program {{targetProgram}} because it is reasonably necessary to reach the suitable employment goal of {{targetOccupation}}.\n\nMy prior education or work path is not producing suitable employment because: {{whyPriorTrainingFails}}.\n\nThis requested program is tied to labor-market or licensure standards as follows: {{licensureNeed}}.\n\nPlease evaluate this request under Chapter 31 rehabilitation necessity standards and provide a written decision that explains the evidence considered, the occupation or training alternative relied upon if denying, and the authority supporting that decision.\n\nRespectfully,\n\n[Your Name]\n[Your Contact Information]"
+}
