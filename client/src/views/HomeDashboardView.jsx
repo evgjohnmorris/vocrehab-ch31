@@ -53,6 +53,7 @@ import {
   fetchCaseDashboard,
   saveCurrentCaseRecord
 } from '../utils/backendApi.js';
+import { getHiddenToolPages } from '../config/pageRegistry.js';
 
 const LOCAL_WORKFLOWS = [
   counselorDelayWf,
@@ -524,16 +525,18 @@ function mapActivityToContactLog(activity) {
   };
 }
 
-function HomeDashboardView({ 
-  reduceMotion, 
-  setActiveView, 
+function HomeDashboardView({
+  reduceMotion,
+  setActiveView,
   setSelectedSection,
   privacyMode,
   bookmarksCount,
   userMode,
   currentCaseStage,
   setCurrentCaseStage,
-  isBackendOnline
+  isBackendOnline,
+  openSettings,
+  onClearAllData
 }) {
   const [workflowCatalog, setWorkflowCatalog] = useState(LOCAL_WORKFLOWS);
   const [caseDashboard, setCaseDashboard] = useState(null);
@@ -1273,6 +1276,61 @@ function HomeDashboardView({
       }
     }
   ];
+  const allowanceRoute = problemRouterOptions.find((option) => option.id === 'monthly_allowance_wrong') || null;
+  const closedCaseRoute = problemRouterOptions.find((option) => option.id === 'case_closed_discontinued') || null;
+  const urgentNeedCards = [
+    {
+      id: 'urgent-school',
+      title: 'School starts soon and payment is missing',
+      detail: 'Build the school-payment or authorization packet before the term-start risk gets worse.',
+      actionLabel: 'Open school emergency',
+      icon: Clock,
+      onClick: () => {
+        if (schoolRoute) {
+          handleRouteProblem(schoolRoute);
+        } else {
+          setActiveView('school_payment_tracker');
+        }
+      }
+    },
+    {
+      id: 'urgent-counselor',
+      title: 'Counselor is not responding',
+      detail: 'Start the written outreach and supervisor escalation trail immediately.',
+      actionLabel: 'Open response delay route',
+      icon: Mail,
+      onClick: () => counselorRoute && handleRouteProblem(counselorRoute)
+    },
+    {
+      id: 'urgent-allowance',
+      title: 'Allowance stopped or the amount is wrong',
+      detail: 'Use the subsistence issue workflow before the payment gap turns into a larger hardship.',
+      actionLabel: 'Open payment issue route',
+      icon: AlertTriangle,
+      onClick: () => {
+        if (allowanceRoute) {
+          handleRouteProblem(allowanceRoute);
+        } else {
+          setActiveView('calculator');
+        }
+      }
+    },
+    {
+      id: 'urgent-denial',
+      title: 'A denial or closure just happened',
+      detail: 'Force VA to identify the issue, evidence, and review rights in writing before the deadline window slips.',
+      actionLabel: 'Open written-decision path',
+      icon: FileText,
+      onClick: () => {
+        if (writtenDecisionWorkflow) {
+          handleStartWorkflow(writtenDecisionWorkflow);
+        } else if (closedCaseRoute) {
+          handleRouteProblem(closedCaseRoute);
+        }
+      }
+    }
+  ];
+  const hiddenToolPages = getHiddenToolPages().filter((page) => !['accessibility_settings'].includes(page.id));
 
   return (
     <motion.div
@@ -1439,6 +1497,89 @@ function HomeDashboardView({
       <div className="rounded-2xl border border-amber-500/15 bg-[linear-gradient(180deg,rgba(146,64,14,0.08),rgba(120,53,15,0.03))] p-4 space-y-1.5">
         <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">{modeAdvice.title}</h4>
         <p className="text-[11px] leading-relaxed text-slate-300">{modeAdvice.text}</p>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+        <div className="xl:col-span-7 rounded-[24px] border border-red-500/15 bg-[linear-gradient(180deg,rgba(127,29,29,0.12),rgba(15,23,42,0.45))] p-5 space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-red-300">
+              <AlertTriangle size={14} />
+              <span>I Need Help Now</span>
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Start with the emergency, then let the casework engine build the record and packet behind it.</h3>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              Use these fast routes for term-start risk, missing payments, counselor silence, denials, or sudden closures. Each route is meant to create an immediate next step, evidence list, and escalation posture.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {urgentNeedCards.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <div key={item.id} className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 rounded-xl border border-red-500/20 bg-red-500/10 p-2 text-red-200">
+                      <Icon size={14} />
+                    </span>
+                    <div className="space-y-1">
+                      <strong className="block text-xs text-slate-100">{item.title}</strong>
+                      <p className="text-[11px] leading-relaxed text-slate-400">{item.detail}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={item.onClick}
+                    className="w-full rounded-xl bg-red-700/90 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-600"
+                  >
+                    {item.actionLabel}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="xl:col-span-5 rounded-[24px] border border-slate-800 bg-slate-900/35 p-5 space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+              <Shield size={14} />
+              <span>Privacy And Data Handling</span>
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Treat the workspace like a case notebook, not a full claim file.</h3>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/35 p-4 space-y-3 text-[11px] leading-relaxed text-slate-300">
+            <p>
+              Privacy mode is currently <strong>{privacyMode ? 'session-only' : 'persistent in this browser'}</strong>.
+              {privacyMode
+                ? ' Case details stay local to this tab session unless you save through the local backend.'
+                : ' Case details can remain in browser storage until you clear them or switch privacy mode back on.'}
+            </p>
+            <ul className="space-y-2 text-slate-400">
+              <li>Use only the minimum facts needed to plan the request, appeal, or escalation.</li>
+              <li>Avoid entering full SSNs, full dates of birth, or unnecessary medical details.</li>
+              <li>Clear local data when working on a shared device or after exporting the packet you need.</li>
+            </ul>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={openSettings}
+              className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/15"
+            >
+              Open Data Settings
+            </button>
+            <button
+              type="button"
+              onClick={onClearAllData}
+              className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-bold text-slate-200 transition hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-100"
+            >
+              Clear Local Data
+            </button>
+          </div>
+        </div>
       </div>
 
       {isBackendOnline ? (
@@ -2096,6 +2237,54 @@ function HomeDashboardView({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {hiddenToolPages.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-sky-300">
+                <Compass size={15} />
+                <span>More Tools In The Workspace</span>
+              </div>
+              <h2 className="text-base font-bold text-slate-100">Some of the strongest tools were underexposed. They are reachable directly here now.</h2>
+              <p className="max-w-3xl text-[11px] leading-relaxed text-slate-400">
+                These modules already exist inside the app, but they are easier to miss in the normal navigation. Use this section as an all-tools shortcut when the dashboard needs to branch into deeper specialized work.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {hiddenToolPages.map((page) => {
+              const Icon = page.Icon;
+
+              return (
+                <button
+                  key={`hidden-tool-${page.id}`}
+                  type="button"
+                  onClick={() => setActiveView(page.id)}
+                  className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 text-left transition hover:border-sky-500/40 hover:bg-slate-900/60"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="rounded-xl border border-slate-700 bg-slate-950/60 p-2">
+                        <Icon size={18} className={page.iconClassName || 'text-sky-300'} />
+                      </span>
+                      <span className="rounded-full border border-slate-700 bg-slate-950/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-300">
+                        {page.readiness}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold text-slate-100">{page.label}</h3>
+                      <p className="text-[11px] leading-relaxed text-slate-400">{page.userNeed}</p>
+                    </div>
+                    <p className="text-[10px] leading-relaxed text-slate-500">{page.plannedNext}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

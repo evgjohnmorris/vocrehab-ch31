@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
 import CustomCursor from './CustomCursor';
-import { BookOpen, Award, Calculator, AlertTriangle, FileEdit } from 'lucide-react';
 
 // Components
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import BookmarkSidebar from './components/BookmarkSidebar';
+import {
+  MOBILE_NAV_ITEMS,
+  getPageMeta,
+  getViewFromHash,
+  getViewPath,
+  normalizeViewId
+} from './config/pageRegistry';
 
 // Views
 import HomeDashboardView from './views/HomeDashboardView';
@@ -77,11 +83,27 @@ function App() {
   const canUseLocalBackend = typeof window !== 'undefined'
     && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
+  const getInitialView = () => {
+    if (typeof window === 'undefined') {
+      return 'home';
+    }
+
+    const hashView = getViewFromHash(window.location.hash);
+    if (hashView && hashView !== 'home') {
+      return hashView;
+    }
+
+    const queryView = new URLSearchParams(window.location.search).get('view');
+    return normalizeViewId(queryView || 'home');
+  };
+
   // Theme State
   const [theme, setTheme] = useState(() => localStorage.getItem('m28c_theme') || 'dark');
 
   // Navigation State
-  const [activeView, setActiveView] = useState('home'); // 'home' | 'reference' | 'wizard' | 'calculator' ...
+  const [activeViewState, setActiveViewState] = useState(getInitialView);
+  const activeView = normalizeViewId(activeViewState);
+  const setActiveView = (view) => setActiveViewState(normalizeViewId(view));
   const [selectedSection, setSelectedSection] = useState({ type: 'usc', id: '38-usc-3100' });
 
   // Accordion Expand/Collapse State
@@ -253,6 +275,56 @@ function App() {
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleHashChange = () => {
+      setActiveViewState(getViewFromHash(window.location.hash));
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const nextHash = getViewPath(activeView);
+    if (window.location.hash !== nextHash) {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${nextHash}`);
+    }
+  }, [activeView]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return;
+    }
+
+    const pageMeta = getPageMeta(activeView);
+    document.title = pageMeta.metaTitle;
+
+    const ensureMetaTag = (selector, attributeName, attributeValue) => {
+      let tag = document.head.querySelector(selector);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attributeName, attributeValue);
+        document.head.appendChild(tag);
+      }
+      return tag;
+    };
+
+    ensureMetaTag('meta[name="description"]', 'name', 'description').setAttribute('content', pageMeta.metaDescription);
+    ensureMetaTag('meta[name="keywords"]', 'name', 'keywords').setAttribute('content', 'VA, VR&E, Chapter 31, veteran benefits, independent living, appeals, entitlement, subsistence calculator');
+    ensureMetaTag('meta[property="og:title"]', 'property', 'og:title').setAttribute('content', pageMeta.metaTitle);
+    ensureMetaTag('meta[property="og:description"]', 'property', 'og:description').setAttribute('content', pageMeta.metaDescription);
+    ensureMetaTag('meta[property="og:type"]', 'property', 'og:type').setAttribute('content', 'website');
+    ensureMetaTag('meta[property="og:url"]', 'property', 'og:url').setAttribute('content', `${window.location.origin}${window.location.pathname}${getViewPath(activeView)}`);
+  }, [activeView]);
 
   const clearAllData = () => {
     if (window.confirm("Are you sure you want to clear all bookmarks, custom rates, accessibility settings, and session case details? This action cannot be undone.")) {
@@ -504,6 +576,8 @@ function App() {
             currentCaseStage={currentCaseStage}
             setCurrentCaseStage={setCurrentCaseStage}
             isBackendOnline={isBackendOnline}
+            openSettings={() => setIsSettingsOpen(true)}
+            onClearAllData={clearAllData}
           />
         );
       case 'dispute_hub':
@@ -515,7 +589,6 @@ function App() {
             setCurrentCaseStage={setCurrentCaseStage}
           />
         );
-      case 'reference':
       case 'authority_library':
         return (
           <AuthorityLibraryView 
@@ -731,42 +804,23 @@ function App() {
         </div>
 
         {/* MOBILE BOTTOM NAVIGATION BAR */}
-          <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
-            <button 
-              className={`mobile-nav-tab ${activeView === 'authority_library' || activeView === 'reference' ? 'active' : ''}`}
-              onClick={() => setActiveView('authority_library')}
-            >
-              <BookOpen size={20} />
-              <span>Library</span>
-            </button>
-          <button 
-            className={`mobile-nav-tab ${activeView === 'wizard' ? 'active' : ''}`}
-            onClick={() => setActiveView('wizard')}
-          >
-            <Award size={20} />
-            <span>Wizard</span>
-          </button>
-          <button 
-            className={`mobile-nav-tab ${activeView === 'calculator' ? 'active' : ''}`}
-            onClick={() => setActiveView('calculator')}
-          >
-            <Calculator size={20} />
-            <span>Calc</span>
-          </button>
-          <button 
-            className={`mobile-nav-tab ${activeView === 'error_spotter' ? 'active' : ''}`}
-            onClick={() => setActiveView('error_spotter')}
-          >
-            <AlertTriangle size={20} />
-            <span>Errors</span>
-          </button>
-          <button 
-            className={`mobile-nav-tab ${activeView === 'document_generator' ? 'active' : ''}`}
-            onClick={() => setActiveView('document_generator')}
-          >
-            <FileEdit size={20} />
-            <span>Docs</span>
-          </button>
+        <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
+          {MOBILE_NAV_ITEMS.map((item) => {
+            const { Icon } = item;
+            const label = item.mobileLabel || item.label;
+            const isActive = activeView === item.id;
+
+            return (
+              <button
+                key={item.id}
+                className={`mobile-nav-tab ${isActive ? 'active' : ''}`}
+                onClick={() => setActiveView(item.id)}
+              >
+                <Icon size={20} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </nav>
       </main>
     </div>
